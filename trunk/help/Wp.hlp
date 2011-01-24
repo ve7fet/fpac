@@ -1,0 +1,16 @@
+
+USAGE
+        Wp [-acdnrl nb] [callsign]
+
+DESCRIPTION
+        Give access to the FPAC white pages database.
+options :
+         n = nodes only
+         l = max number of answers
+       sort by :
+         a address
+         c callsign (default)
+         d date
+         r reverse
+
+	 You can use ? and * jockers in the callsign.

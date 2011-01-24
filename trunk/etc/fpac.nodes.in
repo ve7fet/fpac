@@ -1,0 +1,16 @@
+#
+# FPAC configuration file
+# This optional file includes Adjacent Nodes configuration 
+# If present, this file MUST be @sysconfdir@/ax25/fpac.nodes
+#
+# List of adjacent nodes
+#
+
+Node = KCK
+	Path     = F5KCK-11
+	DNIC     = 2080
+	Address  = 178504
+	Port     = 1
+	NoWp     = 0
+End
+
