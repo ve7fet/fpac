@@ -7912,7 +7912,7 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile cfg/Makefile monitor/Makefile node/Makefile flex/Makefile pad/Makefile tcp/Makefile wp/Makefile kiss/Makefile tools/Makefile stats/Makefile doc/Makefile doc/html/Makefile help/Makefile scripts/versions:scripts/versions.in scripts/fpac.sh:scripts/fpac.in scripts/Makefile etc/aprslist.conf.fr:etc/aprslist.conf.fr.in etc/aprslist.conf:etc/aprslist.conf.in etc/flexd.conf:etc/flexd.conf.in etc/flexd.routes:etc/flexd.routes.in etc/fpac.conf:etc/fpac.conf.in etc/fpac.nodes:etc/fpac.nodes.in etc/fpac.routes:etc/fpac.routes.in etc/Makefile"
+ac_config_files="$ac_config_files Makefile lib/Makefile cfg/Makefile monitor/Makefile node/Makefile flex/Makefile pad/Makefile tcp/Makefile wp/Makefile kiss/Makefile tools/Makefile stats/Makefile doc/Makefile doc/html/Makefile help/Makefile scripts/versions:scripts/versions.in scripts/fpac.sh:scripts/fpac.in scripts/Makefile etc/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8518,13 +8518,6 @@ do
     "scripts/versions") CONFIG_FILES="$CONFIG_FILES scripts/versions:scripts/versions.in" ;;
     "scripts/fpac.sh") CONFIG_FILES="$CONFIG_FILES scripts/fpac.sh:scripts/fpac.in" ;;
     "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
-    "etc/aprslist.conf.fr") CONFIG_FILES="$CONFIG_FILES etc/aprslist.conf.fr:etc/aprslist.conf.fr.in" ;;
-    "etc/aprslist.conf") CONFIG_FILES="$CONFIG_FILES etc/aprslist.conf:etc/aprslist.conf.in" ;;
-    "etc/flexd.conf") CONFIG_FILES="$CONFIG_FILES etc/flexd.conf:etc/flexd.conf.in" ;;
-    "etc/flexd.routes") CONFIG_FILES="$CONFIG_FILES etc/flexd.routes:etc/flexd.routes.in" ;;
-    "etc/fpac.conf") CONFIG_FILES="$CONFIG_FILES etc/fpac.conf:etc/fpac.conf.in" ;;
-    "etc/fpac.nodes") CONFIG_FILES="$CONFIG_FILES etc/fpac.nodes:etc/fpac.nodes.in" ;;
-    "etc/fpac.routes") CONFIG_FILES="$CONFIG_FILES etc/fpac.routes:etc/fpac.routes.in" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
