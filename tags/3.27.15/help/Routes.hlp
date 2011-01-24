@@ -1,0 +1,8 @@
+
+USAGE
+        Routes [Rose/Fpac address]
+
+DESCRIPTION
+        Shows all information on addresses and the Rose/FPAC routing
+	table of the local node.
+
