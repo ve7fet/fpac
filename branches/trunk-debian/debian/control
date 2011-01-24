@@ -1,0 +1,13 @@
+Source: fpac
+Section: hamradio 
+Priority: extra
+Maintainer: Lee Woldanski <ve7fet@tparc.org>
+Build-Depends: debhelper (>= 7), autotools-dev, libax25-dev,  libc6-dev
+Standards-Version: 3.7.3
+Homepage: http://rose.fpac.free.fr
+
+Package: fpac
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libax25 (>= 0.0.12)
+Description: FPAC AX.25 network switching software 
+ FPAC AX.25 network switching software, featuring ROSE routing.
