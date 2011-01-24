@@ -603,7 +603,7 @@ uninstall-am:
 	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am
 
 installconf:
-	@for app in etc; do $(MAKE) -C $$app installconf; done
+	(cd $(top_srcdir)/etc && $(MAKE) installconf)
 
 install-data-hook:
 	@echo
