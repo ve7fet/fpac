@@ -1,3 +1,9 @@
+fpac (3.28)
+	* Moved fpac/help out of etc/ax25 and in to var/ax25/fpac/help, it doesn't really belong
+	  in etc as they are not config files
+	* Bug in expanding variables in conf files with make corrected
+ -- Lee Woldanski <ve7fet@tparc.org>  Mon, 24 Jan 2011 12:00:00 -0800
+
 fpac (3.27.15)
 	* Rolling Bernards changes into an incremental release
 	* Updated sources to use GNU autotools (makes portability using ./configure script)
@@ -14,7 +20,7 @@ fpac (3.27.15)
 	* Checked includes with splint (www.splint.org) in sources and commented out unnecessary headers
 	* Verified ./configure header/library checks
 
- -- Lee Woldanski <ve7fet@rac.ca>  Fri, 7 Jan 2011 23:00:00 -0800 
+ -- Lee Woldanski <ve7fet@tparc.org>  Fri, 7 Jan 2011 23:00:00 -0800 
 
 fpac (3.27.14-pre32)
 	* FPAC White Page server still in debuging phase for compatibility between 32 and 64 bits systems.

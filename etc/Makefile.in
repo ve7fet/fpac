@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -30,19 +31,15 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = etc
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/aprslist.conf.fr.in $(srcdir)/aprslist.conf.in \
-	$(srcdir)/flexd.conf.in $(srcdir)/flexd.routes.in \
-	$(srcdir)/fpac.conf.in $(srcdir)/fpac.nodes.in \
-	$(srcdir)/fpac.routes.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = aprslist.conf.fr aprslist.conf flexd.conf \
-	flexd.routes fpac.conf fpac.nodes fpac.routes
+CONFIG_CLEAN_FILES =
+SCRIPTS = $(noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -134,9 +131,41 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-etcfiles = fpac.dnic fpac.info fpac.hello itu.dnic aprslist.conf aprslist.conf.fr flexd.conf flexd.routes fpac.conf fpac.nodes fpac.routes
+noinst_SCRIPTS = do_subst
+etcfiles = \
+	fpac.dnic \
+	fpac.info \
+	fpac.hello \
+	itu.dnic \
+	aprslist.conf \
+	aprslist.conf.fr \
+	flexd.conf \
+	flexd.routes \
+	fpac.conf \
+	fpac.nodes \
+	fpac.routes
+
+edit = sed \
+	-e 's|@sbindir[@]|$(sbindir)|g' \
+	-e 's|@sysconfdir[@]|$(sysconfdir)|g' \
+	-e 's|@localstatedir[@]|$(localstatedir)|g' \
+	-e 's|@prefix[@]|$(prefix)|g'
+
 AX25_SYSCONFDIR = $(sysconfdir)/ax25
-EXTRA_DIST = $(etcfiles)
+CLEANFILES = $(etcfiles)
+EXTRA_DIST = \
+	fpac.dnic.in \
+	fpac.info.in \
+	fpac.hello.in \
+	itu.dnic.in \
+	aprslist.conf.in \
+	aprslist.conf.fr.in \
+	flexd.conf.in \
+	flexd.routes.in \
+	fpac.conf.in \
+	fpac.nodes.in \
+	fpac.routes.in
+
 all: all-am
 
 .SUFFIXES:
@@ -169,20 +198,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-aprslist.conf.fr: $(top_builddir)/config.status $(srcdir)/aprslist.conf.fr.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-aprslist.conf: $(top_builddir)/config.status $(srcdir)/aprslist.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-flexd.conf: $(top_builddir)/config.status $(srcdir)/flexd.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-flexd.routes: $(top_builddir)/config.status $(srcdir)/flexd.routes.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-fpac.conf: $(top_builddir)/config.status $(srcdir)/fpac.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-fpac.nodes: $(top_builddir)/config.status $(srcdir)/fpac.nodes.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-fpac.routes: $(top_builddir)/config.status $(srcdir)/fpac.routes.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 tags: TAGS
 TAGS:
 
@@ -218,7 +233,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(SCRIPTS)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -237,6 +252,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -316,6 +332,11 @@ installconf:
 	@list='$(etcfiles)'; for p in $$list; do \
 	  echo " $(INSTALL_DATA) $$p $(DESTDIR)$(AX25_SYSCONFDIR)/$$p"; \
 	  $(INSTALL_DATA) $$p $(DESTDIR)$(AX25_SYSCONFDIR)/$$p; \
+	done
+
+do_subst:
+	@list='$(etcfiles)'; for p in $$list; do \
+	$(edit) $(srcdir)/$$p.in >$$p; \
 	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
