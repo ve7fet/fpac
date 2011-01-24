@@ -1,0 +1,406 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.7">
+ <TITLE>Linux FPAC-HOWTO, Amateur Radio.: FPAC tools</TITLE>
+ <LINK HREF="FPAC-HOWTO-3.html" REL=next>
+ <LINK HREF="FPAC-HOWTO-1.html" REL=previous>
+ <LINK HREF="FPAC-HOWTO.html#toc2" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="FPAC-HOWTO-3.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="FPAC-HOWTO-1.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="FPAC-HOWTO.html#toc2"><IMG SRC="toc.gif" ALT="Contents"></A>
+<HR>
+<H2><A NAME="s2">2. FPAC tools</A></H2>
+
+<P>FPAC distribution includes a set of tools. Hereafter is a brief 
+description of each of them.
+<P>
+<H2><A NAME="ss2.1">2.1 fpad</A>
+</H2>
+
+<P>fpad is the main piece of code. It makes the interface between AX25 
+(and other protocols) and ROSE. It allows connections from ax25 users 
+to the network and vice-versa in pseudo-digipeating mode, this is
+without first connecting a node application.
+<P>FPAC will give some information on the link setup and will report any incident.
+<P>Example of connection via fpad :
+<BLOCKQUOTE><CODE>
+<PRE>
+Cmd: C F6FBB-1 via F6FBB-8
+
+*** Connected to f6fbb-1
+*** WP routing F6FBB-1 @ 2080,931502
+*** Connection done
+[FBB-7.00g-AB1FHMRX$]
+Hello Jean-Paul >
+B
+*** Disconnected from F6FBB-1 at F6FBB-11 @ 2080,931502
+*** 0000 - Remote Station cleared connection
+*** Disconnected
+Cmd:
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>FPAC includes a white pages system which records the address of each node
+and user of the network. This information is also distributed to every other
+FPAC system in the network. This allows to connect any known callsign 
+without giving any node or routing information.
+<P>
+<H2><A NAME="ss2.2">2.2 fpacnode</A>
+</H2>
+
+<P>fpacnode acts like the linuxnode. Many parts of the code have been taken 
+from linuxnode. Some additions have been made for the ROSE protocol.
+<P>fpacnode makes the interface to ax25/netrom/rose and tcpip networking.
+It also reports informations and statistics on the system.
+<P>fpacnode has a built-in set of commands. They can be disabled or new 
+commands may be easily added. A second set of commands is added
+after the SYS (sysop) command is successfull.
+<P>Password to change to sys mode is either plain text, netrom or MD2/MD5 keys.
+<P>Here are some examples of the node commands :
+<BLOCKQUOTE><CODE>
+<PRE>
+*** Connection done
+Hello, you are on the FPAC-linux switch F6FBB-10
+located in Roquettes, 15 Km south Toulouse, JN03QL.
+
+FPAC-Node v 3.09 (F6FBB - Sep 22 1998) for LINUX (help = h)
+
+F6FBB-10 (Commands = ?) : ?
+?, Alias, Bye, Connect, CONVers, Help, Info, Links, Mheard, Nodes, 
+Ports, Routes, STat, Status, SYSop, Telnet, Users, Wp
+
+F6FBB-10 (Commands = ?) : 
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>A command</B> gives the list of aliases. An alias allow to connect
+any callsign (even remote) using a local callsign. For instance
+callsign F6FBB-3 will route to the cluster F6KRQ-3 through the
+network. Aliases may be also directly connected by the user without
+using fpacnode.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : A
+Aliases: 
+ F6FBB-3   : F6KRQ-3 931501
+----
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>L command</B> gives the list of L3 links (trunks)
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : L
+Links:
+Callsign  Port   Description
+F6BEX-9   0      (F6BEX-9) UHF  9600 Bds Full Duplex
+F5JTU-9   3      (F5JTU-9) UHF  2400 Bds Full Duplex
+F6FBB-9   5      (F6FBB-9) Ethernet axip Full Duplex
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>M command</B> gives a list of the last 20 heard stations. 
+Giving a port as first argument will list the stations only for this port.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : M
+Last 20 Heard list for all ports :
+Callsign  Port   Pkts-rcvd Mode Time ago
+F6FBB-14  5      357       AX25 00s
+F5OYA-1   1      12184     AX25 16s
+F6BEX-9   0      961440    FPAC 19s
+F5JTU-9   3      905412    FPAC 20s
+F1AMY-7   1      60        AX25 33s
+F1BIS-1   1      247       AX25 44s
+F5NXI     1      49        AX25 01m 15s
+F6FBB-9   5      77        FPAC 01m 30s
+F1AMY     1      14        AX25 04m 15s
+F5OYA     1      85        AX25 05m 15s
+FA1ANP    1      37        AX25 05m 17s
+F1BIS     1      10        AX25 06m 32s
+F6GZM     1      233       AX25 15m 28s
+F5PRP     1      91        AX25 15m 29s
+F5UFI-1   1      92        AX25 16m 11s
+F5GNY-5   1      267       AX25 17m 58s
+FA1CKT-1  1      37        AX25 19m 49s
+F5GNY     1      17        AX25 20m 03s
+F5NUF     1      5659      AX25 20m 23s
+F5UFI     1      22        AX25 21m 29s
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>N command</B> gives the list of known NETROM nodes and FPAC switches.
+A list of callsigns may be given as argument, or a star giving long
+format dump.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : N
+FPAC Nodes:
+  F5FVC-8 2080,982501    F5JTU-8 2080,909501    F5KBQ-5 2080,981501 
+  F6BEX-8 2080,931501   F6FBB-10 2080,931502    F6FBB-8 2080,931503 
+  F6GGY-7 2080,847502    F6GGY-8 2080,847501    F6HRW-8 2080,847503 
+   F8BK-8 2080,981502  
+
+NetRom Nodes:
+  #DEV:F6FBB-4  (255)    #BBS:F6FBB-6  (254)   JTU09:F5JTU-2  (192) 
+
+F6FBB-10 (Commands = ?) : N F6GGY-7 F5JTU-8 JTU09  
+FPAC Nodes:
+  F6GGY-7  2080,847502  FRA  JN04IL  MONFLANQUIN
+  F5JTU-8  2080,909501  FRA  JN02TW  Prat d'Albis
+
+Routes to        Which Quality Obsolescence Port   Neighbour
+ JTU09:F5JTU-2   >     192     5            3      F5JTU-2
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>P command</B> gives the list and description of available ports.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : P
+Ports:
+Port   Description
+0      (F6BEX-9) UHF  9600 Bds Full Duplex
+1      (LOCAL  ) VHF  1200 Bds Simplex
+2      (LOCAL  ) UHF  9600 Bds Simplex
+3      (F5JTU-9) UHF  2400 Bds Full Duplex
+4      (F6FBB-9) Kiss 9600 Bds Full Duplex
+5      (F6FBB-9) Ethernet axip Full Duplex
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>R command</B> gives all information on addresses and the routing table.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : R
+Coverage
+2080,931102  2080,931202  2080,931602  
+
+Address      Port    Description
+2080,931302  0       (F6BEX-9) UHF  9600 Bds Full Duplex
+2080,931402  5       (F6FBB-9) Ethernet axip Full Duplex
+
+Routes:
+DNIC Address Adjacent
+2080,8.....  F6BEX-9  
+2080,7.....  F5JTU-9  
+2080,6.....  F6BEX-9  
+2080,5.....  F6BEX-9  
+2080,4.....  F6BEX-9  
+2080,3.....  F6BEX-9  
+2080,2.....  F6BEX-9  
+2080,1.....  F6BEX-9  
+2080,982...  F6BEX-9  
+2080,981...  F6BEX-9  
+2080,966...  F5JTU-9  
+2080,965...  F6BEX-9  
+2080,946...  F6BEX-9  
+2080,934...  F5JTU-9  
+2080,930...  F5JTU-9  
+2080,911...  F5JTU-9  
+2080,909...  F5JTU-9  
+2080,981501  F5JTU-9  
+2080,931503  F6FBB-9  
+2080,931203  F6FBB-9  
+2080,931501  F6BEX-9  
+2080,931201  F6BEX-9  
+2080,909502  F6BEX-9  
+2080,909202  F6BEX-9  
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>S command</B> gives a status on the LINUX and FPAC resources
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : s
+Status:
+System time      : Thu Sep 24 19:57:55 1998
+Hostname         : fpac
+Operating system : Linux 2.0.35 (i486)
+Uptime           : 2 hours 6 minutes
+Load average     : 0.00, 0.00, 0.00
+Memory           :  6568 KB available,  3920 KB used,  2648 KB free
+Swap             : 31128 KB available,  1324 KB used, 29804 KB free
+
+L2 Users         : 7
+FPAC L3 Users    : 2
+FPAC L3 Transits : 1
+FPAC adjacents   : 3
+FPAC Routes      : 24
+FPAC White Pages : 800
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>ST command</B> gives the statistics of the ROSE/FPAC trunks. This is
+not a built-in command. It displays the contents of the files
+updated by fpacstat application.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : st
+Current hour statistics - Starting date : Thu Sep 24 19:56:56 1998
+
+   Adjacent  data-size qual i-frame     rr  rnr  rej sabm disc   ua   dm
+to F6FBB-9           0   0%       0      2    0    0    0    0    0    0
+fm F6FBB-9           0            0      2    0    0    0    0    0    0
+
+to F6BEX-9         446 100%      18     20    0    0    0    0    0    0
+fm F6BEX-9         711           19     13    0    0    0    0    0    0
+
+to F5JTU-9        1453  65%      18      6    0    0    0    0    0    0
+fm F5JTU-9         181           11     18    0    0    0    0    0    0
+
+Last 24 hours statistics - Starting date : Wed Sep 23 19:56:56 1998
+
+   Adjacent  data-size qual i-frame     rr  rnr  rej sabm disc   ua   dm
+to F6FBB-9         375 100%      11     29    0    0    1    0    0    0
+fm F6FBB-9         258           12     34    0    0    0    0    1    0
+
+to F6BEX-9      183597  99%    1298    713    0    0    1    0    0    0
+fm F6BEX-9       21304          682    854    0   22    0    0    1    0
+
+to F5JTU-9       29544  74%     470    427    0   11    2    0    0    1
+fm F5JTU-9       57445          438    470    0    1    0    0    2    0
+
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>U command</B> gives the list of users on the ROSE/FPAC system
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : u
+Users - AX.25 L2 Sessions :
+Port   Callsign     Callsign  State
+0      F6BEX-9   -> F6FBB-11  Connected   
+5      F6FBB-9   -> F6FBB-11  Connected   
+3      F5JTU-9   -> F6FBB-11  Connected   
+1      F1AMY-7   -> F6FBB-1   Recovery    
+1      F1BIS-1   -> F6FBB-1   Connected   
+5      F6FBB-14  -> F6HRW-8   Disconnected
+5      F6FBB-14  -> F6FBB-10  Connected   
+
+Users - X.25 L3 Sessions :
+Callsign  DNIC addr   Callsign  DNIC addr   LCI Adjacent    State
+F6HRW-8   2080,847503 F6FBB-14  2080,931402 032 (F6BEX-9)   Disconnected
+F6DSP-1   2080,911301 F6FBB-1   2080,931502 001 (F5JTU-9)   Connected   
+
+Users - X.25 L3 Transits :
+Callsign  DNIC addr   LCI Adjacent   Callsign  DNIC addr   LCI Adjacent
+F6KRQ-3   2080,931501 003 (F6BEX-9)  F5UHX-3   2080,934401 030 (F5JTU-9)
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>SYS command</B> switches to SYSOP mode
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : SYS
+F6FBB-10> 5 2 8 19 3 [0906667192]
+4D060A9951C81AAAAF4568F1CAA31AEC
+MD5 OK
+
+F6FBB-10 (Commands = ?) : ?
+Sysop:
+?, Alias, BBs, Bye, CLu, Connect, Help, Info, Links, Mheard
+Nodes, Ports, Routes, STat, Status, SYSop, Telnet, Users, Wp, CAT
+GET, LS, MV, RM, SYSop, WEdit, YGET, YPUT
+
+F6FBB-10 (Commands = ?) : 
+</PRE>
+</CODE></BLOCKQUOTE>
+<P><B>W command</B> gives access to the FPAC white pages database.
+<BLOCKQUOTE><CODE>
+<PRE>
+F6FBB-10 (Commands = ?) : w
+Usage: wp [-acdnrl nb] callsign
+options :
+  n = nodes only
+  l = max number of answers
+sort by :
+  a address
+  c callsign (default)
+  d date
+  r reverse
+
+F6FBB-10 (Commands = ?) :  w f6hrw
+FPAC White Pages database : 800 callsigns
+F6HRW-0   22/09/98 08:30 => 2080 847503   
+F6HRW-1   22/09/98 21:26 => 2080 847401   
+F6HRW-12  22/09/98 20:08 => 2080 847401   
+F6HRW-3   22/09/98 20:08 => 2080 847503   
+F6HRW-8   21/09/98 15:45 => 2080 847503  Node JN04IK VILLENEUVE/LOT
+
+
+F6FBB-10 (Commands = ?) : w F6HRW-1
+FPAC White Pages database : 800 callsigns
+F6HRW-1   22/09/98 21:26 => 2080 847401   
+
+
+F6FBB-10 (Commands = ?) : w -dl5 *
+FPAC White Pages database : 800 callsigns
+F6DEV-1   24/09/98 21:48 => 2080 981502   
+F5PHI-2   24/09/98 21:37 => 2080 982501   
+F6BEX-0   24/09/98 19:00 => 2080 931501   
+F5NXB-0   24/09/98 17:47 => 2080 981502   
+F6CDD-0   24/09/98 16:44 => 2080 931501   
+
+
+F6FBB-10 (Commands = ?) : w -nl4 *
+FPAC White Pages database : 800 callsigns
+F5JTU-8   18/07/98 12:14 => 2080 909501  Node JN02TW Prat d'Albis
+F5KBQ-5   01/09/98 19:14 => 2080 981501  Node JN13CO Castres
+F6BEX-8   13/08/98 19:30 => 2080 931501  Node JN03RM Rebigue
+F6FBB-10  24/07/98 13:59 => 2080 931502  Node JN03QL Roquettes
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>
+<H2><A NAME="ss2.3">2.3 fpacshell</A>
+</H2>
+
+<P>fpacshell opens a LINUX shell session to the user, normally in sysop mode.
+This session is opened mostly for maintenance with root priviledges.
+<P>For safety reasons a password accepting plain text, NetRom key or MD2/MD5
+key is provided.
+<P>fpacshell is run from the command or sysop section of the FPAC configuration
+file. See 
+<A HREF="FPAC-HOWTO-5.html#sysop-section">Sysop section</A>.
+<P>
+<H2><A NAME="ss2.4">2.4 fpacstat</A>
+</H2>
+
+<P>fpacstat is the statistics applications. It computes the traffic statistics
+of the trunks (L3 links between switches) and updates each minute a last-hour
+file <B>/var/ax25/fpac/fpacstat.dat</B> and each hour a last-day file
+<B>/var/ax25/fpac/fpacstat.day</B>.
+<P>These files can be read at any time and sent to the user.
+<P>The "-c" option writes &lt;CR&gt; characters instead of &lt;LF&gt; to be
+compatible with the packet radio protocole in which &lt;CR&gt; characters are
+used as end of line. 
+<P>
+<H2><A NAME="ss2.5">2.5 fpacwpd</A>
+</H2>
+
+<P>fpacwpd is the white pages database server daemon. It will answer to any local or
+remote query. The database is stored in <B>/var/ax25/fpac/fpacwp2.dat</B>.
+<P>To get a report on this server, only connect WP via ROSE/L3 and type ":". The
+server will dump its current status. Type return to end the connection.
+<BLOCKQUOTE><CODE>
+<PRE>
+*** Connecting WP-0 @ 2080,931501
+*** Connection done
+:
+:WP Server version 1.5
+:Node F6BEX-9 @ 2080,931501
+:Database (records) : size=896 used=812
+:
+:Client Callsign  Address     Type   Dirty
+:     6 WP-0      2080,931502 Server 0
+:     7 WP-0      2080,981502 Server 0
+:     8 WP-0      2080,982501 Server 0
+:     9 F6FBB-14  2080,931402 User   0
+:
+:Adjacent-Name    Callsign  Address      State
+:Roquettes        F6FBB-11  2080,931502  connected #6 #dirty=0
+:Rabastens        F8BK-9    2080,981502  connected #7 #dirty=0
+:Montauban        F5FVC-9   2080,982501  connected #8 #dirty=0
+:
+:=== End ===
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>
+<HR>
+<A HREF="FPAC-HOWTO-3.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="FPAC-HOWTO-1.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="FPAC-HOWTO.html#toc2"><IMG SRC="toc.gif" ALT="Contents"></A>
+</BODY>
+</HTML>
