@@ -1,5 +1,5 @@
 installconf:
-	@for app in etc; do $(MAKE) -C $$app installconf; done
+	(cd $(top_srcdir)/etc && $(MAKE) installconf)
 
 SUBDIRS = lib cfg monitor node flex pad tcp wp kiss tools stats doc help scripts etc
 
