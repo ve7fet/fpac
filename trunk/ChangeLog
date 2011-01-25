@@ -2,6 +2,8 @@ fpac (3.28)
 	* Moved fpac/help out of etc/ax25 and in to var/ax25/fpac/help, it doesn't really belong
 	  in etc as they are not config files
 	* Bug in expanding variables in conf files with make corrected
+	* Bernard and Leo found and fixed a bug in aprslist.c
+
  -- Lee Woldanski <ve7fet@tparc.org>  Mon, 24 Jan 2011 12:00:00 -0800
 
 fpac (3.27.15)
