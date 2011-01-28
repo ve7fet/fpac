@@ -4,6 +4,15 @@
 #define PROC_NR_FILE  "/proc/net/nr"
 #define PROC_DEV_FILE "/proc/net/dev"
 
+#define FLEX_GT_FILE  "/usr/local/var/ax25/flex/gateways"
+#define FLEX_DST_FILE "/usr/local/var/ax25/flex/destinations"
+
+#define AX_ROUTES_FILE "/usr/local/etc/ax25/flexd.routes"
+
+#ifndef DATA_MHEARD_FILE
+#define DATA_MHEARD_FILE "/usr/local/var/ax25/mheard/mheard.dat"
+#endif
+
 #define CONN_TYPE_DIRECT 'D'
 #define CONN_TYPE_NODE 'N'
 #define CONN_TYPE_DIGI 'V'
