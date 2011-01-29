@@ -122,9 +122,10 @@ struct flex_gt *read_flex_gt(void)
     safe_strncpy(new_el->call, strtok(NULL, " \t\n\r"), 9);
     safe_strncpy(new_el->dev, strtok(NULL, " \t\n\r"), 13);
     k=0;
-    while((cp=strtok(NULL, " \t\n\r"))!=NULL&&k<AX25_MAX_DIGIS) safe_strncpy(new_el->digis[k++],cp,9);
-    while(k<AX25_MAX_DIGIS) strcpy(new_el->digis[k++],"\0");
-
+    while((cp=strtok(NULL, " \t\n\r"))!=NULL&&k<AX25_MAX_DIGIS)
+        safe_strncpy(new_el->digis[k++],cp,9);
+    while(k<AX25_MAX_DIGIS)
+        strcpy(new_el->digis[k++],"\0");
     if(list==NULL) {
       list=new_el;
       p=list;
