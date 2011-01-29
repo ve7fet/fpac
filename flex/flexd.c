@@ -25,7 +25,7 @@
 #include <netax25/nrconfig.h>
 #include <netax25/rsconfig.h>
 
-#include "../pathnames.h"
+/*#include "../pathnames.h"*/
 #include "procinfo.h"
 
 #define DEFAULT_POLL_TIME 600
@@ -398,7 +398,8 @@ int download_dest(char *gateway, char *fname)
 	}
 
 	/*FSA*/
-	fprintf(stderr, "destcall: %d nrbind: %d addrlen\n", nrbind, addrlen);
+	fprintf(stderr, "NOOP");
+        sleep(1);
 	/*FSA*/
 
 	/*
