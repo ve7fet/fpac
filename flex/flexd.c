@@ -19,24 +19,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <config.h>
-
-#ifdef HAVE_NETAX25_AX25_H
-#include <netax25/ax25.h>
-#else
-#include <netax25/kernel_ax25.h>
-#endif
-#ifdef HAVE_NETROSE_ROSE_H
-#include <netrose/rose.h>
-#else
-#include <netax25/kernel_rose.h>
-#endif
-#ifdef HAVE_NETROM_NETROM_H
-#include <netrom/netrom.h>
-#else
-#include <netax25/kernel_netrom.h>
-#endif
-
 #include <netax25/axlib.h>
 #include <netax25/axconfig.h>
 #include <netax25/daemon.h>
@@ -48,8 +30,6 @@
 
 #define DEFAULT_POLL_TIME 600
 #define MINIMUM_POLL_TIME 300
-#define FLEXD_CONF_FILE "/usr/local/etc/ax25/flexd.conf"
-#define FLEXD_TEMP_PATH "/usr/local/var/ax25/flex/"
 
 int poll_time = DEFAULT_POLL_TIME;
 static char flexgate[10] = "\0";
@@ -189,11 +169,9 @@ int download_dest(char *gateway, char *fname)
 	int n, cmd_send = 0, cmd_ack = 0, c, k;
 	int s = 0;
 	int addrlen = 0;
-/*FSA unused vars
 	int ret;
 	unsigned int retlen;
 	char *cp;
-FSA*/
 	struct sockaddr_rose rosebind;
 	struct sockaddr_rose roseconnect;
 	struct full_sockaddr_ax25 nrbind, nrconnect;
