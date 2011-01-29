@@ -26,12 +26,16 @@
 
 #include "node.h"
 #include "io.h"
-#include "wp.h"
+#include "../lib/wp.h"
 
-#include "ax25compat.h"
+#include "../lib/ax25compat.h"
 
 #ifndef SOL_AX25
 #define SOL_AX25 257
+#endif
+
+#ifndef AF_FLEXNET
+#define AF_FLEXNET 128
 #endif
 
 #define ENOIOCTLCMD 515
