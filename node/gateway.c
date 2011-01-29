@@ -459,8 +459,11 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 
 		sprintf(path, "%s %s", call, dest);
-
-                fprintf(stderr, "connect: call=%s  dest=%s\n", call, dest);
+/*
+ * IZ5FSA for flexnet destination we need to make a call like this:
+ *        CONNECT <port connected to flexnode> <destination call> VIA <flexnode>
+*/
+                node_msg("connect: call=%s  dest=%s\n", call, dest);
 
 		ax25_aton(path, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
@@ -567,9 +570,6 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	usflush(User.fd);
 	/*
 	 * Ok. Now set up a non-blocking connect...
-         * IZ5FSA here my connect debug for flexnet destination
-         *        we need to make a call like this:
-         *        CONNECT <port connected to flexnode> <destination call> VIA <flexnode>
 	 */
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
 	{
