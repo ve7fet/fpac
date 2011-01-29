@@ -428,10 +428,15 @@ static int connect_to(char *address[], int family, int escape, char *source)
 
 	case AF_AX25:
 	case AF_FLEXNET:
+
+            fprintf(stderr, "connect:   address[0]=%s\n", address[0]);
+            fprintf(stderr, "connect:         dest=%s\n", ax25_config_get_name(address[0]));
+            fprintf(stderr, "connect: alt_callsign=%s\n", cfg.alt_callsign);
+
 /*		if (family == AF_FLEXNET)
 			dest = address[0];
 		else */
-			if ((dest = ax25_config_get_addr(address[0])) == NULL)
+			if ((dest = ax25_config_get_name(address[0])) == NULL)
 			{
 				node_msg("Invalid port");
 				return -1;
@@ -450,6 +455,9 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 
 		sprintf(path, "%s %s", call, dest);
+
+                fprintf(stderr, "connect: call=%s  dest=%s\n", call, dest);
+
 		ax25_aton(path, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 		addrlen = sizeof(struct full_sockaddr_ax25);
@@ -555,6 +563,9 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	usflush(User.fd);
 	/*
 	 * Ok. Now set up a non-blocking connect...
+         * IZ5FSA here my connect debug for flexnet destination
+         *        we need to make a call like this:
+         *        CONNECT <port connected to flexnode> <destination call> VIA <flexnode>
 	 */
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
 	{
