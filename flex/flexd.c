@@ -1,9 +1,11 @@
 /*
+ * FPAC project
  * flexd.c
  * original by Jean-Paul f6fbb
- * FPAC project
+ * added start arguments f6bvp Jan 2011
  * part of code borrowed from call.c (ax25-apps) and rose_call.c (ax25-tools) 
  */
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +13,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
+#include <syslog.h>
+
 #include <ctype.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -35,6 +39,21 @@ struct ax_routes *gw;
 int s;
 static int backoff = -1;
 static int ax25mode = -1;
+int verbose = 1;
+int passive = 1;
+int debug = 1;
+int is_daemon = 1;
+
+static void Usage(void)
+{
+	fprintf(stderr, "Usage : flexd [-h] [-d] [-x] [-v] [-f wpfile]\n");
+	fprintf(stderr, "-h : display this message\n");
+	fprintf(stderr, "-d : start in foreground mode\n");
+	fprintf(stderr, "-x : turn on debug mode\n");
+	fprintf(stderr, "-v : turn on debug verbose mode\n");
+	fprintf(stderr, "-p : turn on passive mode\n");
+	exit(1);
+}
 
 int read_conf(void)
 {
@@ -170,7 +189,7 @@ int download_dest(char *gateway, char *fname)
 
 	gw = find_route(gateway, NULL);
 	if (gw == NULL) {
-		fprintf(stderr,"flexd connect: FlexGate %s not found in file: %s\n",
+		fprintf(stdout,"flexd connect: FlexGate %s not found in file: %s\n",
 				gateway, FLEXD_CONF_FILE);
 		return -1;
 	} else {
@@ -193,7 +212,7 @@ int download_dest(char *gateway, char *fname)
 				rs_config_load_ports();
 
 				if ((addr = rs_config_get_addr(port)) == NULL) {
-					fprintf(stderr,
+					fprintf(stdout,
 						"flexd: invalid port setting\n");
 					return -1;
 				} else {
@@ -236,13 +255,13 @@ int download_dest(char *gateway, char *fname)
 
 	if (ax25_aton_entry(destcall, roseconnect.srose_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		return (-1);
 	}
 
 	if (rose_aton(destaddr, roseconnect.srose_addr.rose_addr) == -1) {
 		sprintf(buffer, "ERROR: invalid destination Rose address - %s\n", destaddr);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		return (-1);
 	}
 		rosebind.srose_family = AF_ROSE;
@@ -254,7 +273,7 @@ int download_dest(char *gateway, char *fname)
 	 */
 	if ((s = socket(AF_ROSE, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "ERROR: cannot open Rose socket, %s\n", strerror(errno));
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);	
 		return (-1);
 	}
@@ -263,21 +282,21 @@ int download_dest(char *gateway, char *fname)
 	 */
 	if (rose_aton(addr, rosebind.srose_addr.rose_addr) == -1) {
 		sprintf(buffer, "ERROR: invalid Rose port address - %s\n", addr);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);	
 		return (-1);
 	}
 
 	if (ax25_aton_entry(mycall, rosebind.srose_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid callsign - %s\n", mycall);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);
 		return (-1);
 	}
 	
 	if (bind(s, (struct sockaddr *)&rosebind, addrlen) != 0) {
 		sprintf(buffer, "ERROR: cannot bind Rose socket, %s\n", strerror(errno));
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);	
 		return (-1);
 	}
@@ -299,9 +318,9 @@ int download_dest(char *gateway, char *fname)
 				sprintf(buffer, "Flexd: ERROR cannot connect to Rose address, %s\n", strerror(errno));
 				break;
 		}
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);
-		return 1;
+		return (1);
 	}
 	break;
 	case AF_NETROM:
@@ -309,7 +328,7 @@ int download_dest(char *gateway, char *fname)
 			paclen = nr_config_get_paclen(port);
 
 		if (dlist[0] == NULL) {
-			fprintf(stderr,
+			fprintf(stdout,
 				"flexd: too few arguments for NET/ROM\n");
 			return (-1);
 		}
@@ -324,13 +343,13 @@ int download_dest(char *gateway, char *fname)
 
 	if (ax25_aton_entry(addr, nrbind.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid NET/ROM port callsign - %s\n", addr);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		return (-1);
 	}
 
 	if (ax25_aton_entry(mycall, nrbind.fsa_digipeater[0].ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid callsign - %s\n", mycall);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		return (-1);
 	}
 
@@ -342,11 +361,12 @@ int download_dest(char *gateway, char *fname)
 		strcpy(digicall, dlist[0]);
 	} */
 	
-printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, digicall, mycall, addr);
+	printf("destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", 
+		destcall, digicall, mycall, addr);
 
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		return (-1);
 		}
 	/*
@@ -354,7 +374,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 	 */
 	if ((s = socket(AF_NETROM, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "ERROR: cannot open NET/ROM socket, %s\n", strerror(errno));
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);	
 		return (-1);
 	}
@@ -364,7 +384,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 	 */
 	if (bind(s, (struct sockaddr *)&nrbind, addrlen) != 0) {
 		sprintf(buffer, "ERROR: cannot bind NET/ROM socket, %s\n", strerror(errno));
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);	
 		return (-1);
 	}
@@ -387,9 +407,9 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 				sprintf(buffer, "Flexd: ERROR cannot connect to NET/ROM node, %s\n", strerror(errno));
 				break;
 		}
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stdout, "%s\n", buffer);
 		close(s);
-		return 1;
+		return (1);
 	}		
 	break;
 	case AF_AX25:
@@ -399,7 +419,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 			paclen = ax25_config_get_paclen(port);
 
 		if (dlist[0] == NULL) {
-			fprintf(stderr,
+			fprintf(stdout,
 				"flexd: too few arguments for AX.25\n");
 			return (-1);
 		}
@@ -523,7 +543,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 
 		write(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
-		return 1;
+		return (1);
 	}
 	break;
 	}
@@ -579,7 +599,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 	 */
 
 	if ((tmp = fopen(fname, "w")) == NULL) {
-		fprintf(stderr, "flexd connect: Cannot open temporary file: %s\n",
+		fprintf(stdout, "flexd connect: Cannot open temporary file: %s\n",
 				fname);
 		close(s);
 		return (-1);
@@ -628,13 +648,13 @@ int parse_dest(char *gateway, char *fname)
 	FILE *fdst, *tmp;
 	char *call, *ssid, *rtt, *cp, buf[1024], line[1024];
 	if ((tmp = fopen(fname, "r")) == NULL) {
-		fprintf(stderr, "flexd update: Cannot open temporary file: %s\n",
+		fprintf(stdout, "flexd update: Cannot open temporary file: %s\n",
 				fname);
 		return (-1);
 	}
 
 	if ((fdst = fopen(FLEX_DST_FILE, "w")) == NULL) {
-		fprintf(stderr,
+		fprintf(stdout,
 				"flexd update: Cannot open flexnet destinations file: %s\n",
 				FLEX_DST_FILE);
 		fclose(tmp);
@@ -716,26 +736,71 @@ void alarm_handler(int sig)
 	alarm(poll_time);
 }
 
+static void process_options(int argc, char *argv[])
+{
+	int c;
+	
+	do {
+		c = getopt(argc, argv, "?hdvxp:");
+		switch (c) {
+		case 'h':
+		case '?':
+			Usage();
+			break;
+		case 'd':
+			fprintf(stdout, "Foreground mode\n");
+			is_daemon = 0;
+			verbose = 1;
+			break;
+		case 'x':
+			fprintf(stdout, "Debug mode\n");
+			debug = 1;
+			break;
+		case 'v':
+			fprintf(stdout, "Verbose mode\n");
+			verbose = TRUE;
+			break;		
+		case 'p':
+			fprintf(stdout, "Passive mode\n");
+			passive = 1;
+			break;		
+		default :
+			break;
+		}
+	} while (c != EOF);
+}
+
 int main(int argc, char *argv[])
 {
 	int i;
 	signal(SIGPIPE, SIG_IGN);
 
+	openlog("flexd", LOG_ERR , LOG_INFO);	
+	syslog(LOG_WARNING, "Starting flexd");
+	
 	if (ax25_config_load_ports() == 0) {
-		fprintf(stderr, "flexd error: No AX25 port data configured\n");
+		fprintf(stdout, "flexd error: No AX25 port data configured\n");
 		return 1;
 	}
 
+	process_options(argc, argv);
+	
 	if ((i = read_conf()) == -1)
 		return 1;
 
-	if (!daemon_start(TRUE)) {
-		fprintf(stderr, "flexd: cannot become a daemon\n");
+	if (is_daemon)
+		printf("flexd will run in background\n");
+	else
+		printf("flexd will run in foreground\n");
+
+	
+	if ((is_daemon) && (!daemon_start(TRUE)) ) {
+		fprintf(stdout, "flexd: cannot become a daemon\n");
 		return 1;
 	}
 
 	if ((i = update_flex()) == -1) {  
-		fprintf(stderr, "\nStopping application. Restart flexd after changing the configuration\n");
+		fprintf(stdout, "\nStopping application. Restart flexd after changing the configuration\n");
 		signal(SIGKILL, hup_handler);
 		return (i);
 	}
