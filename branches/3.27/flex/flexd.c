@@ -774,7 +774,7 @@ int update_flex(void)
 {
 	int ret;
 	char fname[80];
-	sprintf(fname, "%s.session.%s", FLEXD_TEMP_PATH, flexgate);
+	sprintf(fname, "%s.session.%s", FLEX_DST_FILE, flexgate);
 
 	if ((ret = download_dest(flexgate, fname)) == 0) {
 		parse_dest(flexgate, fname);
