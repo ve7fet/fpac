@@ -25,7 +25,7 @@
 #include <netax25/nrconfig.h>
 #include <netax25/rsconfig.h>
 
-/*#include "../pathnames.h"*/
+#include "../pathnames.h"
 #include "procinfo.h"
 
 #define DEFAULT_POLL_TIME 600
@@ -774,7 +774,7 @@ int update_flex(void)
 {
 	int ret;
 	char fname[80];
-	sprintf(fname, "%s.session.%s", FLEX_DST_FILE, flexgate);
+	sprintf(fname, "%s.session.%s", FLEXD_TEMP_PATH, flexgate);
 
 	if ((ret = download_dest(flexgate, fname)) == 0) {
 		parse_dest(flexgate, fname);
