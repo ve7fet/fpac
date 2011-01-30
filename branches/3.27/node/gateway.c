@@ -433,18 +433,17 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	case AF_AX25:
 	case AF_FLEXNET:
 
-            fprintf(stderr, "connect:   address[0]=%s\n", address[0]);
-            fprintf(stderr, "connect:         dest=%s\n", ax25_config_get_name(address[0]));
-            fprintf(stderr, "connect: alt_callsign=%s\n", cfg.alt_callsign);
-
-/*		if (family == AF_FLEXNET)
-			dest = address[0];
-		else */
-			if ((dest = ax25_config_get_name(address[0])) == NULL)
-			{
-				node_msg("Invalid port");
-				return -1;
-			}
+/*          if (family == AF_FLEXNET)
+                dest = address[0];
+            else */
+/*FSA       AF_NETROM needs to adjust port 'cause there's a device like ax2 */
+            dest=address[0];
+            address[0]=ax25_config_get_name(address[0]);
+/*FSA*/
+                if ((dest = ax25_config_get_addr(address[0])) == NULL) {
+                    node_msg("Invalid port");
+                    return -1;
+                }
 		
 		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
 		{
@@ -459,11 +458,6 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 
 		sprintf(path, "%s %s", call, dest);
-/*
- * IZ5FSA for flexnet destination we need to make a call like this:
- *        CONNECT <port connected to flexnode> <destination call> VIA <flexnode>
-*/
-                node_msg("connect: call=%s  dest=%s\n", call, dest);
 
 		ax25_aton(path, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
