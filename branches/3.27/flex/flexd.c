@@ -361,6 +361,9 @@ int download_dest(char *gateway, char *fname)
 		strcpy(digicall, dlist[0]);
 	} */
 
+	/*FSA*/
+	fprintf(stderr, "\ndestcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
+	/*FSA*/
         printf("destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n",
 		destcall, digicall, mycall, addr);
 
@@ -390,7 +393,7 @@ int download_dest(char *gateway, char *fname)
 	}
 
 	/*FSA*/
-        sleep(1);
+	fprintf(stderr, "destcall: '%s' nrbind: %d addrlen: %d\n", destcall, nrbind, addrlen);
 	/*FSA*/
 
 	/*
