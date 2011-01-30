@@ -300,6 +300,9 @@ int download_dest(char *gateway, char *fname)
 		close(s);
 		return (-1);
 	}
+	/*F6BVP*/
+	fprintf(stderr, "\nCase AF_ROSE destcall: '%s' destaddr: '%s' mycall: '%s' addrlen: '%d'\n", destcall, destaddr, mycall, addrlen);
+	/*F6BVP*/
 	/*
 	 * Lets try and connect to the far end.
 	 */
@@ -362,9 +365,9 @@ int download_dest(char *gateway, char *fname)
 	} */
 
 	/*FSA*/
-	fprintf(stderr, "\ndestcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
+	fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
 	/*FSA*/
-        printf("destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n",
+        printf("Case AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n",
 		destcall, digicall, mycall, addr);
 
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
@@ -393,7 +396,7 @@ int download_dest(char *gateway, char *fname)
 	}
 
 	/*FSA*/
-	fprintf(stderr, "destcall: '%s' nrbind: %d addrlen: %d\n", destcall, nrbind, addrlen);
+	fprintf(stderr, "Case AF_NETROM destcall: '%s' nrbind: %d addrlen: %d\n", destcall, nrbind, addrlen);
 	/*FSA*/
 
 	/*
@@ -483,7 +486,8 @@ int download_dest(char *gateway, char *fname)
 			return (-1);
 		}
 /* ATTENTION : Check if this is the right structure  ! */
-		sockaddr.rose.srose_family = AF_AX25;
+/* F6BVP	sockaddr.rose.srose_family = AF_AX25;*/
+		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 		addrlen = sizeof(struct full_sockaddr_ax25);
 	/*
 	 * Open the socket into the kernel.
@@ -507,6 +511,10 @@ int download_dest(char *gateway, char *fname)
 	sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 	addrlen = sizeof(struct full_sockaddr_ax25);
 
+	/*F6BVP*/
+	fprintf(stderr, "\nCase AX25 mycall: '%s' addr '%s'\n addrlen %d\n", mycall, addr, addrlen);
+	/*F6BVP*/
+	
 	if (bind(s, (struct sockaddr *) &sockaddr, addrlen) != 0) {
 		sprintf(buffer, "flexd connect: cannot bind AX.25 socket, %s\n",
 				strerror(errno));
