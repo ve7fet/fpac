@@ -398,7 +398,7 @@ int download_dest(char *gateway, char *fname)
 	}
 
 	/*FSA*/
-	fprintf(stderr, "NOOP");
+	fprintf(stderr, "NOOP 0");
         sleep(1);
 	/*FSA*/
 
@@ -532,6 +532,10 @@ int download_dest(char *gateway, char *fname)
 		close(s);
 		return (-1);
 	}
+	/*FSA*/
+	fprintf(stderr, "NOOP 1");
+        sleep(1);
+	/*FSA*/
 	/*
 	 * Lets try and connect to the far end.
 	 *
@@ -552,8 +556,15 @@ int download_dest(char *gateway, char *fname)
 		return (-1);
 	}
 
+	/*FSA*/
+	fprintf(stderr, "NOOP 2");
+        sleep(1);
+	/*FSA*/
 	if (connect(s, (struct sockaddr *) &sockaddr, addrlen) == -1
 		&& errno != EINPROGRESS) {
+            /*fsa*/
+            fprintf(stderr, "se ora si ferma allora prova a gestire %s\n", strerror(errno));
+            /*fsa*/
 		switch (errno) {
 		case ECONNREFUSED:
 			strcpy(buffer, "*** Flexd: Connection refused - aborting\n");
@@ -635,6 +646,7 @@ int download_dest(char *gateway, char *fname)
 
 /*FSA*/
 	fprintf(stderr, "FLEXD:connesso e in attesa di lettura!!!\n");
+        sleep(1);
 /*FSA*/
 
 
