@@ -300,9 +300,6 @@ int download_dest(char *gateway, char *fname)
 		close(s);
 		return (-1);
 	}
-	/*F6BVP*/
-	fprintf(stderr, "\nCase AF_ROSE destcall: '%s' destaddr: '%s' mycall: '%s' addrlen: '%d'\n", destcall, destaddr, mycall, addrlen);
-	/*F6BVP*/
 	/*
 	 * Lets try and connect to the far end.
 	 */
@@ -429,6 +426,7 @@ int download_dest(char *gateway, char *fname)
 		if (paclen == 0)
 			paclen = ax25_config_get_paclen(port);
 
+		dlist[0] = gw->dest_call;
 		if (dlist[0] == NULL) {
 			fprintf(stderr,
 				"flexd: too few arguments for AX.25\n");
@@ -485,10 +483,6 @@ int download_dest(char *gateway, char *fname)
 			close(s);
 			return (-1);
 		}
-/* ATTENTION : Check if this is the right structure  ! */
-/* F6BVP	sockaddr.rose.srose_family = AF_AX25;*/
-		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
-		addrlen = sizeof(struct full_sockaddr_ax25);
 	/*
 	 * Open the socket into the kernel.
 	 */
@@ -508,12 +502,6 @@ int download_dest(char *gateway, char *fname)
 		sprintf(buffer, "\n%s %s\n", mycall, addr);
 
 	ax25_aton(buffer, &sockaddr.ax25);
-	sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
-	addrlen = sizeof(struct full_sockaddr_ax25);
-
-	/*F6BVP*/
-	fprintf(stderr, "\nCase AX25 mycall: '%s' addr '%s'\n addrlen %d\n", mycall, addr, addrlen);
-	/*F6BVP*/
 	
 	if (bind(s, (struct sockaddr *) &sockaddr, addrlen) != 0) {
 		sprintf(buffer, "flexd connect: cannot bind AX.25 socket, %s\n",
