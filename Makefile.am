@@ -17,7 +17,7 @@ install-data-hook:
 	@echo " ***  according to your own BBS callsign and sysop name."
 	@echo
 
-EXTRA_DIST = pathnames.h
+EXTRA_DIST = pathnames.h, fpac.spec
 
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
