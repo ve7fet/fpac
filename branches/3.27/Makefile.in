@@ -160,7 +160,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = lib cfg monitor node flex pad tcp wp kiss tools stats doc help scripts etc
-EXTRA_DIST = pathnames.h, fpac.spec
+EXTRA_DIST = pathnames.h fpac.spec
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
 
