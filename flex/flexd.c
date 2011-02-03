@@ -364,8 +364,8 @@ int download_dest(char *gateway, char *fname)
 	/*FSA*/
 	fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
 	/*FSA*/
-        printf("Case AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n",
-		destcall, digicall, mycall, addr);
+        printf("Case AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s' addrlen %d\n",
+		destcall, digicall, mycall, addr, addrlen);
 
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
@@ -391,10 +391,6 @@ int download_dest(char *gateway, char *fname)
 		close(s);
 		return (-1);
 	}
-
-	/*FSA*/
-	fprintf(stderr, "Case AF_NETROM destcall: '%s' nrbind: %d addrlen: %d\n", destcall, nrbind, addrlen);
-	/*FSA*/
 
 	/*
 	 * Lets try and connect to the far end.
