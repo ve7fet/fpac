@@ -3,6 +3,7 @@ USAGE
         Routes [Rose/Fpac address]
 
 DESCRIPTION
-        Shows all information on addresses and the Rose/FPAC routing
-	table of the local node.
-
+        The Route Table shows the primary and alternate routes set for addresses.
+	Note: 
+	    Open = available 
+	    Closed = unavailable at this time. 
