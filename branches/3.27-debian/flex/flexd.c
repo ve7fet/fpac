@@ -2,8 +2,9 @@
  * flexd.c
  * original by Jean-Paul f6fbb
  * FPAC project
- * part of code borrowed from call.c (ax25-apps) and rose_call.c (ax25-tools) 
+ * part of code borrowed from call.c (ax25-apps) and rose_call.c (ax25-tools)
  */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
+#include <syslog.h>
+
 #include <ctype.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -35,6 +38,21 @@ struct ax_routes *gw;
 int s;
 static int backoff = -1;
 static int ax25mode = -1;
+int verbose = 1;
+int passive = 1;
+int debug = 1;
+int is_daemon = 1;
+
+static void Usage(void)
+{
+	fprintf(stderr, "Usage : flexd [-h] [-d] [-x] [-v] [-f wpfile]\n");
+	fprintf(stderr, "-h : display this message\n");
+	fprintf(stderr, "-d : start in foreground mode\n");
+	fprintf(stderr, "-x : turn on debug mode\n");
+	fprintf(stderr, "-v : turn on debug verbose mode\n");
+	fprintf(stderr, "-p : turn on passive mode\n");
+	exit(1);
+}
 
 int read_conf(void)
 {
@@ -118,11 +136,12 @@ int read_conf(void)
 					strcat(digipath, " ");
 					strcat(digipath, gw->digis[k]);
 				}
-			if ((ax25_config_get_dev(gw->dev)) == NULL )			
-					sprintf(line, "%05d %-8s %5s %s\n",i++, gw->dest_call, gw->dev, digipath);
-				else	 /* ax25 device */
-					sprintf(line, "%05d %-8s %4s %s\n",i++, gw->dest_call, ax25_config_get_dev(gw->dev), digipath);
-				fputs(line, fgt);
+                                if ((ax25_config_get_dev(gw->dev)) == NULL )
+                                    sprintf(line, "%05d %-8s %5s %s\n",i++, gw->dest_call, gw->dev, digipath);
+				else
+                                    /* ax25 device */
+                                    sprintf(line, "%05d %-8s %4s %s\n",i++, gw->dest_call, ax25_config_get_dev(gw->dev), digipath);
+                                fputs(line, fgt);
 			}
 		}
 	}
@@ -136,7 +155,8 @@ int download_dest(char *gateway, char *fname)
 	FILE *tmp;
 	static char *addr;
        	char port[14];
-	char buffer[1024], path[AX25_MAX_DIGIS * 10];
+	char buffer[4096], path[AX25_MAX_DIGIS * 10];
+	int buflen = 4096;
 	char *commands[10], *dlist[9];		/* Destination + 8 digipeaters */
 	fd_set read_fd;
 	int paclen = 0;
@@ -147,16 +167,15 @@ int download_dest(char *gateway, char *fname)
 	int ret;
 	unsigned int retlen;
 	char *cp;
-
 	struct sockaddr_rose rosebind;
 	struct sockaddr_rose roseconnect;
 	struct full_sockaddr_ax25 nrbind, nrconnect;
-	
+
 	union {
 		struct full_sockaddr_ax25 ax25;
 		struct sockaddr_rose  rose;
 	} sockaddr;
-	
+
 	char digicall[10] = "\0";
 	char destcall[10] = "\0";
 	char destaddr[11] = "\0";
@@ -222,8 +241,8 @@ int download_dest(char *gateway, char *fname)
 	roseconnect.srose_family = rosebind.srose_family = AF_ROSE;
 	roseconnect.srose_ndigis = rosebind.srose_ndigis = 0;
 
-	/* 
-	if (dlist[2] == NULL) {	*/	
+	/*
+	if (dlist[2] == NULL) {	*/
 		strcpy(destaddr, dlist[1]);
 		strcpy(destcall, dlist[0]);
 /*		*digicall ='\0';*/
@@ -255,7 +274,7 @@ int download_dest(char *gateway, char *fname)
 	if ((s = socket(AF_ROSE, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "ERROR: cannot open Rose socket, %s\n", strerror(errno));
 		fprintf(stderr, "%s\n", buffer);
-		close(s);	
+		close(s);
 		return (-1);
 	}
 	/*
@@ -264,7 +283,7 @@ int download_dest(char *gateway, char *fname)
 	if (rose_aton(addr, rosebind.srose_addr.rose_addr) == -1) {
 		sprintf(buffer, "ERROR: invalid Rose port address - %s\n", addr);
 		fprintf(stderr, "%s\n", buffer);
-		close(s);	
+		close(s);
 		return (-1);
 	}
 
@@ -274,11 +293,11 @@ int download_dest(char *gateway, char *fname)
 		close(s);
 		return (-1);
 	}
-	
+
 	if (bind(s, (struct sockaddr *)&rosebind, addrlen) != 0) {
 		sprintf(buffer, "ERROR: cannot bind Rose socket, %s\n", strerror(errno));
 		fprintf(stderr, "%s\n", buffer);
-		close(s);	
+		close(s);
 		return (-1);
 	}
 	/*
@@ -301,7 +320,7 @@ int download_dest(char *gateway, char *fname)
 		}
 		fprintf(stderr, "%s\n", buffer);
 		close(s);
-		return 1;
+		return (1);
 	}
 	break;
 	case AF_NETROM:
@@ -341,8 +360,12 @@ int download_dest(char *gateway, char *fname)
 		strcpy(destcall, dlist[1]);
 		strcpy(digicall, dlist[0]);
 	} */
-	
-printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, digicall, mycall, addr);
+
+	/*FSA*/
+	fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
+	/*FSA*/
+        printf("Case AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s' addrlen %d\n",
+		destcall, digicall, mycall, addr, addrlen);
 
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
@@ -355,7 +378,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 	if ((s = socket(AF_NETROM, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "ERROR: cannot open NET/ROM socket, %s\n", strerror(errno));
 		fprintf(stderr, "%s\n", buffer);
-		close(s);	
+		close(s);
 		return (-1);
 	}
 
@@ -365,9 +388,10 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 	if (bind(s, (struct sockaddr *)&nrbind, addrlen) != 0) {
 		sprintf(buffer, "ERROR: cannot bind NET/ROM socket, %s\n", strerror(errno));
 		fprintf(stderr, "%s\n", buffer);
-		close(s);	
+		close(s);
 		return (-1);
 	}
+
 	/*
 	 * Lets try and connect to the far end.
 	 */
@@ -387,10 +411,10 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 				sprintf(buffer, "Flexd: ERROR cannot connect to NET/ROM node, %s\n", strerror(errno));
 				break;
 		}
-		fprintf(stderr, "%s\n", buffer);
+		fprintf(stderr, "\nBUFFER:%s\n", buffer);
 		close(s);
-		return 1;
-	}		
+		return (1);
+	}
 	break;
 	case AF_AX25:
 		if (window == 0)
@@ -398,6 +422,7 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		if (paclen == 0)
 			paclen = ax25_config_get_paclen(port);
 
+		dlist[0] = gw->dest_call;
 		if (dlist[0] == NULL) {
 			fprintf(stderr,
 				"flexd: too few arguments for AX.25\n");
@@ -454,9 +479,6 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 			close(s);
 			return (-1);
 		}
-/* ATTENTION : Check if this is the right structure  ! */
-		sockaddr.rose.srose_family = AF_AX25;
-		addrlen = sizeof(struct full_sockaddr_ax25);
 	/*
 	 * Open the socket into the kernel.
 	 */
@@ -466,17 +488,17 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		write(STDOUT_FILENO, buffer, strlen(buffer));
 		return (-1);
 	}
+
 	/*
 	 * Set our AX.25 callsign and AX.25 port callsign accordingly.
 	 */
 	if (*mycall == '\0')
-		sprintf(buffer, "%s %s", addr, addr);
+		sprintf(buffer, "\n%s %s\n", addr, addr);
 	else
-		sprintf(buffer, "%s %s", mycall, addr);
-	ax25_aton(buffer, &sockaddr.ax25);
-	sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
-	addrlen = sizeof(struct full_sockaddr_ax25);
+		sprintf(buffer, "\n%s %s\n", mycall, addr);
 
+	ax25_aton(buffer, &sockaddr.ax25);
+	
 	if (bind(s, (struct sockaddr *) &sockaddr, addrlen) != 0) {
 		sprintf(buffer, "flexd connect: cannot bind AX.25 socket, %s\n",
 				strerror(errno));
@@ -484,6 +506,9 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		close(s);
 		return (-1);
 	}
+	/*FSA*/
+        sleep(1);
+	/*FSA*/
 	/*
 	 * Lets try and connect to the far end.
 	 *
@@ -504,7 +529,11 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		return (-1);
 	}
 
-	if (connect(s, (struct sockaddr *) &sockaddr, addrlen) == -1
+	/*FSA*/
+        sleep(1);
+	/*FSA*/
+/**/
+        if (connect(s, (struct sockaddr *) &sockaddr, addrlen) == -1
 		&& errno != EINPROGRESS) {
 		switch (errno) {
 		case ECONNREFUSED:
@@ -523,8 +552,9 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 
 		write(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
-		return 1;
+		return (1);
 	}
+/**/
 	break;
 	}
 
@@ -536,39 +566,37 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		FD_ZERO(&read_fd);
 		FD_SET(s, &read_fd);
 		if (select(s + 1, &read_fd, NULL, 0, 0) == -1) {
-			break;
+                    break;
 		}
 		if (FD_ISSET(s, &read_fd)) {
+                    /*	See if we got connected or if this was an error		*/
+                    getsockopt(s, SOL_SOCKET, SO_ERROR, &ret, &retlen);
 
-		/*	See if we got connected or if this was an error		*/
-		getsockopt(s, SOL_SOCKET, SO_ERROR, &ret, &retlen);	
-	
-	switch (af_mode) {
-		case AF_ROSE:
-			break;
-		case AF_NETROM:
-			break;
-		case AF_AX25:
-			{				
-			if (ret != 0) {
-				cp = strdup(strerror(ret));
-				strlwr(cp);
-				sprintf(buffer, "flexd connect: Failure with %s error %d %s\n",
+                    switch (af_mode) {
+                        case AF_ROSE:
+                            break;
+                        case AF_NETROM:
+                            break;
+                        case AF_AX25: {
+/*FSA don'know how but works!*/
+                            if ((ret != 0) && (ret != 256)) {
+                                cp = strdup(strerror(ret));
+                                strlwr(cp);
+                                sprintf(buffer, "flexd connect: Failure with %s error %d %s\n",
 						gateway, ret, cp);
-				write(STDOUT_FILENO, buffer, strlen(buffer));
-				free(cp);
-				close(s);
-				return 1;
-			}
-			}
-			break;
-		default:
-			break;	
-			}
-		break;
-		}	
+                                write(STDOUT_FILENO, buffer, strlen(buffer));
+                                free(cp);
+                                close(s);
+                                return 1;
+                            }
+                        } break;
+                        default:
+                            break;
+                    }
+                    break;
+		}
 	}
-	
+
 	commands[0] = "d\r";
 	commands[1] = "q\r";
 	commands[2] = "b\r";
@@ -584,16 +612,16 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 		close(s);
 		return (-1);
 	}
-
+/*FSA*/
+        sleep(1);
+/*FSA*/
 	for (;;) {
 		FD_ZERO(&read_fd);
 		FD_SET(s, &read_fd);
-
 		if (select(s + 1, &read_fd, NULL, NULL, NULL) == -1) {
 			break;
 		}
-
-		if (FD_ISSET(s, &read_fd)) { 
+		if (FD_ISSET(s, &read_fd)) {
 			if ((n = read(s, buffer, 512)) == -1)
 				break;
 			for (c = 0; c < n; c++) {
@@ -606,19 +634,17 @@ printf("destcall: %s digicall: %s mycall: %s port callsign: %s\n", destcall, dig
 			if (cmd_send == 1) {
 				fwrite(buffer, sizeof(char), n, tmp);
 			}
-		} 
-				
+		}
+
 		if (cmd_ack != 0) {
-			if (commands[cmd_send] != NULL) { 
+			if (commands[cmd_send] != NULL) {
 				write(s, commands[cmd_send], 2);
 				cmd_send++;
 			}
 			cmd_ack = 0;
 		}
 	}
-
 	close(s);
-
 	fclose(tmp);
 	return 0;
 }
@@ -657,7 +683,8 @@ int parse_dest(char *gateway, char *fname)
 		if (strncmp(cp, "Cmd:", 4) == 0)	/* AWZnode prompt */
 			continue;
 
-		if (strncmp(cp, "Connected to", 12) == 0)	/* Flexnode prompt */
+		if ((strncmp(cp, "Connected to", 12) == 0)
+                        || (strncmp(cp, "=>", 2) == 0))	/* Flexnode prompt */
 			continue;
 
 		/* CALL SSID-ESID RTT */
@@ -673,12 +700,11 @@ int parse_dest(char *gateway, char *fname)
 				break;
 			sprintf(line, "%-8s  %-5s %6d    %05d\n", call, ssid,
 					safe_atoi(rtt), 0);
-/*					safe_atoi(rtt), gateway); */
+/*				safe_atoi(rtt), gateway); */
 			fputs(line, fdst);
 			cp = strtok(NULL, " \t\n\r");
 		} while (cp != NULL);
 	}
-
 	fclose(fdst);
 	fclose(tmp);
 
@@ -712,8 +738,42 @@ void alarm_handler(int sig)
 	signal(SIGALRM, SIG_IGN);
 	update_flex();
 
-	signal(SIGALRM, alarm_handler);		/* Restore alarm handler */ 
+	signal(SIGALRM, alarm_handler);		/* Restore alarm handler */
 	alarm(poll_time);
+}
+
+static void process_options(int argc, char *argv[])
+{
+	int c;
+
+	do {
+		c = getopt(argc, argv, "?hdvxp:");
+		switch (c) {
+		case 'h':
+		case '?':
+			Usage();
+			break;
+		case 'd':
+			fprintf(stderr, "Foreground mode\n");
+			is_daemon = 0;
+			verbose = 1;
+			break;
+		case 'x':
+			fprintf(stderr, "Debug mode\n");
+			debug = 1;
+			break;
+		case 'v':
+			fprintf(stderr, "Verbose mode\n");
+			verbose = TRUE;
+			break;
+		case 'p':
+			fprintf(stderr, "Passive mode\n");
+			passive = 1;
+			break;
+		default :
+			break;
+		}
+	} while (c != EOF);
 }
 
 int main(int argc, char *argv[])
@@ -721,20 +781,25 @@ int main(int argc, char *argv[])
 	int i;
 	signal(SIGPIPE, SIG_IGN);
 
+	openlog("flexd", LOG_ERR , LOG_INFO);
+	syslog(LOG_WARNING, "Starting flexd");
+
 	if (ax25_config_load_ports() == 0) {
 		fprintf(stderr, "flexd error: No AX25 port data configured\n");
 		return 1;
 	}
 
+	process_options(argc, argv);
+
 	if ((i = read_conf()) == -1)
 		return 1;
 
-	if (!daemon_start(TRUE)) {
+	if ((is_daemon) && (!daemon_start(TRUE)) ) {
 		fprintf(stderr, "flexd: cannot become a daemon\n");
 		return 1;
 	}
 
-	if ((i = update_flex()) == -1) {  
+	if ((i = update_flex()) == -1) {
 		fprintf(stderr, "\nStopping application. Restart flexd after changing the configuration\n");
 		signal(SIGKILL, hup_handler);
 		return (i);

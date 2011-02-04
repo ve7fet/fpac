@@ -3,9 +3,9 @@
 # This optional file includes Adjacent Nodes configuration 
 # If present, this file MUST be @sysconfdir@/ax25/fpac.nodes
 #
-# List of adjacent nodes
+# List of adjacent nodes - these are other nodes which can be 
+# reached by a DIRECT connection (either over RF or Ethernet).
 #
-
 Node = KCK
 	Path     = F5KCK-11
 	DNIC     = 2080
