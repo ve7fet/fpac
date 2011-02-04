@@ -1,5 +1,6 @@
 docdir = @localstatedir@/ax25/fpac/help
 doc_DATA = Alias.hlp \
+	APplications.hlp \
 	CALLbook.hlp \
 	Connect.hlp \
 	HOst.hlp \
@@ -14,6 +15,7 @@ doc_DATA = Alias.hlp \
 	Destinations.hlp \
 	Help.hlp \
 	Info.hlp \
+	NEtrom.hlp \
 	Nodes.hlp \
 	Quit.hlp \
 	SYSop.hlp \
@@ -27,7 +29,8 @@ doc_DATA = Alias.hlp \
 	PIng.hlp \
 	Routes.hlp \
 	Status.hlp \
-	Telnet.hlp
+	Telnet.hlp \
+	VERsions.hlp
 
 EXTRA_DIST = $(doc_DATA)
 

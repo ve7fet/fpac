@@ -13,4 +13,4 @@ options :
          d date
          r reverse
 
-	 You can may ? and * wildcards in the callsign.
+	 You may use ? and * wildcards in the callsign.
