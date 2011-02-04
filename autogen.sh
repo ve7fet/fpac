@@ -18,6 +18,7 @@ fi
 rm -Rf autom4te.cache
 rm -f Makefile.in aclocal.m4 compile config.guess config.sub configure \
       config.h.in depcomp install-sh ltmain.sh missing
+rm -f `find . -name "Makefile.in"`
 
 
 if test "$1" != "clean" ; then
