@@ -1,22 +1,17 @@
-
 /*
- * aprslist.c (after mheardd.c)
- *
  * FPAC project
+ * aprslist.c (after mheardd.c)
+ * modified by f6bvp 25/01/2011
  */
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
-/*#include <sys/types.h>*/
-/*#include <sys/socket.h>*/
 #include <linux/if_ether.h>
-/*#include <netinet/in.h>*/
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-/*#include <netdb.h>*/
 
 #include <unistd.h>
 #include <stdio.h>
@@ -26,7 +21,6 @@
 #include <signal.h>
 #include <syslog.h>
 #include <errno.h>
-/*#include <fcntl.h>*/
 
 #include "config.h"
 #include "../pathnames.h"
@@ -73,6 +67,7 @@
 
 #define	ALEN		6
 #define	AXLEN		7
+#define	BEACON_TEXT_BUFFER	123
 
 #define n_cpy(a, b, c) strncpy(a, b, c)
 
@@ -108,7 +103,7 @@ sport *phead = NULL;
 double my_w = 0.0;
 double my_l = 0.0;
 char my_loc[22];
-char beacon[80];
+char beacon[BEACON_TEXT_BUFFER];
 
 int mask = U_MASK;
 
@@ -653,14 +648,14 @@ void load_config(void)
 			my_w = atof(get_next_arg(&p));
 			minutes = atof(get_next_arg(&p));
 			seconds = atof(get_next_arg(&p));
-			geo = *p;
+			geo = toupper(*get_next_arg(&p));
 			
-			sprintf(slon, "%03g%02g.%02g%c", my_w, minutes, seconds, toupper(geo));
+			sprintf(slon, "%03g%02g.%02g%c", my_w, minutes, seconds, geo);
 			slon[9] = '\0';
 
 			my_w += minutes / 60.0;
 			my_w += seconds / 3600.0;
-			if (geo == 'e')
+			if (geo == 'E')
 				my_w = -my_w;
 		}
 		else if (!strncmp(cmd, "lat", 3))
@@ -668,14 +663,14 @@ void load_config(void)
 			my_l = atof(get_next_arg(&p));
 			minutes = atof(get_next_arg(&p));
 			seconds = atof(get_next_arg(&p));
-			geo = *p;
+			geo = toupper(*get_next_arg(&p));
 			
-			sprintf(slat, "%02g%02g.%02g%c", my_l, minutes, seconds, toupper(geo));
+			sprintf(slat, "%02g%02g.%02g%c", my_l, minutes, seconds, geo);
 			slat[8] = '\0';
 
 			my_l += minutes / 60.0;
 			my_l += seconds / 3600.0;
-			if (geo == 's')
+			if (geo == 'S')
 				my_l = -my_l;
 		}
 		else if (*cmd == '[')
@@ -713,7 +708,8 @@ void load_config(void)
 		}
 		else if (ps && !strncmp(cmd, "bea", 3))
 		{ 
-			strcpy( beacon, p);
+			strncpy( beacon, p, BEACON_TEXT_BUFFER);
+			beacon[BEACON_TEXT_BUFFER] = '\0';
 		}
 
 	}
@@ -721,7 +717,7 @@ void load_config(void)
 	fclose(fp);
 	
 	sprintf(my_loc, "=%s/%s", slat, slon);
-	printf("%s\n", my_loc);
+	printf("%s\n%s\n", my_loc, beacon);
 }
 
 int send_beacon(void)
