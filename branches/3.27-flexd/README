@@ -1,0 +1,85 @@
+FPAC
+====
+Here is a list of applications dedicated to FPAC X25 node.
+
+They are using the ROSE/X25 L3 layer of the linux kernel.
+
+The documentation is in doc directory. HTML doc in doc/html.
+
+aprslist	lists APRS frames heard
+calibrate	sends a sequence of UI frames to a port
+call_tcp	(ax25d/node) Calls a remote BBS via TCP
+calld		Receives calls from a remote BBS via TCP
+flexd		Download and handle Flexnet destinations database
+fpac.sh		Shell script to start/stop fpac 
+fpaccfg		dumps the configuration of fpac
+fpacnode	The FPAC node client
+fpacroute	daemon for traceroute
+fpacshell	(node) Runs a shell with MD5 protection
+fpacstat	computes the traffic statistics of the trunks
+fpacwdog	simple watchdog that sends a character to a serial port
+fpacwpd		The white pages database server daemon
+fpad		The FPAC pad. Access from/to AX25/NetRom/ROSE
+mailbbs		Simple mailer to send Fpac's services messages to a BBS
+mkissattach	** Obsolete - Multiple kissattach
+mon_tcp		Sends/receive monitoring frames to a remote BBS via TCP/IP
+monitor		Simple monitoring tool
+remote		** Obsolete
+wpcmp		WP utility
+wpedit		WP editor (to edit WP node parameters or delete a node)
+wpmaint		White Pages maintenance utility
+wpserv		WP application
+wpstress	** Obsolete - WP utility
+yapp		To remotely download or upload files to your node with YAPP transfert protocol.
+
+See INSTALL for configuration and installation instructions.
+
+PREREQUISITES
+=============
+
+You need to have current libax25 installed.
+
+Ensure ax25-apps and ax25-tools are also installed. Ensure all configuration files 
+exist (use `make installconf' to install defaults).
+
+Installation paths can be changed to suit local requirements, see ./configure --help or INSTALL for 
+details. Ensure you install in the same paths used by libax25, ax25-apps, and ax25-tools.
+
+STARTING FPAC
+=============
+To start fpac, use the fpac.sh script
+
+TODO
+====
+	* To be compatible with libax25-0.0.9 and up now
+	* Upgrade with last ROSE fonctionalities
+	  (UI frames routed like I frames for APRS and IP datagrams and increase MTU )
+	* Do automatic cleaning of WP database.
+	* Find a solution for automatic and dynamic routing.
+	* Support an online and switchable compression algorithm.
+	* Flexnet Digipeating or perhaps convert flexnet destinations collected in WP
+	* Fix all bugs you can found and report.
+	* Add new fonctionnalities you request ;-)
+
+You can post your bug reports or requests in the Rose/Fpac mailing list.
+Subscription on http://www.f6fbb.org/mailman/listinfo/fpac
+
+You can also help us to keep up to date this package (Sources, documentation...)
+
+  Jean-Paul ROUBELAT <jpr@f6fbb.org>
+
+=================================
+F6BVP - December 2010
+
+	* Automatic routing has been improved in ROSE Linux module and should be found in next kernel release around
+	  2.6.37 or 38. Dynamic packet routing is still far away (...)
+
+	* >3.28.1 (F6BVP)
+	  Investigate the issue when call <portname> <callsign> is actually now interpreted as call <callsign> via <callsign>
+	  Close rose sockets when FPAC is shut down.
+	  When issuing a call from fpacnode and the call is not in fpac wp data base but
+  	   a node with same DNIC address is connected (routes), the call should go through this route.
+
+  Bernard Pidoux f6bvp <f6bvp@free.fr>
+
+

@@ -1,0 +1,1578 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE"
+ content="text/html; charset=windows-1252">
+  <title>Linux FPAC Flash Key mini-HOWTO</title>
+  <meta name="GENERATOR" content="OpenOffice.org 2.0  (Win32)">
+  <meta name="CREATED" content="20060213;22041700">
+  <meta name="CHANGEDBY" content="Bernard Pidoux">
+  <meta name="CHANGED" content="20060818;14495429">
+<!-- saved from url=(0039)http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO/ -->
+  <style>
+	<!--
+		H1 { color: #000000 }
+		P { color: #000000 }
+		H2 { color: #000000 }
+	-->
+	</style>
+  <meta content="Bernard Pidoux, F6BVP" name="author">
+  <meta
+ content="Install an FPAC router onto a bootable Mandriva Linux Flash USB Key"
+ name="description">
+</head>
+<body dir="ltr"
+ style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"
+ lang="en-US">
+<h1>Linux FPAC Flash Key mini-HOWTO</h1>
+<h2>Bernard Pidoux, F6BVP, <code>f6bvp at amsat dot org</code></h2>
+<p style="margin-bottom: 0in;">V1.0.4, 2007-09-10</p>
+<hr>
+<p>This mini HOWTO was written to <span style="font-weight: bold;">help
+setting up an </span><span style="font-weight: bold;">FPAC router </span>and
+packet-radio communication applications using <span
+ style="font-weight: bold;">AX25</span> protocole, on a <span
+ style="font-weight: bold;">Mandriva Flash USB key</span>. Basic
+description of FPAC can be found in this <a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/FPAC-HOWTO/FPAC-HOWTO.html">FPAC
+HOWTO</a> and you should read&nbsp; <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/">FPAC-MINI-HOWTO</a>&nbsp;
+in order to learn how to install step by step an FPAC router onto a
+Mandriva Linux distro. I will only describe here the specific
+installation of FPAC and <span style="font-weight: bold;">AX25
+applications</span> on a Mandriva
+Flash USB Key, including <span style="font-weight: bold;">F6FBB BBS</span>.<br>
+</p>
+<hr>
+<h2><a name="toc1"></a>1. <a href="#s1">Introduction</a></h2>
+<h2><a name="toc2"></a>2. <a href="#s2">Install Gcc compiler and
+development libraries on your Flash key<br>
+</a></h2>
+<h2><a name="toc3"></a>3. <a href="#s3">Install AX25 libraries</a></h2>
+<h2><a name="toc4"></a>4. <a href="#s4">Install AX25 tools</a></h2>
+<h2><a name="toc5"></a>5. <a href="#s5">Install AX25 application
+programs</a></h2>
+<h2><a name="toc6"></a>6. <a href="#s6">An utility script to set up
+directories and files rights</a></h2>
+<h2><a name="toc7"></a>7. <a href="#s7">Configure ax25ipd daemon<br>
+</a></h2>
+<h2><a name="toc8"></a>8. <a href="#s8">Install and configure FPAC 3.27</a></h2>
+<h2><a name="toc9"></a>9. <a href="#s9">A script to start AX25</a></h2>
+<h2><a name="toc10"></a>10.1 <a href="#s101">Configure a router</a></h2>
+<h2><a name="toc101"></a>10.2 <a href="#s102">Linking FPAC with
+application software</a></h2>
+<h2><a name="toc11"></a>11. <a href="#s11">Others HOWTO</a></h2>
+<h2><a name="toc12"></a>12. <a href="#s12">Finding more help</a></h2>
+<hr>
+<h2><a name="s1"></a>1. Introduction</h2>
+<p>Mandriva software editor is distributing two Linux "Live" distro,
+that is with ready to use Linux. The first, <a
+ href="http://www.mandriva.com/fr/download/mandrivaone">Mandriva “One”</a>
+is available on a single bootable CD
+that can be freely downloaded. The second is <span
+ style="font-weight: bold;">Mandriva Flash USB</span> sold for less
+than 100 US$ . It is a 4Gb memory USB key with a bootable Linux. Both
+live versions do not need any hard disk and use RAM memory. With a live
+distro you get a complete portable Linux system. Mandriva Flash is
+described on <a href="http://www.mandriva.com/linux/node_3827">Mandriva
+Flash site</a>.<br>
+</p>
+<p>Linux Live distro has the peculiarity not to need any hard disk, but
+to work with RAM memory. You can however personnalize your Linux by
+saving your files on a USB memory key. However, if Mandriva One can be
+installed easily on a hard disk, this distro does not include any
+development facility : compiler and utility libraries. The same with
+Mandriva Flash. Fortunately there is some place left on the USB key to
+save your personnal files on a partition
+that you can read from Windows or Linux.<br>
+</p>
+<p>We will describe how to add development tools to Mandriva
+Flash (Gcc compiler and libraries) and <span style="font-weight: bold;">AX25
+libraries</span>, <span style="font-weight: bold;">AX25 tools </span>and
+<span style="font-weight: bold;">AX25 applications</span>. After this
+is done we will explain how to build and install FPAC program suite and
+<span style="font-weight: bold;">F6FBB BBS</span> from source packages.<br>
+</p>
+<p>Following step by step this mini HOWTO the user will obtain a
+complete Linux system including AX25 software applications with a FPAC
+AX25 router on a bootable USB key. When starting Linux from this USB
+key, the user can connect to FPAC network either on radio via a serial
+port or on Internet via an ethernet link or a wireless WiFi connexion.<br>
+</p>
+<br>
+<hr>
+<h2><a name="s2"></a>2. Install Gcc compiler and development libraries
+on your Flash key<br>
+</h2>
+Mandriva Flash USB key distro has no development software like Gcc
+compiler or libraries necessary to build AX25 libraries, tools and
+applications.<br>
+You thus need to download a package I built that includes Gcc compiler
+and the development libraries plus other utility programs.<br>
+Start inserting your Mandriva Flash USB key onto your computer USB
+connector. <span style="font-weight: bold;">Do not connect any other
+USB device</span> like a mouse or a printer, for this would prevent
+Mandriva Flash Linux to boot on the USB key. This is due to a bug. On
+my portable laptop, pressing keyboard fonction <span
+ style="font-weight: bold;">key F12</span> allow to choose the boot
+device. The key to press may depend on your specific bios. Select USB
+device and boot Mandriva Flash form the USB key. Proceed with the first
+time configuration process. When you are done you may plug in other USB
+devices like a mouse. Then connect your computer to Internet and open <span
+ style="font-weight: bold;">Konqueror </span>or <span
+ style="font-weight: bold;">Mozilla firefox</span>. Then connect this
+URL <a href="http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO/">FPAC-LINUX-FLASH
+MINI-HOWTO/</a><br>
+<br>
+<ul>
+  <li>Click on the toolbar <span
+ style="font-weight: bold; font-style: italic;">Konsol </span>icone
+and open a <span style="font-weight: bold; font-style: italic;">terminal
+    </span>window on the Desktop. </li>
+</ul>
+<ul>
+  <li>Login as supervisor with command <span style="font-weight: bold;">su</span>
+and enter the <span style="font-weight: bold;">root</span> password.<br>
+  </li>
+</ul>
+<ul>
+  <li>Create a directory named&nbsp; <span style="font-weight: bold;">/temp</span>&nbsp;
+with the command </li>
+</ul>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">mkdir
+/temp </span>and enter into this directory <span
+ style="font-weight: bold;"><br>
+<br>
+cd&nbsp; /temp<br style="font-weight: bold;">
+</span></div>
+<ul>
+  <li>Right click on the following link to download the development
+package and choose destination directory <span
+ style="font-weight: bold;">/temp</span></li>
+</ul>
+<ul>
+  <p><a href="http://f6bvp.free.fr/logiciels/ax25/GCC-devel-RPMs.tgz">http://f6bvp.free.fr/logiciels/ax25/GCC-devel-RPMs.tgz</a></p>
+  <li>
+    <p>Click on Konsol terminal window and extract the files from
+archive with the command :<b><br>
+    </b></p>
+  </li>
+  <li>
+    <p><b>tar &nbsp; xvf&nbsp;&nbsp; </b><b>GCC-devel-RPMs.tgz <br>
+    </b></p>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;">Command <span
+ style="font-weight: bold;">ls</span> will show you the list of RPM
+files extracted. Enter the following command to start the script
+that will install Gcc compiler and development libraries :<br>
+  </p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./install</span><span
+ style="font-weight: bold;"><br>
+  </span></font></p>
+</ul>
+<p style="margin-right: 0.39in; margin-left: 40px;">After a while your
+Linux system will be equipped with a compiler and the libraries
+necessary to build all AX25 routines. </p>
+<ul>
+  <li>You can delete temporary files with rm -f /temp/* command<br>
+  </li>
+</ul>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">rm&nbsp;
+-f&nbsp; /temp/*</span><br>
+</div>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">You can now download and install
+AX25 libraries.</p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s3"></a>3. Install AX25 libraries</h2>
+<div style="margin-left: 40px;"><br>
+<p><span style="font-style: italic;">Like many other AX25 applications
+FPAC needs the AX25 libraries. When running AX25 applications,
+softwares use common subroutines that are included into ax25libraries.
+To optimize performance, I have provided the source of <span
+ style="font-weight: bold;">libax25-0.0.11</span> package, with changes
+to allow compilation under kernel 2.6. It is always better to compile
+sofware on your own system.</span><br>
+</p>
+<br>
+Right click on the following link to download the package and choose <span
+ style="font-weight: bold; font-style: italic;">/temp</span> directory :<br>
+</div>
+<p style="margin-left: 40px;"><a
+ href="http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.11.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.11.2src_f6bvp.tgz</a></p>
+<ul>
+  <li>
+    <p>Click on terminal console window and extract files from archive
+into <b>/temp&nbsp; </b>:</p>
+    <p><b>tar&nbsp; xvf&nbsp; libax25-0.0.11.2src_f6bvp.tgz</b></p>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;"><b>cd&nbsp;
+libax25-0.0.11 </b>and type the commands :</p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install<br>
+make installconf<br>
+  </span> </font> </p>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;">This will install configuration
+files <span style="font-weight: bold;">axports</span>, <span
+ style="font-weight: bold;">rsports</span> and <span
+ style="font-weight: bold;">nrports</span> into <span
+ style="font-weight: bold;">/usr/local/etc/ax25</span>/,&nbsp; <span
+ style="font-style: italic;">include</span> files into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/include</span>
+and will compile and install libraries into&nbsp; <b><i>/usr/local/lib</i></b>/<br>
+Also documentation manuals that you can read via <span
+ style="font-weight: bold;">man</span> command will be copied into <span
+ style="font-weight: bold; font-style: italic;">usr/local/man</span>.<br>
+  </p>
+</ul>
+<p style="margin-left: 0.42in;">Command&nbsp; <b>ls&nbsp;
+/usr/local/lib </b>should then display the following file names and
+symbolic links although the dates and size will be different :</p>
+<pre style="margin-left: 2cm; margin-right: 1cm;">-rw-r--r--  1 root root 101464 déc  4 19:59 libax25.a<br>-rw-r--r--  1 root root  20816 déc  4 19:59 libax25io.a<br>-rwxr-xr-x  1 root root    720 déc  4 19:59 libax25io.la*<br>lrwxrwxrwx  1 root root     18 déc  4 19:59 libax25io.so -&gt; libax25io.so.0.0.0*<br>lrwxrwxrwx  1 root root     18 déc  4 19:59 libax25io.so.0 -&gt; libax25io.so.0.0.0*<br>-rwxr-xr-x  1 root root  23090 déc  4 19:59 libax25io.so.0.0.0*<br>-rwxr-xr-x  1 root root    706 déc  4 19:59 libax25.la*<br>lrwxrwxrwx  1 root root     16 déc  4 19:59 libax25.so -&gt; libax25.so.0.0.0*<br>lrwxrwxrwx  1 root root     16 déc  4 19:59 libax25.so.0 -&gt; libax25.so.0.0.0*<br>-rwxr-xr-x  1 root root  76967 déc  4 19:59 libax25.so.0.0.0*</pre>
+<hr>
+<h2><a name="s4"></a>4. Install AX25 tools<br>
+</h2>
+<p style="margin-left: 0.42in;">Right click on the following link to
+download <span style="font-weight: bold;">ax25-tools</span> source
+package and choose <span style="font-weight: bold; font-style: italic;">/temp</span>
+directory :<br>
+</p>
+<ul>
+  <p><a
+ href="http://f6bvp.free.fr/logiciels/ax25/ax25-tools-0.0.8.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/ax25-tools-0.0.8.2src_f6bvp.tgz</a></p>
+  <p>Unpack the package :<br>
+  </p>
+  <p><b>tar&nbsp; xvf&nbsp; ax25-tools-0.0.8.2src_f6bvp.tgz</b></p>
+  <p><b>cd&nbsp; ax25-tools-0.0.8</b> and enter the following commands :</p>
+</ul>
+<ul style="font-weight: bold;">
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make installconf</span><br>
+  </font></p>
+</ul>
+<p style="margin-left: 0.42in; margin-right: 0.39in;">This will install
+into <span style="font-weight: bold;">/usr/local/etc/ax25</span> the
+following sample configuration files : <span style="font-weight: bold;">ax25d.conf,
+ax25.profile, ax25spawn.conf, nrbroadcast.conf, rip98d.conf,
+rxecho.conf, ttylinkd.conf </span>and will compile and install utility
+applications into <b><i>/usr/local/sbin</i></b>/&nbsp; directory and
+others into <b>/usr/local/bin/<br>
+</b></p>
+<p style="margin-left: 40px;">Directories and manual documentation
+files that you can read via <span style="font-weight: bold;">man</span>
+command will also be copied into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/man</span>.</p>
+<hr>
+<h2><a name="s5"></a>5. Install AX25 application programs<br>
+</h2>
+<p style="margin-left: 0.42in;">Right click on the following link to
+download the <span style="font-weight: bold;">ax25-apps</span> source
+package and choose <span style="font-weight: bold; font-style: italic;">/temp</span>
+directory :
+</p>
+<ul>
+  <p><a
+ href="http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.6.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.6.2src_f6bvp.tgz</a></p>
+  <p>Extract the source files from the archive :</p>
+  <p><b>tar xvf ax25-apps-0.0.6.2src_f6bvp.tgz</b></p>
+  <p><b>cd&nbsp; ax25-apps-0.0.6</b>&nbsp; and enter the following
+commands :</p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make installconf</span><br>
+  </font> </p>
+</ul>
+<div style="margin-left: 40px;">
+<p>This will install into <span style="font-weight: bold;">/usr/local/etc/ax25</span>
+the following sample configuration files : <span
+ style="font-weight: bold;">ax25ipd.conf,
+ax25mon.conf, ax25rtd.conf</span> and application software into <span
+ style="font-weight: bold;">/usr/local/bin</span> and <span
+ style="font-weight: bold;">/usr/local/sbin</span><br>
+</p>
+<p>Directories and manual documentation files that you can read via <span
+ style="font-weight: bold;">man</span> command will also be copied into
+<span style="font-weight: bold; font-style: italic;">/usr/local/man</span>.
+</p>
+</div>
+<ul>
+  <li>Now you should perform some housekeeping tasks. <br>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;"> <br>
+  </p>
+</ul>
+<hr>
+<h2><a name="s6"></a>6. An utility script to set up directories and
+files rights</h2>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">In order to start FPAC router with
+Linux kernel 2.6 we must create some directories and files with
+appropriate access and user rights. </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">I wrote a script to perfomr this
+task that should be done only once.</p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">You can copy and paste into /temp
+directory the following script and name it&nbsp; <b>rc.init.script</b>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><b>cd</b>&nbsp; into <span
+ style="font-weight: bold;">/temp</span> and enter the command <b>chmod
+a+x&nbsp; rc.init.script</b>&nbsp; then run the script with the
+following command :&nbsp;&nbsp;</p>
+  </li>
+</ul>
+<div style="margin-left: 40px;"><b>./rc.init.script</b></div>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">You can alternatively <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/rc.init.script">download the
+script file from this link</a> and run the same commands as above. </p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-left: 0.42in; margin-bottom: 0in;"><font
+ face="courier new, courier, monospace"><font size="2">#!/bin/sh<br>
+#
+rc.init.script<br>
+# Part of <a href="http://rose.fpac.free.fr/MINI-HOWTO/">http://rose.fpac.free.fr/MINI-HOWTO/</a><br>
+#
+by f6bvp at amsat dot org<br>
+#<br>
+#
+This script should be run only once after installation of<br>
+#<br>
+# -
+libax25<br>
+# - ax25-apps<br>
+# - ax25-tools<br>
+#<br>
+# and before
+installing FPAC fpac327 package<br>
+#<br>
+# AX25 libraries declaration
+(into ld.so.conf)<br>
+#<br>
+echo "/usr/local/lib" &gt;&gt;
+/etc/ld.so.conf<br>
+/sbin/ldconfig<br>
+#<br>
+# Reserving UDP port 10093
+for FPAC service<br>
+#<br>
+echo "fpad 10093/tcp # FPAC" &gt;&gt;
+/etc/services<br>
+echo "fpad 10093/udp # FPAC" &gt;&gt;
+/etc/services<br>
+#<br>
+# Making necessary AX25 directories<br>
+#<br>
+mkdir
+/usr/local/var<br>
+mkdir /usr/local/var/ax25<br>
+cd /var<br>
+ln -s
+/usr/local/var/ax25 ax25<br>
+mkdir /usr/local/etc<br>
+mkdir
+/usr/local/etc/ax25<br>
+cd /etc<br>
+ln -s /usr/local/etc/ax25 ax25<br>
+#<br>
+#
+Add some FPAC directories and files<br>
+#<br>
+mkdir
+/usr/local/var/ax25/fpac<br>
+/bin/chmod a+x /usr/local/var<br>
+/bin/chmod
+a+x /usr/local/var/ax25<br>
+/bin/chmod a+x
+/usr/local/var/ax25/fpac<br>
+/bin/touch
+/usr/local/var/ax25/fpac/loggedin<br>
+/bin/chmod a+w
+/usr/local/var/ax25/fpac/loggedin<br>
+#<br>
+mkdir
+/usr/local/var/ax25/mheard<br>
+/bin/chmod a+x
+/usr/local/var/ax25/mheard<br>
+/bin/touch
+/usr/local/var/ax25/mheard/mheard.dat<br>
+#<br>
+/bin/touch
+/usr/local/etc/ax25/axports<br>
+/bin/touch
+/usr/local/etc/ax25/nrports<br>
+/bin/touch
+/usr/local/etc/ax25/flexd.conf<br>
+/bin/touch
+/usr/local/etc/ax25/node.routes<br>
+#<br>
+echo "Do not forget to
+edit 'SYSOP=' and 'CONNECT='"<br>
+echo "in file
+/usr/local/sbin/fpac.sh"<br>
+echo "according to your own BBS
+callsign and sysop name"<br>
+#</font></font></p>
+<br>
+<ul>
+  <li>Do not forget to edit '<b>SYSOP=</b>' and&nbsp; '<b>CONNECT=</b>'
+fields in <b><i>/usr/local/sbin/fpac.sh</i></b> file substituting BBS
+and sysop callsigns.</li>
+</ul>
+<ul>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.1cm;">Next we need to edit <b><i>/usr/local/etc/ax25/axports,</i></b>
+a very important file for the declaration of AX25 port names. Replace
+F6ZZZ with your call sign. </p>
+    <p style="margin-bottom: 0.1cm;">Port 0 will be attached by
+kissattach to pseudo tty ptyq1. I used a speed of 115200 baud, but I am
+not sure it is used. </p>
+    <p style="margin-bottom: 0.1cm;">Paclen is the upper limit
+permitted in AX25. ROSE routing protocol has a three byte overhead, so
+applications that use ROSE declare a Paclen of less than 253. For
+example in the xfbb port.sys file I set paclen at 250.</p>
+    <p style="margin-bottom: 0.25cm;">It is critical that stations
+talking together use the same Maxframe parameter. AX25 protocol will
+allow up to 7 frames but, I am convinced that a small Maxframe is
+better, especially on radio links. For AXIP I suggest that we set
+Maxframes to 4. </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.51cm;">In the following example of <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/axports">/usr/local/etc/ax25/axports</a>
+I commented-out the entries for ports except port 0 that will be used
+by FPAC to access Internet. Other ports could be used to connect
+dual ports TNCs or single port TNCs using the mkiss driver.</p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><font
+ face="courier new, courier, monospace"><font size="2">#
+/usr/local/etc/ax25/axports<br>
+#<br>
+# The format of this file is:<br>
+#<br>
+#
+name callsign speed paclen maxframes description<br>
+#<br>
+0&nbsp;&nbsp;
+F6ZZZ-8&nbsp; 38400&nbsp;&nbsp; 256&nbsp; 4&nbsp; Linux&nbsp;
+(AXIP)<br>
+#1&nbsp;&nbsp; F6ZZZ-4&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp;
+2&nbsp; Linux&nbsp; (VHF-1)<br>
+#2&nbsp;&nbsp; F6ZZZ-5&nbsp;&nbsp;
+38400&nbsp;&nbsp; 256&nbsp; 2&nbsp; Linux&nbsp; (UHF-1)<br>
+#3&nbsp;&nbsp;
+F6ZZZ-6&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp; 2&nbsp; Linux&nbsp;
+(VHF-2)<br>
+#4&nbsp;&nbsp; F6ZZZ-7&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp;
+2&nbsp; Linux&nbsp; (UHF-2)<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p>If you plan to use KPC9612 TNCs,
+you may <a href="http://f6bvp.free.fr/logiciels/ax25/rc.f6bvp.tnc">download
+from here</a> a sample initialization script for two dual radio ports
+KPC9612 (1200 &amp; 9600 baud). The script should be run after <b>rc.ax25</b>
+script presented in chapter 9.<br>
+    </p>
+  </li>
+</ul>
+<ul>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s7"></a>7. Configure ax25ipd daemon<br>
+</h2>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;">When installing <b>ax25-apps</b>
+we have compiled <b>ax25ipd</b>. This application runs as a daemon in
+the background. The configuration file is <b><i>/usr/local/etc/ax25/ax25ipd.conf</i></b>.
+It tells <b>ax25ipd</b> the name of the port where to get or put AX25
+packet frames, the name of the port toward the Internet world, and the
+Internet Protocol address (IPv4) plus UDP port numbers of the remote
+stations. Given this, <b>ax25ipd</b> daemon routes frames in both
+inward and outward direction between UDP port 10093 and slave pseudo
+tty device ttyq1. Master pseudo tty device ptyq1 and slave pseudo tty
+ttyq1 are the two extremities of a virtual tunnel. When a character is
+written at one extremity it can be read at the other and vice versa.
+Remember that kissattach links ttyq1 device to AX25 port 0 of&nbsp; <b><i>/usr/local/etc/ax25/axports</i></b>
+(ax0) in our example. Thus AX25 ax0 port is connected to Internet via
+this complicated chain. <b>Ax25ipd</b> does another important work. It
+performs an encapsulation of AX25 frames into Internet Protocol frames
+(AXIP). AX25 frames are embedded into standard IP frames that Internet
+can handle. On the other direction, IP frames arriving on UDP port
+10093 are stripped by <b>ax25ipd</b> and finally AX25 frames are
+presented to ax0 device. When ax25ipd daemon is running, any local AX25
+application can discuss transparently via Internet with another remote
+application by writing or reading on ax0 port without knowing the
+operations performed after that step.</p>
+  </li>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;">Our sample <b><i>ax25ipd.conf</i></b>&nbsp;
+listing follows. It can also be <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/ax25ipd.conf">downloaded
+from here.</a></p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><font size="2"><font
+ face="courier new, courier, monospace">#
+/usr/local/etc/ax25/ax25ipd.conf</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+ax25ipd configuration file for station f6zzz</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Select axip transport. 'ip' is what you want for compatibility</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+with most other gates ...</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">socket
+ip</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">socket
+udp 10093</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Set ax25ipd mode of operation. (digi or tnc)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">mode
+tnc</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+If you selected digi, you must define a callsign. If you selected</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+tnc mode, the call sign is currently optional, but this may change</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+in the future! (2 calls if using dual port kiss)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#mycall2
+vk5xxx-5</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+In digi mode, you may use an alias. (2 for dual port)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#myalias2
+svwdn2</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Send an ident every 540 seconds ...</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#beacon
+after 540</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#btext
+ax25ip -- tncmode rob/vk5xxx -- Experimental AXIP gateway</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Serial port, or pipe connected to a kissattach in my case</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+master /dev/ptyq1 is attached to port ax0 ( 0 in
+/usr/local/etc/ax25/axports)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#<br>
+device
+/dev/ttyq1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Set the device speed</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">speed 38400</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+loglevel 0 - no output</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+loglevel 1 - config info only</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+loglevel 2 - major events and errors</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+loglevel 3 - major events, errors, and AX25 frame trace</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+loglevel 4 - all events</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+log 0 for the moment, syslog not working yet ...</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">loglevel
+2</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+If we are in digi mode, we might have a real tnc here, so use param
+to</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+set the tnc parameters ...</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#param
+1 20</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Broadcast Address definition. Any of the addresses listed will be
+forwarded</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+to any of the routes flagged as broadcast capable routes.</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">broadcast
+QST-0 NODES-0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+ax.25 route definition, define as many as you need.</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+format is route (call/wildcard) (ip host at destination)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+ssid of 0 routes all ssid's</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+route &lt;destcall&gt; &lt;destaddr&gt; [flags]</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Valid flags are:</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+b - allow broadcasts to be transmitted via this route</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+d - this route is the default route</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#route
+vk2sut-0 44.136.8.68 b</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">route
+f5mtz-0 f5mtz.no-ip.org udp 10093 b </font></font><br>
+<font size="2"><font face="courier new, courier, monospace">route
+kp4djt-0 24.129.134.206 udp 10093 b</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">route
+f1hci-0 f1hci.org udp 10093 b</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">route
+f5kbw-0 147.210.91.241 udp 10093 b</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">route
+f6bvp-0 f6bvp.org udp 10093 b</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#delay
+f5mzn-0 35</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;">As can be seen on the above route
+lines, with the present version, ax25ipd can handle permanent IP as
+well as dynamic IPs, thanks to Steve VK5ASF<font size="2"><font
+ face="Courier New">.</font></font></p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s8"></a>8. Install and configure FPAC 3.27</h2>
+<p style="margin-bottom: 0.51cm;"><em>Jean-Paul F6FBB, the author of
+Linux FPAC, stopped its development with version 3.25 for Linux kernel
+2.2, but released a
+compiled working version (3.26) on a floppy image that can be
+downloaded from <a
+ href="ftp://ftp.f6fbb.org/pub/f6fbb/distrib/fpac-linux/floppy">F6FBB
+FTP site</a> or from a <a
+ href="ftp://ftp.funet.fi/pub/ham/packet/bbs/f6fbb/distrib/fpac-linux/floppy">mirror
+site</a>. This <a
+ href="ftp://ftp.funet.fi/pub/ham/packet/bbs/f6fbb/distrib/fpac-linux/floppy/rawwritewin.exe">Windows
+program</a> , Rawrite, will help you to make a bootable floppy that
+will run Fpac. FPAC 3.26 was associated with Linux system glibc6
+library compatible with 2.4 kernels. For our purpose we need to
+compile FPAC sources.</em></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.15cm;">Compiling FPAC from sources and
+using recent GCC compiler and kernels gave errors. With the help of
+Jean-Paul F6FBB, I included changes to enable you to compile FPAC
+sources. The new FPAC release presented here is compatible with 2.4
+and 2.6 kernels. <span style="font-weight: bold;">With this version,
+FPAC can now make connections
+through alternate routes.</span><br style="font-weight: bold;">
+    <span style="font-weight: bold;">Connection will be performed using
+available opened route via one of
+the three possible neighbour nodes toward any destination ROSE address.</span>
+    <br>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.15cm;">Download <a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/fpac327-8src.tgz">FPAC327-8src.tgz</a>
+from here.</p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.15cm;">Move the archive file into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/src/ax25</span>
+then <b>cd<i>&nbsp; /usr/local/src/ax25</i></b> </p>
+    <p style="margin-bottom: 0.51cm;">then <b>tar xvf
+fpac327-8src.tgz</b> </p>
+    <p style="margin-bottom: 0.2cm;">then <b>cd fpac327.8</b></p>
+  </li>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.2cm;">Then run the commands :</p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><b><font
+ face="courier new, courier, monospace">make</font><br>
+<font face="courier new, courier, monospace">make
+install<br>
+make installconf<br>
+</font></b></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.25cm;">Subdirectories and files
+necessary for FPAC will are created into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/var/ax25</span>
+and <span style="font-weight: bold; font-style: italic;">/usr/local/etc/ax25</span>.
+FPAC application programs files are
+installed into <b><i>/usr/local/sbin</i></b></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.25cm;">Main FPAC configuration file is <b><i>/usr/local/etc/ax25/fpac.conf</i></b>
+and <a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/FPAC-HOWTO-EN/FPAC-HOWTO.html">FPAC
+HOWTO</a> explains how to configure it. </p>
+    <p style="margin-bottom: 0.25cm;">The example <b><i>fpac.conf</i></b>
+configuration file is setup for a FPAC station connected via Internet.</p>
+    <p style="margin-bottom: 0.51cm;"><a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/fpac.conf">You may download
+it from here</a>.</p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><font size="2"><font
+ face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Configuration file for FPAC node</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+This file is /usr/local/etc/ax25/fpac.conf</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Node Informations</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">L2call
+= F6ZZZ-10</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">L3call
+= F6ZZZ-11</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Trcall
+= F6ZZZ-14</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 2080</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 175522</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Coverage
+=</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">InetPort
+= 10093</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">InetAddr
+= 44.151.75.153</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Password
+= abcdefghi</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">City
+= PARIS-17</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">locator
+= JN18DV</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">UserPort
+= *</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DefPort
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Additional commands</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Command</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">BBs
+= connect f6bvp-1 2080175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+BBs = /usr/local/sbin/call_tcp f6bvp 1022</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">CLu
+= connect f6bvp-3 2080175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">STat=
+/bin/cat /usr/local/var/ax25/fpac/fpacstat.dat
+/usr/local/var/ax25/fpac/fpacstat.day</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Telnet
+=</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">IPLinks
+= /bin/netstat --ip</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">IPRoutes=
+/bin/netstat -r</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">TRace
+= connect f6bvp-14 2080175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">HCI
+= connect f1hci-10 2080191601</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Bbs command will connect the user to the BBS on the same machine</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+via rose level</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+idem for command CLu that will connect the user to local DxNet
+server</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+STat command will display connexion statistics</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Empty command telnet will do nothing</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#
+Sysop reserved commands</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Sysop</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DIsk
+= /bin/df -k</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">SYSop
+= /usr/local/sbin/fpacshell</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">YGET
+= /usr/local/sbin/yapp -u /tmp/%1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">YPUT
+= /usr/local/sbin/yapp -d /tmp/%1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">RM
+= /bin/rm /tmp/%1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">LS
+= ls -l /usr/local/etc/ax25/%1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">CAT
+= sh -c cat /usr/local/etc/ax25/%1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">WEdit
+= /usr/local/sbin/wpedit %*</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Hci
+= telnet f1hci.org 3282</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">end</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Port specific to an address</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+VHF user access port has address 175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+AddPort = VHF</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Address = 175302</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Port = 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#
+UHF user access port has address 175502</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#AddPort
+= UHF</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Address = 175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Port = 1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#
+Port UHF 9600 via carte SCC4 et T7F (experimental)</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#AddPort
+= UHF-9600</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Address = 175402</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Port = 4</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+List of predifined users (to specify a non-default port)</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+USER command was used to send frames via rose network level.</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+This was when Kissnetd was used to create an internal network</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+in order to link applications together. But now, ax25d, xfbb,</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+or dxnet are able to listen to rose connexions, so may be directly</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+connected via rose0 port issuing a Level 3 command.</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#User
+= BBS</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Path = F6KDS-1</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+port =</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Liste of alias for easy connexions to some address</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#Alias
+= F6BVP-3</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Path = F6PTT-1,191501</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#Alias
+= F6BVP-4</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Path = F5KCK-1,178504</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#Alias
+= F6BVP-4</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Path = F6KDS-1,194501</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+List of adjacent nodes</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+NoWP = 1 means no White Page</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+for FPAC DOS does not know how to handle white pages</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Node
+= DJT</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">path
+= KP4DJT-9</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 3100</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 813626</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Port
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">NoWP
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Node
+= XEO</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">path
+= N4XEO-9</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 3100</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 772467</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Port
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">NoWP
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Node
+= BVP</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">path
+= F6BVP-11</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 2080</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 175502</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Port
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">NoWp
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Node
+= HCI</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">path
+= F1HCI-11</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 2080</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 191601</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Port
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">NoWp
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Node
+= KBW</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">path
+= F5KBW-9</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 2080</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Address
+= 833501</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">Port
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">NoWp
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Routes to adjacent nodes</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+DNIC specify a default DNIC for the following addresses</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#
+Address is for 1 to 6 digits, using hierarchy</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">#</font></font><br>
+<br>
+<font size="2"><font face="courier new, courier, monospace">Routes</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 0</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">3100
+= DJT</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 3100</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">772
+= DJT</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">772
+= XEO</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">DNIC
+= 2080</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">*
+= BVP</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">8
+= HCI</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">8
+= KBW</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">177202
+= HCI</font></font><br>
+<font size="2"><font face="courier new, courier, monospace">End</font></font></p>
+<ul>
+  <li>You will have to edit this sample file in order to match your own
+setup. Edit <span style="font-style: italic;">L2, L3 </span>and<span
+ style="font-style: italic;"> Trcall, DNIC, Address, InetAddr,
+Password, City, locato</span>r items. Do not change <span
+ style="font-style: italic;">InetPort 10093</span> the FPAC standard
+port. Edit <span style="font-style: italic;">callsign</span> and <span
+ style="font-style: italic;">address</span> in the <span
+ style="font-weight: bold;">Command</span> paragraph. Edit adjacent
+nodes at will. Keep Port 0 for Internet access. Each <span
+ style="font-style: italic;">callsign</span> on <span
+ style="font-style: italic;">path</span> lines must have a route
+defined
+into<span style="font-weight: bold;"> /usr/local/etc/ax25ipd.conf</span>&nbsp;
+    <span style="font-style: italic;">route</span>&nbsp;
+lines. <br>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.51cm;">Note that more than one adjacent
+node may use the same route. In the case of link failure, this sets up
+an alternate route. </p>
+  </li>
+</ul>
+<hr>
+<h2><a name="s9"></a>9. A script to start AX25</h2>
+<ul>
+  <li><font face="serif"><font size="3">Nowadays it
+is not uncommon to have several home computer interconnected on a Local
+Area Network. The LAN gets it's Internet connection via a
+router which provides the gateway. For FPAC it is not a good idea to
+use an address assigned by a DHCP server. We need to use a fixed IP
+address
+for our Linux host. For the purpose of this document our LAN address
+will be <span style="font-weight: bold;">192.168.0.0</span>. and the
+gateway address <span style="font-weight: bold;">192.168.0.1</span>.</font></font></li>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font
+ face="Times New Roman, serif"><font size="3"><font face="serif">The
+following script should be placed in <b><i>/etc/rc.d/rc.ax25</i></b></font>
+    <font face="serif">file and the file given the execute rights. </font></font></font>
+    </p>
+    <p style="margin-bottom: 0.25cm;"><b>chmod a+x&nbsp;
+/etc/rc.d/rc.ax25</b></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.25cm;"><font face="serif"><font size="3">We
+need to initialize AX25 devices and network ports. The following script
+is an example that will do the initialization</font></font><font
+ face="serif"><font size="3"> before starting FPAC</font></font><font
+ face="serif"><font size="3">. IP address for <span
+ style="font-weight: bold;">eth0</span> the Ethernet port&nbsp;
+(<span style="font-weight: bold;">192.168.0.200</span>) and gateway (<span
+ style="font-weight: bold;">192.168.0.1</span>) were arbitrarily chosen
+and
+should be edited to fit your installion. Nodal ampr.org address
+(44.151.75.153) and callsign (F6ZZZ) must also be replaced by your own
+callsign/addresses.</font></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font face="serif">The following
+shell script can be <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/rc.ax25">downloaded from here</a>.</font></p>
+  </li>
+</ul>
+<pre>#!/bin/sh<br># /etc/rc.d/rc.ax25<br>#<br># This script will start AX25 FPAC switch application on a Linux 2.6 system<br># at boot time with a sample callsign F6ZZZ.<br># rc.eth0 : setup Ethernet eth0 device LAN address and initialize a route to Internet<br># through a gateway ;<br># rc.tnc : attach ax0 device to pseudo device ptyq1 ;<br># rc.axip : install a tunnel between ptyq1 and ttyq1 pseudo tty devices ;<br># run ax25ipd daemon that performs AX25 frame encapsulation in IP frames ;<br># routes encapsulated packets from ax0 to Internet rose FPAC address;<br># rc.fpac : start FPAC suite of programs and mheardd daemon;<br># rc.beacon : start listen application on console 2 listening to port 0<br># and install a beacon broadcast on ax0 port ;<br>#<br>echo 15 &gt; /proc/sys/kernel/panic<br>echo 1 &gt; /proc/sys/net/ipv4/ip_forward<br>#<br># The following is an example for eth0 fixed IP address <br># not necessary if protocol DHCP is used  <br>#<br>#/sbin/ifconfig eth0 192.168.0.200<br>#/sbin/route add -net 192.168.0.0 netmask 255.255.255.0 eth0<br>#/sbin/ifconfig lo 127.0.0.1<br>#/sbin/route add -net 127.0.0.0 netmask 255.0.0.0 lo<br>#/sbin/route add default gw 192.168.0.1<br>#<br># /etc/rc.d/rc.tnc<br>#<br>/usr/local/sbin/kissattach /dev/ptyq1 0 44.151.75.153<br>/bin/sleep 2<br>#<br>#/etc/rc.d/rc.axip<br>#<br>/bin/date &gt; /var/log/ax25ipd.log<br>/usr/local/sbin/ax25ipd -l4 &gt;&gt; /var/log/ax25ipd.log 2&gt;&amp;1<br>#<br>#/etc/rc.d/rc.fpac<br>#<br>/bin/date &gt; /var/log/fpac<br>/usr/local/sbin/fpac.sh<br>/usr/local/sbin/mheardd<br>#<br>#/etc/rc.d/rc.beacon<br>#<br>#/usr/local/bin/listen -char &gt;&gt; /dev/tty2 &amp;<br>/usr/local/sbin/beacon -c F6ZZZ -d QST -t 10 0 'Nodal Rose FPAC F6ZZZ'<br>#<br><br></pre>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font face="serif">AX25 system
+can be started automatically at boot time if script <i>/<b>etc/rc.d/rc.ax25</b></i>
+is called by <i>/<b>etc/rc.d/rc.local</b></i>. Here is a sample of <i><a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/rc.local">/<b>etc/rc.d/rc.local</b></a>
+    </i>that will initialize AX25 and FPAC node each time he computer
+is started.</font></p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><font
+ face="courier new, courier, monospace"><font size="2">#!/bin/sh<br>
+#<br>
+#
+This script will be executed *after* all the other init scripts.<br>
+#
+You can put your own initialization stuff in here if you don't<br>
+#
+want to do the full Sys V style init stuff.<br>
+#<br>
+echo 30 &gt;
+/proc/sys/kernel/panic<br>
+#<br>
+#/etc/rc.d/rc.eth0<br>
+#<br>
+/etc/rc.d/rc.ax25<br>
+#<br>
+touch
+/var/lock/subsys/local<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font
+ face="Times New Roman, serif"><font size="3">If you prefer not to
+start AX25 automatically, edit <b><i>rc.local</i></b> and put a # at
+the beginning of the line with </font></font> </p>
+    <p style="margin-bottom: 0.25cm;"><font
+ face="Times New Roman, serif"><font size="3"><b><i>/etc/rc.d/rc/ax25</i></b>.
+Also remove the # on line with <b><i>/etc/rc.d/rc.eth0</i></b>.</font></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.25cm;"><font
+ face="Times New Roman, serif"><font size="3">I like to start a task
+without typing a lot of characters, so I made a shortcut to start AX25.
+    </font></font> </p>
+  </li>
+</ul>
+<p style="margin-left: 1.07cm; margin-bottom: 0.25cm;"><font
+ face="Times New Roman, serif"><font size="3"><b>cd
+/usr/local/bin</b></font></font></p>
+<p style="margin-left: 1.07cm; margin-bottom: 0.51cm;"><font
+ face="Times New Roman, serif"><font size="3"><b>ln
+-s /etc/rc.d/rc.ax25&nbsp; ax25</b></font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font
+ face="Times New Roman, serif"><font size="3">Now type <b>ax25</b> on
+a command line to start the FPAC application.</font></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.51cm;"><font
+ face="Times New Roman, serif"><font size="3">You can also make a
+shortcut with symbolic name <b>fpac</b> that will run <b>fpacnode</b></font></font></p>
+  </li>
+</ul>
+<hr>
+<h2><a name="s101"></a>10.1 Configure a router</h2>
+<em><em>f your Linux computer is
+directly connected to your DSL box without a router, the following
+applies to your DSL router settings.</em></em>
+<p>A router not only performs the basic
+routing functions but it usally includes a firewall function to
+protect your computer and LAN from Internet intruders. By default the
+traffic passing through the router may be filtered in both
+directions. IP packets going from LAN to Internet are routed only if
+you give the permission. You may already be setup to pass normal
+traffic. However AX25 applications are using ports that must be
+opened in both directions. Ports up to 1024 are reserved for Standard
+applications and must not be used. See <b><i>/etc/services</i></b>
+file. Our FPAC needs <span style="font-weight: bold;">port 10093</span>
+to be opened in both directions for
+<span style="font-weight: bold;">UDP</span> and <span
+ style="font-weight: bold;">TCP</span> protocols. Check your router or
+DSL modem documentation
+to find out how to enable these ports. Same for other AX25 applications
+such as&nbsp; port 6300 (TCP/UDP) for BBS F6BVP, port 9000 UDP for
+DxNet.<br>
+<br>
+</p>
+<hr>
+<h2><a name="s102"></a>10.2 Linking FPAC with application software</h2>
+<p style="margin-bottom: 0.5cm;">Some application programs that will
+run on the same Linux machine can listen to a local port and may be
+easily interconnected with fpac node.</p>
+<p style="margin-bottom: 0.5cm;">FBB and DxNet can communicate with
+FPAC without additive programs. <span style="font-weight: bold;">NetRomd</span>
+needs <span style="font-weight: bold;">ax25d</span> to perform the
+interface with FPAC.</p>
+<p style="margin-bottom: 0.5cm;">Run the following script during AX25
+setup. It will create NetRom devices that will be used by the
+following applications and start NetRomd daemon.</p>
+<p style="margin-bottom: 0.5cm;"><font face="Courier New, monospace"><font
+ size="2">#!/bin/sh<br>
+#
+/etc/rc.d/rc.netrom<br>
+#<br>
+#echo "NETROM"<br>
+&nbsp;
+/sbin/modprobe netrom<br>
+#<br>
+killall -KILL netromd<br>
+ifconfig nr1
+down<br>
+ifconfig nr0 down<br>
+ifconfig nr2 down<br>
+ifconfig nr3 down<br>
+#
+creating NET/ROM devices (please edit your own ampr.org network
+address)<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256
+netnod<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256
+netbbs<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256 netclu<br>
+#
+adjacent NET/ROM nodes creation via port 4=ax4 (ax25 over
+ip)<br>
+/usr/local/sbin/nrparms -nodes k4gbb-14&nbsp; + CIT03 120 6 4
+k4gbb-14<br>
+/usr/local/sbin/nrparms -nodes kp4djt-14 + DJT14 120 6 4
+kp4djt-14<br>
+/usr/local/sbin/nrparms -nodes vk2tv-14&nbsp; + KEMPC
+120 6 4 vk2tv-14<br>
+/usr/local/sbin/nrparms -nodes vk2vy-2&nbsp;&nbsp;
++ VYNODE 120 6 4 vk2vy-2<br>
+# start ax25d daemon to link NetRom and
+FPAC node<br>
+/usr/local/sbin/ax25d<br>
+# Broadcast
+NET/ROM<br>
+/usr/local/sbin/netromd -lid -t 10<br>
+# remove default
+routes<br>
+/sbin/route del -net 44.0.0.0/8 nr0<br>
+/sbin/route del -net
+44.0.0.0/8 nr1<br>
+/sbin/route del -net 44.0.0.0/8 nr2<br>
+/sbin/route
+del -net 44.0.0.0/8 nr3<br>
+/sbin/route del -net 44.0.0.0 netmask
+255.255.255.255 eth0<br>
+#<br>
+<br>
+For deeper understanding see
+nrattach and nrparms manuals.</font></font></p>
+<h2><font style="font-size: 16pt;" size="4"><b>10.2.1.
+Interfacing FPAC with a BBS application</b></font></h2>
+<p style="margin-bottom: 0.51cm;"><em>If your Linux box is running a
+BBS it can be internally connected to ROSE FPAC and interfaced with
+NetRom. This will give your BBS a worldwide access to AX25 stations via
+packet radio or Internet.</em></p>
+<p style="margin-bottom: 0.51cm;">This is a partial listing from FBB
+BBS showing the port description file : <b>/usr/local/etc/ax25/port.sys</b></p>
+<p><font face="Courier New, Courier, monospace"><font size="2">#Com
+Interface Adress (Hex)&nbsp;&nbsp; Baud<br>
+&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*****&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+115200<br>
+&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+189C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br>
+#TNC NbCh
+Com MultCh Pacln Maxfr NbFwd MxBloc M/P-Fwd Mode&nbsp; Freq<br>
+&nbsp;&nbsp;
+0&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00/01&nbsp;&nbsp; ---- File-fwd.<br>
+&nbsp;&nbsp;
+1&nbsp; 20&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; rose0&nbsp;&nbsp;
+250&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp;
+15/10&nbsp;&nbsp; XULWY Rose0</font></font><br>
+&nbsp; &nbsp; &nbsp; <font size="2"><font
+ face="Courier New, Courier, monospace">2&nbsp;&nbsp;
+4&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+250&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp; 08/10&nbsp;&nbsp; XULWY UHF<br>
+&nbsp;&nbsp;
+3&nbsp; 10&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+250&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp; 15/15&nbsp;&nbsp; TUWY&nbsp; Telnet<br>
+&nbsp;&nbsp;
+4&nbsp;&nbsp; 4&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; netbbs&nbsp;
+250&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp;
+15/15&nbsp;&nbsp; XULWY NetRom<br>
+#</font></font></p>
+<p style="margin-bottom: 0.5cm;">The BBS is connected to fpac node via
+rose0 port.</p>
+<p style="margin-bottom: 0.5cm;">There is a TNC linked to AX25 port 3
+defined in /etc/ax25/axports file.</p>
+<p style="margin-bottom: 0.5cm;">Telnet port 189C is decimal 6300.
+Command is : telnet &lt;hostname&gt; 6300 to enter the BBS.</p>
+<p style="margin-bottom: 0.5cm;">Port <b>netbbs</b> will interface the
+BBS with NetRom.</p>
+<p style="margin-bottom: 0.5cm;">By the way. Dealing with 2.6 kernels,
+F6FBB's xfbbd source file needed to be updated in order to be compiled
+with recent compilers.</p>
+<p style="margin-bottom: 0.5cm;">You can download the last BBS
+source file archive <a
+ href="ftp://f6bvp.org:32221/logiciels/BBS-f6fbb/xd704n-src.tgz">xd704n-src.tgz</a>
+via FTP.<br>
+You may also download the archive <a
+ href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/xd704n-src.tgz">xd704n-src.tgz</a>
+via HTTP.<br>
+</p>
+<ul>
+  <li>
+    <p>Move the source package into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/src/ax25</span></p>
+  </li>
+</ul>
+<p style="margin-bottom: 0.5cm; margin-left: 40px;"><span
+ style="font-weight: bold;">cd /usr/local/src/ax25</span><br>
+</p>
+<ul>
+  <li>
+    <p>Enter the following commands :</p>
+  </li>
+</ul>
+<div style="margin-left: 40px;">
+<p><span style="font-weight: bold;">tar&nbsp; xvf&nbsp;&nbsp;
+xd704n-src.tgz<br>
+cd fbbsrc.704n<br>
+cd src<br>
+make<br>
+make install</span></p>
+</div>
+<p style="margin-bottom: 0.5cm;">&nbsp;A second choice could be to
+download already compiled FBB suite via http from <a
+ href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/xd704n_i386.tgz">xd704n-i386.tgz</a><br>
+or via FTP from <a
+ href="ftp://f6bvp.org:32221/logiciels/BBS-f6fbb/xd704n_i386.tgz">xd704n_i386.tgz</a><br>
+</p>
+<ul>
+  <li>
+    <p>Extract the files from archive <span style="font-weight: bold;">tar&nbsp;
+xvfP&nbsp; xd704n_i386.tgz</span></p>
+  </li>
+</ul>
+<p style="margin-left: 40px;"><span style="font-style: italic;">Note:
+flag </span><span style="font-weight: bold; font-style: italic;">P</span><span
+ style="font-style: italic;"> is uppercase</span><br>
+</p>
+<ul>
+  <li>
+    <p>Executable programs are installed into <span
+ style="font-weight: bold; font-style: italic;">/usr/local/sbin</span>,
+others files into <span style="font-weight: bold; font-style: italic;">/usr/local/etc/ax25/fbb</span>,
+and <span style="font-weight: bold; font-style: italic;">/usr/local/var/ax25/fbb/usr/lib/fbb</span></p>
+  </li>
+</ul>
+To start BBS application, enter command <span
+ style="font-weight: bold;">fbb</span> that will execute <span
+ style="font-weight: bold;">/usr/local/sbin/script. </span>The first
+time it will proceed to iinitialization of the necessary configuration
+files asking a few questions and create <span
+ style="font-weight: bold;">/usr/local/etc/ax25/fbb.conf</span> and <span
+ style="font-weight: bold;">/usr/local/etc/ax25/port.sys</span> if they
+did not exist yet. Next times it will start <span
+ style="font-weight: bold;">xfbbd</span> the BBS daemon application.<br>
+<p>For local connexions, edit <span style="font-weight: bold;">sysop</span>
+<span style="font-weight: bold; font-style: italic;">CALLSIGN</span>
+and&nbsp; <span style="font-weight: bold; font-style: italic;">PASSWORD</span>
+in file <span style="font-weight: bold;">/etc/ax25/fbb/passwrd.sys</span>
+then run the FBB client<br>
+</p>
+<span style="font-weight: bold;">xfbbC -c -i <span
+ style="font-style: italic;">CALLSIGN</span> -w <span
+ style="font-style: italic;">PASSWORD</span></span><br>
+<br>
+<h2><font style="font-size: 16pt;" size="4">10.2.2. Linking FPAC
+with DxCluster</font></h2>
+<p style="margin-bottom: 0.51cm;"><em>If your Linux box computer is
+running a DxNet cluster you can interface it with ROSE FPAC.</em></p>
+<p style="margin-bottom: 0.51cm;">Dxnet system/dxnet.cfg file will
+look like :</p>
+<font size="2"><font face="Courier New, monospace">set/node
++f8kgk-3 +f5mtz-3 +f5kbw-3 +f6cdd-3 +tu5ex-3 +kp4ig-5 <br>
+set/call
+f6bvp-3<br>
+set/sys +F6BVP<br>
+set/ssid +3<br>
+<b>set/port 0 1 3 4 rose0
+inet:9000 netclu</b><br>
+set/tz +2</font></font><br>
+<br>
+The Dx cluster can be accessed via
+either ax25 radio ports <span style="font-weight: bold;">0, 1, 3</span>
+and <span style="font-weight: bold;">4</span>, via FPAC node port <span
+ style="font-weight: bold;">rose0</span>, telnet port
+<span style="font-weight: bold;">9000</span> and NetRom port <span
+ style="font-weight: bold;">netclu</span>.
+<h2><font style="font-size: 16pt;" size="4">10.2.3. Linking FPAC
+with NetRom</font></h2>
+<p style="margin-bottom: 0.51cm;"><em><em>The following will give the
+necessary instructions to interface FPAC with a NetRom net</em>.</em></p>
+<p style="margin-bottom: 0.51cm;">Example of <b>/usr/local/etc/ax25/nrports
+</b>file</p>
+<p style="margin-bottom: 0.51cm;"><font face="Courier New, monospace"><font
+ size="2">#
+/usr/local/etc/ax25/nrports <br>
+# <br>
+# The format of this file is: <br>
+# name
+callsign alias paclen description <br>
+# <br>
+netnod&nbsp; F6BVP-10&nbsp;
+BVPNOD&nbsp;&nbsp;&nbsp; 235&nbsp;&nbsp;&nbsp; F6BVP FPAC node
+<br>
+netbbs&nbsp; F6BVP-1&nbsp;&nbsp; BVPBBS&nbsp;&nbsp;&nbsp;
+235&nbsp;&nbsp;&nbsp;
+F6BVP BBS <br>
+netclu&nbsp; F6BVP-3&nbsp;&nbsp; BVPDX&nbsp;&nbsp;&nbsp;&nbsp;
+235&nbsp;&nbsp;&nbsp; F6BVP Dx Cluster <br>
+# </font></font>
+</p>
+<p style="margin-bottom: 0.2in;">This is the content of your
+<b>/usr/local/etc/ax25/ax25d.conf</b> file<br>
+<br>
+#<br>
+&lt;netrom&gt;<br>
+parameters
+1&nbsp;&nbsp; 10 * * * * *<br>
+NOCALL * * * * * * L<br>
+default&nbsp; *
+* * * * * *&nbsp;&nbsp;&nbsp; root /usr/sbin/fpacnode fpacnode -q
+%S<br>
+#<br>
+<br>
+Add the letter <b>b</b> after UDP port number of the
+route description in <span
+ style="font-weight: bold; font-style: italic;">/usr/local/etc/ax25ipd.conf</span>
+to allow broadcast of NetRom
+routes.<br>
+</p>
+<hr>
+<h2><a name="s11"></a>11. Others HOWTO</h2>
+<p style="margin-bottom: 0.51cm;">There are many other documents that
+relate to Linux networking in a general way. I strongly recommend you
+also read them. They will assist your efforts and provide a stronger
+insight into other possible configurations. </p>
+<p style="margin-bottom: 0.51cm;">They are: </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://www.digitalhermit.com/linux/Kernel-Build-HOWTO.html">The
+Linux Kernel HOWTO</a></p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://sunsite.unc.edu/LDP/HOWTO/AX25-HOWTO.html">The
+AX25-HOWTO</a>, </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://sunsite.unc.edu/LDP/HOWTO/HAM-HOWTO.html">Tithe
+HAM-HOWTO</a>, </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://sunsite.unc.edu/LDP/HOWTO/NET-3-HOWTO.html">The
+NET-3-HOWTO</a>, </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://sunsite.unc.edu/LDP/HOWTO/Ethernet-HOWTO.html">The
+Ethernet-HOWTO</a>, </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;">and: </p>
+<p style="margin-left: 0.51cm; margin-bottom: 0.51cm;"><a
+ href="http://sunsite.unc.edu/LDP/HOWTO/Firewall-HOWTO.html">The
+Firewall-HOWTO</a></p>
+<ul>
+  <ul>
+    <p style="margin-bottom: 0.51cm;">More general Linux information
+may be found in other <a href="http://sunsite.unc.edu/LDP/HOWTO/">Linux
+HOWTO</a> documents. </p>
+  </ul>
+</ul>
+<hr>
+<h2><a name="s12"></a>12. Finding more help </h2>
+<p style="margin-bottom: 0.51cm;">Remember that FPAC is a network
+switch. You must be able to connected to at least one other FPAC
+node. The more adjacent nodes you are linked to the better your
+network will perform.</p>
+<p style="margin-bottom: 0.51cm;">Stations already running an FPAC
+node is a good place to get help.</p>
+<p style="margin-bottom: 0.51cm;">Reading messages from FPAC News list
+is a must.. To see the collection of prior postings to the list,
+visit the <a href="http://mailman.f6fbb.org/pipermail/fpac/">fpac
+Archives</a>. </p>
+<p style="margin-bottom: 0.51cm;">Subscribe to the FPAC list by <a
+ href="http://mailman.f6fbb.org/mailman/listinfo/fpac/">going
+to this page</a>.</p>
+<p style="margin-bottom: 0.51cm;">Global help about Linux and Ham
+radio can be requested via the Linux Ham list. First check the
+<a href="http://he.fi/archive/linux-hams/">Linux-hams archive</a>.
+<br>
+Linux-Hams is a mailing list for the discussion of the Linux
+operating system, and it's use in Amateur Radio. Anyone with an
+interest in both subjects is encouraged to subscribe. The discussion
+is mostly concentrated on the use and development of the AX.25 code
+in the Linux kernel. If you would like to subscribe to the Linux-hams
+mailing list and receive these messages in your own mailbox, send a
+message to <a href="mailto:majordomo@vger.kernel.org">majordomo@vger.kernel.org</a>,
+placing the line <br>
+<br>
+<code><b>subscribe linux-hams</b></code><br>
+<br>
+in
+the body of the message. </p>
+<ul>
+  <ul>
+    <p style="margin-bottom: 0.51cm;">Other useful links are :</p>
+    <p style="margin-bottom: 0.51cm;"><a href="http://www.qsl.net/fpac/">FPAC
+International Home page</a></p>
+    <p style="margin-bottom: 0.51cm;"><a
+ href="http://fcrosby.com/fadca/">Florida Amateur Digital Communication
+Association</a></p>
+    <p style="margin-bottom: 0.51cm;">The most recent version of this <span
+ style="font-weight: bold;">FPAC-LINUS-FLASH-MINI-HOWTO</span> may be
+found here : <a
+ href="http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO/">http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO/</a></p>
+    <p style="margin-bottom: 0.51cm;">I would appreciate any error
+report or remarks about this documentation. Please contact Bernard
+F6BVP at the address mentioned in the title.</p>
+    <p style="margin-bottom: 0.51cm;">Happy mobile networking !<br>
+    <br>
+    </p>
+  </ul>
+</ul>
+</body>
+</html>
