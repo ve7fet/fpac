@@ -3,4 +3,4 @@ USAGE
         Status
 
 DESCRIPTION
-        Returns information about the status of the Linux system and FPAC.
+        Displays information about the status of the local Linux system and FPAC node.

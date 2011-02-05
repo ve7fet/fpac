@@ -3,7 +3,7 @@ USAGE
         PIng <hostname> [<length>]
 
 DESCRIPTION
-        Checks if a host can be reached trough the network by sending
+        Checks if an Internet host can be reached through the network by sending
         an ICMP Echo Request packet to the host and waiting for it to
         reply. If a reply is received the round-trip-time (RTT)
         between the local and remote hosts is shown.

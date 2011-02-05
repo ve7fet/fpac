@@ -3,5 +3,6 @@ USAGE
         Users
 
 DESCRIPTION
-        Shows a list of users  currently connected to  the local node
-	over AX.25 L2 Sessions, X.25 L3 Sessions and X.25 L3 Transits.
+        Displays a list of users  currently connected to  the local node.
+	Connections are shown as AX.25 L2 Sessions (Users),
+         AX.25 L3 Sessions (Network)and AX.25 L3 Transits (Linking).
