@@ -3,15 +3,12 @@ USAGE
         Nodes [*|<nodecall>]
 
 DESCRIPTION
-        Shows the FPAC and NET/ROM nodes table of the local host.
-        The nodes on this list can be reached  using the Connect
-        command without  knowing  the actual  network path  used 
-        (assuming the network is OK).
+        Displays the FPAC nodes listing for the local host.
+        The list shows the call-ssid and ROSE/FPAC address of the nodes
+        The nodes on this list may be reached using the command
 
-        The optional parameter * toggles verbose mode.
-        For  NETROM, showing  the Obsolescence counter, relative
-        path  quality and  the port and  neighbour node  used to
-        reach each node. You can also specify a node callsign to
-        get the verbose information for a single node.
-        In that case a  "which" field  that tells what route the
-        kernel will use to reach the node is shown.
+               Connect node [node_address|<nodecall>] 
+        
+        The optional parameter * - displays the list in the verbose format.
+
+

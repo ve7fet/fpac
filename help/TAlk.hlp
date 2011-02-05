@@ -3,13 +3,11 @@ USAGE
         TAlk <user> <message>
 
 DESCRIPTION
-        Sends a one-line message to another user of the node. The user
-        in question must be in idle state (ie. not connected/connecting
-        anywhere or running a program).
+        Sends a one-line message to another user of the node. 
+        The user must be in idle state (ie. not connected/connecting or running a program).
 
-        If the user has an SSID other than zero, the SSID must be
-        specified. If multiple users are logged in with the same
-        callsign/SSID pair, those who are in idle state, get the message.
+        If the user has an SSID other than zero, the SSID must be used.
+        All users who are logged in with the same callsign-ssid and in an idle state will receive the message.
 
-EXAMPLES
+EXAMPLE
         talk oh7lzb-3 Good evening, Hessu!

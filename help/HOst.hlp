@@ -3,9 +3,9 @@ USAGE
         HOst <hostname>|<ip address>
 
 DESCRIPTION
-        Tells information about an Internet host. The host can be identified
-        using a host name (for example, zone.oh7rba.ampr.org) or an IP 
-        address (for example, 44.139.39.6).
+        Displays information about an Internet host. 
+	The host may be identified using a URL (Example: zone.oh7rba.ampr.org)
+	or an IP address (Example: 44.139.39.6).
 
-        Returns the host name, IP addresses and known aliases for the host.
-        The information is gathered from the DNS (domain name service).
+        The information is gathered from the DNS (domain name service)
+	which returns the host name, IP addresses and known aliases for the host.
