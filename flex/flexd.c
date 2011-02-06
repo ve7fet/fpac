@@ -627,25 +627,40 @@ int download_dest(char *gateway, char *fname)
 			for (c = 0; c < n; c++) {
 				if (buffer[c] == '\r')
 					buffer[c] = '\n';
-				if ((buffer[c] == '=' || buffer[c] == '-') && c < n - 1 && buffer[c + 1] == '>') {
+/* DEBUG F6BVP */
+				if ((c < n-1) && ((buffer[c] == '=') && (buffer[c + 1] == '>')
+					|| (buffer[c] == '-' && (buffer[c + 1] == '>'))
+				       	|| ((buffer[c] == ':')  && (buffer[c - 1] == ' ') && (buffer[c + 1] == ' ')))) {
 					cmd_ack++;
+			fprintf (stderr, "prompt received '%c%c%c' cmd_ack=%d cmd_send=%d\n", 
+				buffer[c-1],buffer[c], buffer[c+1], cmd_ack, cmd_send);
+/* BVP */
 				}
 			}
-			if (cmd_send == 1) {
-				fwrite(buffer, sizeof(char), n, tmp);
+/* DEBUG F6BVP */
+/*			if (cmd_send == 1) {*/
+				if (cmd_send >= 1) {
+					fprintf (stderr, "Writing buffer cmd_ack=%d cmd_send=%d\n", cmd_ack, cmd_send); 
+/* BVP */
+					fwrite(buffer, sizeof(char), n, tmp);
 			}
 		}
 
 		if (cmd_ack != 0) {
 			if (commands[cmd_send] != NULL) {
 				write(s, commands[cmd_send], 2);
+/* DEBUG F6BVP */
+				fprintf (stderr, "Sending command %d '%c' cmd_ack=%d smd_send=%d\n", cmd_send, commands[cmd_send][0], cmd_ack, cmd_send); 
 				cmd_send++;
 			}
-			cmd_ack = 0;
+/* DEBUG F6BVP */
+/*			cmd_ack = 0;*/
 		}
 	}
 	close(s);
 	fclose(tmp);
+/* DEBUG F6BVP */
+	fprintf (stderr, "End of destination download\n"); 
 	return 0;
 }
 
