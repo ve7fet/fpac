@@ -306,16 +306,16 @@ int download_dest(char *gateway, char *fname)
 	if (connect(s, (struct sockaddr *)&roseconnect, addrlen) != 0) {
 		switch (errno) {
 			case ECONNREFUSED:
-				strcpy(buffer, "*** Flexd: Connection refused - aborting\n");
+				strcpy(buffer, "*** Flexd: Connection refused - will try again later\n");
 				break;
 			case ENETUNREACH:
-				strcpy(buffer, "*** Flexd: Route is closed - aborting\n");
+				strcpy(buffer, "*** Flexd: Route is closed - will try again later\n");
 				break;
 			case EINTR:
-				strcpy(buffer, "*** Flexd: Connection timed out - aborting\n");
+				strcpy(buffer, "*** Flexd: Connection timed out - will try again later\n");
 				break;
 			default:
-				sprintf(buffer, "Flexd: ERROR cannot connect to Rose address, %s\n", strerror(errno));
+				sprintf(buffer, "Flexd: ERROR cannot connect to Rose address %s\n", strerror(errno));
 				break;
 		}
 		fprintf(stderr, "%s\n", buffer);
@@ -399,13 +399,13 @@ int download_dest(char *gateway, char *fname)
 		sprintf(buffer,"\nTrying %s ", destcall);
 		switch (errno) {
 			case ECONNREFUSED:
-				strcat(buffer, "*** Flexd: Connection refused - aborting\n");
+				strcat(buffer, "*** Flexd: Connection refused - will try again later\n");
 				break;
 			case ENETUNREACH:
-				strcat(buffer, "*** Flexd: Route is closed - aborting\n");
+				strcat(buffer, "*** Flexd: Route is closed - will try again later\n");
 				break;
 			case EINTR:
-				strcat(buffer, "*** Flexd: Connection timed out - aborting\n");
+				strcat(buffer, "*** Flexd: Connection timed out - will try again later\n");
 				break;
 			default:
 				sprintf(buffer, "Flexd: ERROR cannot connect to NET/ROM node, %s\n", strerror(errno));
@@ -537,16 +537,16 @@ int download_dest(char *gateway, char *fname)
 		&& errno != EINPROGRESS) {
 		switch (errno) {
 		case ECONNREFUSED:
-			strcpy(buffer, "*** Flexd: Connection refused - aborting\n");
+			strcpy(buffer, "*** Flexd: Connection refused - will try again later\n");
 			break;
 		case ENETUNREACH:
-			strcpy(buffer, "*** Flexd: Route is closed - aborting\n");
+			strcpy(buffer, "*** Flexd: Route is closed - will try again later\n");
 			break;
 		case EINTR:
-			strcpy(buffer, "*** Flexd: Connection timed out - aborting\n");
+			strcpy(buffer, "*** Flexd: Connection timed out - will try again later\n");
 			break;
 		default:
-			sprintf(buffer, "*** Flexd: Cannot connect, %s\n", strerror(errno));
+			sprintf(buffer, "*** Flexd: Cannot connect %s\n", strerror(errno));
 			break;
 		}
 
@@ -616,6 +616,7 @@ int download_dest(char *gateway, char *fname)
         sleep(1);
 /*FSA*/
 	for (;;) {
+		int prompt = 0;
 		FD_ZERO(&read_fd);
 		FD_SET(s, &read_fd);
 		if (select(s + 1, &read_fd, NULL, NULL, NULL) == -1) {
@@ -627,40 +628,30 @@ int download_dest(char *gateway, char *fname)
 			for (c = 0; c < n; c++) {
 				if (buffer[c] == '\r')
 					buffer[c] = '\n';
-/* DEBUG F6BVP */
 				if ((c < n-1) && ((buffer[c] == '=') && (buffer[c + 1] == '>')
 					|| (buffer[c] == '-' && (buffer[c + 1] == '>'))
 				       	|| ((buffer[c] == ':')  && (buffer[c - 1] == ' ') && (buffer[c + 1] == ' ')))) {
+					prompt = 1;
 					cmd_ack++;
-			fprintf (stderr, "prompt received '%c%c%c' cmd_ack=%d cmd_send=%d\n", 
-				buffer[c-1],buffer[c], buffer[c+1], cmd_ack, cmd_send);
-/* BVP */
 				}
 			}
-/* DEBUG F6BVP */
-/*			if (cmd_send == 1) {*/
 				if (cmd_send >= 1) {
-					fprintf (stderr, "Writing buffer cmd_ack=%d cmd_send=%d\n", cmd_ack, cmd_send); 
-/* BVP */
-					fwrite(buffer, sizeof(char), n, tmp);
-			}
+					if (!prompt) {
+						fwrite(buffer, sizeof(char), n, tmp);
+					}
+				}
+		prompt = 0;
 		}
 
 		if (cmd_ack != 0) {
 			if (commands[cmd_send] != NULL) {
 				write(s, commands[cmd_send], 2);
-/* DEBUG F6BVP */
-				fprintf (stderr, "Sending command %d '%c' cmd_ack=%d smd_send=%d\n", cmd_send, commands[cmd_send][0], cmd_ack, cmd_send); 
 				cmd_send++;
 			}
-/* DEBUG F6BVP */
-/*			cmd_ack = 0;*/
 		}
 	}
 	close(s);
 	fclose(tmp);
-/* DEBUG F6BVP */
-	fprintf (stderr, "End of destination download\n"); 
 	return 0;
 }
 
@@ -682,11 +673,8 @@ int parse_dest(char *gateway, char *fname)
 		return (-1);
 	}
 
-	fputs("callsign  ssid     rtt    gateway\n", fdst);
-
 	while (fgets(buf, sizeof(buf), tmp)) {
 		cp = strtok(buf, " \t\n\r");
-/*		if (cp == NULL || i++ < 2)fprintf(stderr, */
 		if (cp == NULL)
 			continue;			/* empty line/connect text */
 		if (*cp == '#' || *cp == '=' || *cp == ' ' || *cp == '*'
@@ -700,6 +688,21 @@ int parse_dest(char *gateway, char *fname)
 
 		if ((strncmp(cp, "Connected to", 12) == 0)
                         || (strncmp(cp, "=>", 2) == 0))	/* Flexnode prompt */
+			continue;
+		
+		if ((strncmp(cp, "Commands", 8) == 0) || (strncmp(cp, "(Co", 3) == 0))	/* prompt */
+			continue;
+		
+		if ((strncmp(cp, "FlexNet", 7) == 0) 
+		       || (strncmp(cp, "Callsign", 8) == 0))	/* FPAC prompt */
+			continue;
+
+		if (strncmp(cp, "Callsign ssid", 13) == 0) /* FPAC flex empty destinations */
+			continue;
+	
+		if ((strncmp(line, "No", 2) == 0)
+		       || (strncmp(cp, "Read", 4) == 0) 
+		       || (strncmp(cp, "Commands", 8) == 0))	/* Final FPAC prompt */
 			continue;
 
 		/* CALL SSID-ESID RTT */
@@ -715,7 +718,10 @@ int parse_dest(char *gateway, char *fname)
 				break;
 			sprintf(line, "%-8s  %-5s %6d    %05d\n", call, ssid,
 					safe_atoi(rtt), 0);
-/*				safe_atoi(rtt), gateway); */
+			if ((strncmp(line, "No", 2) == 0)
+			       || (strncmp(cp, "Read", 4) == 0) 
+			       || (strncmp(cp, "Commands", 8) == 0))	/* Final FPAC prompt */
+			continue;
 			fputs(line, fdst);
 			cp = strtok(NULL, " \t\n\r");
 		} while (cp != NULL);
