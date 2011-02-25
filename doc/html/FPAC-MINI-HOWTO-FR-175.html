@@ -5,19 +5,18 @@
   <title>FPAC MINI HOWTO - MINI MODE D'EMPLOI</title>
   <meta name="GENERATOR" content="OpenOffice.org 3.2  (Linux)">
   <meta name="AUTHOR" content="Bernard Pidoux F6BVP">
-  <meta name="CREATED" content="0;0">
-  <meta name="CHANGEDBY" content="bernard ">
-  <meta name="CHANGED" content="20110221;19373800">
+  <meta name="CREATED" content="Bernard Pidoux;F6BVP">
+  <meta name="CHANGEDBY" content="Bernard Pidoux F6BVP">
+  <meta name="CHANGED" content="20110225;19373800">
   <meta name="DESCRIPTION" content="FPAC MINI HOWTO">
   <meta name="KEYWORDS"
  content="ROSE, AX25, hamradio, packet radio, Linux">
   <meta name="Copyright" content="© 2011 Bernard PIDOUX">
-  <meta name="Date" content="Mon, 21 Feb 2011 08:00:00">
+  <meta name="Date" content="Fri, 25 Feb 2011 08:00:00">
   <meta name="Publisher" content="Bernard Pidoux, F6BVP">
   <meta name="Revisit-after" content="30">
-  <meta name="CHANGEDBY" content="bernard ">
   <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="Mon, 21 feb 2011 21:00:00">
+  <meta http-equiv="Expires" content="Fri, 25 feb 2011 21:00:00">
   <style type="text/css">
 	<!--
 		P { color: #000000 }
@@ -29,12 +28,14 @@
 	-->
 	</style>
 </head>
-<body dir="LTR" bgcolor="#ffffff" lang="fr-FR" text="#000000">
+<body dir="LTR"
+ style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"
+ lang="fr-FR">
 <h1>Linux FPAC mini-HOWTO</h1>
 <h1>ou FPAC Linux mini mode d'emploi</h1>
 <h2>Bernard Pidoux, F6BVP, <code class="western">f6bvp at amsat dot
 org</code></h2>
-<p style="margin-bottom: 0cm;">V1.7.4,&nbsp; 24-février-2011</p>
+<p style="margin-bottom: 0cm;">V1.7.5,&nbsp; 25-février-2011</p>
 <hr>
 <p>Le paquet-radio est un moyen d'interconnecter des ordinateurs via
 des stations radioamateurs. Ce mini mode d'emploi décrit
@@ -49,7 +50,9 @@ distante à travers <a
  href="http://rose.fpac.free.fr/BonsUsageIndicatifsNetRomFPAC.txt">trois
 différentes
 routes
-et des protocoles différents</a> selon
+et
+des
+protocoles différents</a> selon
 l'indicatif de la destination.</p>
 <p>Un autre exemple montre comment le noyau Linux effectue le routage
 des trames AX.25 via le <a
@@ -78,7 +81,7 @@ HOWTO-FR</a> (ou ce site <a
 <p>Ce FPAC Linux mini mode d'emploi est également disponible sous
 forme d'un document PDF ici
 <br>
-<a href="http://rose.fpac.free.fr/FPAC-MINI-HOWTO-FR-174.pdf">http://rose.fpac.free.fr/FPAC-MINI-HOWTO-FR-174.pdf</a>
+<a href="http://rose.fpac.free.fr/FPAC-MINI-HOWTO-FR-175.pdf">http://rose.fpac.free.fr/FPAC-MINI-HOWTO-FR-175.pdf</a>
 </p>
 <hr>
 <h2><a name="toc1"></a>1. <a href="#s1">Introduction</a></h2>
@@ -220,7 +223,9 @@ démarrer (bouter). Celui-ci est autonome et ne modifie pas le contenu
 de votre disque dur. <a href="http://www2.mandriva.com/fr/linux/one/">La
 
 distribution
-Mandriva live s'appelle “One”</a>. Vous pouvez télécharger
+Mandriva
+live
+s'appelle “One”</a>. Vous pouvez télécharger
 librement la distribution Mandriva One Linux en FTP à partir des <a
  href="http://www.mandriva.com/fr/telecharger/">sites miroir Mandriva</a>
 ou via BitTorrent. Gravez ensuite le CD et boutez à partir de celui-ci.
@@ -230,7 +235,6 @@ l'AX25 de base. Consultez cette page Wiki pour lire la <a
 d'installation de Mandriva Linux</a>. Il existe aussi une documentation
 d'utilisation <a
  href="http://doc.mandriva.com/fr/2010/Mastering-Manual/Mastering-Manual.html/">accessible
-
 en
 ligne</a>.</p>
   </li>
@@ -251,7 +255,9 @@ fonctionnalités et en support matériel.</p>
   <li>
     <p style="margin-bottom: 0cm;">Si vous téléchargez <b>Mandriva One</b>,
 pour
-faire tourner les applications AX25 vous devrez cependant
+faire
+tourner
+les applications AX25 vous devrez cependant
 installer cette version Live sur disque dur via l'utilitaire dont
 l'icone d'<b>Installation</b> figure sur le bureau. Rendez-vous ensuite
 directement au chapitre 3 pour installer les librairies AX25.
@@ -274,7 +280,9 @@ Mandriva Flash sur cette page de l'éditeur Mandriva</a>. J'ai écrit
 un <a href="http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO-FR/">FPAC
 Linux
 Flash
-Mini Mode d'Emploi</a> spécifique pour expliquer
+Mini
+Mode
+d'Emploi</a> spécifique pour expliquer
 l'adjonction d'un compilateur Gcc et des outils de développements en
 vue de l'installation des applications AX25 et en particulier de FPAC
 et d'une BBS F6FBB sur la clé USB. Si vous souhaitez disposer d'un
@@ -287,6 +295,8 @@ fichiers de ce mode d'emploi sont cependant dépassées).</p>
     <p style="margin-bottom: 0cm;">Autrement, si vous connaissez bien
 Linux, vous pouvez&nbsp; procéder à l'installation d'une distribution <b>Mandriva
 Linux
+
+
     </b>plus complète avec les options de développement et les
 serveurs (nfs, ftp etc...) Dans mon expérience c'est une distributions
 Linux facile à installer. Elle peut être téléchargée librement depuis
@@ -301,16 +311,22 @@ faisant environ 4 Go. </p>
 celui-ci. L'installation est assez simple. Au moment du choix du bureau
 (KDE, Gnome) sélectionnez l'option <b>personnalisée</b> ou <b>avancée</b>.
 Ceci
-élargit le choix des options d'installation. Sélectionner au
+élargit
+le
+choix des options d'installation. Sélectionner au
 minimum les suivantes : <i><b>développement</b></i>, <i><b>serveurs
 réseau</b></i> et <i><b>client réseau</b></i> et un environnement de
 bureau, KDE par exemple. Les autres options sont à votre gré. A un
 moment il vous sera demandé le mot de passe du superviseur (<b>root</b>)
 et
-de déclarer un utilisateur. Faites le. En plus il sera utile pour la
+de
+déclarer
+un utilisateur. Faites le. En plus il sera utile pour la
 suite de créer un autre compte utilisateur avec le nom '<b>fpacuser</b>'
 et
-le mot de passe '<b>fpac</b>'. Avant la fin de l'installation il y a
+le
+mot
+de passe '<b>fpac</b>'. Avant la fin de l'installation il y a
 deux choses importantes à faire : la configuration du graphique et du
 réseau. Vérifiez que le graphique est bien configuré en faisant le test
 proposé. Il est déconseillé de configurez votre adresse réseau locale
@@ -319,6 +335,8 @@ interface Ethernet eth0. Exemple <b>192.168.0.200</b>. Créez un compte
 utilisateur à votre nom pour l'usage courant de Linux. Cependant, les
 applications AX25 nécessitent de se connecter en mode superviseur,
 c'est à&nbsp; dire en utilisant le login et le mot de passe du <i><b>root</b></i>.
+
+
 
     </p>
   </li>
@@ -358,7 +376,9 @@ documenté dans le <a
  href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/pdf/Kernel-HOWTO.pdf">mode
 
 d'emploi
-du noyau Linux</a><u>.</u> </p>
+du
+noyau
+Linux</a><u>.</u> </p>
   </li>
 </ul>
 <ul>
@@ -396,7 +416,9 @@ et passez dans ce répertoire avec la commande <b>cd /usr/src </b> </p>
 également utile de créez les liens symboliques <b>a </b>et <b>b </b>qui
 pourront
 servir
-pour appliquer des patches de modification des
+pour
+appliquer
+des patches de modification des
 fichiers sources du noyau Linux.</p>
 <p style="margin-left: 1.06cm; margin-bottom: 0cm;"><b><br>
 ln &nbsp;
@@ -411,7 +433,9 @@ noyau. Pour cela vous pouvez consulter le&nbsp;<a
  href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/pdf/Kernel-HOWTO.pdf">mode
 
 d'emploi
-du noyau Linux</a>. </p>
+du
+noyau
+Linux</a>. </p>
   </li>
 </ul>
 <p style="margin-left: 1.06cm; margin-bottom: 0cm;">Très sommairement
@@ -488,6 +512,8 @@ Attention de ne pas créer de nouvelle ligne et de ne pas modifier la
 ligne qui commence par <b>initrd</b>. Les dix pseudo TTY créés
 apparaîtront sous les noms&nbsp; <b>/dev/ttyp0 à 9 et /dev/ptyp0 à 9</b>.
 
+
+
     </p>
   </li>
 </ul>
@@ -526,7 +552,6 @@ cliquez sur la boîte de l'item pour la vider (xconfig). </p>
   </li>
   <li>
     <p style="margin-bottom: 0cm;">Sélectionnez le sous menu <b>amateur
-
 radio
 support</b> et validez <i><b>tous les protocoles</b></i>.
 Sélectionnez le menu <i><b>AX25 network device drivers</b></i> et
@@ -560,7 +585,9 @@ pouvez maintenant rebouter votre système. Le choix du nouveau noyau
 apparaîtra après la ligne <b>Linux 2010</b> du noyau d'origine (option
 de boute par défaut); sur la ligne <b>Linux avec le noyau 2.6.34 </b>si
 vous
-avez compilé le noyau 2.6.34. Si le boute se passe bien vous aurez
+avez
+compilé
+le noyau 2.6.34. Si le boute se passe bien vous aurez
 désormais un système Linux avec les modules AX25. Vous pouvez vérifier
 avec certains qu'ils sont chargeables avec les commandes :</p>
     <p style="margin-bottom: 0.51cm;"><font
@@ -614,7 +641,9 @@ d'optimiser les performances. J'ai modifié <a
  href="http://www.linux-ax25.org/pub/libax25/libax25-0.0.12-rc2.tar.gz">le
 paquetage
 officiel
-des sources des librairies ax25</a>,
+des
+sources
+des librairies ax25</a>,
 </em><em><b>libax25-0.0.12-rc2</b></em><em>, incluant des
 modifications pour permettre la compilation avec le noyau 2.6. Il est
 toujours préférable de compiler les logiciels sur votre propre
@@ -633,7 +662,9 @@ devez télécharger le fichier d'archive
  href="http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.12-1mdv2010.1.i586.rpm"><b>libax25-0.0.12-1mdv2010.1.i586.rpm</b></a>,
 sinon
 téléchargez
-le fichier <a
+le
+fichier
+<a
  href="http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.12-1mdv2010.1.x86_64.rpm"><b>libax25-0.0.12-1mdv2010.1.x86_64.rpm</b></a>
 pour une architecture Linux 64 bits.</p>
 <p style="margin-left: 1.06cm; margin-bottom: 0.51cm;">Les étapes à
@@ -705,7 +736,9 @@ Debian de la librairie AX.25 </font>
 <p style="margin-left: 1.06cm; margin-bottom: 0.51cm;"><font size="2"><b>Charlie
 K4GBB
 a
-construit un paquetage librairie AX25 pour la distribution
+construit
+un
+paquetage librairie AX25 pour la distribution
 Ubuntu Linux (Debian) que vous pouvez essayer si vous avez installé
 cette distribution. Veuillez rapporter vos observations a
 K4GBB.<br>
@@ -744,6 +777,8 @@ configuration&nbsp; de l'AX.25)</b></i>&nbsp; </font> </p>
 <ul>
   <p>Ceci installera des exemples de fichiers de configuration, <b>axports</b>,
 
+
+
   <b>rsports</b> et <b>nrports</b> dans <i><b>/usr/local/etc/ax25</b></i>
 et compilera et installera les fichiers binaires dans le
 répertoire&nbsp; <i><b>/usr/local/lib</b></i>/ , et placera des
@@ -757,18 +792,24 @@ qu'il n'existe aucune autre librairie AX.25 installée précédemment dans
 votre système Linux dans le répertoire <i><b>/usr/lib/</b></i>. Si
 c'était le cas vous devrez effacer les fichiers <i><b>/usr/lib/libax25*</b></i>.
 
+
+
     </p>
   </li>
   <li>
     <p style="margin-bottom: 0cm;">Il faut ensuite ajouter une ligne
 comportant <i><b>/usr/local/lib</b></i> à la fin du fichier <i><b>/etc/ld.so.conf
 
+
+
     </b></i>et lancer la commande <i><b>/sbin/ldconfig</b></i>.</p>
   </li>
   <li>
     <p style="margin-bottom: 0cm;"><b>Note : la modification de </b><i><b>/etc/ld.so.conf
 et
-l'appel à ldconfig est effectué automatiquement quand on lance le
+l'appel
+à
+ldconfig est effectué automatiquement quand on lance le
 script du chapitre 6.</b></i> </p>
   </li>
 </ul>
@@ -790,7 +831,9 @@ répertoire de votre choix.</p>
   <p><b>cd &nbsp; /usr/local/src/ax25 </b> </p>
   <p><b>tar&nbsp; xf&nbsp; ax25-tools-0.0.10-rc2.patched_f6bvp.tar.bz2 </b>et
 changez
-de répertoire </p>
+de
+répertoire
+  </p>
   <p><b>cd&nbsp; ax25-tools-0.0.10-rc2.patched_f6bvp</b> et tapez les
 commandes suivantes :</p>
 </ul>
@@ -842,10 +885,13 @@ répertoire de votre choix :</p>
  href="http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.8-rc2.patched_f6bvp.tar.bz2">http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.8-rc2.patched_f6bvp.tar.bz2</a></p>
   <p>Déplacez le fichier dans le répertoire&nbsp; <i><b>/usr/local/src/ax25</b></i>&nbsp;
 et&nbsp;
+
+
   <b>cd</b>&nbsp; dans ce répertoire. Désarchivez le paquetage :</p>
   <p><b>tar&nbsp; xf&nbsp; ax25-apps-0.0.8-rc2.patched_f6bvp.tar.bz2 </b>et
 changez
-de répertoire</p>
+de
+répertoire</p>
   <p><b>cd&nbsp; ax25-apps-0.0.8-rc2.patched_f6bvp</b>&nbsp; et tapez
 les commandes suivantes :</p>
 </ul>
@@ -867,7 +913,9 @@ personnalisé les fichiers de configuration suivants)</b></i></font> </p>
 installconf</b></font> installera
 des exemples de fichiers de configuration, <b>ax25ipd.conf</b>,
 <b>ax25mond.conf</b> et <b>ax25rtd.conf</b> dans <i><b>/usr/local/etc/ax25</b></i>.
-La commande <font face="courier new, courier, monospace"><b>make
+La
+commande
+<font face="courier new, courier, monospace"><b>make
 install</b></font>
 installera les logiciels d'application dans le répertoire&nbsp;
 <i><b>/usr/local/sbin</b></i><i>/</i>&nbsp; d'autres dans
@@ -1022,7 +1070,9 @@ l'indicatif de la BBS et le nom du sysop"<br>
   <p>Ne pas oublier d'éditer les champs '<b>SYSOP=</b>' et '<b>CONNECT=</b>'
 
 dans
-le fichier <i><b>/usr/local/sbin/fpac.sh</b></i> en complétant
+le
+fichier
+  <i><b>/usr/local/sbin/fpac.sh</b></i> en complétant
 avec l'indicatif de la BBS et le nom du sysop.</p>
 </ul>
 <ul>
@@ -1086,6 +1136,8 @@ des ports sont <b>aprs</b>, <b>uhf-1</b>, <b>axudp</b>, qui sont
 plus explicites que 0, 1, 2 ... D'autres noms pourraient être <b>vhf</b>,
 
 
+
+
     <b>40m </b>etc... On doit utiliser les mêmes noms dans les
 fichiers de configuration qui dépendent des noms de ports de axports.</p>
   </li>
@@ -1108,7 +1160,9 @@ applications (<b>ax25-apps</b>) nous avons compilé <b>ax25ipd</b>.
 Cette application fonctionne en tâche de fond (démon d'arrière plan).
 Le fichier de configuration est <i><b>/usr/local/etc/ax25/ax25ipd.conf</b></i>.
 Il
-indique à <b>ax25ipd</b> le nom du port par lequel il doit recevoir
+indique
+à
+    <b>ax25ipd</b> le nom du port par lequel il doit recevoir
 ou émettre les trames de paquets AX25, le nom du port vers le monde
 Internet, et les adresses Protocole Internet (IPv4) plus les numéros de
 ports UDP des stations distantes. Avec ces indications, le démon <b>ax25ipd</b>
@@ -1137,7 +1191,9 @@ connaître les opérations effectuées après cette étape.</p>
     <p style="margin-bottom: 0cm;">Ci-après se trouve un exemple de
 fichier <i><b>ax25ipd.conf</b></i>. Vous pouvez le copier-coller dans <b>/usr/local/etc/ax25/ax25ipd.conf</b>,
 éditer
-le fichier existant ou le <a
+le
+fichier
+existant ou le <a
  href="http://f6bvp.free.fr/logiciels/ax25/ax25ipd.conf">télécharger
 depuis ici.</a></p>
   </li>
@@ -1179,7 +1235,9 @@ FPAC permet de se connecter à une station distante via <a
  href="http://rose.fpac.free.fr/BonsUsageIndicatifsNetRomFPAC.txt">trois
 
 différentes
-routes et des protocoles différents</a> selon l'indicatif
+routes
+et
+des protocoles différents</a> selon l'indicatif
 de la destination. On a également vu dans un autre exemple comment le
 noyau Linux effectue le routage des trames AX.25 via le <a
  href="http://rose.fpac.free.fr/RoutesFPAC.txt">module ROSE selon des
@@ -1234,7 +1292,8 @@ développement, entrez la commande :<br>
 </ul>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">svn
 checkout
-https://fpac.googlecode.com/svn/trunk&nbsp; fpac-3.27</span><br>
+https://fpac.googlecode.com/svn/branches/3.27/&nbsp;
+fpac-3.27</span><br>
 &nbsp;&nbsp;&nbsp; <br>
 &nbsp;&nbsp;&nbsp; Entrer ensuite dans le répertoire fpac3.27
 nouvellement créé<span style="font-weight: bold;">&nbsp;&nbsp;&nbsp; cd
@@ -1331,13 +1390,17 @@ Pages Blanches (WP). </p>
     <p style="margin-bottom: 0cm;">Vous devrez éditez le fichier
 exemple précédent pour votre propre installation. Editez les lignes <i><b>L2,
 L3
+
+
     </b></i>et <i><b>Trcall, DNIC, Address, InetAddr, Password, City,
 locator</b></i>. Ne changez pas <i><b>InetPort 10093</b></i> le port
 standard FPAC. Editez <i><b>callsign</b></i> et <i><b>address</b></i>
 du chapitre <b>Command</b>. Editez les nodes adjacents. Gardez le Port
 0 pour l'acces Internet. Chaque <i><b>callsign</b></i> du <b>path </b>doit
 avoir
-une <b>route</b> définie dans <b>/usr/local/etc/ax25/ax25ipd.conf</b>.</p>
+une
+
+    <b>route</b> définie dans <b>/usr/local/etc/ax25/ax25ipd.conf</b>.</p>
   </li>
   <li>
     <p style="margin-bottom: 0cm;">Notez que plusieurs stations nodales
@@ -1351,7 +1414,6 @@ capable de fournir une route vers la même destination.</p>
   <li>
     <p><a
  href="http://f6bvp.free.fr/logiciels/rose-fpac/VK2TV_FPAC_xfbb_AX25_node_config_install.txt">Vous
-
 trouverez
 ici</a> un <b>exemple de configuration très complet pour FPAC</b>
 du à Ray VK2TV, incluant la gestion d'une carte interface série SCC.</p>
@@ -1377,7 +1439,9 @@ local est <b>192.168.0.0</b> et que l'adresse de la passerelle est <b>192.168.0.
     <p style="margin-bottom: 0.51cm;"><font face="serif"><font size="3">Il
 
 est
-nécessaire d'initialiser les interfaces et ports AX25 avant de
+nécessaire
+d'initialiser
+les interfaces et ports AX25 avant de
 lancer FPAC. Pour cela un exemple de script exécutable est donné
 ci-après.Vous pouvez le copier-coller dans le fichier <i><b>/etc/rc.d/rc.ax25</b></i>
 et lui donner les permissions d'exécution : </font></font> </p>
@@ -1387,7 +1451,9 @@ et lui donner les permissions d'exécution : </font></font> </p>
     <p style="margin-bottom: 0.25cm;"><font face="serif"><font size="3">Nous
 
 devons
-initialiser les interfaces AX25 et ports réseaux. Avant de
+initialiser
+les
+interfaces AX25 et ports réseaux. Avant de
 lancer FPAC, le script suivant est un exemple d'installation d'un port
 AXUDP (trame ax25 encapsulée dans une trame UDP) et deux ports série
 (connectés à un TNC deux ports) selon le protocole de pseudo TTY
@@ -1403,7 +1469,9 @@ scrit suivant depuis ce lien</a>. <a
 autre script ax25 pour les PTYs Legacy</a>. </font><font face="serif"><b>Il
 
 est
-fortement recommandé de lire les manuels de kissattach, kissparms
+fortement
+recommandé
+de lire les manuels de kissattach, kissparms
 et mkiss</b></font> pour comprendre ce que font les scripts <font
  face="serif">(commande de type </font><font face="serif"><b>man mkiss</b></font><font
  face="serif">).</font></p>
@@ -1417,31 +1485,7 @@ débutant par </font><font face="serif"><b>kissattach</b></font><font
 les liaisons hamradio.</p>
   </li>
 </ul>
-<pre class="western">#!/bin/sh<br># this script file is /etc/rc.d/rc.ax25<br># after K4GBB ax25 scripts <br>echo 1 &gt; /proc/sys/net/ipv4/ip_forward<br>#<br><b>echo "Installing ax25ipd Unix98 master pseudo tty"</b>
-/bin/date &gt; /var/log/ax25ipd.log
-/usr/bin/killall -KILL /usr/local/sbin/kissattach
-/usr/bin/killall -KILL /usr/local/sbin/ax25ipd
-/usr/bin/killall -KILL /usr/local/sbin/mkiss
-/sbin/ifconfig /dev/ax0 down
-/sbin/ifconfig /dev/ax1 down
-/sbin/ifconfig /dev/ax2 down
-/usr/local/sbin/ax25ipd  &gt; /tmp/unix98
-echo $! &gt; /var/run/ax25ipd.pid
-export AXUDP=`tail -1 /tmp/unix98`
-#
-echo "Installing a KISS link on ethernet port"
-/usr/local/sbin/kissattach  $AXUDP <b>axudp</b> 44.151.75.15 &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>axudp</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.255<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br>/bin/sleep 4<br>echo "Installing two KISS connections on serial port ttyS0"<br><b># aprs &amp; uhf-1 are ports names in /etc/ax25/axports</b>
-echo "Installing two KISS connexions on serial port ttyS0"
-# -c enables a one-byte checksum on each incoming and outgoing KISS frame  on
-#    the  serial  port.  This  checksum is used by G8BPQ KISS roms to maintain the
-#    integrity of KISS frames. <b>Do not use -c with standard TNC KISS EPROM.</b>
-#/usr/local/sbin/mkiss -s 38400 -c -x 2 /dev/ttyS0 &gt; /tmp/unix98
-/usr/local/sbin/mkiss -s 38400 -x 2 /dev/ttyS0 &gt; /tmp/unix98
-export PTS0=`more /tmp/unix98 | grep -w /dev | cut -b -11`
-export PTS1=`more /tmp/unix98 | grep -w /dev | cut -b 12-`
-<b># Attach KPC9612 TNC in kiss mode - on primary PORT ttyS0 = 1200 bauds ---&gt; ax1 = aprs</b>
-/usr/local/sbin/kissattach $PTS0 <b>aprs</b> f6bvp.ampr.org &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Install Parameter : P=250, W=10, TX-Delay=50<br>/usr/local/sbin/kissparms -p <b>aprs</b> -r 250 -s 10 -l 20 -t 220<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>aprs</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.0<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br># Port end<br><b># Attach KPC9612 TNC in kiss mode - on secondary PORT ttyS0 = 9600 bauds ---&gt; ax2 = uhf-1</b>
-/usr/local/sbin/kissattach $PTS1 <b>uhf-1</b> f6bvp.ampr.org &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Install Parameter : P=250, W=10, TX-Delay=50<br>/usr/local/sbin/kissparms -p <b>uhf-1</b> -r 250 -s 10 -l 20 -t 220<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>uhf-1</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.0<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br># Port end<br>#</pre>
+<pre class="western">#!/bin/sh<br># this script file is /etc/rc.d/rc.ax25<br># after K4GBB ax25 scripts <br>echo 1 &gt; /proc/sys/net/ipv4/ip_forward<br>#<br><b>echo "Installing ax25ipd Unix98 master pseudo tty"</b><br>/bin/date &gt; /var/log/ax25ipd.log<br>/usr/bin/killall -KILL /usr/local/sbin/kissattach<br>/usr/bin/killall -KILL /usr/local/sbin/ax25ipd<br>/usr/bin/killall -KILL /usr/local/sbin/mkiss<br>/sbin/ifconfig /dev/ax0 down<br>/sbin/ifconfig /dev/ax1 down<br>/sbin/ifconfig /dev/ax2 down<br>/usr/local/sbin/ax25ipd  &gt; /tmp/unix98<br>echo $! &gt; /var/run/ax25ipd.pid<br>export AXUDP=`tail -1 /tmp/unix98`<br>#<br>echo "Installing a KISS link on ethernet port"<br>/usr/local/sbin/kissattach  $AXUDP <b>axudp</b> 44.151.75.15 &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>axudp</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.255<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br>/bin/sleep 4<br>echo "Installing two KISS connections on serial port ttyS0"<br><b># aprs &amp; uhf-1 are ports names in /etc/ax25/axports</b><br>echo "Installing two KISS connexions on serial port ttyS0"<br># -c enables a one-byte checksum on each incoming and outgoing KISS frame  on<br>#    the  serial  port.  This  checksum is used by G8BPQ KISS roms to maintain the<br>#    integrity of KISS frames. <b>Do not use -c with standard TNC KISS EPROM.</b><br>#/usr/local/sbin/mkiss -s 38400 -c -x 2 /dev/ttyS0 &gt; /tmp/unix98<br>/usr/local/sbin/mkiss -s 38400 -x 2 /dev/ttyS0 &gt; /tmp/unix98<br>export PTS0=`more /tmp/unix98 | grep -w /dev | cut -b -11`<br>export PTS1=`more /tmp/unix98 | grep -w /dev | cut -b 12-`<br><b># Attach KPC9612 TNC in kiss mode - on primary PORT ttyS0 = 1200 bauds ---&gt; ax1 = aprs</b><br>/usr/local/sbin/kissattach $PTS0 <b>aprs</b> f6bvp.ampr.org &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Install Parameter : P=250, W=10, TX-Delay=50<br>/usr/local/sbin/kissparms -p <b>aprs</b> -r 250 -s 10 -l 20 -t 220<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>aprs</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.0<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br># Port end<br><b># Attach KPC9612 TNC in kiss mode - on secondary PORT ttyS0 = 9600 bauds ---&gt; ax2 = uhf-1</b><br>/usr/local/sbin/kissattach $PTS1 <b>uhf-1</b> f6bvp.ampr.org &gt; /tmp/ax25-config.tmp<br> awk '/device/ { print $7 }' /tmp/ax25-config.tmp &gt; /tmp/ax25-config-tmp<br>read Device &lt; /tmp/ax25-config-tmp<br># Install Parameter : P=250, W=10, TX-Delay=50<br>/usr/local/sbin/kissparms -p <b>uhf-1</b> -r 250 -s 10 -l 20 -t 220<br># Check for Device<br>if [ -d /proc/sys/net/ax25/$Device ]<br>then echo "Port <b>uhf-1</b> attached to $Device"<br>        cd /proc/sys/net/ax25/$Device/<br># ifconfig $Device parameters<br> ifconfig $Device netmask 255.255.255.0<br> ifconfig $Device broadcast 0.0.0.0<br>else echo "** Error setting $Device parms **"<br>fi<br># Port end<br>#</pre>
 <ul>
   <li>
     <p style="margin-bottom: 0.51cm;"><font
@@ -1455,6 +1499,8 @@ moment du boute tout le système AX25 si le script </font><font
  face="Times New Roman, serif">. Voici un exemple de </font><font
  face="Times New Roman, serif"><i>/</i></font><font
  face="Times New Roman, serif"><i><b>etc/rc.d/rc.local</b></i></font>&nbsp;
+
+
 
 
     <font face="Times New Roman, serif">qui initialisera l'AX25 et le
@@ -1713,7 +1759,8 @@ fonctionne.</p>
 fichiers sources <a href="ftp://f6bvp.org:32221/logiciels/BBS-f6fbb/">les
 plus
 récents
-via FTP</a></p>
+via
+FTP</a></p>
 <p style="margin-bottom: 0cm;">Ou bien <a
  href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/">télécharger
 l'archive via HTTP</a> (par exemple <b>xd705c3-src.tar.bz2</b>) </p>
@@ -1824,6 +1871,8 @@ télécharger ces fichiers :&nbsp; <a
  href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/FBB7UT_G.DOC">FBB7UT.DOC</a>,
 
 
+
+
     <a href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/fbb7ut_g.zip">fbb7ut_g.zip</a></p>
   </li>
 </ul>
@@ -1851,7 +1900,9 @@ set/ssid +2<br>
 </font></font><font face="Courier New, monospace"><font size="2"><b>set/port
 0
 1
-3 4 rose0 inet:9000 netclu</b></font></font><font
+3
+4
+rose0 inet:9000 netclu</b></font></font><font
  face="Courier New, monospace"><font size="2"><br>
 set/tz
 +2</font></font><br>
@@ -2052,7 +2103,9 @@ patches
  href="http://f6bvp.free.fr/logiciels/netstat/net-tools-1.60-23.netstat.rose.patch">http://f6bvp.free.fr/logiciels/netstat/</a>&nbsp;
 )
 vous
-pouvez télécharger un patch pour apporter à netstat la
+pouvez
+télécharger
+un patch pour apporter à netstat la
 gestion des sockets <b>ROSE</b>.</p>
 <p>Télécharger également ces trois patches nécessaires :
 <a
@@ -2128,7 +2181,9 @@ net-tools-1.60-23.netstat.rose.patch</b> </p>
 <p>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; <b>make </b>(vou
 devez
 répondre
-oui (y pour yes) ou non (n pour no) a quelques
+oui
+(y
+pour yes) ou non (n pour no) a quelques
 questions pour personnaliser la compilation de net-tools. La réponse
 par défaut est toujours valable.<b><br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -2139,70 +2194,11 @@ make install</b><br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
 Vous pouvez maintenant utiliser <b>netstat</b> pour visualiser les
 information de ROSE :</p>
-<pre class="western" style="margin-bottom: 0.5cm;">[root@f6bvp-9 net-tools-1.60-23]# <b>netstat --ax25 --netrom --rose</b>
-Active AX.25 sockets
-Dest Source Device State Vr/Vs Send-Q Recv-Q
-F6BVP-12 F6BVP-14 ax2 ESTABLISHED 006/003 0 0
-F6BVP-11 F6BVP-9 ax2 ESTABLISHED 003/000 0 0
-* F6BVP-1 ax2 LISTENING 000/000 0 0
-* F6BVP-1 ax1 LISTENING 000/000 0 0
-* F6BVP-1 ax0 LISTENING 000/000 0 0
-* F6BVP-15* ??? LISTENING 000/000 0 0
-* F6BVP-15 ??? LISTENING 000/000 0 0
-* F6BVP-8 ??? LISTENING 000/000 0 0
-* F6BVP-8* ??? LISTENING 000/000 0 0
-* F6BVP-9* ??? LISTENING 000/000 0 0
-Active NET/ROM sockets
-User Dest Source Device State Vr/Vs Send-Q Recv-Q
-* * F6BVP-0 nr1 LISTENING 000/000 0 0
-Active ROSE sockets
-dest_addr dest_call src_addr src_call dev lci neigh state
-2080175521 ROUTE-0 2080175520 F6BVP-9 rose0 0 0 LISTENING
-2080175520 F6BVP-0 2080175520 F6BVP-15 rose0 0 1 LISTENING
-* * 2080175520 F6BVP-1 rose0 0 0 LISTENING
-2080428501 F4BWT-10 2080175520 F6BVP-0 rose0 0 0 LISTENING
-* * 2080175520 ROUTE-0 rose0 0 0 LISTENING
-* * 2080175520 F6BVP-15 rose0 0 0 LISTENING
-2080175520 FPAD-0 2080175520 WP-0 rose0 0 0 LISTENING
-* * 2080175520 WP-0 rose0 0 0 LISTENING
-2080175520 WP-0 2080175520 FPAD-0 rose0 1 1 ESTABLISHED
-* * 2080175520 ??????-? rose0 0 0 LISTENING</pre>
+<pre class="western" style="margin-bottom: 0.5cm;">[root@f6bvp-9 net-tools-1.60-23]# <b>netstat --ax25 --netrom --rose</b><br>Active AX.25 sockets<br>Dest Source Device State Vr/Vs Send-Q Recv-Q<br>F6BVP-12 F6BVP-14 ax2 ESTABLISHED 006/003 0 0<br>F6BVP-11 F6BVP-9 ax2 ESTABLISHED 003/000 0 0<br>* F6BVP-1 ax2 LISTENING 000/000 0 0<br>* F6BVP-1 ax1 LISTENING 000/000 0 0<br>* F6BVP-1 ax0 LISTENING 000/000 0 0<br>* F6BVP-15* ??? LISTENING 000/000 0 0<br>* F6BVP-15 ??? LISTENING 000/000 0 0<br>* F6BVP-8 ??? LISTENING 000/000 0 0<br>* F6BVP-8* ??? LISTENING 000/000 0 0<br>* F6BVP-9* ??? LISTENING 000/000 0 0<br>Active NET/ROM sockets<br>User Dest Source Device State Vr/Vs Send-Q Recv-Q<br>* * F6BVP-0 nr1 LISTENING 000/000 0 0<br>Active ROSE sockets<br>dest_addr dest_call src_addr src_call dev lci neigh state<br>2080175521 ROUTE-0 2080175520 F6BVP-9 rose0 0 0 LISTENING<br>2080175520 F6BVP-0 2080175520 F6BVP-15 rose0 0 1 LISTENING<br>* * 2080175520 F6BVP-1 rose0 0 0 LISTENING<br>2080428501 F4BWT-10 2080175520 F6BVP-0 rose0 0 0 LISTENING<br>* * 2080175520 ROUTE-0 rose0 0 0 LISTENING<br>* * 2080175520 F6BVP-15 rose0 0 0 LISTENING<br>2080175520 FPAD-0 2080175520 WP-0 rose0 0 0 LISTENING<br>* * 2080175520 WP-0 rose0 0 0 LISTENING<br>2080175520 WP-0 2080175520 FPAD-0 rose0 1 1 ESTABLISHED<br>* * 2080175520 ??????-? rose0 0 0 LISTENING</pre>
 <p><br>
 Vous pouvez afficher la table de routage ROSE du noyau Linux :<br>
 &nbsp;</p>
-<pre class="western" style="margin-bottom: 0.5cm;">[root@f6bvp-11 bernard]# <b>netstat --rose -r</b>
-Table de routage ROSE du noyau
-Destination neigh1 callsign device neigh2 callsign device neigh3 callsign device
-2080175502 00001 RSLOOP-0 ??? 
-2080175522 00016 F6BVP-5 ax0 
-2080175521 00015 F6BVP-7 ax0 
-2080175520 00014 F6BVP-9 ax0 
-2080854509 00012 F8COJ-11 ax0 
-2080444501 00013 F3KT-11 ax0 
-2080833501 00008 F5KBW-9 ax0 
-2080847501 00011 F6GGY-9 ax0 
-2080428501 00010 F4BWT-11 ax0 
-2080886801 00009 F1MVP-5 ax0 
-3100352726 00007 K4GBB-9 ax0 
-3100727489 00006 KD4YAL-9 ax0 
-3100813626 00005 KP4DJT-9 ax0 
-5050699300 00004 VK2XB-2 ax0 
-5050656200 00003 VK2TV-2 ax0 
-7120282700 00002 TI2HAS-9 ax0 
-2080833500 00008 F5KBW-9 ax0 
-2080444000 00013 F3KT-11 ax0 00011 F6GGY-9 ax0 00009 F1MVP-5 ax0 
-2080847000 00011 F6GGY-9 ax0 00010 F4BWT-11 ax0 
-2080428000 00010 F4BWT-11 ax0 
-3100772000 00006 KD4YAL-9 ax0 00007 K4GBB-9 ax0 00003 VK2TV-2 ax0 
-2080100000 00014 F6BVP-9 ax0 00015 F6BVP-7 ax0 
-2080700000 00008 F5KBW-9 ax0 
-2080800000 00012 F8COJ-11 ax0 00008 F5KBW-9 ax0 
-2080900000 00008 F5KBW-9 ax0 
-2080000000 00008 F5KBW-9 ax0 00013 F3KT-11 ax0 00010 F4BWT-11 ax0 
-3100000000 00006 KD4YAL-9 ax0 00007 K4GBB-9 ax0 00005 KP4DJT-9 ax0 
-5050000000 00003 VK2TV-2 ax0 00004 VK2XB-2 ax0 00006 KD4YAL-9 ax0 
-7120000000 00002 TI2HAS-9 ax0 00007 K4GBB-9 ax0 00006 KD4YAL-9 ax0 
-7100000000 00002 TI2HAS-9 ax0 00007 K4GBB-9 ax0 00006 KD4YAL-9 ax0 </pre>
+<pre class="western" style="margin-bottom: 0.5cm;">[root@f6bvp-11 bernard]# <b>netstat --rose -r</b><br>Table de routage ROSE du noyau<br>Destination neigh1 callsign device neigh2 callsign device neigh3 callsign device<br>2080175502 00001 RSLOOP-0 ??? <br>2080175522 00016 F6BVP-5 ax0 <br>2080175521 00015 F6BVP-7 ax0 <br>2080175520 00014 F6BVP-9 ax0 <br>2080854509 00012 F8COJ-11 ax0 <br>2080444501 00013 F3KT-11 ax0 <br>2080833501 00008 F5KBW-9 ax0 <br>2080847501 00011 F6GGY-9 ax0 <br>2080428501 00010 F4BWT-11 ax0 <br>2080886801 00009 F1MVP-5 ax0 <br>3100352726 00007 K4GBB-9 ax0 <br>3100727489 00006 KD4YAL-9 ax0 <br>3100813626 00005 KP4DJT-9 ax0 <br>5050699300 00004 VK2XB-2 ax0 <br>5050656200 00003 VK2TV-2 ax0 <br>7120282700 00002 TI2HAS-9 ax0 <br>2080833500 00008 F5KBW-9 ax0 <br>2080444000 00013 F3KT-11 ax0 00011 F6GGY-9 ax0 00009 F1MVP-5 ax0 <br>2080847000 00011 F6GGY-9 ax0 00010 F4BWT-11 ax0 <br>2080428000 00010 F4BWT-11 ax0 <br>3100772000 00006 KD4YAL-9 ax0 00007 K4GBB-9 ax0 00003 VK2TV-2 ax0 <br>2080100000 00014 F6BVP-9 ax0 00015 F6BVP-7 ax0 <br>2080700000 00008 F5KBW-9 ax0 <br>2080800000 00012 F8COJ-11 ax0 00008 F5KBW-9 ax0 <br>2080900000 00008 F5KBW-9 ax0 <br>2080000000 00008 F5KBW-9 ax0 00013 F3KT-11 ax0 00010 F4BWT-11 ax0 <br>3100000000 00006 KD4YAL-9 ax0 00007 K4GBB-9 ax0 00005 KP4DJT-9 ax0 <br>5050000000 00003 VK2TV-2 ax0 00004 VK2XB-2 ax0 00006 KD4YAL-9 ax0 <br>7120000000 00002 TI2HAS-9 ax0 00007 K4GBB-9 ax0 00006 KD4YAL-9 ax0 <br>7100000000 00002 TI2HAS-9 ax0 00007 K4GBB-9 ax0 00006 KD4YAL-9 ax0 </pre>
 <p style="margin-bottom: 0cm;"><br>
 </p>
 <hr>
@@ -2218,7 +2214,9 @@ possibles. </p>
  href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/pdf/Kernel-HOWTO.pdf">le
 mode
 d'emploi
-du noyau Linux</a></p>
+du
+noyau
+Linux</a></p>
 <p><a
  href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/text/AX25-HOWTO.txt">le
 AX25-HOWTO</a>, </p>
@@ -2256,7 +2254,9 @@ Pour s'inscrire à cette liste <a
  href="http://rose.fpac.free.fr/MINI-HOWTO-FR/frpacket-linux-subscribe@yahoogroupes.fr">envoyer
 un
 message
-à cette adresse</a>.</p>
+à
+cette
+adresse</a>.</p>
 <p>Pour la liste internationale visitez <a
  href="http://mailman.f6fbb.org/pipermail/fpac/">les
 archives FPAC</a>. </p>

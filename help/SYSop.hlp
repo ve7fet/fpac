@@ -3,4 +3,4 @@ USAGE
         SYSop
 
 DESCRIPTION
-        Gives a password prompt (with MD5 encryption) to get SysOp privileges.
+        Give a password prompt (with MD5 encryption) to get sysop's privileges.

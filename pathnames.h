@@ -6,7 +6,7 @@
 #define FPACDNIC        	AX25_SYSCONFDIR"fpac.dnic"
 #define FPAC_INFO_FILE  	AX25_SYSCONFDIR"fpac.info"
 #define FPAC_HELLO_FILE 	AX25_SYSCONFDIR"fpac.hello"
-#define FPAC_HELP_DIR   	AX25_LOCALSTATEDIR"fpac/help/"
+#define FPAC_HELP_DIR   	AX25_SYSCONFDIR"fpac/help/"
 #define FPACWP 			AX25_LOCALSTATEDIR"fpac/fpacwp3.dat"
 
 #define FLEX_GT_FILE  		AX25_LOCALSTATEDIR"flex/gateways"

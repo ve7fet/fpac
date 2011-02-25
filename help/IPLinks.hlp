@@ -3,4 +3,4 @@ USAGE
         IPLinks
 
 DESCRIPTION
-        Displays a list of the current TCP/IP links with the local host.
+        Shows a list of the current TCPIP links with the local host.

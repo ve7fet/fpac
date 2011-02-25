@@ -1,10 +1,12 @@
-fpac (3.28)
-	* Moved fpac/help out of etc/ax25 and in to var/ax25/fpac/help, it doesn't really belong
-	  in etc as they are not config files
+fpac (3.27.16)
 	* Bug in expanding variables in conf files with make corrected
-	* Bernard and Leo found and fixed a bug in aprslist.c
+	* Added some variables to configure.ac to split apart the version for package building
+	* Added a fpac.spec file to build RPM's with
+	* Leo, IZ5FSA, has a done a bunch of work on the FLEX code to get it working again
+	  (still more work in progress)
+	* Bernard, F6BVP, has made some debugging changes
 
- -- Lee Woldanski <ve7fet@tparc.org>  Mon, 24 Jan 2011 12:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org>  Mon, 31 Jan 2011 22:00:00 -0800
 
 fpac (3.27.15)
 	* Rolling Bernards changes into an incremental release

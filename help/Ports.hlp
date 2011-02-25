@@ -3,7 +3,9 @@ USAGE
         Ports
 
 DESCRIPTION
-        Displays the available AX.25 ports. 
-        The port name and a short description of the port is provided.
-        The port name is used with the Connect command. 
-	Port names are also used in the Route and Link lists.
+        Shows the available AX.25 ports. Shown are the port name, the speed
+        of the port (in bits/sec) and a short description for the port.
+        The port name is used when using the Connect command to connect
+        to an user or service not running NET/ROM (eg. not visible in the
+        Nodes list). The port name is also visible in the Route and Link 
+        lists.
