@@ -631,20 +631,16 @@ int download_dest(char *gateway, char *fname)
 				if ((c < n-1) && ((buffer[c] == '=') && (buffer[c + 1] == '>')
 					|| (buffer[c] == '-' && (buffer[c + 1] == '>'))
 				       	|| ((buffer[c] == ':')  && (buffer[c - 1] == ' ') && (buffer[c + 1] == ' ')))) {
-					prompt = 1;
 					cmd_ack++;
 				}
 			}
-				if (cmd_send >= 1) {
-					if (!prompt) {
-						fwrite(buffer, sizeof(char), n, tmp);
-					}
-				}
-		prompt = 0;
+			if (cmd_send > 0) {
+				fwrite(buffer, sizeof(char), n, tmp);
+			}
 		}
 
 		if (cmd_ack != 0) {
-			if (commands[cmd_send] != NULL) {
+			if (cmd_send < 3) {
 				write(s, commands[cmd_send], 2);
 				cmd_send++;
 			}
@@ -718,10 +714,8 @@ int parse_dest(char *gateway, char *fname)
 				break;
 			sprintf(line, "%-8s  %-5s %6d    %05d\n", call, ssid,
 					safe_atoi(rtt), 0);
-			if ((strncmp(line, "No", 2) == 0)
-			       || (strncmp(cp, "Read", 4) == 0) 
-			       || (strncmp(cp, "Commands", 8) == 0))	/* Final FPAC prompt */
-			continue;
+ 			if (strncmp(ssid, "(Commands", 9) == 0)	/* do not include final FPAC prompt */
+			break;
 			fputs(line, fdst);
 			cp = strtok(NULL, " \t\n\r");
 		} while (cp != NULL);
