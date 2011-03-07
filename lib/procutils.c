@@ -240,7 +240,7 @@ struct flex_dst *read_flex_dst(void)
 
 	errno = 0;
   	if ((fp = fopen(FLEX_DST_FILE, "r")) == NULL) {
-		printf("Error : file %s not found\n", FLEX_DST_FILE);
+/*		printf("Error : file %s not found\n", FLEX_DST_FILE);*/
 	return NULL;
   	}
 

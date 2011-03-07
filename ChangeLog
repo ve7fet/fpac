@@ -1,3 +1,10 @@
+fpac (3.27.17)
+	* Merged some fixes in for FLEX to get it working better
+	* Updated fpac.spec file to check OS and select build dependencies better
+	* Bernard updated the included How-TO to version 1.75
+
+ -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 10:00:00 -0800
+
 fpac (3.27.16)
 	* Bug in expanding variables in conf files with make corrected
 	* Added some variables to configure.ac to split apart the version for package building
