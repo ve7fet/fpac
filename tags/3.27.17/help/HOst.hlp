@@ -1,0 +1,11 @@
+
+USAGE
+        HOst <hostname>|<ip address>
+
+DESCRIPTION
+        Tells information about an Internet host. The host can be identified
+        using a host name (for example, zone.oh7rba.ampr.org) or an IP 
+        address (for example, 44.139.39.6).
+
+        Returns the host name, IP addresses and known aliases for the host.
+        The information is gathered from the DNS (domain name service).
