@@ -3,5 +3,5 @@ USAGE
         STats
 
 DESCRIPTION
-        Displays the statistics of the FPAC Network (L3) links.
+        Returns the statistics of the FPAC level 3 links.
 

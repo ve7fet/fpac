@@ -3,4 +3,4 @@ USAGE
         IPRoutes
 
 DESCRIPTION
-        Diaplays the TCP/IP route table of the local host.
+        Shows the TCPIP route table of the local host.
