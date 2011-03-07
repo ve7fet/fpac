@@ -1,17 +1,6 @@
 #ifndef _PROCINFO_H
 #define _PROCINFO_H
 
-#define FLEX_GT_FILE  		AX25_LOCALSTATEDIR"flex/gateways"
-#define FLEX_DST_FILE 		AX25_LOCALSTATEDIR"flex/destinations"
-
-#define DATA_MHEARD_FILE        AX25_LOCALSTATEDIR"mheard/mheard.dat"
-
-#define DATA_NODE_LOGIN_FILE	AX25_LOCALSTATEDIR"fpac/loggedin"
-
-#define FLEXD_CONF_FILE 	AX25_SYSCONFDIR"flexd.conf"
-#define FLEXD_TEMP_PATH 	AX25_LOCALSTATEDIR"flex/"
-#define AX_ROUTES_FILE 		AX25_SYSCONFDIR"flexd.routes"
-
 #define PROC_NR_FILE  "/proc/net/nr"
 #define PROC_DEV_FILE "/proc/net/dev"
 
