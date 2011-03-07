@@ -1,4 +1,4 @@
-fpac (3.28) unstable; urgency=low
+fpac (3.28-beta1) unstable; urgency=low
 
   * Initial Release.
   * This is a beta package built against the FPAC trunk source.
