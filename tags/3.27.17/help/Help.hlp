@@ -1,0 +1,8 @@
+
+USAGE
+        Help [<command>]
+
+DESCRIPTION
+        Gives help for the specified command or this text if no
+        command is specified. Commands can not be abbreviated.
+        Use the "?" command to retrieve a list of available commands.
