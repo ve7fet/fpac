@@ -67,6 +67,7 @@
 
 #define	ALEN		6
 #define	AXLEN		7
+#define	BEACON_TEXT_BUFFER	123
 
 #define n_cpy(a, b, c) strncpy(a, b, c)
 
@@ -102,7 +103,7 @@ sport *phead = NULL;
 double my_w = 0.0;
 double my_l = 0.0;
 char my_loc[22];
-char beacon[81];
+char beacon[BEACON_TEXT_BUFFER];
 
 int mask = U_MASK;
 
@@ -707,8 +708,8 @@ void load_config(void)
 		}
 		else if (ps && !strncmp(cmd, "bea", 3))
 		{ 
-			strncpy( beacon, p, 80);
-			beacon[80] = '\0';
+			strncpy( beacon, p, BEACON_TEXT_BUFFER);
+			beacon[BEACON_TEXT_BUFFER] = '\0';
 		}
 
 	}
