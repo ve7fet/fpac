@@ -29,6 +29,7 @@
 
 #include "procinfo.h"
 #include "node.h"
+#include "../pathnames.h"
 
 
 /*

@@ -2,6 +2,7 @@ fpac (3.27.17)
 	* Merged some fixes in for FLEX to get it working better
 	* Updated fpac.spec file to check OS and select build dependencies better
 	* Bernard updated the included How-TO to version 1.75
+	* Added the aprslist.c patch that was applied to trunk but not this branch
 
  -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 10:00:00 -0800
 
