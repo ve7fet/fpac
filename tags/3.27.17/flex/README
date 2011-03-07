@@ -1,9 +1,0 @@
-These sources codes are extracting from the FlexNode software.
-
-To configure flexd, you need to edit /usr/local/etc/ax25/flexd.routes :
- and /usr/local/etc/ax25/flexd.conf
-
-#
-# see file examples in fpac package etc/ directory
-#
-
