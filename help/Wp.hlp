@@ -3,14 +3,14 @@ USAGE
         Wp [-acdnrl nb] [callsign]
 
 DESCRIPTION
-        Displays FPAC White Pages Database information.
-          options :
-            n = Nodes only
-            l = List length 
-          sort by :
-       	    a address
-            c callsign (default)
-            d date
-            r reverse
+        Give access to the FPAC white pages database.
+options :
+         n = Nodes only
+         l = List length 
+  sort by :
+       	 a address
+         c callsign (default)
+         d date
+         r reverse
 
 	 You may use ? and * wildcards in the callsign.

@@ -3,5 +3,4 @@ USAGE
         Bye
 
 DESCRIPTION
-        Disconnects you from the node.
-        You may also use Q for Quit.
+        Disconnects you from this node.

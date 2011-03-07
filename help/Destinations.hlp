@@ -3,15 +3,15 @@ USAGE
         Destinations [*|call]
 
 DESCRIPTION
-        Displays the Flex Net Destinations. This Destination Table shows 
-        the Flex nodes to which the FPAC node may connect to.
+        Without argument, this will give you a list of destinations
+        (the  Destination  Table)  which  the  node  can  route  to.
+        With every callsign you have the SSID  range and round-trip
+        time in 100 ms steps from the Flexgate.
 
-        Each callsign listed shows the SSID range and RTT (round-trip time) in 100 ms.
+        If a callsign is specified  this will display SSID, RTT and
+        the Flexgate.
 
-        If a callsign is specified the SSID, RTT and FlexGate will be displayed.
+        You can use ? and * jockers.
 
-        You may use ? and * wildcards.
-
-EXAMPLES
         D F*    will display all destinations beginning with F,
         D F?K*  will display all french club callsign destinations.

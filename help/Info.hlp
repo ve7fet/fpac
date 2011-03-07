@@ -3,6 +3,6 @@ USAGE
         Info
 
 DESCRIPTION
-       Displays FPAC version and the contents of the
-       node's info file, which contains information about 
-       the local node and things that the sysop likes to brag about.
+       Displays the version information and the contents of the
+       /etc/ax25/node.info file, which describes those aspects of
+       the system that the sysop likes to brag about.

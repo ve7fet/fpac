@@ -3,9 +3,6 @@ USAGE
         TRace
 
 DESCRIPTION
-	Gives a prompt for a Node call or ROSE/FPAC address for a network test
-        
-	The test will display all nodes used to connect to the Node and the round
+	Give a prompt to test a route to a callsign or a Rose/Fpac address.
+	It will indicate all nodes crossed  through the  network and round
 	trip time between each node.
- 
-        To Exit the Trace test  - Press enter w/o a call or address.

@@ -14,9 +14,9 @@
  *#include <linux/rose.h>
  */
 #include <sys/ipc.h>	/* for key_t */
-#include "ax25compat.h"
-#include "fpac.h"
-#include "wp.h"
+#include "../lib/ax25compat.h"
+#include "../lib/fpac.h"
+#include "../lib/wp.h"
 
 #define STATE_IDLE	0
 #define STATE_TRYING	1
