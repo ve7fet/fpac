@@ -3,6 +3,7 @@ fpac (3.28)
 	  in etc as they are not config files
 	* Bug in expanding variables in conf files with make corrected
 	* Bernard and Leo found and fixed a bug in aprslist.c
+	* Added some init scripts (found in the doc folder for this package)
 	*
 	* Changes from 3.27.17
         * Merged some fixes in for FLEX to get it working better
@@ -17,7 +18,7 @@ fpac (3.28)
           (still more work in progress)
         * Bernard, F6BVP, has made some debugging changes
 
- -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 10:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 14:00:00 -0800
 
 fpac (3.27.15)
 	* Rolling Bernards changes into an incremental release
