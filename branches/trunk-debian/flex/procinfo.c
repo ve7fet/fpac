@@ -11,9 +11,25 @@
 #include <netax25/axconfig.h>
 #include <netax25/mheard.h>
 
-#include "../pathnames.h"
+#ifndef HAVE_NETAX25_AX25_H
+#include <netax25/ax25.h>
+#else
+#include <netax25/kernel_ax25.h>
+#endif
+#ifndef HAVE_NETROSE_ROSE_H
+#include <netrose/rose.h>
+#else
+#include <netax25/kernel_rose.h>
+#endif
+#ifndef HAVE_NETROM_NETROM_H
+#include <netrom/netrom.h>
+#else
+#include <netax25/kernel_netrom.h>
+#endif
+
 #include "procinfo.h"
 #include "node.h"
+#include "../pathnames.h"
 
 
 /*
@@ -94,7 +110,6 @@ struct flex_gt *read_flex_gt(void)
   char buffer[256], *cp;
   struct flex_gt *p=NULL, *list = NULL, *new_el;
   int i = 0, k;
-  
   errno = 0;
   if ((fp = fopen(FLEX_GT_FILE, "r")) == NULL) {
 	printf("Error : file %s not found\n", FLEX_GT_FILE);
@@ -108,9 +123,10 @@ struct flex_gt *read_flex_gt(void)
     safe_strncpy(new_el->call, strtok(NULL, " \t\n\r"), 9);
     safe_strncpy(new_el->dev, strtok(NULL, " \t\n\r"), 13);
     k=0;
-    while((cp=strtok(NULL, " \t\n\r"))!=NULL&&k<AX25_MAX_DIGIS) safe_strncpy(new_el->digis[k++],cp,9);
-    while(k<AX25_MAX_DIGIS) strcpy(new_el->digis[k++],"\0");
-
+    while((cp=strtok(NULL, " \t\n\r"))!=NULL&&k<AX25_MAX_DIGIS)
+        safe_strncpy(new_el->digis[k++],cp,9);
+    while(k<AX25_MAX_DIGIS)
+        strcpy(new_el->digis[k++],"\0");
     if(list==NULL) {
       list=new_el;
       p=list;
@@ -146,11 +162,13 @@ struct flex_dst *read_flex_dst(void)
 	printf("Error : file %s not found\n", FLEX_DST_FILE);
 	return NULL;
   }
-  
+
   while (fgets(buffer, 256, fp) != NULL) {
+
+	printf("flexd : file %s => %s\n", FLEX_DST_FILE, buffer);
+
     if (i++<1) continue;
     if ((new_el = calloc(1, sizeof(struct flex_dst))) == NULL) break;
-
     safe_strncpy(new_el->dest_call, strtok(buffer, " \t\n\r"), 9);
     new_el->ssida = safe_atoi(strtok(NULL, " -\t\n\r"));
     new_el->sside = safe_atoi(strtok(NULL, " -\t\n\r"));
@@ -308,10 +326,9 @@ struct flex_dst *find_dest(char *dest_call, struct flex_dst *list)
     ssid=safe_atoi(cp+1);
     *cp='\0';
   }
-
   fdst=list?list:read_flex_dst();
   for (p=fdst;p!=NULL;p=p->next) {
-    if (!strcasecmp(call, p->dest_call) && (ssid>=p->ssida && ssid<=p->sside)) {
+    if (!strcasecmp(call, p->dest_call) && (ssid >= p->ssida && ssid <= p->sside)) {
       f = *p;
       f.next = NULL;
       p = &f;
@@ -319,14 +336,16 @@ struct flex_dst *find_dest(char *dest_call, struct flex_dst *list)
     }
   }
   if (list==NULL) free_flex_dst(fdst);
+
   return p;
 }
 
 struct flex_gt *find_gateway(int addr, struct flex_gt *list)
 {
- static struct flex_gt f; 
+  static struct flex_gt f; 
   struct flex_gt *flgt=NULL, *p;
   flgt=list?list:read_flex_gt();
+
   for (p=flgt;p!=NULL;p=p->next) {
     if (addr==p->addr) {
       f = *p;

@@ -158,72 +158,65 @@ int is_heard(char **av)
  * Flexnet routines taken from FlexNode
  */
 
-struct flex_gt *read_flex_gt(void)
-{
-	FILE *fp;
-	char buffer[256], *cp;
-	char *addr;
-	struct flex_gt *p = NULL, *list = NULL, *new_el;
-	int i = 0, k;
+struct flex_gt *read_flex_gt(void) {
+    FILE *fp;
+    char buffer[256], *cp;
+    char *addr;
+    struct flex_gt *p = NULL, *list = NULL, *new_el;
+    int i = 0, k;
+    errno = 0;
+    if ((fp = fopen(FLEX_GT_FILE, "r")) == NULL) {
+        printf("Error : file %s not found\n", FLEX_GT_FILE);
+        return NULL;
+    }
 
-  	errno = 0;
-  	if ((fp = fopen(FLEX_GT_FILE, "r")) == NULL) {
-		printf("Error : file %s not found\n", FLEX_GT_FILE);
-		return NULL;
-	}
+    while (fgets(buffer, 256, fp) != NULL) {
+        if (i++ < 1)
+            continue;
+        if (buffer == NULL)
+            continue;
+        if ((new_el = calloc(1, sizeof (struct flex_gt))) == NULL)
+            break;
 
-	while (fgets(buffer, 256, fp) != NULL)
-	{
-		if (i++ < 1)
-			continue;
-		if (buffer == NULL)
-			continue;
-		if ((new_el = calloc(1, sizeof(struct flex_gt))) == NULL)
-			break;
+        new_el->addr = safe_atoi(strtok(buffer, " \t\n\r"));
+        safe_strncpy(new_el->call, strtok(NULL, " \t\n\r"), 9);
+        safe_strncpy(new_el->dev, strtok(NULL, " \t\n\r"), 13);
 
-		new_el->addr = safe_atoi(strtok(buffer, " \t\n\r"));
-		safe_strncpy(new_el->call, strtok(NULL, " \t\n\r"), 9);
-		safe_strncpy(new_el->dev, strtok(NULL, " \t\n\r"), 13);
+        k = 0;
+        while ((cp = strtok(NULL, " \t\n\r")) != NULL && k < AX25_MAX_DIGIS)
+            safe_strncpy(new_el->digis[k++], cp, 9);
+        while (k < AX25_MAX_DIGIS)
+            strcpy(new_el->digis[k++], "\0");
 
-		k = 0;
-		while ((cp = strtok(NULL, " \t\n\r")) != NULL && k < AX25_MAX_DIGIS)
-			safe_strncpy(new_el->digis[k++], cp, 10);
-		while (k < AX25_MAX_DIGIS)
-			strcpy(new_el->digis[k++], "\0");
+        if ((addr = ax25_config_get_name(new_el->dev)) == NULL) {
+            /*			nr_config_load_ports();*/
 
-		if ((addr = ax25_config_get_addr(new_el->dev)) == NULL) {
-/*			nr_config_load_ports();*/
+            if ((addr = nr_config_get_name(new_el->dev)) == NULL) {
+                /*			rs_config_load_ports();*/
+                if ((addr = rs_config_get_name(new_el->dev)) == NULL) {
+                    fprintf(stderr,
+                            "read_flex_gt: invalid port setting\n");
+                    return NULL;
+                } else {
+                    new_el->af_mode = AF_ROSE;
+                }
+            } else {
+                new_el->af_mode = AF_NETROM;
+            }
+        } else {
+            new_el->af_mode = AF_FLEXNET;
+        }
 
-			if ((addr = nr_config_get_addr(new_el->dev)) == NULL) {
-/*			rs_config_load_ports();*/
-
-				if ((addr = rs_config_get_addr(new_el->dev)) == NULL) {
-					fprintf(stderr,
-						"read_flex_gt: invalid port setting\n");
-					return NULL;
-				} else {
-					new_el->af_mode = AF_ROSE;
-				}
-			} else {
-				new_el->af_mode = AF_NETROM;
-			}
-		} else {
-			new_el->af_mode = AF_FLEXNET;
-		}
-
-		if (list == NULL)
-		{
-			list = new_el;
-			p = list;
-		}
-		else
-		{
-			p->next = new_el;
-			p = p->next;
-		}
-	}
-	fclose(fp);
-	return list;
+        if (list == NULL) {
+            list = new_el;
+            p = list;
+        } else {
+            p->next = new_el;
+            p = p->next;
+        }
+    }
+    fclose(fp);
+    return list;
 }
 
 void free_flex_gt(struct flex_gt *fp)
@@ -247,7 +240,7 @@ struct flex_dst *read_flex_dst(void)
 
 	errno = 0;
   	if ((fp = fopen(FLEX_DST_FILE, "r")) == NULL) {
-		printf("Error : file %s not found\n", FLEX_DST_FILE);
+/*		printf("Error : file %s not found\n", FLEX_DST_FILE);*/
 	return NULL;
   	}
 

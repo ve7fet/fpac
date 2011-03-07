@@ -22,9 +22,9 @@ struct proc_dev {
   int           tx_packets;
   int           tx_errs;
   int           tx_drop;
-  int           tx_fifo;  
-  int           tx_colls;  
-  int           tx_carrier;  
+  int           tx_fifo;
+  int           tx_colls;
+  int           tx_carrier;
   int           tx_compressed;
 
   struct proc_dev  *next;
@@ -42,8 +42,8 @@ struct flex_gt {
   char                    call[10];
   char                    dev[14];
   char                    digis[AX25_MAX_DIGIS][11];
-  int                     af_mode;  
- 
+  int                     af_mode;
+
   struct flex_gt          *next;
 };
 
@@ -60,7 +60,7 @@ struct flex_dst {
   unsigned short          sside;
   unsigned long           rtt;
   int                     addr;
-  
+
   struct flex_dst         *next;
 };
 
