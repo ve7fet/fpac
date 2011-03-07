@@ -9,7 +9,11 @@ License:        GPLv2+ and BSD
 URL:            http://fpac.googlecode.com/
 Source0:        %{name}-@VERSION@.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-@VERSION@-%{release}-root-%(%{__id_u} -n)
-BuildRequires:	libax25-devel >= 0.0.12, ncurses-devel
+%if 0%{?mdkversion}
+BuildRequires:  libax25-devel >= 0.0.12, libncurses-devel
+%else
+BuildRequires:  libax25-devel >= 0.0.12, ncurses-devel
+%endif
 Requires:       libax25 >= 0.0.12
 
 %description
@@ -49,8 +53,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/html/FPAC-HOWTO-1.html doc/html/FPAC-HOWTO-2.html doc/html/FPAC-HOWTO-3.html
 %doc doc/html/FPAC-HOWTO-4.html doc/html/FPAC-HOWTO-5.html doc/html/FPAC-HOWTO-6.html
 %doc doc/html/FPAC-HOWTO.html doc/html/FPAC-LINUX-FLASH-MINI-HOWTO104.html
-%doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-172.html
-%doc doc/html/FPAC-MINI-HOWTO-FR.html doc/html/next.gif doc/html/prev.gif doc/html/toc.gif
+%doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-175.html
+%doc doc/html/FPAC-MINI-HOWTO-FR-175.html doc/html/next.gif doc/html/prev.gif doc/html/toc.gif
 %doc %{_sysconfdir}/ax25/fpac/help/*
 %config %{_sysconfdir}/ax25/aprslist.conf.fr
 %config %{_sysconfdir}/ax25/aprslist.conf
