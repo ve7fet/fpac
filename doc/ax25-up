@@ -112,7 +112,7 @@ fi
 #rm -f /tmp/ax25-config-tmp
 ## Check for Device
 #if [ -d /proc/sys/net/ax25/$Device ]
-#  then echo "Port axudp attached to $Device"
+#  then echo "Port uhfdrop attached to $Device"
 #  cd /proc/sys/net/ax25/$Device/
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
@@ -146,7 +146,7 @@ fi
 #rm -f /tmp/ax25-config-tmp
 ## Check for Device
 #if [ -d /proc/sys/net/ax25/$Device ]
-#  then echo "Port axudp attached to $Device"
+#  then echo "Port west attached to $Device"
 #  cd /proc/sys/net/ax25/$Device/
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
@@ -180,7 +180,7 @@ fi
 #rm -f /tmp/ax25-config-tmp
 ## Check for Device
 #if [ -d /proc/sys/net/ax25/$Device ]
-#  then echo "Port axudp attached to $Device"
+#  then echo "Port east attached to $Device"
 #  cd /proc/sys/net/ax25/$Device/
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
