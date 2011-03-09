@@ -8,6 +8,11 @@ doc_DATA = 	FPAC-HOWTO.man \
 		ax25-down \
 		README.init
 
+install-data-hook:
+	chmod 755 $(DESTDIR)$(docdir)/ax25
+	chmod 755 $(DESTDIR)$(docdir)/ax25-up
+	chmod 755 $(DESTDIR)$(docdir)/ax25-down
+
 SUBDIRS = html
 
 EXTRA_DIST = $(doc_DATA)
