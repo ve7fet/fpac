@@ -98,8 +98,8 @@ binary-common:
 	dh_installman
 	dh_link
 	dh_strip
-	dh_compress
-	dh_fixperms --exclude loggedin
+	dh_compress -Xax25 -Xax25-up -Xax25-down
+	dh_fixperms -Xloggedin -Xax25 -Xax25-up -Xax25-down
 #	dh_perl
 	dh_makeshlibs
 	dh_installdeb

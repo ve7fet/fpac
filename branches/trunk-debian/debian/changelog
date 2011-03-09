@@ -1,6 +1,6 @@
-fpac (3.28-beta1) unstable; urgency=low
+fpac (3.28-beta6) unstable; urgency=low
 
   * Initial Release.
   * This is a beta package built against the FPAC trunk source.
 
- -- Lee Woldanski <ve7fet@tparc.org>  Mon, 07 Mar 2011 10:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org>  Tue, 08 Mar 2011 17:00:00 -0800
