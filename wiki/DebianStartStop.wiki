@@ -29,16 +29,16 @@ This will start the AX.25 subsystem at 80 and shut it down at 20.
 
 {{{
 #! /bin/bash
-# Provided by Charles S Schuman ( K4GBB )
+# Provided by Charles S Schuman ( k4gbb1@gmail.com )
 # 04/29/09
 ### BEGIN INIT INFO
 # Provides: ax25
-# Required-Start: /etc/ax25/ax25-up
-# Required-Stop: /etc/ax25/ax25-down
-# Default-Start: 3 4 5
-# Default-Stop: 0 1 2 6
+# Required-Start: $remote_fs $syslog $network
+# Required-Stop: $remote_fs $syslog $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 # Short-Description: Ax.25 initialization
-# Description: This script provides the control for the ax.25 packet radio service.
+# Description: This script provides the control for the ax.25 Packet Radio Service.
 #The fine tuning is accomplished via /etc/ax25/ax25-up and /etc/ax25/ax25-down.
 #
 ### END INIT INFO
