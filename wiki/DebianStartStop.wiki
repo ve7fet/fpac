@@ -30,7 +30,7 @@ This will start the AX.25 subsystem at 80 and shut it down at 20.
 {{{
 #! /bin/bash
 # Provided by Charles S Schuman ( k4gbb1@gmail.com )
-# 04/29/09
+# Updated 03/09/11
 ### BEGIN INIT INFO
 # Provides: ax25
 # Required-Start: $remote_fs $syslog $network
