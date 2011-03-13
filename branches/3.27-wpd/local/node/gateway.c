@@ -869,6 +869,8 @@ int do_connect(int argc, char **argv)
 				("Usage: connect [<port>] <call> [via <call1> ...] [d|s]");
 		return 0;
 	}
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() argv[1] '%s' argv[2] '%s'\n", argv[1], argv[2]);
 
 	/* Telnet connection */
 	if (*argv[0] == 't')
@@ -886,19 +888,26 @@ int do_connect(int argc, char **argv)
 			argc = parse_args(argv + 1, alias.path) + 1;
 		}
 
+/* DEBUG F6BVP */
+/* Why FPACNODE would try user port call as destination */
 		/* Check if its is a known port */
-		if (ax25_config_get_addr(argv[1]))
+/*		if (ax25_config_get_addr(argv[1]))
 		{
 			family = AF_AX25;
-			source = "(user port) ";
+			source = "(user port) ";*/
+/* DEBUG F6BVP * /
+	fprintf(stderr, "do_connect() family AF_AX25 source = (user_port)\n");
 		}
 
-		/* Check if known NetRom node */
-		else if ((argc == 2) && (is_netrom(argv[1], netromcall)))
+		/ * Check if known NetRom node */
+/*		else */ 
+		if ((argc == 2) && (is_netrom(argv[1], netromcall)))
 		{
 			argv[1] = netromcall;
 			family = AF_NETROM;
 			source = "(netrom node) ";
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() family AF_NETROM source = (netrom node)\n");
 		}
 
 		/* Check if in FPAC WP */
@@ -916,6 +925,8 @@ int do_connect(int argc, char **argv)
 			family = AF_ROSE;
 			source = "(fpac wp) ";
 
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() family AF_ROSE source = (fpac wp)\n");
 
 		}
 		
@@ -949,6 +960,8 @@ int do_connect(int argc, char **argv)
 					argv[2] = rsaddr;
 					family = AF_ROSE;
 					source = "(fpac node) ";
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() family AF_ROSE source = (fpac node)\n");
 				}
 
 				/* Default to AX25 */
@@ -990,6 +1003,8 @@ int do_connect(int argc, char **argv)
 			argv[k++] = NULL;
 			argc = k;
 			source = "(flex) ";
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() family flgt->af_mode source = (flex)\n");
 
 	/* set protocole family */
 		family = flgt->af_mode;
@@ -1000,6 +1015,8 @@ int do_connect(int argc, char **argv)
 		{
 			family = AF_AX25;
 			source = "(heard) ";
+/* DEBUG F6BVP */
+	fprintf(stderr, "do_connect() family AF_AX25 source = (heard)\n");
 		}
 		else
 		{
