@@ -112,18 +112,19 @@ void wp_flush_pdu(void)
 	}
 		
 /* DEBUG F6BVP*/
-	fprintf(stderr, "wp_flush_pdu() wp_socket=%d pdu_s=%d pdu_s_cache '%s' pdu_s_len=%d ==> write(pdu_s)\n", wp_socket, pdu_s, pdu_s_cache, pdu_s_len);
-/* DEBUG F6BVP*/
+	fprintf(stderr, "wp_flush_pdu() wp_socket=%d pdu_s=%d pdu_s_cache '%s' pdu_s_len=%d ==> send(pdu_s,...)\n", wp_socket, pdu_s, pdu_s_cache, pdu_s_len);
+/* DEBUG F6BVP
 	if (pdu_s <= 0)
-		return;
+		return;*/
 
-	rc = write(pdu_s, pdu_s_cache, pdu_s_len);
+/*	rc = write(pdu_s, pdu_s_cache, pdu_s_len);*/
+	rc = send(pdu_s, pdu_s_cache, pdu_s_len, MSG_OOB | MSG_DONTWAIT | MSG_NOSIGNAL);
 	pdu_s_len = 0;
 
 	if (rc <= 0)	{
 /* DEBUG F6BVP*/
-		syslog(LOG_INFO, "wp_flush_pdu() WRITE ERROR - closing wp socket"); 
-		fprintf(stderr, "wp_flush_pdu() WRITE ERROR - closing wp socket");
+/*		syslog(LOG_INFO, "wp_flush_pdu() WRITE ERROR - closing wp socket"); 
+		fprintf(stderr, "wp_flush_pdu() WRITE ERROR\n");*/
 /*		close(pdu_s);*/
 	}
 }
@@ -395,11 +396,12 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		}
 	
 		/* Read the packet */
-		rc = read(s, pdu_r_cache, sizeof(pdu_r_cache));
+/*		rc = read(s, pdu_r_cache, sizeof(pdu_r_cache));*/
+		rc = recv(s, pdu_r_cache, sizeof(pdu_r_cache), 0);
 		if (rc <= 0) {
-			syslog(LOG_INFO, "wp_receive_pdu() read disconnection or error - status %d\n", pdu->data.status);
 /* DEBUG F6BVP */
-			fprintf(stderr, "wp_receive_pdu() read disconnection or error - status %d\n", pdu->data.status);
+/*			syslog(LOG_INFO, "wp_receive_pdu() read disconnection or error - status %d\n", pdu->data.status);
+			fprintf(stderr, "wp_receive_pdu() read disconnection or error - status %d\n", pdu->data.status);*/
 			return rc;	/* Disconnection or error */
 		}
 		pdu_r_pos = 0;
@@ -754,7 +756,7 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	fd = socket(AF_ROSE, SOCK_SEQPACKET, 0);
 /* DEBUG F6BVP */		
 	fprintf(stderr, "wp_open_remote() fd %d\n", fd); 
-	syslog(LOG_INFO, "wi_open_remote() fd %d\n", fd);
+	syslog(LOG_INFO, "wp_open_remote() fd %d\n", fd);
 	if (fd < 0) return -1;
 
 	memset(&rose, 0x00, sizeof(struct full_sockaddr_rose));

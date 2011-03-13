@@ -44,6 +44,9 @@ static void vector_request(struct wp_adjacent *wpa);
 
 static int init_client(int client, struct full_sockaddr_rose *address)
 {
+	if (verbose)
+		syslog(LOG_INFO, "init_client() client %d\n", client);
+
 	assert(context[client] == 0);
 	context[client] = calloc(1, sizeof(*context[client]));
 	if (!context[client]) {
@@ -54,11 +57,15 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 	
 	if (strcmp("WP-0", ax25_ntoa(&address->srose_call)) == 0) {
 		context[client]->type = WP_SERVER;
+		if (verbose)
+			syslog(LOG_INFO, "init_client() context client = WP_SERVER\n");
 	}
 	else {
 		context[client]->type = WP_USER;
+		if (verbose)
+			syslog(LOG_INFO, "init_client() context client = WP_USER\n");
 	}
-	
+
 	RegisterEventHandler(client, rose_handler);
 	RegisterEventAwaited(client, READ_EVENT);	
 	return 0;
