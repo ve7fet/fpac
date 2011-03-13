@@ -1,0 +1,8 @@
+
+USAGE
+        TRace
+
+DESCRIPTION
+	Give a prompt to test a route to a callsign or a Rose/Fpac address.
+	It will indicate all nodes crossed  through the  network and round
+	trip time between each node.
