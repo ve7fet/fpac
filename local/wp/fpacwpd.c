@@ -777,30 +777,33 @@ int main(int argc, char *argv[])
 	int rc;
 	int fd;
 	wp_t *wp;
-	
+
+/* Ignore SIGPIPE signal when writing to a socket fails */	
+	signal(SIGPIPE, SIG_IGN);
+
 	process_options(argc, argv);
-	
+
 	openlog("fpacwpd", LOG_PERROR | LOG_PID, LOG_USER);	
 	syslog(LOG_WARNING, "Starting version %s - vector version %x Hex (%d dec) - file signature %s",
 				VERSION, WP_VERSION, WP_VERSION, FILE_SIGNATURE);
 	srand(time(NULL));
-	
+
 	if (cfg_open(&cfg) != 0) {
 		perror("fpacwpd : error in configuration reading");
 		exit(1);
 	}
-	
+
 	if (init_adjacents(&cfg)) {
 		perror("fpacwpd : error init adjacents");
 		exit(1);
 	}
-		
+
 	rc = init_rose();
 	if (rc < 0) {
 		syslog(LOG_ERR, "fpacwpd : cannot init ROSE access point");
 		exit(1);
 	}
-	
+
 	/* Informations of the node in case of creation of database */
 	/*memset(&wp, 0, sizeof(wp));*/
 	wp = calloc(sizeof(*wp), 1);
@@ -818,12 +821,12 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "fpacwpd : cannot open database %s\n", wp_file);
 		exit(1);	
 	}
-		
+
 	if (is_daemon && !daemon_start(TRUE)) {
 		fprintf(stderr, "fpacwpd cannot become daemon\n");
 		exit(1);
 	}
-		
+
 	while (1) {
 /*		fd = WaitEvent(1000);*/
 /* wait 2 seconds = 2000 milliseconds */

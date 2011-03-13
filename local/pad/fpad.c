@@ -353,18 +353,8 @@ int main(int argc, char **argv)
 	sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
 	sigaction(SIGTERM, &act, &oact);
-	
-	/* No signal !*/ 
-/*
-	for (i = 1 ; i < NSIG ; i++)
-	{
-		if ((i == SIGABRT) || (i == SIGINT) || (i == SIGTERM))
-			continue;
-		else if (i == SIGHUP)
-			signal(SIGHUP, sighup_handler);
-		else
-			signal(i, SIG_IGN);
-*/	
+
+ 	signal(SIGPIPE, SIG_IGN);
 
 	/* Load AX25 L2 configuration */
 	if (ax25_config_load_ports() == 0)
@@ -770,17 +760,12 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 			if ((u->fd != -1) && (FD_ISSET(u->fd, &fdread)))
 			{
 				len = read(u->fd, buffer+2, sizeof(buffer)-2);
-/* DEBUG F6BVP */
+				
 				if (len <= 0)
-/* DEBUG F6BVP */
-/* DEBUG F6BVP */
-				if (len == 0) {
-					fprintf (stderr, "FPAD : CONNECTED read 0 length data\n");
-				}
-/* DEBUG F6BVP */
-				if (len < 0)
 				{
+/* DEBUG F6BVP*/ 
 					connection_done = 0;
+					fprintf (stderr, "FPAD : data read length <= 0 connection_done\n");
 					len = -1;
 				}
 			}
