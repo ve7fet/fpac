@@ -1947,9 +1947,16 @@ int do_status(int argc, char **argv)
 
 	if (wp_open("NODE") == 0)
 	{
-		if ((n = wp_nb_records()) < 0) n = 0;
+/* DEBUG F6BVP */
+	fprintf (stderr, "do_status() wp opened\n");	
+		n = wp_nb_records();
+/* DEBUG F6BVP */
+/*	if ((n = wp_nb_records()) < 0) n = 0;*/
+	fprintf (stderr, "do_status() wp_nb_records() returned  %d\n",n);	
+		if (n < 0) n = 0;
 		tprintf("FPAC White Pages : %d\n", n);
-		wp_close();
+/* DEBUG F6BVP */
+/*		wp_close();*/
 	}
 
 	return 0;
