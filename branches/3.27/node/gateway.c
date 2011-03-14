@@ -441,14 +441,14 @@ static int connect_to(char *address[], int family, int escape, char *source)
             address[0]=ax25_config_get_name(address[0]);
 /*FSA*/
 /* DEBUG F6BVP */
-/*		printf ("Family = AF_AX25 ou AF_FLEXNET %d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
+/*		printf ("Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' address[2] ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], address[2], cfg.alt_callsign);*/
 
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
                     node_msg("Invalid port");
                     return -1;
                 }
 		
-		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
+		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", call);
 			return -1;
