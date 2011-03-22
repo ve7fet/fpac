@@ -675,7 +675,7 @@ void db_compute_vector(int dirty, vector_t * vector)
 			else
 				treshold = treshold * 2;
 /* DEBUG F6BVP */
-		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d Treshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);
+/*		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d Treshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);*/
 			
 			crc16_cumul(NULL, 0);
 			*(unsigned short *) crc_buf = htons(vector->seed);

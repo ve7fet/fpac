@@ -284,9 +284,10 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	switch (family)
 	{
 	case AF_ROSE:
-		
 	
-		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
+/* DEBUG F6BVP */
+		fprintf (stderr, "connect_to() Family AF_ROSE =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);
+		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
 			return -1;
@@ -347,7 +348,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 
 		memcpy(path + (10 - addrlen), address[pos], addrlen);
-
+/* DEBUG F6BVP */
+		fprintf(stderr, "connect_to '%s' @ '%s' address[1]='%s'\n", strupr(address[0]), roseaddr(path), address[1]);
 		sprintf(User.dl_name, "%s @ %s", strupr(address[0]), roseaddr(path));
 
 		++pos;
@@ -391,6 +393,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		break;
 
 	case AF_NETROM:
+/* DEBUG F6BVP */
+		fprintf (stderr, "connect_to() Family AF_NETROM =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
@@ -442,13 +446,15 @@ static int connect_to(char *address[], int family, int escape, char *source)
 /*FSA*/
 /* DEBUG F6BVP */
 /*		printf ("Family = AF_AX25 ou AF_FLEXNET %d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
+/* DEBUG F6BVP */
+		fprintf (stderr, "connect_to() Family AF_FLEXNET =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);
 
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
                     node_msg("Invalid port");
                     return -1;
                 }
 		
-		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
+		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", call);
 			return -1;
@@ -511,7 +517,9 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 		eol = AX25_EOL;
 		break;
-	case AF_INET:
+	case AF_INET:  
+/* DEBUG F6BVP */
+		fprintf (stderr, "connect_to() Family AF_INET =%d address[0] ='%s' address[1] = '%s'\n", family, address[0], address[1]);
 		if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
 			node_perror("connect_to: socket", errno);

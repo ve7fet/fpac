@@ -165,8 +165,13 @@ struct flex_gt *read_flex_gt(void) {
     struct flex_gt *p = NULL, *list = NULL, *new_el;
     int i = 0, k;
     errno = 0;
+/* DEBUG F6BVP */
+	fprintf (stderr, "read_flex_gt() FLEX_GT_FILE %s\n", FLEX_GT_FILE);
+
     if ((fp = fopen(FLEX_GT_FILE, "r")) == NULL) {
-        printf("Error : file %s not found\n", FLEX_GT_FILE);
+/* DEBUG F6BVP */
+        fprintf(stderr, "Error : file %s not found\n", FLEX_GT_FILE);
+	printf("Error : file %s not found\n", FLEX_GT_FILE);
         return NULL;
     }
 
@@ -182,7 +187,10 @@ struct flex_gt *read_flex_gt(void) {
         safe_strncpy(new_el->call, strtok(NULL, " \t\n\r"), 9);
         safe_strncpy(new_el->dev, strtok(NULL, " \t\n\r"), 13);
 
-        k = 0;
+/* DEBUG F6BVP */
+        fprintf(stderr, "read_flex_gt() addr '%04d' call '%s' dev '%s'\n", new_el->addr, new_el->call, new_el->dev);
+
+	k = 0;
         while ((cp = strtok(NULL, " \t\n\r")) != NULL && k < AX25_MAX_DIGIS)
             safe_strncpy(new_el->digis[k++], cp, 9);
         while (k < AX25_MAX_DIGIS)
@@ -193,13 +201,22 @@ struct flex_gt *read_flex_gt(void) {
 
             if ((addr = nr_config_get_name(new_el->dev)) == NULL) {
                 /*			rs_config_load_ports();*/
-                if ((addr = rs_config_get_name(new_el->dev)) == NULL) {
+
+/* DEBUG F6BVP */
+		if ((addr = rs_config_get_addr(new_el->dev)) == NULL) {
+			fprintf(stderr,	"read_flexd: invalid port setting\n");
+			return NULL;
+		} else {
+			new_el->af_mode = AF_ROSE;
+/* DEBUG F6BVP */
+/*
+	    if ((addr = rs_config_get_name(new_el->dev)) == NULL) {
                     fprintf(stderr,
                             "read_flex_gt: invalid port setting\n");
                     return NULL;
                 } else {
                     new_el->af_mode = AF_ROSE;
-                }
+*/                }
             } else {
                 new_el->af_mode = AF_NETROM;
             }
@@ -306,6 +323,9 @@ struct flex_dst *find_dest(char *dest_call, struct flex_dst *list)
 	fdst = list ? list : read_flex_dst();
 	for (p = fdst; p != NULL; p = p->next)
 	{
+/* DEBUG F6BVP */
+	fprintf (stderr, "find_dest() liste '%s'\n",p->dest_call); 	
+
 		if (!strcasecmp(call, p->dest_call)
 			&& (ssid >= p->ssida && ssid <= p->sside))
 		{
@@ -328,6 +348,8 @@ struct flex_gt *find_gateway(int addr, struct flex_gt *list)
 	flgt = list ? list : read_flex_gt();
 	for (p = flgt; p != NULL; p = p->next)
 	{
+/* DEBUG F6BVP */
+	fprintf (stderr, "find_gateway() addr '%s' '%s'\n", addr, p->addr); 	
 		if (addr == p->addr)
 		{
 			f = *p;
