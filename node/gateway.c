@@ -284,9 +284,10 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	switch (family)
 	{
 	case AF_ROSE:
-		
 	
-		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
+/* DEBUG F6BVP */
+	/*	fprintf (stderr, "Connect_to() Family AF_ROSE =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
+		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
 			return -1;
@@ -347,7 +348,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 
 		memcpy(path + (10 - addrlen), address[pos], addrlen);
-
+/* DEBUG F6BVP */
+		fprintf(stderr, "Connect_to() '%s' @ '%s' address[1]='%s'\n", strupr(address[0]), roseaddr(path), address[1]);
 		sprintf(User.dl_name, "%s @ %s", strupr(address[0]), roseaddr(path));
 
 		++pos;
@@ -391,6 +393,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		break;
 
 	case AF_NETROM:
+/* DEBUG F6BVP */
+/*		fprintf (stderr, "Connect_to() Family AF_NETROM =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
@@ -439,16 +443,16 @@ static int connect_to(char *address[], int family, int escape, char *source)
 /*FSA       AF_NETROM needs to adjust port 'cause there's a device like ax2 * /
             dest=address[0];
             address[0]=ax25_config_get_name(address[0]);
-/*FSA*/
+*FSA*/
 /* DEBUG F6BVP */
-/*		printf ("Family = AF_AX25 ou AF_FLEXNET %d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
+/*		fprintf (stderr, "Connect_to() Family AF_FLEXNET =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
 
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
                     node_msg("Invalid port");
                     return -1;
                 }
 		
-		if (strcasecmp(address[1], cfg.alt_callsign) == 0)
+		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", call);
 			return -1;
@@ -511,7 +515,9 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 		eol = AX25_EOL;
 		break;
-	case AF_INET:
+	case AF_INET:  
+/* DEBUG F6BVP */
+/*		fprintf (stderr, "Connect_to() Family AF_INET =%d address[0] ='%s' address[1] = '%s'\n", family, address[0], address[1]);*/
 		if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
 			node_perror("connect_to: socket", errno);
@@ -961,33 +967,45 @@ int do_connect(int argc, char **argv)
 		/* Check if known Flex destination */
 		else if ((argc == 2) && ((flx = find_dest(argv[1], NULL)) != NULL))
 		{						/* Check FlexNet */
+/* DEBUG F6BVP */
+/*		fprintf	(stderr, "Check if %s is a known Flex destination (address=%04d)\n", argv[1], flx->addr);*/
 			k = 1;
-			strcpy(netromcall, argv[1]);
+			strcpy(netromcall, strupr(argv[1]));
 			flgt = find_gateway(flx->addr, NULL);
 			if (flgt == NULL)
 			{
-				node_msg ("Error: No gateway for destination %s", netromcall);
+				node_msg ("Error: No gateway for flex destination %s", netromcall);
 				return 0;
 			}
-
+/* DEBUG F6BVP */
+/*		fprintf (stderr, "Flex gateway %04d call '%s' dev '%s'\n", flgt->addr, flgt->call, flgt->dev);*/
 /*			argv[k++] = ax25_config_get_name(flgt->dev); */
 			argv[k++] = flgt->dev;
 			argv[k++] = netromcall;
-		while ((k - 3) < AX25_MAX_DIGIS && flgt->digis[k - 3][0] != '\0')
+		while ((k - 4) < AX25_MAX_DIGIS && flgt->digis[k - 4][0] != '\0')
 			{
 				k++;
-				argv[k-1] = flgt->digis[(k) - 3];
+				argv[k-1] = flgt->digis[(k) - 4];
+/* DEBUG F6BVP */
+/*				if (flgt->digis[k - 4][0] != '\0')
+					fprintf (stderr, "digi(%d) '%s''\n", k-4, argv[k-1]);*/
 			}
-		if (strspn(argv[k-1], "0123456789") == strlen(argv[k-1])) {
-			strcpy(destaddr, argv[k-1]);
-			argv[k-1] = flgt->call;
-			strcpy(argv[k], destaddr); 	
-			k++;
+/* DEBUG F6BVP */
+		n = strspn(argv[k-2],"0123456789");
+/*		fprintf (stderr, "Flex gateway k-1=%d n=%d 'k-4:%s k-3:%s k-2:%s'\n", k-1, n, argv[k-4], argv[k-3], argv[k-2]);*/
+		if (n != 0) {
+			if ( n == strlen(argv[k-2])) {
+				strcpy(destaddr, argv[k-2]);
+/*				argv[k-1] = flgt->call;*/
+				strcpy(argv[k-4],flgt->call);
+				strcpy(argv[k-3], destaddr); 	
+/*				k++;*/
+			}
 		}
 		else {
-			argv[k++] = flgt->call;
+			argv[1] = flgt->call;
 		}
-			argv[k++] = NULL;
+			argv[k-2] = NULL;
 			argc = k;
 			source = "(flex) ";
 
