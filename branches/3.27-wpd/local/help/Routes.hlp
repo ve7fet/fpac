@@ -1,9 +1,0 @@
-
-USAGE
-        Routes [Rose/Fpac address]
-
-DESCRIPTION
-        The Route Table shows the primary and alternate routes set for addresses.
-	Note: 
-	    Open = available 
-	    Closed = unavailable at this time. 
