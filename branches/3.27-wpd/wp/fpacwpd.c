@@ -176,8 +176,8 @@ static void rose_read_handler(int s)
 	  memset(&pdu, 0, sizeof(wp_pdu));
 	  rc = wp_receive_pdu(s, &pdu);
 	  if (rc < 0) {	/* Connection lost or protocol error */
-/* DEBUG F6BVP */		
-		if (verbose) syslog(LOG_INFO, "rose_read_handler() receive_pdu rc %d connection lost or protocol error", rc);
+/* DEBUG F6BVP 		
+		if (verbose) syslog(LOG_INFO, "rose_read_handler() receive_pdu rc %d connection lost or protocol error", rc);*/
 		close_client(s, 0);
 		return;
 	  }
