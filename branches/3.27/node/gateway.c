@@ -445,7 +445,7 @@ FSA*/
                     return -1;
                 }
 /* DEBUG F6BVP */
-		fprintf (stderr, "Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);
+/*		fprintf (stderr, "Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);*/
 		
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
