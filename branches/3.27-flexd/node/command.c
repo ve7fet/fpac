@@ -2098,7 +2098,8 @@ int do_dest(int argc, char **argv)
 			node_msg("No FlexNet destinations");
 		
 		node_msg("Read /var/log/fpac.log file");
-*/		return 0;
+*/		free_flex_dst(fdst);
+		return 0;
 	}
 
 	/* "dest" */
@@ -2122,6 +2123,7 @@ int do_dest(int argc, char **argv)
 	{
 		node_perror("do_dest: read_flex_gt", errno);
 		free_flex_dst(fdst);
+		free_flex_gt(flgt);
 		return 0;
 	}
 
