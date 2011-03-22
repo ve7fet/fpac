@@ -349,7 +349,7 @@ static int connect_to(char *address[], int family, int escape, char *source)
 
 		memcpy(path + (10 - addrlen), address[pos], addrlen);
 /* DEBUG F6BVP */
-		fprintf(stderr, "Connect_to() '%s' @ '%s' address[1]='%s'\n", strupr(address[0]), roseaddr(path), address[1]);
+/*		fprintf(stderr, "Connect_to() '%s' @ '%s' address[1]='%s'\n", strupr(address[0]), roseaddr(path), address[1]);*/
 		sprintf(User.dl_name, "%s @ %s", strupr(address[0]), roseaddr(path));
 
 		++pos;

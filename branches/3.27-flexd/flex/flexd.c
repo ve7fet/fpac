@@ -362,11 +362,9 @@ int download_dest(char *gateway, char *fname)
 	} */
 
 	/*FSA*/
-	fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s'\n", destcall, digicall, mycall, addr);
+	if (verbose) fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s' addrlen %d\n",
+		       	destcall, digicall, mycall, addr, addrlen);
 	/*FSA*/
-        printf("Case AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s' addrlen %d\n",
-		destcall, digicall, mycall, addr, addrlen);
-
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
 		fprintf(stderr, "%s\n", buffer);
@@ -717,6 +715,9 @@ int parse_dest(char *gateway, char *fname)
  			if (strncmp(ssid, "(Commands", 9) == 0)	/* do not include final FPAC prompt */
 			break;
 			fputs(line, fdst);
+
+			if (verbose) fprintf (stderr, "%s",line);
+		
 			cp = strtok(NULL, " \t\n\r");
 		} while (cp != NULL);
 	}

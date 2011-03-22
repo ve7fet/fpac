@@ -163,7 +163,7 @@ struct flex_gt *read_flex_gt(void) {
     char buffer[256], *cp;
     char *addr;
     struct flex_gt *p = NULL, *list = NULL, *new_el;
-    int i = 0, k;
+    int i = 0, k, n;
     errno = 0;
 
     if ((fp = fopen(FLEX_GT_FILE, "r")) == NULL) {
@@ -191,35 +191,24 @@ struct flex_gt *read_flex_gt(void) {
 
 /* Find Protocol family to be used for Flex connection based on dev name */ 	
 
-	if ((addr = ax25_config_get_name(new_el->dev)) == NULL) {
-            /*			nr_config_load_ports();*/
-
-            if ((addr = nr_config_get_name(new_el->dev)) == NULL) {
-                /*			rs_config_load_ports();*/
-
-/* DEBUG F6BVP * 
-		if ((addr = rs_get_addr(new_el->dev)) == NULL) {
-			fprintf(stderr,	"read_flexd: invalid port setting\n");
-			return NULL;
-		} else { */
-			new_el->af_mode = AF_ROSE;
-/* DEBUG F6BVP */
+	if ((addr = ax25_config_get_addr(new_el->dev)) == NULL) {
+		n = nr_config_load_ports();
+			if ((addr = nr_config_get_addr(new_el->dev)) == NULL) {
+				n = rs_config_load_ports();
+				if ((addr = rs_config_get_addr(new_el->dev)) == NULL) {
+					fprintf(stderr,
+						"read_flex_gt() invalid port setting\n");
+					return NULL;
+				} else {
+					new_el->af_mode = AF_ROSE;
+				}
+			} else {
+				new_el->af_mode = AF_NETROM;
+			}
+		} else {
+			new_el->af_mode = AF_FLEXNET;
 		}
-/*
-	    if ((addr = rs_config_get_name(new_el->dev)) == NULL) {
-                    fprintf(stderr,
-                            "read_flex_gt: invalid port setting\n");
-                    return NULL;
-                } else {
-                    new_el->af_mode = AF_ROSE;
-                }
-            } else {
-                new_el->af_mode = AF_NETROM;
-            }
-*/        } else {
-            new_el->af_mode = AF_FLEXNET;
-        }
-
+        
         if (list == NULL) {
             list = new_el;
             p = list;
