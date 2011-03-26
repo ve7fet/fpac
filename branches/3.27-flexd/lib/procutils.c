@@ -191,11 +191,14 @@ struct flex_gt *read_flex_gt(void) {
 
 /* Find Protocol family to be used for Flex connection based on dev name */ 	
 
-	if ((addr = ax25_config_get_addr(new_el->dev)) == NULL) {
-		n = nr_config_load_ports();
-			if ((addr = nr_config_get_addr(new_el->dev)) == NULL) {
+	n = ax25_config_load_ports();
+	if ((addr = ax25_config_get_dev(new_el->dev)) == NULL) {
+		
+		nr_config_load_ports();
+			if ((addr = nr_config_get_dev(new_el->dev)) == NULL) {
+		
 				n = rs_config_load_ports();
-				if ((addr = rs_config_get_addr(new_el->dev)) == NULL) {
+				if ((addr = rs_config_get_dev(new_el->dev)) == NULL) {
 					fprintf(stderr,
 						"read_flex_gt() invalid port setting\n");
 					return NULL;
@@ -207,6 +210,8 @@ struct flex_gt *read_flex_gt(void) {
 			}
 		} else {
 			new_el->af_mode = AF_FLEXNET;
+/* DEBUG F6BVP */
+/*    			fprintf(stderr, "read_flex_gt() af_mode= %d AF_FLEXNET dev=%s\n", new_el->af_mode, new_el->dev);*/
 		}
         
         if (list == NULL) {
@@ -218,6 +223,8 @@ struct flex_gt *read_flex_gt(void) {
         }
     }
     fclose(fp);
+/* DEBUG F6BVP */
+/*    fprintf(stderr, "read_flex_gt() af_mode= %d dev=%s\n", new_el->af_mode, new_el->dev);*/
     return list;
 }
 

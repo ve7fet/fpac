@@ -38,7 +38,7 @@ struct ax_routes *gw;
 int s;
 static int backoff = -1;
 static int ax25mode = -1;
-int verbose = 1;
+int verbose = 0;
 int passive = 1;
 int debug = 1;
 int is_daemon = 1;
@@ -205,24 +205,28 @@ int download_dest(char *gateway, char *fname)
 	}
 	if (af_mode == 0) {
 
-		if ((addr = ax25_config_get_addr(port)) == NULL) {
-			nr_config_load_ports();
-
-			if ((addr = nr_config_get_addr(port)) == NULL) {
-				rs_config_load_ports();
-
-				if ((addr = rs_config_get_addr(port)) == NULL) {
+		/* ax25_config_load_ports() already called by main() */
+		if ((addr = ax25_config_get_dev(port)) == NULL) {
+			
+			n = nr_config_load_ports();
+			if ((addr = nr_config_get_dev(port)) == NULL) {
+			
+				n = rs_config_load_ports();
+				if ((addr = rs_config_get_dev(port)) == NULL) {
 					fprintf(stderr,
 						"flexd: invalid port setting\n");
 					return -1;
 				} else {
 					af_mode = AF_ROSE;
+				if (verbose) fprintf(stderr,"flexd download dest af mode AF_ROSE =%d device '%s'\n", af_mode, port);
 				}
 			} else {
 				af_mode = AF_NETROM;
+				if (verbose) fprintf(stderr,"flexd download dest af mode AF_NETROM =%d device '%s'\n", af_mode, port);
 			}
 		} else {
 			af_mode = AF_AX25;
+				if (verbose) fprintf(stderr,"flexd download dest af mode AF_AX25 =%d device '%s'\n", af_mode, port);
 		}
 	}
 
@@ -280,6 +284,9 @@ int download_dest(char *gateway, char *fname)
 	/*
 	 * Set our AX.25 callsign and Rose address accordingly.
 	 */
+
+	addr = rs_config_get_addr(port);
+
 	if (rose_aton(addr, rosebind.srose_addr.rose_addr) == -1) {
 		sprintf(buffer, "ERROR: invalid Rose port address - %s\n", addr);
 		fprintf(stderr, "%s\n", buffer);
@@ -341,6 +348,8 @@ int download_dest(char *gateway, char *fname)
 	nrconnect.fsa_ax25.sax25_ndigis = 0;
 	addrlen = sizeof(struct full_sockaddr_ax25);
 
+	addr = nr_config_get_addr(port);
+	
 	if (ax25_aton_entry(addr, nrbind.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid NET/ROM port callsign - %s\n", addr);
 		fprintf(stderr, "%s\n", buffer);
@@ -353,18 +362,19 @@ int download_dest(char *gateway, char *fname)
 		return (-1);
 	}
 
-/*	if (dlist[1] == NULL) { */
+	if (dlist[1] == NULL) { 
 		strcpy(destcall, dlist[0]);
-/*	}
+	}
 	else {
 		strcpy(destcall, dlist[1]);
 		strcpy(digicall, dlist[0]);
-	} */
+	} 
 
 	/*FSA*/
-	if (verbose) fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' port callsign: '%s' addrlen %d\n",
-		       	destcall, digicall, mycall, addr, addrlen);
+/*	if (verbose) fprintf(stderr, "\nCase AF_NETROM destcall: '%s' digicall: '%s' mycall: '%s' addr: '%s' addrlen %d\n",
+		       	destcall, digicall, mycall, addr, addrlen);*/
 	/*FSA*/
+
 	if (ax25_aton_entry(destcall, nrconnect.fsa_ax25.sax25_call.ax25_call) == -1) {
 		sprintf(buffer, "ERROR: invalid destination callsign - %s\n", destcall);
 		fprintf(stderr, "%s\n", buffer);
@@ -490,10 +500,12 @@ int download_dest(char *gateway, char *fname)
 	/*
 	 * Set our AX.25 callsign and AX.25 port callsign accordingly.
 	 */
+	addr = ax25_config_get_addr(port);
+
 	if (*mycall == '\0')
-		sprintf(buffer, "\n%s %s\n", addr, addr);
+		sprintf(buffer, "%s %s", addr, addr);
 	else
-		sprintf(buffer, "\n%s %s\n", mycall, addr);
+		sprintf(buffer, "%s %s", mycall, addr);
 
 	ax25_aton(buffer, &sockaddr.ax25);
 	
@@ -716,8 +728,6 @@ int parse_dest(char *gateway, char *fname)
 			break;
 			fputs(line, fdst);
 
-			if (verbose) fprintf (stderr, "%s",line);
-		
 			cp = strtok(NULL, " \t\n\r");
 		} while (cp != NULL);
 	}
