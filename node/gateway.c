@@ -444,8 +444,6 @@ static int connect_to(char *address[], int family, int escape, char *source)
             dest=address[0];
             address[0]=ax25_config_get_name(address[0]);
 *FSA*/
-/* DEBUG F6BVP */
-/*		fprintf (stderr, "Connect_to() Family AF_FLEXNET =%d address[0] ='%s' address[1] = '%s' address[2] = '%s'\n", family, address[0], address[1], address[2]);*/
 
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
                     node_msg("Invalid port");
@@ -463,6 +461,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 			node_perror("connect_to: socket", errno);
 			return -1;
 		}
+/* DEBUG F6BVP */
+	/*	fprintf (stderr, "Connect_to() Family AF_FLEXNET =%d call ='%s' dest = '%s'\n", family, call, dest);*/
 
 		sprintf(path, "%s %s", call, dest);
 
