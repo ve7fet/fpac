@@ -310,20 +310,74 @@ int pty_open (int *pid, struct winsize *winsize, char **chargv, char **chenvp)
 	int c;
 	int tty, devtty;
 
-	sprintf (line, "/dev/tty");
-	devtty = open (line, O_RDWR);
+	for (c = 'a'; c <= 'z'; c++)
+	{
+		for (i = 0; i < 16; i++)
+		{
+			sprintf (line, "/dev/pty%c%x", c, i);
+			pty = open (line, O_RDWR | O_NOCTTY);
+			if (pty >= 0)
+				break;
+		}
+		if (pty >= 0)
+			break;
+	}
+
+	if (pty < 0)
+	{
+		fprintf (stderr, "Out of pty\n");
+		return -1;
+	}
+
+	ioctl (pty, TIOCEXCL, NULL);
+
+	if ((*pid = fork ()) != 0)
+	{
+		/* Father */
+		return pty;
+	}
+
+	/* Child */
+
+	close (pty);
+
+	setenv ("TERM", "linux", 1);
+
+	line[5] = 't';
+	tty = open (line, O_RDWR);
+	if (tty < 0)
+	{
+		fprintf (stderr, "Cannot open slave side\n");
+		close (pty);
+		return -1;
+	}
+	(void) chown (line, getuid (), getgid ());
+	(void) chmod (line, 0600);
+
+	setsid ();					/* will break terminal affiliation */
+	ioctl (tty, TIOCSCTTY, (char *) 0);
+
+	setuid (getuid ());
+	setgid (getgid ());
+
+	devtty = open ("/dev/tty", O_RDWR);
 	if (devtty < 0)
 	{
-		fprintf (stderr, "cannot open '%s'\n", line);
+		perror ("cannot open /dev/tty");
 		exit (1);
 	}
 
+/*      if (ioctl(devtty, TIOCNOTTY, (char *)0)) {
+   perror("cannot do iotctl TIOCNOTTY");
+   exit(1);
+   }
+ */
 	ioctl (devtty, TIOCSWINSZ, winsize);
+	close (tty);
 	dup2 (devtty, 0);
 	dup2 (devtty, 1);
 	dup2 (devtty, 2);
 	execve (chargv[0], chargv, chenvp);
-	close(devtty);
 	exit (0);
 }
 
@@ -499,7 +553,7 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		syslog (LOG_ERR, "cannot fork, closing connection to %s\n", call);
+		syslog (LOG_ERR, "cannot fork %m, closing connection to %s\n", call);
 		write_ax25 (MSG_CANNOTFORK, sizeof (MSG_CANNOTFORK));
 		sleep (EXITDELAY);
 		return 1;
