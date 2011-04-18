@@ -778,6 +778,9 @@ int main(int argc, char *argv[])
 	int fd;
 	wp_t *wp;
 	
+/* Ignore SIGPIPE signal when writing to a socket fails */	
+	signal(SIGPIPE, SIG_IGN);
+
 	process_options(argc, argv);
 	
 	openlog("fpacwpd", LOG_PERROR | LOG_PID, LOG_USER);	
