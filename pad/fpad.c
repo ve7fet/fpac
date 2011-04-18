@@ -355,6 +355,7 @@ int main(int argc, char **argv)
 	sigaction(SIGTERM, &act, &oact);
 	
 	/* No signal !*/ 
+	signal(SIGPIPE, SIG_IGN);
 /*
 	for (i = 1 ; i < NSIG ; i++)
 	{
