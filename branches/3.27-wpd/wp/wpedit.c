@@ -246,7 +246,7 @@ int main(int ac, char **av)
 				wp.is_node = 0;
 			else
 				wp.is_node = 1;
-			if (wp_set(&wp))
+			if (wp_set(&wp) == 0)
 				printf("%s Node attribute updated", call);
 			else
 				printf("%s record not updated", call);
@@ -255,7 +255,7 @@ int main(int ac, char **av)
 			break;
 		case 'R':
 			wp.is_deleted = 1;
-			if (wp_set(&wp))
+			if (wp_set(&wp) == 0)
 				printf("%s WP record deleted", call);
 			else
 				printf("%s record not updated", call);
@@ -264,7 +264,7 @@ int main(int ac, char **av)
 			break;
 		case 'U':
 			wp.is_deleted = 0;
-			if (wp_set(&wp))
+			if (wp_set(&wp) == 0)
 				printf("%s WP record restored", call);
 			else
 				printf("%s record not updated", call);
