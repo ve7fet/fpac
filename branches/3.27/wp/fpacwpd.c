@@ -340,7 +340,7 @@ static void listening_handler(int s)
 
 	new_client = accept(s, (struct sockaddr *)&address, &addrlen);
 
-	if (strncmp(ax25_ntoa(&address.srose_call),"WPEDIT-0",8) == 0)
+	if (strncmp(ax25_ntoa(&address.srose_call),"WPEDIT", 6) == 0)
 		WPEDIT_CLIENT = 1;
 
 	if (new_client < 0) return;
