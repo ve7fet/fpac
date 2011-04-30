@@ -27,6 +27,15 @@ int wp_debug = 0;
 * Private internal functions section
 *****************************************************************************/
 
+static char *strip_zero_ssid(char *call)
+{
+	char *cp;
+
+	if ((cp = strstr(call, "-0")) != NULL)
+		*cp = 0;
+	return call;
+}
+
 static ax25_address *call_clean(ax25_address *call)
 {
 	/* Cleans the callsign */
@@ -963,6 +972,7 @@ int wp_get(ax25_address *call, wp_t *wp)
 	call_clean(call);
 	memset(&pdu, 0, sizeof(wp_pdu));
 	pdu.type = wp_type_get;
+	strip_zero_ssid(call);
 	pdu.data.call = *call;
 	rc = wp_send_pdu(wp_socket, &pdu);
 	if (rc)
