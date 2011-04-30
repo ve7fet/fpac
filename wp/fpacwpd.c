@@ -52,7 +52,7 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 	}
 	context[client]->address = *address;
 	
-	if (strcmp("WP-0", ax25_ntoa(&address->srose_call)) == 0) {
+	if (strcmp("WP", ax25_ntoa(&address->srose_call)) == 0) {
 		context[client]->type = WP_SERVER;
 	}
 	else {
