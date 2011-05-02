@@ -965,6 +965,7 @@ int wp_get(ax25_address *call, wp_t *wp)
 {
 	wp_pdu pdu;
 	int rc;
+	char *callsign;
 	
 	if (wp_socket == -1)
 		return -1;
@@ -972,7 +973,9 @@ int wp_get(ax25_address *call, wp_t *wp)
 	call_clean(call);
 	memset(&pdu, 0, sizeof(wp_pdu));
 	pdu.type = wp_type_get;
-	strip_zero_ssid(call);
+	memcpy(&callsign, &call, 6); 	
+	strip_zero_ssid(callsign);
+	memcpy(&call, &callsign, 6); 	
 	pdu.data.call = *call;
 	rc = wp_send_pdu(wp_socket, &pdu);
 	if (rc)
