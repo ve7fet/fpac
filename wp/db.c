@@ -632,7 +632,7 @@ void db_compute_vector(int dirty, vector_t * vector)
 	dirty_first = 0;
 
 /* DEBUG F6BVP */
-	if (verbose) syslog(LOG_INFO,"FPACWPD: compute_vector() treshold = %d", treshold) ;
+	if (verbose) syslog(LOG_INFO,"db_compute_vector() treshold = %d", treshold) ;
 
 	for (i = 0; i <= db_header->nb_record; i++)
 	{

@@ -266,7 +266,7 @@ static void display_results(wp_t *wp, int limit, int nb)
 			nb = limit;
 		}
 
-		printf("Callsign  Status  Last update       DNIC address Type Locator-city-digis"); 
+		printf("Callsign  Status  Last update       DNIC address Type Locator City                 Digis call"); 
 		CR();
 			
 		for (i = 0 ; i < nb ; i++)
@@ -291,10 +291,11 @@ static void display_results(wp_t *wp, int limit, int nb)
 			else
 				printf("User ");
 
+			printf("%-6s %-21s", wp->locator, wp->city);
+			
 			for (j = wp->address.srose_ndigis-1 ; j >= 0  ; j--)
-				printf("%s ", ax25_ntoa(&wp->address.srose_digis[j]));
+				printf(" %s ", ax25_ntoa(&wp->address.srose_digis[j]));
 						
-			printf("%s %s", wp->locator, wp->city);
 			CR();
 			
 			++wp;
