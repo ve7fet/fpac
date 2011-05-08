@@ -8,7 +8,7 @@ doc_DATA = 	FPAC-HOWTO.html \
 		FPAC-HOWTO-6.html \
 		FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html \
 		FPAC-LINUX-FLASH-MINI-HOWTO104.html \
-		FPAC-MINI-HOWTO-176.html \
+		FPAC-MINI-HOWTO-177.html \
 		FPAC-MINI-HOWTO-FR-175.html \
 		next.gif \
 		prev.gif \
