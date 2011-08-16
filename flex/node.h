@@ -33,7 +33,7 @@
 /*#include <errno.h>*/
 #include <netax25/ax25io.h>
 
-struct user
+struct fpac_user
 {
         pid_t           pid;
         key_t           ipc_key;
@@ -51,7 +51,7 @@ struct user
         char            unused[92];
 };
 
-extern struct user User;
+extern struct fpac_user User;
 
 extern ax25io *NodeIo;
 
@@ -115,7 +115,7 @@ extern int system_user_count(void);
 /* in config.c */
 extern int is_hidden(const char *port);
 extern int check_perms(int what, unsigned long peer);
-extern char *read_perms(struct user *up, unsigned long peer);
+extern char *read_perms(struct fpac_user *up, unsigned long peer);
 extern int read_config(void);
 extern int get_escape(char *s);
 
