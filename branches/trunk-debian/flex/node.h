@@ -1,5 +1,22 @@
-#define VERSION                "AWZNode v0.4-pre2"
-#define COMPILING	       "February 18, 2000"
+
+/******************************************************
+ * node/node.h                                        *
+ * FPAC project.            FPAC NODE                 *
+ *                                                    *
+ * Parts of code from different sources of ax25-utils *
+ *                                                    *
+ * F6FBB 05-1997                                      *
+ *                                                    *
+ ******************************************************/
+
+/*#include <linux/ax25.h>
+ *#include <linux/netrom.h>
+ *#include <linux/rose.h>
+ */
+#include <sys/ipc.h>	/* for key_t */
+#include "../lib/ax25compat.h"
+#include "../lib/fpac.h"
+#include "../lib/wp.h"
 
 #define STATE_IDLE	0
 #define STATE_TRYING	1
@@ -25,76 +42,74 @@
 
 #define PERM_TELNET (PERM_TELNET_LOCAL & PERM_TELNET_AMPR & PERM_TELNET_INET)
 
-/* Fake id for Flexnet */
-#define AF_FLEXNET 128
-
-/*#include <sys/types.h>*/
-#include <sys/ipc.h>	/* for key_t */
-/*#include <errno.h>*/
-#include <netax25/ax25io.h>
-
-struct user
-{
-        pid_t           pid;
-        key_t           ipc_key;
-        time_t          logintime;
-        time_t          cmdtime;
-        unsigned char   state;
-        char            call[10];
-        unsigned short  ul_type;
-        unsigned short  dl_type;
-        char            ul_name[32];
-        char            dl_name[32];
-        char            ul_port[32];
-        char            dl_port[32];
-
-        char            unused[92];
-};
-
-extern struct user User;
-
-extern ax25io *NodeIo;
-
-extern long IdleTimeout;
-extern long ConnTimeout;
-extern int ReConnectTo;
-extern int LogLevel;
-extern int EscChar;
-extern int aliascmd;
-
-extern char *HostName;
-extern char *NodeId;
-extern char *NrPort;
-extern char *Prompt;
-extern char *PassPrompt;
-
-#define	CMD_INTERNAL	1
-#define	CMD_ALIAS	2
-#define	CMD_EXTERNAL	3
-
 struct cmd {
 	char	*name;
+	int	valid;
 	int	len;
 	int	type;
+	int	visible;
 	int	(*function) (int argc, char **argv);
 	char	*command;
 	int	flags;
 	int	uid;
 	int	gid;
 	char	*path;
-
 	struct cmd *next;
 };
 
+struct fpac_user
+{
+	int		pid;
+	int		fd;
+	key_t		ipc_key;
+	long		logintime;
+	long		cmdtime;
+	unsigned char	state;
+	char		call[10];
+	unsigned short	ul_type;
+	unsigned short	dl_type;
+	char		ul_name[32];
+	char		dl_name[32];
+	char    	ul_port[32];
+	char    	dl_port[32];
+
+	char		unused[92];
+};
+
+extern struct fpac_user User;
+
+extern long IdleTimeout;
+extern long ConnTimeout;
+extern int ReConnectTo;
+extern int LogLevel;
+extern int EscChar;
+
+extern char HostName[40];
+extern char *NodeId;
+extern char *NrPort;
+
+extern cfg_t cfg;
+
 extern struct cmd *Nodecmds;
+extern struct cmd *Syscmds;
+
+#define	CMD_INTERNAL	1
+#define	CMD_ALIAS	2
+#define	CMD_EXTERNAL	3
 
 #define min(a,b)	((a) < (b) ? (a) : (b))
 #define max(a,b)	((a) > (b) ? (a) : (b))
 
+/* in nodeio.c */
+extern int tprintf(const char *, ...);
+
+/* in nodeconf.c */
+extern int read_conf(int verbose);
+
 /* in cmdparse.c */
-void free_cmdlist(struct cmd *list);
+extern void free_cmdlist(struct cmd *list);
 extern void insert_cmd(struct cmd **list, struct cmd *new);
-extern int add_internal_cmd(struct cmd **list, char *name, int len, int (*function) (int argc, char **argv));
+extern int add_internal_cmd(struct cmd **list, char *name, int len, int visible, int (*function) (int argc, char **argv));
 extern int parse_args(char **argv, char *cmd);
 extern int cmdparse(struct cmd *cmdp, char *cmdline);
 
@@ -110,37 +125,40 @@ extern void logout_user(void);
 extern void update_user(void);
 extern int user_list(int argc, char **argv);
 extern int user_count(void);
-extern int system_user_count(void);
 
 /* in config.c */
 extern int is_hidden(const char *port);
 extern int check_perms(int what, unsigned long peer);
-extern char *read_perms(struct user *up, unsigned long peer);
+extern char *read_perms(struct fpac_user *up, unsigned long peer);
 extern int read_config(void);
-extern int get_escape(char *s);
 
 /* in command.c */
-void init_nodecmds(void);
-extern void node_logout(char *reason);
+extern char *roseaddr(char *addr);
+extern void init_nodecmds(void);
+extern void logout(char *reason);
+extern int do_alias(int argc, char **argv);
+extern int do_application(int argc, char **argv);
 extern int do_bye(int argc, char **argv);
-extern int do_escape(int argc, char **argv);
-
+extern int do_mheard(int argc, char **argv);
+extern int do_dest(int argc, char **argv);
 extern int do_help(int argc, char **argv);
 extern int do_host(int argc, char **argv);
 extern int do_ports(int argc, char **argv);
-extern int do_sessions(int argc, char **argv);
+extern int do_links(int argc, char **argv);
 extern int do_routes(int argc, char **argv);
-extern int do_nodes(int argc, char **argv);
+extern int do_netrom(int argc, char **argv);
 extern int do_status(int argc, char **argv);
+extern int do_users(int argc, char **argv);
+extern int do_dir(int argc, char **argv);
+extern int do_wp(int argc, char **argv);
+extern int do_yapp(int argc, char **argv);
+extern int do_rose(int argc, char **argv);
 
 /* in gateway.c */
+extern char *rs_get_addr(char *dev);
 extern int do_connect(int argc, char **argv);
 extern int do_finger(int argc, char **argv);
 extern int do_ping(int argc, char **argv);
-
-/* in router.c */
-extern int do_links(int argc, char **argv);
-extern int do_dest(int argc, char **argv);
 
 /* in ipc.c */
 extern int ipc_open(void);
@@ -150,15 +168,9 @@ extern int do_talk(int argc, char **argv);
 /* in extcmd.c */
 extern int extcmd(struct cmd *cmdp, char **argv);
 
-/* in system.c */
-extern int do_system(int argc, char **argv);
-extern int examine_user(void);
-extern void newmail(void);
-extern void mailcheck(void);
-extern void lastlog(void);
+/* in fpaccmd.c */
+extern int add_alias_cmd(struct cmd **list, char *cmd, char *arg);
 
-/* in mheard.c */
-extern int do_mheard(int argc, char **argv);
-
-/* in mailbox.c */
-extern int SendMessage( int argc, char **argv);
+/* in nodesys.c */
+extern int do_sysop(int argc, char **argv);
+extern int is_sysop(void);
