@@ -1,24 +1,29 @@
-fpac (3.28)
-	* Moved fpac/help out of etc/ax25 and in to var/ax25/fpac/help, it doesn't really belong
-	  in etc as they are not config files
-	* Bug in expanding variables in conf files with make corrected
-	* Bernard and Leo found and fixed a bug in aprslist.c
-	* Added some init scripts (found in the doc folder for this package)
-	*
-	* Changes from 3.27.17
-        * Merged some fixes in for FLEX to get it working better
-        * Updated fpac.spec file to check OS and select build dependencies better
-        * Bernard updated the included How-TO to version 1.75
-	*
-	* Changes from 3.27.16
-        * Bug in expanding variables in conf files with make corrected
-        * Added some variables to configure.ac to split apart the version for package building
-        * Added a fpac.spec file to build RPM's with
-        * Leo, IZ5FSA, has a done a bunch of work on the FLEX code to get it working again
-          (still more work in progress)
-        * Bernard, F6BVP, has made some debugging changes
+fpac (3.27.18)
+	* Merged some of Bernard's fixes to the white pages database
+	* Minor cosmetic changes for displaying wp data
+	* Bernard updated the included How-TO to version 1.77
+	* Change the user function to fpac_user to get around a bug when 
+	  cross-compiling
 
- -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 14:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Sun, 28 Aug 2011 10:00:00 -0800
+
+fpac (3.27.17)
+	* Merged some fixes in for FLEX to get it working better
+	* Updated fpac.spec file to check OS and select build dependencies better
+	* Bernard updated the included How-TO to version 1.75
+	* Added the aprslist.c patch that was applied to trunk but not this branch
+
+ -- Lee Woldanski <ve7fet@tparc.org> Mon, 07 Mar 2011 10:00:00 -0800
+
+fpac (3.27.16)
+	* Bug in expanding variables in conf files with make corrected
+	* Added some variables to configure.ac to split apart the version for package building
+	* Added a fpac.spec file to build RPM's with
+	* Leo, IZ5FSA, has a done a bunch of work on the FLEX code to get it working again
+	  (still more work in progress)
+	* Bernard, F6BVP, has made some debugging changes
+
+ -- Lee Woldanski <ve7fet@tparc.org>  Mon, 31 Jan 2011 22:00:00 -0800
 
 fpac (3.27.15)
 	* Rolling Bernards changes into an incremental release
