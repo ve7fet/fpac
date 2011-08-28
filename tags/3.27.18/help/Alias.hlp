@@ -1,0 +1,9 @@
+
+USAGE
+        Alias
+
+DESCRIPTION
+	Give  the list of  aliases.  An alias allow to connect any
+        callsign (even remote) using a local callsign. 
+	Aliases may be also directly connected by the user without
+        using fpacnode. 

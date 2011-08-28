@@ -1,0 +1,28 @@
+#
+# Position geographique
+#
+#         deg min sec
+longitude  2  18  80  e
+latitude  48  53  08  n
+#
+# Beacon information by port. 
+# Port names are the same as in @sysconfdir@/ax25/axports 
+# Period in minutes
+#
+[vhf]
+from F6BVP
+to APRS
+period 1
+#
+[uhf-1]
+from F6BVP
+to APRS
+period 5
+#
+[uhf-2]
+from F6BVP
+to APRS
+period 1
+#
+beacon ROSE/FPAC node BBS JN18DV Paris 145,275 1200b 433,775 9600b http://f6bvp.org
+#
