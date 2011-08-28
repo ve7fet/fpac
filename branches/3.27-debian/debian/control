@@ -2,8 +2,8 @@ Source: fpac
 Section: hamradio 
 Priority: extra
 Maintainer: Lee Woldanski <ve7fet@tparc.org>
-Build-Depends: debhelper (>= 7), autotools-dev, libax25-dev,  libc6-dev
-Standards-Version: 3.7.3
+Build-Depends: debhelper (>= 7), autotools-dev, libax25-dev,  libc6-dev (>= 2)
+Standards-Version: 3.8.0
 Homepage: http://rose.fpac.free.fr
 
 Package: fpac

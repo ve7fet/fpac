@@ -20,13 +20,13 @@
 #include "io.h"
 #include "ax25compat.h"
 
-struct user User	= {0};
+struct fpac_user User	= {0};
 static long CallerPos	= -1L;
 
 void login_user(void)
 {
 	FILE *f;
-	struct user u;
+	struct fpac_user u;
 	long pos = 0L;
 	long free = -1L;
 	struct stat statbuf;
@@ -35,7 +35,7 @@ void login_user(void)
 		node_perror(DATA_NODE_LOGIN_FILE, errno);
 		return;
 	}
-	if (statbuf.st_size % sizeof(struct user) != 0) {
+	if (statbuf.st_size % sizeof(struct fpac_user) != 0) {
 		node_msg("%s: Incorrect size", DATA_NODE_LOGIN_FILE);
 		fpaclog(LOGLVL_ERROR, "%s: Incorrect size", DATA_NODE_LOGIN_FILE);
 		return;
@@ -115,7 +115,7 @@ void update_user(void)
 int user_list(int argc, char **argv)
 {
 	FILE *f;
-	struct user u;
+	struct fpac_user u;
 	struct tm *tp;
 	struct proc_nr_nodes *np;
 	char buf[80];
@@ -241,7 +241,7 @@ int user_list(int argc, char **argv)
 int user_count(void)
 {
 	FILE *f;
-	struct user u;
+	struct fpac_user u;
 	int cnt = 0;
 
 	if ((f = fopen(DATA_NODE_LOGIN_FILE, "r")) == NULL) {

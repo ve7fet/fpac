@@ -665,7 +665,7 @@ int do_users(int argc, char **argv)
 			node_msg("Users - AX.25 Level 2 sessions :");
 			tprintf("Port   Callsign     Callsign  AX.25 state  ROSE state  NetRom status");
 			if (is_sysop())
-				tprintf("   Unack    T1     T3     Retr   Rtt Snd-Q Rcv-Q");
+				tprintf(" Unack   T1      T3      Retr  Rtt Snd-Q Rcv-Q");
 			tprintf("\n");
 		}
 
@@ -767,7 +767,7 @@ int do_users(int argc, char **argv)
 			tprintf
 				("Callsign  DNIC addr   <-> Callsign  DNIC addr   LCI Adjacent    AX.25 state");
 			if (is_sysop())
-				tprintf("        Unack Snd-Q Rcv-Q");
+				tprintf("    Unack Snd-Q Rcv-Q");
 			tprintf("\n");
 		}
 
@@ -808,7 +808,7 @@ int do_users(int argc, char **argv)
 		tprintf("%s", cp);
 		if (is_sysop())
 		{
-			tprintf(" %02d    %5d %5d",
+			tprintf("   %02d   %5d %5d",
 					rp->vs < rp->va ? rp->vs - rp->va + 8 : rp->vs - rp->va,
 					rp->sndq, rp->rcvq);
 		}
