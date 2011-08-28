@@ -1,3 +1,12 @@
+fpac (3.27.18)
+        * Merged some of Bernard's fixes to the white pages database
+        * Minor cosmetic changes for displaying wp data
+        * Bernard updated the included How-TO to version 1.77
+        * Change the user function to fpac_user to get around a bug when
+          cross-compiling
+
+ -- Lee Woldanski <ve7fet@tparc.org> Sun, 28 Aug 2011 10:00:00 -0800
+
 fpac (3.27.17)
 	* Merged some fixes in for FLEX to get it working better
 	* Updated fpac.spec file to check OS and select build dependencies better
