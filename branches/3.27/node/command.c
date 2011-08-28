@@ -663,7 +663,7 @@ int do_users(int argc, char **argv)
 		{
 			first = 0;
 			node_msg("Users - AX.25 Level 2 sessions :");
-			tprintf("Port   Callsign     Callsign  AX.25 state  ROSE state  NetRom state");
+			tprintf("Port   Callsign     Callsign  AX.25 state  ROSE state  NetRom status");
 			if (is_sysop())
 				tprintf(" Unack   T1      T3      Retr  Rtt Snd-Q Rcv-Q");
 			tprintf("\n");

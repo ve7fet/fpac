@@ -27,6 +27,15 @@ int wp_debug = 0;
 * Private internal functions section
 *****************************************************************************/
 
+static char *strip_zero_ssid(char *call)
+{
+        char *cp;
+
+        if ((cp = strstr(call, "-0")) != NULL)
+                *cp = 0;
+        return call;
+}
+
 static ax25_address *call_clean(ax25_address *call)
 {
 	/* Cleans the callsign */
@@ -94,11 +103,11 @@ void wp_flush_pdu(void)
 	if (pdu_s_len == 0)
 		return;
 
-	rc = write(pdu_s, pdu_s_cache, pdu_s_len);
+	rc = send(pdu_s, pdu_s_cache, pdu_s_len, 0);
 	pdu_s_len = 0;
 
 	if (rc <= 0)	{
-/*		syslog(LOG_INFO, "wp_flush_pdu() WRITE ERROR - closing wp socket"); */
+/*		syslog(LOG_INFO, "wp_flush_pdu() WRITE ERROR - closing wp socket");*/
 		close(pdu_s);
 	}
 }
@@ -148,6 +157,10 @@ int ancien(wp_pdu *pdu)
 		return (0);
 	}
 }
+
+/*
+ * Return 0 if successful or -1 if error
+ */
 
 int wp_send_pdu(int s, wp_pdu *pdu)
 {
@@ -334,6 +347,10 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 	return 0; /* succes */
 }
 
+/*
+ * Return 0 if successful or -1 if error
+ */
+
 int wp_receive_pdu(int s, wp_pdu *pdu)
 {
 	int rc = 0, L = 0, i, len;
@@ -358,7 +375,8 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		}
 	
 		/* Read the packet */
-		rc = read(s, pdu_r_cache, sizeof(pdu_r_cache));
+/*		rc = read(s, pdu_r_cache, sizeof(pdu_r_cache));*/
+		rc = recv(s, pdu_r_cache, sizeof(pdu_r_cache), 0);
 		if (rc <= 0) {
 /*			syslog(LOG_INFO, "wp_receive_pdu()rc read disconnection or error - status %d\n", pdu->data.status);*/
 			return rc;	/* Disconnection or error */
@@ -653,7 +671,7 @@ int wp_nb_records(void)
 	pdu.data.info.mask = WP_INFO_ALL;
 	
 	rc = wp_send_pdu(wp_socket, &pdu);
-	if (rc)
+	if (rc < 0)
 	{
 		/* Disconnected */
 		syslog(LOG_INFO, "wp_nb_records() send wp error - closing wp socket\n"); 
@@ -664,7 +682,7 @@ int wp_nb_records(void)
 	wp_flush_pdu();
 	
 	rc = wp_receive_pdu(wp_socket, &pdu);
-	if (rc == -1)
+	if (rc < 0)
 	{
 		/* Disconnected */
 		syslog(LOG_INFO, "wp_nb_records() receive wp error - closing wp socket\n"); 
@@ -893,7 +911,7 @@ int wp_get_list(wp_t **wp, int *nb, int flags, char *mask)
 	
 	memcpy(pdu.data.list_req.mask, mask, 9);
 	rc = wp_send_pdu(wp_socket, &pdu);
-	if (rc)
+	if (rc < 0)
 	{
 		/* Disconnected */
 		syslog(LOG_INFO, "wp_get_list() error disconnected - closing wp socket\n");
@@ -905,7 +923,7 @@ int wp_get_list(wp_t **wp, int *nb, int flags, char *mask)
 	
 	for (i = 0 ; i < max ; i++) {
 		rc = wp_receive_pdu(wp_socket, &pdu);
-		if (rc == -1)
+		if (rc < 0)
 		{
 			syslog(LOG_INFO, "wp_get_list() error - closing wp socket\n");
 			wp_close();
@@ -953,16 +971,20 @@ int wp_get(ax25_address *call, wp_t *wp)
 {
 	wp_pdu pdu;
 	int rc;
-	
+	char *callsign;
+
 	if (wp_socket == -1)
 		return -1;
 		
 	call_clean(call);
 	memset(&pdu, 0, sizeof(wp_pdu));
 	pdu.type = wp_type_get;
+        memcpy(&callsign, &call, 6);    
+        strip_zero_ssid(callsign);
+        memcpy(&call, &callsign, 6);    
 	pdu.data.call = *call;
 	rc = wp_send_pdu(wp_socket, &pdu);
-	if (rc)
+	if (rc < 0)
 	{
 		/* Disconnected */
 		syslog(LOG_INFO, "wp_get() error disconnected - closing wp socket\n");
@@ -973,7 +995,7 @@ int wp_get(ax25_address *call, wp_t *wp)
 	wp_flush_pdu();
 	
 	rc = wp_receive_pdu(wp_socket, &pdu);
-	if (rc == -1)
+	if (rc < 0)
 	{
 		syslog(LOG_INFO, "wp_get() error - wp_receive_pdu() - closing wp socket\n");
 		wp_close();
@@ -1015,7 +1037,7 @@ int wp_set(wp_t *wp)
 	pdu.type = wp_type_set;
 	pdu.data.wp = *wp;		
 	rc = wp_send_pdu(wp_socket, &pdu);
-	if (rc)
+	if (rc < 0)
 	{
 		/* Disconnected */
 		syslog(LOG_INFO, "wp_set() wp_send_pdu() error - closing wp socket\n");
@@ -1026,7 +1048,7 @@ int wp_set(wp_t *wp)
 	wp_flush_pdu();
 	
 	rc = wp_receive_pdu(wp_socket, &pdu);
-	if (rc == -1)
+	if (rc < 0)
 	{
 		syslog(LOG_INFO, "wp_set() wp_receive_pdu() error - closing wp socket\n");
 		wp_close();
