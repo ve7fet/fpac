@@ -7,12 +7,12 @@
   <meta name="AUTHOR" content="Bernard Pidoux F6BVP">
   <meta name="CREATED" content="Bernard Pidoux; F6BVP">
   <meta name="CHANGEDBY" content="Bernard Pidoux F6BVP">
-  <meta name="CHANGED" content="20110225;19464100">
+  <meta name="CHANGED" content="20110315;19464100">
   <meta name="DESCRIPTION" content="FPAC MINI HOWTO">
   <meta name="KEYWORDS"
  content="ROSE, AX25, hamradio, packet radio, Linux">
   <meta name="Copyright" content="© 2011 Bernard PIDOUX">
-  <meta name="Date" content="Fri, 25 Feb 2011 08:00:00">
+  <meta name="Date" content="Tue, 15 Mar 2011 08:00:00">
   <meta name="Publisher" content="Bernard Pidoux, F6BVP">
   <meta name="Revisit-after" content="30">
   <style type="text/css">
@@ -33,7 +33,7 @@
 <h2>Bernard Pidoux, F6BVP, <code class="western"><font
  face="Courier New, monospace">f6bvp
 at amsat dot org</font></code></h2>
-<p style="margin-bottom: 0.51cm;">v1.7.5, 2011-february-25</p>
+<p style="margin-bottom: 0.51cm;">v1.7.7, 2011-april-25</p>
 <hr>
 <p style="margin-bottom: 0.51cm;">Packet radio is a way of connecting
 computers via Amateur Radio. This mini-HOWTO covers the installation
@@ -72,7 +72,7 @@ HOWTO</a> (or from this <a
  href="http://f6bvp.free.fr/logiciels/rose-fpac/FPAC-HOWTO/">mirror</a>).&nbsp;</p>
 <p style="margin-bottom: 0.51cm;"><b>This Linux FPAC mini-HOWTO
 document is also available in PDF format here</b> :
-<a href="http://rose.fpac.free.fr/FPAC-MINI-HOWTO-175.pdf">http://rose.fpac.free.fr/FPAC-MINI-HOWTO-175.pdf</a></p>
+<a href="http://rose.fpac.free.fr/MINI-HOWTO/FPAC-MINI-HOWTO-177.pdf">http://rose.fpac.free.fr/MINI-HOWTO/FPAC-MINI-HOWTO-177.pdf</a></p>
 <hr>
 <h2><a name="toc1"></a>1. <a href="#s1">Introduction</a> </h2>
 <h2><a name="toc2"></a>2. <a href="#s2">How to configure a Linux 2.6
@@ -118,9 +118,15 @@ which
 covers
 the
 operation
-and setup of the FPAC node. An <a
- href="http://rose.fpac.free.fr/FPAC-Sysop.odt">FPAC
-sysop's manual</a> has also been written by Charles Schumann, K4GBB.</p>
+and
+setup
+of
+the
+FPAC
+node.
+An <a href="http://rose.fpac.free.fr/FPAC-Sysop.odt">FPAC
+sysop's
+manual</a> has also been written by Charles Schumann, K4GBB.</p>
 <p style="margin-bottom: 0.51cm;">The purpose of this document is to
 assist the reader in the setup of an Amateur Radio Packet node from
 scratch. The process is based on my own experience using a Mandriva
@@ -214,7 +220,13 @@ tools, you could not install FPAC.</p>
 either
 32
 bits
-Linux with KDE or Gnome desktop. This key is easy to
+Linux
+with
+KDE
+or
+Gnome
+desktop.
+This key is easy to
 carry and allows you to install Mandriva linux on a Netbook or a PC
 with no CD drive. Price is <b>29 US$</b> or 19 Euros. Mandriva Linux
 One is a full Linux operating system on a simple key for both new and
@@ -250,7 +262,13 @@ easiest Linux distro to install. It can be freely downloaded from a <a
 It
 is
 available
-as a 4 GB DVD ISO image to be downloaded via FTP or
+as
+a
+4
+GB
+DVD
+ISO
+image to be downloaded via FTP or
 BitTorrent. There are two versions depending on the Linux environment
 you want : either a 32 bits or a 64 bits Linux. If your Linux machine
 has a 32 bits processor (like Intel 586 or 686) you cannot install
@@ -272,13 +290,25 @@ Near the installation end you will be asked for <i><b>root password</b></i>,
 a
 
 
+
+
+
+
+
+
     <i><b>user name</b></i> and <i><b>password name</b></i>. Later it
 will be useful to create another user account with the name <i><b>'fpacuser'</b></i>
 , password <i><b>'fpac'</b></i> and shell <i><b>/usr/local/sbin/fpacnode</b></i>.
 We
 shall
 see
-why. </p>
+why.
+
+
+
+
+
+    </p>
     <p style="margin-bottom: 0.51cm;">During the installation, there
 are two important things to complete: graphic configuration and network
 configuration. Be sure that graphics are well configured by performing
@@ -321,6 +351,12 @@ Then move the cursor to the empty line created after the new paragraph.
 Type <b>p</b> and edit the new paragraph entry name (command <b>i</b>
 for insert). For example, replace '<b>title xx</b>', by <b>title
 xx-custom</b>. At the end of line begining with kernel, add&nbsp; <b>pty.legacy_count=10
+
+
+
+
+
+
 
 
 
@@ -368,8 +404,20 @@ existing pseudo TTYs by listing <b>ls&nbsp; /dev/ptyp*</b> or <b>/dev/ttyp*</b>.
 Ten
 PTY
 (master
-and slave) pairs were created and will appear under
+and
+slave)
+pairs
+were
+created
+and
+will appear under
 names <b>/dev/ttyp0 </b>to <b>9</b> and <b>/dev/ptyp0 </b>to <b>ptyp9</b>.
+
+
+
+
+
+
 
 
 
@@ -452,7 +500,13 @@ password. Next, change directories, <b>cd&nbsp; /usr/src/linux. </b>If
 this
 is
 the
-very first time you compile the kernel source since you
+very
+first
+time
+you
+compile
+the
+kernel source since you
 installed your Mandriva Linux distro, just type <b>make oldconfig</b>.
 This will copy the present hidden <b>.config </b>kernel configuration
 file from <b>/boot </b>into linux directory. This file is only
@@ -479,6 +533,12 @@ xconfig</b> on the command line in a console terminal from <b>/usr/src/linux
 
 
 
+
+
+
+
+
+
     </b>directory. A menu will pop-up and you will be able to select or
 de-select the different items, depending on the hardware present on
 your computer. Some items are selected by default. This <b>xconfig</b>
@@ -500,7 +560,13 @@ to select the sub menu Networking and enable <b>Amateur Radio Support</b>.
 Enabled
 modules
 are
-indicated by a letter <b>M </b>(menuconfig) or by
+indicated
+by
+a
+letter
+
+
+    <b>M </b>(menuconfig) or by
 a dot (xconfig). To disable an item, type <b>N</b> (menuconfig) or
 click on the item box (xconfig). Select sub menu <i><b>Amateur Radio
 Support </b></i>and enable <b>all the protocols</b>. Select the <i><b>AX25
@@ -672,7 +738,13 @@ K4GBB
 has
 built
 an
-AX25 libraries package for Ubuntu Linux system
+AX25
+libraries
+package
+for
+Ubuntu
+Linux
+system
 (Debian) that you may try if you installed that distro.<br>
 Please
 report your observations as this is K4GBB first attempt with deb
@@ -685,7 +757,12 @@ An
 AX.25
 libraries
 RPM
-package has been prepared by </small></font><em><font size="4"><small>Lee
+package
+has
+been
+prepared
+by
+</small></font><em><font size="4"><small>Lee
 VE7FET
 (ve7fet.at.gmail.com)
 </small></font></em><font size="4"><small>and
@@ -759,6 +836,12 @@ with&nbsp; </span><b>/usr/local/lib </b><span
 
 
 
+
+
+
+
+
+
     </b></i><span style="font-weight: normal;">file and run the
 following command</span>&nbsp; <b>/sbin/ldconfig</b> </p>
   </li>
@@ -819,7 +902,13 @@ into <i><b>/usr/local/etc/ax25</b></i>, documentation manual into <i><b>/usr/loc
 application
 tools
 will
-be placed into <i><b>/usr/local/sbin</b></i>
+be
+placed
+into
+
+
+
+  <i><b>/usr/local/sbin</b></i>
 and <i><b>/usr/local/bin</b></i></p>
 </ul>
 <h2 style="margin-left: 1.06cm;" align="LEFT"><font size="3">4.1 Ubuntu
@@ -830,7 +919,13 @@ K4GBB
 has
 built
 an
-AX25 tools package for Ubuntu Linux system
+AX25
+tools
+package
+for
+Ubuntu
+Linux
+system
 (Debian) that you may try if you installed that distro.<br>
 Please
 report your observations as this is K4GBB first attempt with deb
@@ -841,8 +936,14 @@ package.<br>
 <h2 style="margin-left: 1.06cm;" align="LEFT"><small><font size="4"><small>4.2
 Another
 option
-is from AX.25
-tools RPM package prepared by </small></font><em><font size="4"><small>Lee
+is
+from
+AX.25
+tools
+RPM
+package
+prepared
+by </small></font><em><font size="4"><small>Lee
 VE7FET
 (ve7fet.at.gmail.com)
 </small></font></em><font size="4"><small>that
@@ -904,7 +1005,13 @@ K4GBB
 has
 built
 an
-AX25 applications package for Ubuntu Linux system
+AX25
+applications
+package
+for
+Ubuntu
+Linux
+system
 (Debian) that you may try if you installed that distro.<br>
 Please
 report your observations as this is K4GBB first attempt with deb
@@ -1117,6 +1224,12 @@ the background. The configuration file is <i><b>/usr/local/etc/ax25/ax25ipd.conf
 It
 tells
 
+
+
+
+
+
+
     <b>ax25ipd</b> the name of the port where to get or put AX25
 packet frames, the name of the port toward the Internet world, and the
 Internet Protocol address (IPv4) plus UDP port numbers of the remote
@@ -1146,7 +1259,13 @@ operations performed after that step.</p>
 listing
 follows.
 It
-can be <a href="http://f6bvp.free.fr/logiciels/ax25/ax25ipd.conf">downloaded
+can
+be
+
+
+
+
+    <a href="http://f6bvp.free.fr/logiciels/ax25/ax25ipd.conf">downloaded
 from
 here.</a> There is also another <a
  href="http://f6bvp.free.fr/logiciels/ax25/ax25ipd-legacy.conf">example
@@ -1194,7 +1313,7 @@ First opened route is automatically selected.</p>
   <li>
     <p style="margin-bottom: 0.15cm;">Find the latest FPAC327 source
 package from here&nbsp; <a
- href="http://code.google.com/p/fpac/download/list"><b>http://code.google.com/p/fpac/download/list</b></a><b>
+ href="http://code.google.com/p/fpac/downloads/list"><b>http://code.google.com/p/fpac/downloads/list</b></a><b>
 (for example fpac-3.27.15.tar.bz2)</b><a
  href="http://code.google.com/p/fpac/download/list"><b><br>
     </b></a></p>
@@ -1297,6 +1416,12 @@ HOWTO</a> explains how to configure it. </p>
 
 
 
+
+
+
+
+
+
     <b>fpac.nodes</b> and <b>fpac.routes</b> configuration file are
 setup for a FPAC station connected via Internet and radio ports.</p>
     <p style="margin-bottom: 0.51cm;"><a
@@ -1353,6 +1478,12 @@ have a route defined into <b>/usr/local/etc/ax25ipd.conf</b>&nbsp; <i>route</i>&
 lines.
 
 
+
+
+
+
+
+
     </p>
   </li>
   <li>
@@ -1401,7 +1532,13 @@ following script should be placed in </font><font face="serif"><i><b>/etc/rc.d/r
 need
 to
 initialize
-AX25 devices and network ports. Before starting
+AX25
+devices
+and
+network
+ports.
+Before
+starting
 FPAC, next script is an example for installing one AXUDP port and two
 serial ports (connected to a dual ports TNC)&nbsp; following Unix98
 pseudo TTY standard.&nbsp; Nodal ampr.org address ( f6bvp.ampr.org is
@@ -1415,6 +1552,12 @@ shell script can be <a
 There
 is
 another
+
+
+
+
+
+
     <a href="http://f6bvp.free.fr/logiciels/ax25/rc-legacy.ax25">rc
 ax25
 script
@@ -1444,7 +1587,13 @@ can be started automatically at boot time if script </font><font
 Here
 is
 a
-sample of </font><font face="serif"><i>/</i></font><font face="serif"><i><b>etc/rc.d/rc.local</b></i></font>
+sample
+of
+
+
+
+
+    </font><font face="serif"><i>/</i></font><font face="serif"><i><b>etc/rc.d/rc.local</b></i></font>
     <font face="serif">that
 will
 initialize AX25 and FPAC node each time the computer is started.</font></p>
@@ -1551,9 +1700,11 @@ can listen to a local port and may be easily interconnected with fpac
 node.</p>
 <p>FBB and DxNet can communicate with FPAC without additive programs.
 <b>NetRomd</b> needs <b>ax25d</b> to be connected internally with
-FPAC.</p>
-<h2><font style="font-size: 16pt;" size="4"><b>10.2.1. Interfacing FPAC
-with a BBS application</b></font></h2>
+FPAC.<br>
+</p>
+<hr style="width: 100%; height: 2px;">
+<p><font style="font-size: 16pt;" size="4"><b>10.2.1. Interfacing FPAC
+with a BBS application</b></font></p>
 <p style="margin-bottom: 0.51cm;"><em>If your Linux box is running a
 BBS it can be internally connected to ROSE FPAC and interfaced with
 NetRom. This will give your BBS a worldwide access to AX25
@@ -1770,10 +1921,22 @@ SYSOP to enter your local BBS by running the FBB client xfbbC.</i></p>
 may
 find
 a
-complete documentation </a><a
- href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/html/">ON LINE</a> for
+complete
+documentation
+
+
+
+
+    </a><a href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/html/">ON LINE</a>
+for
 the FBB BBS or download these files :&nbsp; <a
  href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/FBB7UT_G.DOC">FBB7UT.DOC</a>,
+
+
+
+
+
+
 
 
 
@@ -1803,8 +1966,10 @@ set/ssid +2<br>
 1
 3
 4
-rose0 inet:9000 netclu</b></font></font><font
- face="Courier New, monospace"><font size="2"><br>
+rose0
+inet:9000
+netclu</b></font></font><font face="Courier New, monospace"><font
+ size="2"><br>
 set/tz
 +2</font></font><br>
 <br>
@@ -1980,9 +2145,23 @@ root /usr/sbin/fpacnode fpacnode -q %S<br>
 Add the letter <b>b</b> after
 UDP port number of the route description in
 <i><b>/usr/local/etc/ax25ipd.conf</b></i> to allow broadcast of
-NetRom routes.</p>
+NetRom routes.<br>
+<br>
+</p>
+<hr style="width: 100%; height: 2px;">
+<h2 style="margin-bottom: 0.51cm;"><font style="font-size: 16pt;"
+ size="4">10.2.4. Adding RMS link to FPAC</font><font
+ style="font-size: 16pt;" size="4"> </font>
+</h2>
+<p style="margin-bottom: 0.51cm;"><em>This page by Charley K4gbb
+describes <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO/AddRMStoFPAC.html">how to
+configure
+user RMS gate access via FPAC network</a>.<br>
+<br>
+</em></p>
 <hr>
-<h2><font style="font-size: 16pt;" size="4">10.2.4. Allowing remote
+<h2><font style="font-size: 16pt;" size="4">10.2.5. Allowing remote
 users access to FPAC node</font> <font style="font-size: 16pt;"
  size="4">via
 Internet </font>
