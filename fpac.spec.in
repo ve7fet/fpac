@@ -53,7 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/html/FPAC-HOWTO-1.html doc/html/FPAC-HOWTO-2.html doc/html/FPAC-HOWTO-3.html
 %doc doc/html/FPAC-HOWTO-4.html doc/html/FPAC-HOWTO-5.html doc/html/FPAC-HOWTO-6.html
 %doc doc/html/FPAC-HOWTO.html doc/html/FPAC-LINUX-FLASH-MINI-HOWTO104.html
-%doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-175.html
+%doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-177.html
 %doc doc/html/FPAC-MINI-HOWTO-FR-175.html doc/html/next.gif doc/html/prev.gif doc/html/toc.gif
 %doc %{_sysconfdir}/ax25/fpac/help/*
 %config %{_sysconfdir}/ax25/aprslist.conf.fr
