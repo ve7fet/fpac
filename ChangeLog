@@ -1,3 +1,11 @@
+fpac (3.27.19)
+	* Cleaned up the SVN code base
+	* Moved the help files from /etc/ax25/fpac/help to /var/ax25/fpac/help 
+	  for better policy compliance and less security risk
+	* Added some of Charley's scripts: ax25, ax25-up, ax25-down, ax25parms
+
+ -- Lee Woldanski <ve7fet@tparc.org> Sat, 17 Sep 2011 22:00:00 -0800
+
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database
 	* Minor cosmetic changes for displaying wp data
