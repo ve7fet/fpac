@@ -1,4 +1,4 @@
-docdir = @sysconfdir@/ax25/fpac/help
+docdir = @localstatedir@/ax25/fpac/help
 doc_DATA = Alias.hlp \
 	APplications.hlp \
 	CALLbook.hlp \
