@@ -1,0 +1,85 @@
+#! /bin/sh
+# This shell script can be used to report the ax25 parameters 
+# of all the active ax devices on the systems.
+#
+# It is only useful if your kernel is >2.6.17.
+#
+
+echo "AX.25 Device Parameters"
+
+for DEV in /proc/sys/net/ax25/*; do
+	echo "Parameters for device `basename $DEV`"
+
+	case `cat $DEV/ax25_default_mode` in
+		0) echo "Default AX.25 mode             : Standard (Modulo 7)";;
+		1) echo "Default AX.25 mode             : Extended (Modulo 127)";;
+		*) echo "Default AX.25 mode             : Unknown";;
+	esac
+
+	case `cat $DEV/backoff_type` in
+		0) echo "AX.25 Backoff Mode             : Original";;
+		1) echo "AX.25 Backoff Mode             : Linear";;
+		2) echo "AX.25 Backoff Mode             : Exponential";;
+		*) echo "AX.25 Backoff Mode             : Unknown";;
+	esac
+
+	case `cat $DEV/connect_mode` in
+		0) echo "AX.25 Connection Mode          : None";;
+		1) echo "AX.25 Connection Mode          : Network";;
+		2) echo "AX.25 Connection Mode          : All";;
+		*) echo "AX.25 Connection Mode          : Unknown";;
+	esac
+
+	SWIND=`cat $DEV/standard_window_size`
+	EWIND=`cat $DEV/extended_window_size`
+	PACLEN=`cat $DEV/maximum_packet_length`
+	RETRIES=`cat $DEV/maximum_retry_count`
+
+	echo "Standard Window Size           : $SWIND"
+	echo "Extended Window Size           : $EWIND"
+	echo "Maximum Packet Length          : $PACLEN bytes"
+	echo "Maximum Retry Count            : $RETRIES"
+
+	case `cat $DEV/ip_default_mode` in
+		0) echo "Default IP Mode                : Datagram";;
+		1) echo "Default IP Mode                : Virtual Circuit";;
+		*) echo "Default IP Mode                : Unknown";;
+	esac
+
+	T1=`cat $DEV/t1_timeout`
+	T2=`cat $DEV/t2_timeout`
+	T3=`cat $DEV/t3_timeout`
+	IDLE=`cat $DEV/idle_timeout`
+
+	T1a=`expr $T1 / 1000`
+	T1b=`expr $T1a \* 1000`
+	T1c=`expr $T1 - $T1b`
+	T1d=`expr $T1c / 100`
+	echo "T1 Timeout (Frack)             : $T1a.$T1d seconds"
+
+
+	T2a=`expr $T2 / 1000`
+	T2b=`expr $T2a \* 1000`
+	T2c=`expr $T2 - $T2b`
+	T2d=`expr $T2c / 100`
+	echo "T2 Timeout (Resp)              : $T2a.$T2d seconds"
+
+	T3T=`expr $T3 / 60000`
+	if [ $T3T = 0 ]; then
+		echo "T3 Timeout (Check)             : None"
+	else
+		echo "T3 Timeout (Check)             : $T3T minutes"
+	fi
+
+	IDLET=`expr $IDLE / 60000`
+	if [ $IDLET = 0 ]; then
+		echo "Idle Timeout (Disc)            : None"
+	else
+		echo "Idle Timeout (Disc)            : $IDLET minutes"
+	fi
+
+	echo
+
+done
+
+exit 0
