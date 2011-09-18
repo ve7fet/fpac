@@ -55,7 +55,7 @@ Finger =
 # End of Built-in commands
 #
 # Additional Commands - place additional commands you would like to offer
-# in this section. Also remember to create a help file in @sysconfdir@/ax25/fpac/help
+# in this section. Also remember to create a help file in @localstatedir@/ax25/fpac/help
 # 
 Command
 	MONitor = @prefix@/sbin/monitor -art -p%1
