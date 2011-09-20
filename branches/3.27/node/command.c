@@ -1979,13 +1979,13 @@ int do_wp(int argc, char **argv)
 	char *call;
 	char dnic[5];
 
-	/*if (argc < 2)
+	if (argc < 2)
 	   {
 	   node_msg ("Usage: wp [-acdnrl nb] callsign");
 	   node_msg ("options :\n  n = nodes only\n  l = max number of answers");       
 	   node_msg ("sort by :\n  a address\n  c callsign (default)\n  d date\n  r reverse");
 	   return (1);
-	   } */
+	   }
 
 	optind = 0;
 
