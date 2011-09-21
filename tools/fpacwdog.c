@@ -1,14 +1,13 @@
 /*
- * fpacwdog.c
- *
- * FPAC project
- *
- * fpacwdog : sends a CR to a serial port
- * Default period is 1 minute
- *
- * F6FBB 09-99
- *
- */
+* fpacwdog.c
+* This creates the fpacwdog binary.
+*
+* fpacwdog sends a CR to the serial port at a
+* defined interval and baud rate
+*
+* Default interval is 1 minute at 50 baud and use daemon mode
+*
+*/
  
 #include <stdio.h>
 #include <termios.h>
@@ -48,14 +47,14 @@ int main(int argc, char **argv)
 			break;
 		case '?':
 		case ':':
-			fprintf (stderr, "usage: fpacwdog [-d] [-b baudrate] [-p seconds] serial_device\n");
+			fprintf (stderr, "usage: fpacwdog [-v] [-d] [-b baudrate] [-p seconds] serial_device\n");
 			return 1;
 		}
 	}
 
 	if (optind == argc)
 	{
-		fprintf (stderr, "usage: fpacwdog [-d] [-b baudrate] [-p seconds] serial_device\n");
+		fprintf (stderr, "usage: fpacwdog [-v] [-d] [-b baudrate] [-p seconds] serial_device\n");
 		return 1;
 	}
 
@@ -150,7 +149,7 @@ int main(int argc, char **argv)
 		
 	for (;;)
 	{
-		if (verbose > 1)
+		if (verbose)
 			printf("Sending CR\n");
 		write(fd, "\r", 1);
 		sleep(period);

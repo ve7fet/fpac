@@ -1,10 +1,19 @@
 /*
- * wp/fpacpwd.c : FPAC WP daemon
- *
- * FPAC project
- *
- * F1OAT 970831
- */
+* fpacpwd.c
+* This is the FPAC White Pages (WP) daemon
+*
+* It is uses to create and exchange a database of node information
+* between networked nodes.
+*
+* It can be called with the following options:
+*      -d foreground mode      don't fork to daemon mode
+*      -v verbose mode         print status to syslog
+*      -x debug mode           print more data to syslog
+*      -b passive mode
+*      -f <filename>           use alternate database filename
+*
+*/
+
 #include "config.h"
 #include "wpdefs.h"
 #include "sockevent.h"

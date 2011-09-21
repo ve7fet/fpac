@@ -1,26 +1,21 @@
-/******************************************************
- * fpaccfg.c                                          *
- * FPAC project.            FPAC PAD                  *
- *                                                    *
- * Parts of code from different sources of ax25-utils *
- *                                                    *
- * F6FBB 05-1997                                      *
- *                                                    *
- ******************************************************/
+/*
+* fpaccfg.c
+* This creates the fpaccfg binary.
+* It is used to parse the FPAC configuration and
+* print out the current configuration of the node.
+*
+* It sources all the configuration settings using the
+* libfpac.a library (built in lib).
+*/
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-/*#include <unistd.h>*/
-/*#include <errno.h>*/
 #include <signal.h>
 #include <syslog.h>
 #include <ctype.h>
-/*#include <sys/types.h>*/
-/*#include <sys/fcntl.h>*/
 #include <sys/file.h>
 #include <sys/ioctl.h>
-/*#include <sys/socket.h>*/
 #include <arpa/inet.h>
 
 #include "ax25compat.h"
