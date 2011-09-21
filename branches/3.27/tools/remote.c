@@ -1,9 +1,15 @@
 /*
- * tools/remote.c
- *
- * FPAC project
- *
- */
+* remote.c
+* This creates the remote binary.
+*
+* It is a simple control program for setting and
+* clearing bits on a parallel port.
+*
+* This allows the parallel port pins to be used
+* for remote controlling attached devices.
+*
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>

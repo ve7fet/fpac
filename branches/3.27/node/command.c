@@ -2092,13 +2092,13 @@ int do_dest(int argc, char **argv)
 
 	if ((fdst = read_flex_dst()) == NULL)
 	{
-/*		if (errno)
+		if (errno)
 			node_msg("flexd is probably not loaded");
 		else
 			node_msg("No FlexNet destinations");
 		
 		node_msg("Read /var/log/fpac.log file");
-*/		return 0;
+		return 0;
 	}
 
 	/* "dest" */
