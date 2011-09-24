@@ -67,6 +67,7 @@ AC_CHECK_FUNCS(alarm dup2 gethostbyaddr gethostname gettimeofday inet_ntoa memch
 AC_CONFIG_FILES([Makefile \
 	lib/Makefile \
 	cfg/Makefile \
+	man/Makefile \
 	monitor/Makefile \
 	node/Makefile \
 	flex/Makefile \
