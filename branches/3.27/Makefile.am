@@ -1,7 +1,7 @@
 installconf:
 	(cd $(top_srcdir)/etc && $(MAKE) installconf)
 
-SUBDIRS = lib cfg monitor node flex pad tcp wp tools stats doc help scripts etc
+SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
 
 install-data-hook:
 	@echo
