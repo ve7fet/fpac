@@ -1,0 +1,30 @@
+.TH WPEDIT 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+wpedit /- FPAC White Pages database editor.
+.SH SYNOPSIS
+.B wpedit callsign
+.SH DESCRIPTION
+.LP
+.B wpedit
+opens an edit session for a callsign record present in the in the FPAC WP database.
+.SH COMMANDS
+.TP 20
+.BI "\-a   rose_address"
+Change the ROSE address
+.TP 20
+.BI "\-b"
+Bye (exit editor)
+.TP 20
+.BI "\-d   digi_path"
+Change the Digi path. Use d . to remove the digi path.
+.TP 20
+.BI "\-n"
+Toggle the record between User and Node.
+.TP 20
+.BI "\-u"
+Undelete. Restore a deleted record
+.TP 20
+.BI "\-r"
+Mark the record for removal.
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
