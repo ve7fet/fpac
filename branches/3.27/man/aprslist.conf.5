@@ -1,0 +1,48 @@
+.TH APRSLIST.CONF 5 "23 September 2011" Linux "FPAC OPERATOR's Manual"
+.SH NAME
+aprslist.conf \- Configuration file for aprslist
+.SH DESCRIPTION
+The Geographical coordinates of your station are listed with the longitude and latitude statements.
+.TP 10
+.BI "longitude " "deg min sec E/W"
+.TP 10 
+.BI "latitude " "deg min sec N/S"
+.TP 1
+That is followed by beacon information for each port. 
+.P
+The individual port's information begins with with a bracketed port name.
+.TP 10
+.BI [ port ]
+The port name used in /etc/ax25/axports
+.TP 19
+.BI period " minutes
+The time in minutes for sending coordinates and beacon information.
+.TP 19
+.BI from " call_sign
+Originating Station
+.TP 18
+.BI to " APRS_area
+APRS area ID
+.LP
+Additional text may be added to the beacon.
+.BI beacon " add_beacon_text
+.SH EXAMPLE
+.EX
+#Geographical coordinates of your Station
+longitude 2 18 80 E
+latitude 48 53 08 N
+# *** Beacon information by port ***
+[0]
+from F6BVP
+to APRS
+period 1
+#
+[4]
+from F6BVP
+period 30
+to INFO
+beacon JN18DV 145.275 1200b 433.775 9600b http://f6bvp.org
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+aprslist(1)
