@@ -1,0 +1,33 @@
+.TH FPACROUTE 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpacroute \- Trace route daemon for the FPAC Trace command.
+.SH SYNOPSIS
+.B fpacroute
+.SH DESCRIPTION
+.LP
+.B fpacroute
+Runs as one of the FPAC node elements. When called from 
+.B fpacnode 
+it starts a dialog which prompts for a 
+.I node call 
+or 
+.I ROSE address.
+.P
+It then tests the route to the call/address given as input to the prompt.
+.P
+The route test consists of a block of alpha characters followed the ROSE 
+address of the destination. Three tests are run and the latency time is 
+measured.
+.SH Example
+.BI "Enter address or callsign to check :" w4bgh-8
+
+Checking route 3100,813684 found in WP
+
+ 1st --Tries-- 3rd  L2Call       L3Call/Address    Locator City
+
+ 0.000  0.000  0.000 K4GBB-8     K4GBB-9/3100,352726 EL88tx Cedar Cove
+
+ 0.016  0.016  0.017 K4GBB-11   K4GBB-12/3100,352727 EL88TX Cedar Cove
+
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
