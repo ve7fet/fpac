@@ -26,9 +26,9 @@
 
 #include "node.h"
 #include "io.h"
-#include "../lib/wp.h"
+#include "wp.h"
 
-#include "../lib/ax25compat.h"
+#include "ax25compat.h"
 
 #ifndef SOL_AX25
 #define SOL_AX25 257

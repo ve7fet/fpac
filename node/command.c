@@ -32,6 +32,14 @@ struct cmd *Nodecmds = NULL;
 #define	ROSE_DEFAULT_MAXVC	50	/* Maximum number of VCs per neighbour in linux/include/net/rose.h */
 #define nb_wp() 1
 
+/*add_internal_cmd's args are:
+ -list to add the command to (&Nodecmds)
+ -command name
+ -num of chars of cmd name required (Alias = 1, HOst = 2)
+ -is visible? (1 = yes, 0 = no)
+ -subroutine to run for command
+*/
+
 void init_nodecmds(void)
 {
 	add_internal_cmd(&Nodecmds, "?", 1, 1, do_help);
