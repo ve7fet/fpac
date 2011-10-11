@@ -5,8 +5,9 @@ fpac (3.27.19)
 	* Added some of Charley's scripts: ax25, ax25-up, ax25-down, ax25parms
 	* Remove the obsolete mkissattach code (and kiss folder)
 	* Add a buch of man pages for the binaries created by this software
+	* Commented some more of the source
 
- -- Lee Woldanski <ve7fet@tparc.org> Sat, 17 Sep 2011 22:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Mon, 10 Oct 2011 19:00:00 -0800
 
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database

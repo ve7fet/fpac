@@ -1625,6 +1625,7 @@ static int new_l3_connection(int fd, char *port, int verbose)
 
 	if (ax25_aton_entry(addr, axbind.fsa_digipeater[0].ax25_call) == -1) 
 	{
+		syslog(LOG_ERR, "new_l3_connection() ax25 call error '%s'\n", addr);
 		return(-1);
 	}
 
@@ -1704,6 +1705,7 @@ static int new_l3_connection(int fd, char *port, int verbose)
 	/* Start the L2 connection */
 	if ((axfd = socket (AF_AX25, SOCK_SEQPACKET, 0)) < 0)
 	{
+		syslog(LOG_ERR, "new_l3_connection() cannot start L2 connection\n");
 		end(pl3);
 		return(-1);
 	}
@@ -1770,6 +1772,7 @@ static int new_l3_connection(int fd, char *port, int verbose)
 
 			ioctl(new, SIOCRSSCAUSE, &rose_cause);
 
+			syslog(LOG_ERR, "new_l3_connection() cannot connect\n");
 			close (axfd);
 			end(pl3);
 			return(-1);
