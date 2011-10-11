@@ -849,7 +849,7 @@ int wp_update_addr(struct full_sockaddr_rose *addr)
 	memset(&wp, 0, sizeof(wp_t));		
 	if (wp_get(&addr->srose_call, &wp) != 0) {
 		syslog(LOG_INFO, "wp_update_addr() callsign '%s' not found\n", ptr);
-		return -1;
+	/*	return -1; */
 	}
 	wp.date = time(NULL);
 	wp.is_deleted = 0;
