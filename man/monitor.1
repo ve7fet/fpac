@@ -2,7 +2,7 @@
 .SH NAME 
 monitor \- FPAC ax.25 traffic monitor.
 .SH SYNOPSIS
-.B monitor [-c] [-a] [-r] [-t] [-p port] [-h] [-v]
+.B monitor [-8] [-i] [-c] [-a] [-r] [-t] [-p <port>] [-h] [-v]
 .SH DESCRIPTION
 .LP
 .B Monitor
@@ -11,46 +11,44 @@ It displays standard AX.25, PE1CHL extended AX.25, NET/ROM,
 Rose, ARP, IP, ICMP, TCP and UDP. It also displays IP, TCP, ICMP, TCP
 and UDP encapsulated within NET/ROM frames. The program also displays
 AX.25 and IP encapsulated within an IP frame.
-.P
-Monitor is similar to axlisten except that is is exited by a CR.
-.P
-Monitor attempts to decode the more common network protocols.
+.P Monitor is similar to axlisten except that is is exited by a CR.
+.P Monitor attempts to decode the more common network protocols.
 RSPF and RIP (both normal and G8BPQs RIP98) are traced.
 JNOS style NET/ROM node polls are also displayed.
 .SH OPTIONS
-.TP 13
+.TP 10
 .BI \-8
 Required for the -i parameter to work. Indicates that the terminal is capable 
 of printing 8-bit characters.
-.TP 13
+.TP 10
 .BI \-a 
 Enable the monitoring of outgoing frames as well as incoming ones.
-.TP 13
+.TP 10
 .BI \-c 
 Enable Color support
-.TP 13
+.TP 10
 .BI \-h 
 Dump the data portion of the packet in both  hexadecimal and
 ASCII. The default is to display data as ASCII only.
-.TP 13
+.TP 10
 .BI \-i
 Map IBM codepage 437 characters 128-158 to their ISO-Latin-1
 equivalents.  Only valid when used with the -8 and -c parameters.
-.TP 13
+.TP 10
 .BI "\-p port"
 Displays a single port.
-.TP 13
+.TP 10
 .BI \-r       
 Display the data portion in a "readable" fashion for tracing plaintext AX.25 traffic.
 CR-LF  conversion is included.
-.TP 13
+.TP 10
 .BI \-t 
 Timestamp each frame
-.TP 13
+.TP 10
 .BI \-v
 Display Version
 .SH COMMANDS
-.TP 13
+.TP 10
 .BI CR  
 End the session.		
 .SH AUTHOR
