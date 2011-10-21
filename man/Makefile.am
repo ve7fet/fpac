@@ -5,6 +5,9 @@ man_MANS = \
 	flexd.1 \
 	flexd.conf.5 \
 	flexd.routes.5 \
+	fpac.dnic.5 \
+	fpac.hello.5 \
+	fpac.info.5 \
 	fpaccfg.1 \
 	fpacroute.1 \
 	fpacshell.1 \
