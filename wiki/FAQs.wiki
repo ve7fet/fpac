@@ -72,3 +72,58 @@ WPEDIT is the utility used to manually edit the WP database.
 
 Entries deleted do not get removed immediately. They are changed to Removed status, and in two weeks they may be erased by the WPMAINT
 utility. WPMAINT has to be run in order for those removals to be processed. Callsigns that are not updated for a year also get changed to Removed status and maybe erased 14 days later (by WPMAINT). Usually WPMAINT is run as part of the startup script when the node is started. *This can be a problem* if the node is not restarted periodically. 
+
+
+== SYSop and SHELL Security Explained ==
+
+For security reasons you have to access the SYSop commands to get to
+the FPACSHELL (SHELL).
+
+To access the SYSop commands you have to know your FPAC Node's
+password/passphrase.
+
+In case you have forgotten the password/passphrase - check fpac.conf.
+
+Connect to the FPAC node and issue the SYSop command.
+
+You will see something like...
+
+{{{
+W4ABC-8 (Commands = ?) : sys
+W4ABC-8> 10 19 15 20 6 [1301597890]
+}}}
+
+You may answer the challenge in one of two ways.
+
+If your password/phrase is `Mary_has_a_little_boat`:
+
+1. Enter the full password/passphrase: `Mary_has_a_little_boat`
+
+2. Enter the characters that correspond to the numbers not in the
+braces (from the example above those would be 10 19 15 20 6). The valid response in this case would be `abtoh`.
+
+Your password response is validated by:
+
+{{{
+Pass OK
+
+W4ABC-8 (Commands = ?) :
+}}}
+
+You are now in the Sysop Mode and may use all the "normal" commands
+plus the defined Sysop commands.
+
+`SHEll` should be one of these commands and it is invoked like the SYSop
+command.
+
+This time your valid response will be:
+
+{{{
+Pass OK
+#
+}}}
+
+You are now in a *root* shell on the node and you may issue Linux commands. Note that there is no indication of the directory you are in, the root shell environment is homed in /tmp. Also note that you have limited permissions and are limited to basic commands.
+
+Keep is simple and don't over use it... the frequency has eyes and
+curious fingers.
