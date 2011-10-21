@@ -1,0 +1,27 @@
+#summary Frequently Asked Questions.
+#labels Featured,Phase-Support
+
+= Introduction =
+
+This wiki page will contain some FAQ's and answers on things that may not be covered in the documentaiton.
+
+
+== FPAC and Linux RMS ==
+
+There are two ways to define an RMS command within fpac.conf (in the Command section):
+
+The first way calls the RMS Gate direct.
+    `RMS = /usr/local/bin/rmsgw -P 0 %U`
+
+The second way connects to the the RMS Gate like a RF connect request.
+    `RMS = connect k4gbb-10 3100352726`
+
+The second way is preferred way. It allows the FPAC node to supply the
+correct line ends and prevent the overwriting of lines supplied by the CMS.
+
+You will likely also want to define an application line in the Applications section:
+
+     `K4GBB-10 = /usr/bin/rmsgw -P 0 %U`
+
+Note that the -P option defines the axport (from the /etc/axports) file to connect with. This MUST be a valid port that has been defined in /etc/rmsgw/channels.xml for this configuration. If you don't use a valid axport/channel, then rmsgw won't start (you'll get a banner and that is it if you were to try connecting from the command line).
+
