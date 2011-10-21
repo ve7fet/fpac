@@ -25,3 +25,26 @@ You will likely also want to define an application line in the Applications sect
 
 Note that the -P option defines the axport (from the /etc/axports) file to connect with. This MUST be a valid port that has been defined in /etc/rmsgw/channels.xml for this configuration. If you don't use a valid axport/channel, then rmsgw won't start (you'll get a banner and that is it if you were to try connecting from the command line).
 
+
+There is a newer rmschanstat script available from the LinuxRMS Yahoo! group than is included with the linuxrms source. You will want to get this newer script as it supports FPAC.
+
+In this new script, you *need to check the path to fpad* and correct it based on your installation.
+
+
+There have been reports of some problems with the above RMS command. If you get an error like this:
+
+{{{
+K4GBB-8 (Commands = ?) : rms
+axutils: SSID must follow '-' and be numeric in the range 0-15 - '3100352726'
+}}}
+
+Then one option is to change the command to:
+
+    `RMS = connect k4gbb-10, 3100352726`
+
+Note the "," in there.
+
+It seems that this also may be related to the callsign you have defined for the port in axports. If port 0 in axports has the same callsign and SSID as the call used in the Command and Application in fpac.conf (ie in this example, port 0 also has the call k4gbb-10), you may run in to this problem. Changing the SSID of the call in axports to anything else seems to resolve the issue too. 
+
+
+
