@@ -47,4 +47,28 @@ Note the "," in there.
 It seems that this also may be related to the callsign you have defined for the port in axports. If port 0 in axports has the same callsign and SSID as the call used in the Command and Application in fpac.conf (ie in this example, port 0 also has the call k4gbb-10), you may run in to this problem. Changing the SSID of the call in axports to anything else seems to resolve the issue too. 
 
 
+== White Pages ==
 
+Some explanation of the White Pages system.
+
+Manually entered records are added to the local WP database.
+
+Twice an hour the local node connects to its neighbours WP database and
+exchanges database changes.
+
+The node to node WP connection is made at L3.
+
+I don't believe calls heard on the local ports are added to the WP
+database.
+
+The Heard (from mheard) list is used locally to complete connect requests.
+
+The local node is automatically placed into the WP database when FPAC is placed on the air the 1st time.
+
+There is an issue with secondary ROSE addresses. The addresses
+assigned to added User Ports are not automatically entered into the database. They should be manually added via WPEDIT. 
+
+WPEDIT is the utility used to manually edit the WP database.
+
+Entries deleted do not get removed immediately. They are changed to Removed status, and in two weeks they may be erased by the WPMAINT
+utility. WPMAINT has to be run in order for those removals to be processed. Callsigns that are not updated for a year also get changed to Removed status and maybe erased 14 days later (by WPMAINT). Usually WPMAINT is run as part of the startup script when the node is started. *This can be a problem* if the node is not restarted periodically. 
