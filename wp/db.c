@@ -80,11 +80,6 @@ static int db_valid(wp_t * wp)
 	}
 
 	/* Check the Date */
-/* DEBUG F6BVP */
-	/* should not be in the future !!!! */
-	if (wp->date > time(NULL))
-			wp->date = time(NULL);
-/* END DEBUG TEMPORARY HACK ! */
 	/* should be between 01-01-1998 and current + 1 week */
 	if ((wp->date < 883612800L) || (wp->date > (time(NULL) + 604800L)))
 	{
