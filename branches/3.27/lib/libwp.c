@@ -46,12 +46,14 @@ static ax25_address *call_clean(ax25_address *call)
 static int wait_for_local_wp(int timeout)
 {
 	struct proc_rs *rp, *rlist;
-	time_t timer = time(NULL) + timeout;
-	
-	while (time(NULL) <= timer) {
+	time_t temps = time(NULL);
+	time_t timer = temps + timeout;
+
+	while (timer > temps) {
+		temps = time(NULL);
+
 		if ((rlist = read_proc_rs()) == NULL) {
 			if (errno) perror("FPAC: wait_for_local_wp() read_proc_rs");
-/*		syslog(LOG_INFO, "FPAC: wait_for_local() time left %lu / %d (-1)", timer - time(NULL), timeout );*/
 		continue;
 /*		return -1;*/
 		}
@@ -63,15 +65,12 @@ static int wait_for_local_wp(int timeout)
 				(strcasecmp(rp->dev, "rose0") == 0))
 			{
 				free_proc_rs(rlist);
-/*		syslog(LOG_INFO, "FPAC: wait_for_local() time left %lu / %d (0)", timer - time(NULL), timeout );*/
 				return 0;
 			}
 		}
 		free_proc_rs(rlist);
 		sleep(1);
-/*		syslog(LOG_INFO, "FPAC: wait_for_local() time left %lu / %d", timer - time(NULL), timeout );*/
 	}
-	syslog(LOG_INFO, "FPAC: wait_for_local() time left %lu / %d (-1)", timer - time(NULL), timeout );
 	return -1;
 }
 
@@ -119,32 +118,37 @@ int ancien(wp_pdu *pdu)
 {
 	static struct tm *wpdate, *sdate;
 	int date_limite = WP_OBSOLETE;
-	int jours, annees, anciennete, s_jours, wp_jours, s_annee, wp_annee;
+	int jours, annees, s_jours, wp_jours, s_annee, wp_annee;
 	time_t temps;
 
-	wpdate = localtime(&pdu->data.wp.date);
-	wp_annee = wpdate->tm_year;
+	wpdate = gmtime(&pdu->data.wp.date);
+	wp_annee = wpdate->tm_year%100;
 	wp_jours = wpdate->tm_yday;
 	
-	time(&temps);
-	sdate = localtime(&temps);
-	s_annee = sdate->tm_year;
+	temps = time(NULL);
+	sdate = gmtime(&temps);
+	s_annee = sdate->tm_year%100;
 	s_jours = sdate->tm_yday;
 
-	jours = s_jours - wp_jours;
-	annees = s_annee - wp_annee;
-	
-	if(annees == 0)
-		anciennete = jours;
-	else
-		anciennete = (365 - wp_jours) + ((annees-1) * 365) + s_jours;
+	if (pdu->data.wp.date > temps + 84600L) 
+		syslog (LOG_INFO, "WP record date dd/mm/yy  %02d/%02d/%02d is in the future !\n", wpdate->tm_mday, wpdate->tm_mon+1, wpdate->tm_year%100);
 
-	if (anciennete > date_limite) {
-/*		fprintf(stderr, "WP record REFUSED %d days old - limit is %d\n", anciennete, date_limite);*/
+	annees = s_annee - wp_annee;
+	jours = (annees * 365 - wp_jours) + s_jours;
+	
+	syslog(LOG_INFO, "record dated year : %d and day %d - Today's year is %d and day number %d\n", wp_annee+2000, wp_jours, s_annee+2000, s_jours);
+
+	if (jours < 0) {
+		syslog (LOG_INFO, "WP record date is in the future !\n");
+		return (0);
+	}
+
+	if (jours > date_limite) {
+		syslog (LOG_INFO, "WP record REFUSED %d days old - limit is %d\n",jours, date_limite);
 		return (1);
 	}
 	else {
-/*		fprintf(stdout, "ACCEPTED\n");*/
+		syslog(LOG_INFO, "WP record ACCEPTED %d days old\n", jours);
 		return (0);
 	}
 }
@@ -168,7 +172,7 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 	switch (pdu->type) {
 	case wp_type_set:
 	case wp_type_get_response:
-		*(unsigned int *)&p[L] = htonl(pdu->data.wp.date);
+		*(unsigned long *)&p[L] = htonl(pdu->data.wp.date);
 		L += 4;
 		memcpy(&p[L], &pdu->data.wp.address.srose_addr, 5);
 		L += 5;
@@ -220,31 +224,31 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 		L += 7;		
 		break;
 	case wp_type_info:
-		*(unsigned int *)&p[L] = htonl(pdu->data.info.mask);
+		*(unsigned long *)&p[L] = htonl(pdu->data.info.mask);
 		L += 4;
 		break;
 	case wp_type_info_response:
-		*(unsigned int *)&p[L] = htonl(pdu->data.info_rsp.mask);
+		*(unsigned long *)&p[L] = htonl(pdu->data.info_rsp.mask);
 		L += 4;
-		*(unsigned int *)&p[L] = htonl(pdu->data.info_rsp.nbrec);
+		*(unsigned long *)&p[L] = htonl(pdu->data.info_rsp.nbrec);
 		L += 4;
-		*(unsigned int *)&p[L] = htonl(pdu->data.info_rsp.size);
+		*(unsigned long *)&p[L] = htonl(pdu->data.info_rsp.size);
 		L += 4;
 		break;
 	case wp_type_get_list:
-		*(unsigned int *)&p[L] = htonl(pdu->data.list_req.max);
+		*(unsigned long *)&p[L] = htonl(pdu->data.list_req.max);
 		L += 4;
-		*(unsigned int *)&p[L] = htonl(pdu->data.list_req.flags);
+		*(unsigned long *)&p[L] = htonl(pdu->data.list_req.flags);
 		L += 4;
 		memcpy(&p[L], &pdu->data.list_req.mask, 9);
 		L += 9;		
 		break;
 	case wp_type_get_list_response:
-		*(unsigned int *)&p[L] = htonl(pdu->data.list_rsp.pos);
+		*(unsigned long *)&p[L] = htonl(pdu->data.list_rsp.pos);
 		L += 4;
 		p[L] = pdu->data.list_rsp.next;
 		L += 1;
-		*(unsigned int *)&p[L] = htonl(pdu->data.list_rsp.wp.date);
+		*(unsigned long *)&p[L] = htonl(pdu->data.list_rsp.wp.date);
 		L += 4;
 		memcpy(&p[L], &pdu->data.list_rsp.wp.address.srose_addr, 5);
 		L += 5;
@@ -297,7 +301,7 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 	case wp_type_vector_response:
 		*(unsigned short *)&p[L] = htons(pdu->data.vector.version);
 		L += 2;		
-		*(unsigned int *)&p[L] = htonl(pdu->data.vector.date_base);
+		*(unsigned long *)&p[L] = htonl(pdu->data.vector.date_base);
 		L += 4;
 		*(unsigned short *)&p[L] = htons(pdu->data.vector.interval);
 		L += 2;		
@@ -432,7 +436,7 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 			syslog(LOG_INFO, "Received wp pdu min length/21=%d\n", rc); 
 			return -1;
 		}
-		pdu->data.wp.date = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.wp.date = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		memcpy(&pdu->data.wp.address.srose_addr, &p[L], 5);
 		L += 5;
@@ -465,8 +469,6 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		memset(pdu->data.wp.name, 0, sizeof(pdu->data.wp.name));
 		if (len) {
 			memcpy(pdu->data.wp.name, &p[L], len);
-/* DEBUG F6BVP */
-/*			syslog(LOG_ERR, "wp_receive_pdu() get_response name '%s'\n", pdu->data.wp.name);*/
 			L += len;
 		}
 		len = p[L++];
@@ -487,21 +489,21 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		L += 7;		
 		break;
 	case wp_type_info:
-		pdu->data.info.mask = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.info.mask = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		break;
 	case wp_type_info_response:
-		pdu->data.info_rsp.mask = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.info_rsp.mask = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
-		pdu->data.info_rsp.nbrec = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.info_rsp.nbrec = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
-		pdu->data.info_rsp.size = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.info_rsp.size = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		break;
 	case wp_type_get_list:
-		pdu->data.list_req.max = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.list_req.max = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
-		pdu->data.list_req.flags = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.list_req.flags = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		memcpy(&pdu->data.list_req.mask, &p[L], 9);
 		pdu->data.list_req.mask[9] = '\0';
@@ -512,13 +514,13 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 			syslog(LOG_ERR, "Received wp pdu min length/26=%d\n", rc); 
 			return -1;
 		}
-		pdu->data.list_rsp.pos = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.list_rsp.pos = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		pdu->data.list_rsp.next = p[L];
 		L += 1;
 		
 		/* Struct wp_t */
-		pdu->data.list_rsp.wp.date = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.list_rsp.wp.date = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		memcpy(&pdu->data.list_rsp.wp.address.srose_addr, &p[L], 5);
 		L += 5;
@@ -572,7 +574,7 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 	case wp_type_vector_response:
 		pdu->data.vector.version = ntohs(*(unsigned short *)&p[L]);
 		L += 2;		
-		pdu->data.vector.date_base = ntohl(*(unsigned int *)&p[L]);
+		pdu->data.vector.date_base = ntohl(*(unsigned long *)&p[L]);
 		L += 4;
 		pdu->data.vector.interval = ntohs(*(unsigned short *)&p[L]);
 		L += 2;		
@@ -707,7 +709,6 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	if (!rs_addr) return -1;
 	
 	fd = socket(AF_ROSE, SOCK_SEQPACKET, 0);
-/*	syslog(LOG_INFO, "wp_open_remote() fd %d\n", fd); */
 	if (fd < 0) return -1;
 
 	memset(&rose, 0x00, sizeof(struct full_sockaddr_rose));
@@ -716,7 +717,6 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	ax25_aton_entry(source_call, rose.srose_call.ax25_call);
 	rose_aton(rs_addr, rose.srose_addr.rose_addr);
 	if (bind(fd, (struct sockaddr *)&rose, sizeof(struct full_sockaddr_rose)) == -1) {
-/*		syslog(LOG_INFO, "wp_open_remote() bind\n"); */
 		perror("wp_open: bind");
 		close(fd);
 		return -1;
@@ -727,7 +727,6 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 		int flag = 1;
 		rc = ioctl(fd, FIONBIO, &flag);
 		if (rc) {
-/*			syslog(LOG_INFO, "wp_open_remote() ioctl FIONBIO\n"); */
 			perror("wp_open_remote:ioctl FIONBIO");
 			close(fd);
 			return -1;
@@ -735,9 +734,8 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	}
 	
 	if (!remote) {	
-/*		syslog(LOG_INFO, "wp_open_remote() local WP\n"); */
-		/* Wait for local WP server to be ready */
-		if (wait_for_local_wp(60)) return -1;
+		/* Wait a few seconds for local WP server to be ready */
+		if (wait_for_local_wp(6)) return -1;
 		/* Reuse the rose structure : same X.121 address */
 		ax25_aton_entry("WP", rose.srose_call.ax25_call);
 		rc = connect(fd, (struct sockaddr *)&rose, sizeof(struct full_sockaddr_rose));		
@@ -930,10 +928,9 @@ int wp_get_list(wp_t **wp, int *nb, int flags, char *mask)
 		}
 		else if ((pdu.type == wp_type_response) && (pdu.data.status == WP_OK))
 			return 0;
-		else {
-			syslog(LOG_INFO, "wp_get_list() error pdu type %d wp_type_response %d status %d\n", pdu.type, wp_type_response, pdu.data.status);
+		else 
 			return -1;
-		}
+
 		if (pdu.data.list_rsp.next == 0)
 		{
 			*nb = i+1;
@@ -1004,6 +1001,7 @@ int wp_get(ax25_address *call, wp_t *wp)
  * Update (or create) a full WP record
  *
  * Return 0 if successful
+ * else return error number
  */
  
 int wp_set(wp_t *wp)
@@ -1048,7 +1046,7 @@ int wp_set(wp_t *wp)
 		return 0;
 	}
 				
-	syslog(LOG_ERR, "wp_set() error - type %d response %d name '%s' status %d\n", pdu.type, wp_type_response, pdu.data.wp.name, pdu.data.status);
+	syslog(LOG_INFO, "wp_set() error - type %d response %d status %d\n", pdu.type, wp_type_response, pdu.data.status);
 	return -1;
 }
 
@@ -1063,7 +1061,7 @@ int wp_is_node(char *callsign)
 	ax25_address call;
 	
 	ax25_aton_entry(callsign, call.ax25_call);
-	
+
 	return ((wp_get(&call, &wp) == 0) && (wp.is_node));
 }
 
