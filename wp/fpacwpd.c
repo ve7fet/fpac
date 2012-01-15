@@ -185,8 +185,6 @@ static void rose_read_handler(int s)
 	  memset(&pdu, 0, sizeof(wp_pdu));
 	  rc = wp_receive_pdu(s, &pdu);
 	  if (rc < 0) {	/* Connection lost or protocol error */
-/* DEBUG F6BVP */		
-		if (verbose) syslog(LOG_INFO, "rose_read_handler() receive_pdu rc %d connection lost or protocol error", rc);
 		close_client(s, 0);
 		return;
 	  }
@@ -708,7 +706,7 @@ static void debug_pdu(wp_pdu *pdu)
 	syslog(LOG_INFO, "Date %s ", tmp);
 	syslog(LOG_INFO, "vector version %u seed %u Total %d Interv:%.2f min (%u)",
 		       	pdu->data.vector.version, pdu->data.vector.seed, j, pdu->data.vector.interval/60.0, pdu->data.vector.interval);
-	str[0] = '\0';
+/*	str[0] = '\0';
 	for (i=0 ; i<WP_VECTOR_SIZE ; i++) {
 		sprintf(tmp, "%02d:%05d/%-5d", i, pdu->data.vector.crc[i], pdu->data.vector.cnt[i]);
 		strcat(str, tmp);
@@ -721,7 +719,7 @@ static void debug_pdu(wp_pdu *pdu)
 			strcat(str, " ");
 	}
 	syslog(LOG_INFO, "%s", str);
-
+*/
 }
 
 static void do_cmd(int s, char *cmd)
