@@ -142,7 +142,7 @@ int main(int ac, char **av)
 			printf("         ");
 
  		printf("%s => %s %s  ", 
-			my_date(wp.date), 
+ 			my_date(wp.date),
 			dnic, 
 			add+4);
 
@@ -166,6 +166,9 @@ int main(int ac, char **av)
 
 		sscanf(line, "%s %[^\r\n]", command, str);
 
+/* F6BVP record is set to present date */
+		wp.date = time (NULL);
+
 		switch(toupper(command[0]))
 		{
 		case 'A':
@@ -180,8 +183,12 @@ int main(int ac, char **av)
 			else
 			{
 				rose_aton(str, wp.address.srose_addr.rose_addr);
-				wp_set(&wp);
-				printf("%s WP record updated", call); CR(); CR();
+				ret = wp_set(&wp);
+				if (ret == 0)
+					printf("WP record '%s' updated", call);
+				else	
+					printf("*** Error in address setting"); 
+				CR(); CR();
 				wp_get(&wp.address.srose_call, &wp);
 			}
 			break;
@@ -226,13 +233,10 @@ int main(int ac, char **av)
 					wp.address.srose_ndigis = num;
 					ret = wp_set(&wp);
 					if (ret == 0)
-					{
-						printf("%s WP record updated", call); CR(); CR();
-					}
+						printf("WP record '%s' updated", call);
 					else
-					{
-						printf("*** Error in list of digis"); CR(); CR();
-					}
+						printf("*** Error in list of digis");
+				       	CR(); CR();
 					wp_get(&wp.address.srose_call, &wp);
 				}
 			}
@@ -242,32 +246,33 @@ int main(int ac, char **av)
 			}
 			break;
 		case 'N':
-			if(wp.is_node == 1)
+			if (wp.is_node == 1)
 				wp.is_node = 0;
-			else
+			else 
 				wp.is_node = 1;
-			if (wp_set(&wp) == 0)
-				printf("%s Node attribute updated", call);
-			else
-				printf("%s record not updated", call);
+			ret = wp_set(&wp);
+			if (ret == 0)
+				printf("Node '%s' attribute updated", call);
+			else 
+				printf("record '%s' not updated - error %d", call, ret);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'R':
 			wp.is_deleted = 1;
 			if (wp_set(&wp) == 0)
-				printf("%s WP record deleted", call);
+				printf("WP record '%s' deleted", call);
 			else
-				printf("%s record not updated", call);
+				printf("record '%s' not updated", call);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'U':
 			wp.is_deleted = 0;
 			if (wp_set(&wp) == 0)
-				printf("%s WP record restored", call);
+				printf("WP record '%s' restored", call);
 			else
-				printf("%s record not updated", call);
+				printf("record '%s' not updated", call);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
