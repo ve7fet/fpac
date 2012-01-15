@@ -68,7 +68,13 @@ int main(int ac, char **av)
 	char *match;
 	char *add;
 
-	while ((p = getopt(ac, av, "acnrl:0123456789" )) != -1)
+	if (ac == 1) {
+		printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
+		printf("              [-a unsort output] [-r revert sort] [-c remove new line]\n");
+		return(1);
+	}
+
+	while ((p = getopt(ac, av, "acn:rl:0123456789" )) != -1)
 	{
 		switch (p)
 		{
@@ -86,9 +92,11 @@ int main(int ac, char **av)
 			break;
 		case 'n' :
 			node = 1;
+			limit = atoi(optarg);
 			break;
 		case '?' :
-			printf("usage: wpserv [-c] [-l n] [-n<ode>] [mask<*>]\n");
+			printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
+			printf("              [-a unsort output] [-r revert sort] [-c remove new line]\n");
 			return(1);
 		}
 	}
@@ -315,7 +323,7 @@ static char *my_date(time_t date)
 	static char buf[20];
 	struct tm *sdate;
 
-	sdate = localtime (&date);
+	sdate = gmtime (&date);
 	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
 		sdate->tm_mday,
 		sdate->tm_mon + 1, 
