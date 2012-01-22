@@ -161,7 +161,7 @@ static void rose_write_handler(int s)
 			close_client(s, 1);
 		}
 		else {
-			if (verbose) syslog(LOG_INFO, "dirty record sent to adjacent rc %d", rc); 		 
+/*			if (verbose) syslog(LOG_INFO, "dirty record sent to adjacent rc %d", rc); 		 */
 			clear_dirty_context(dirty, s);
 		}	
 	}
@@ -210,7 +210,7 @@ static void rose_read_handler(int s)
 		  }
 		  if (rc >= 0) {
 			  pdu.data.status = WP_OK;
-			  if (verbose) syslog(LOG_INFO, "rose_read_handler() wp_type_set status WP_OK %d", pdu.data.status);
+/*			  if (verbose) syslog(LOG_INFO, "rose_read_handler() wp_type_set status WP_OK %d", pdu.data.status);*/
 			  /* Broadcast this new record */
 			  broadcast_dirty(rc, s);
 		  }
