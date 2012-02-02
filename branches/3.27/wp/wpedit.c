@@ -166,8 +166,8 @@ int main(int ac, char **av)
 
 		sscanf(line, "%s %[^\r\n]", command, str);
 
-/* F6BVP record is set to present date */
-		wp.date = time (NULL);
+/* F6BVP record is set to present date
+		wp.date = time (NULL); */
 
 		switch(toupper(command[0]))
 		{
