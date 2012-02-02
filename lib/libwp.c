@@ -1014,7 +1014,8 @@ int wp_set(wp_t *wp)
 		syslog(LOG_ERR, "wp_set() no wp socket\n");
 		return -1;
 	}	
-	wp->date = time(NULL);
+/* DEBUG F6BVP */
+/*	wp->date = time(NULL);*/
 	call_clean(&wp->address.srose_call);
 	for (n = 0 ; n < wp->address.srose_ndigis ; n++)
 		call_clean(&wp->address.srose_digis[n]);
