@@ -1160,3 +1160,16 @@ int strmatch (char *chaine, char *masque)
 	}
 }
 
+void my_date(char *buf, time_t date)
+{
+	struct tm *sdate;
+
+	sdate = gmtime (&date);
+	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
+		sdate->tm_mday,
+		sdate->tm_mon + 1, 
+		sdate->tm_year%100,
+		sdate->tm_hour,
+		sdate->tm_min);
+}
+

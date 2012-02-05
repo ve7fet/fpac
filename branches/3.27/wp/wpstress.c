@@ -31,34 +31,21 @@
 
 #include "wp.h"
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
-}
-
 static void dump_record(wp_t *wp)
 {
 	int i;
 	char *add;
 	char dnic[5];
-
+	char buf[20];
 
 	add = rose_ntoa(&wp->address.srose_addr);
 	strncpy(dnic, add, 4); dnic[4] = '\0';
 
+	my_date(buf, wp->date);
+
 	printf("%-9s %s => %s %s ", 
 	       ax25_ntoa(&wp->address.srose_call), 
-	       my_date(wp->date), dnic, add+4);
+	       buf, dnic, add+4);
 
 	for (i = 0 ; i < wp->address.srose_ndigis ; i++)
 	{

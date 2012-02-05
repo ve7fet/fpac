@@ -46,7 +46,6 @@ int deleted = 0; /* number of deleted records */
 
 /*** Prototypes *******************/
 static void display_results(wp_t *wp, int limit, int nb);
-static char *my_date(time_t date);
 static int wp_cmp(const void *p1, const void *p2);
 
 #define CR() printf( (cr) ? "\r" : "\n"); 
@@ -68,13 +67,7 @@ int main(int ac, char **av)
 	char *match;
 	char *add;
 
-	if (ac == 1) {
-		printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
-		printf("              [-a unsort output] [-r revert sort] [-c remove new line]\n");
-		return(1);
-	}
-
-	while ((p = getopt(ac, av, "acn:rl:0123456789" )) != -1)
+	while ((p = getopt(ac, av, "acrnl" )) != -1)
 	{
 		switch (p)
 		{
@@ -82,7 +75,7 @@ int main(int ac, char **av)
 			cr = 1;
 			break;
 		case 'l' :
-			limit = atoi(optarg);
+			node = 0;
 			break;
 		case 'a' :
 			addsort = 1;
@@ -92,7 +85,6 @@ int main(int ac, char **av)
 			break;
 		case 'n' :
 			node = 1;
-			limit = atoi(optarg);
 			break;
 		case '?' :
 			printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
@@ -100,23 +92,24 @@ int main(int ac, char **av)
 			return(1);
 		}
 	}
-	
-	if (optind == ac)
-	{
-		match = strdup("*");
-		test_call = 1;
-	}
-	else
-	{
-		match = av[optind];
+
+	match = strdup("*");
+	test_call = 1;
+
+	if (ac > 2) limit = atoi(av[optind]);
+	if ((ac == 4 && limit != 0) || (ac == 3 && limit == 0)) { 
+		match = av[ac-1];
+		strcat(match,"*\0");
 		test_call = 0;
-		for (ptr = match ; *ptr ; ptr++)
-		{
-		if (isalpha(*ptr)) 
-			test_call = 1;
+		for (ptr = match ; *ptr ; ptr++) {
+			if (isalpha(*ptr)) { 
+				*ptr = toupper((int)*ptr);
+				test_call = 1;
+			}
 		}
 	}
-
+	
+	if (limit == 0) limit = 10;
 	printf("mask : %s\n",match);
 
 	fptr = fopen(FPACWP, "r");
@@ -257,9 +250,11 @@ static void display_results(wp_t *wp, int limit, int nb)
 	char dnic[5];
 	char *add;
 	char *call;
+	char buf[20];	/* my_date string */
 
 	if (nb == 0)
 	{
+		CR();
 		printf("None found");
 		CR();
 	}
@@ -289,8 +284,11 @@ static void display_results(wp_t *wp, int limit, int nb)
 				printf("%s", "   Ok  ");
 			else
 				printf("%s", "deleted");
+
+			my_date(buf, wp->date);
+
 			printf(" %s => %s %-7s ",
-				my_date(wp->date),
+				buf,
 				dnic, 
 				add+4);
 			
@@ -308,27 +306,11 @@ static void display_results(wp_t *wp, int limit, int nb)
 			
 			++wp;
 		}
+	CR();
 	}
-	printf("%d deleted records found",deleted);
-	CR();
-	printf("%d valid records found",valid); 
-	CR();
-	printf("-- ");
-	CR();
+	printf("\n%d deleted records found\n",deleted);
+	printf("%d valid records found\n",valid); 
+	printf("--\n");
 
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = gmtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
-}

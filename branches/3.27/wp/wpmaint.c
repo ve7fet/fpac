@@ -38,7 +38,6 @@
 int cr = 0;
 
 /*** Prototypes *******************/
-static char *my_date(time_t date);
 
 #define CR() printf( (cr) ? "\r" : "\n"); 
 
@@ -60,6 +59,7 @@ int main(int ac, char **av)
 	time_t temps = time(NULL);
 	time_t delete_temps = time(NULL) - 3600L * 24L * 180L;
 	time_t erase_temps   = time(NULL) - 3600L * 24L * 7L;
+	char buf[20];
 
 	strcpy(fpacwp_old, FPACWP);
 	strcat(fpacwp_old, ".old");
@@ -134,9 +134,11 @@ int main(int ac, char **av)
 			continue;
 		}
 		
+		my_date(buf, wp.date);
+
 /* User records marked deleted and older than 8 days are erased i.e. not copied */
 		if (!wp.is_node && wp.is_deleted && wp.date < erase_temps) {
-			printf("%-9s %s => %s %-7s", full_call, my_date(wp.date) ,dnic, add+4);
+			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
 			printf("%s", " user  deleted  ERASED");
 			printf("\n");
 			continue;
@@ -144,7 +146,7 @@ int main(int ac, char **av)
 /* User records older than 180 days are marked DELETED - Nodes are NEVER deleted */ 	
 		if (!wp.is_node && wp.date < delete_temps) {
 			wp.is_deleted = 1;
-			printf("%-9s %s => %s %-7s", full_call, my_date(wp.date) ,dnic, add+4);
+			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
 			printf("%s", " user  deleted ");
 			printf("\n");
 			wp.date = temps;
@@ -155,7 +157,7 @@ int main(int ac, char **av)
 			wp.date = temps;
 		}
 
-		printf("%-9s %s => %s %-7s", full_call, my_date(wp.date), dnic, add+4);
+		printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
 		if (wp.is_node == 0)
 		       printf("%s"," user ");
 		else
@@ -218,17 +220,3 @@ int main(int ac, char **av)
 	return(retour);
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
-}

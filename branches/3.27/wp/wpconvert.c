@@ -37,7 +37,6 @@
 int cr = 0;
 
 /*** Prototypes *******************/
-static char *my_date(time_t date);
 
 typedef struct {
 	time_t date;
@@ -58,6 +57,7 @@ int main(int ac, char **av)
 	wp_header wph;
 	char dnic[5];
 	char *add, *call;
+	char buf[20];
 
 	if (ac < 2)
 	{
@@ -108,9 +108,11 @@ int main(int ac, char **av)
 
 		strncpy(dnic, add, 4); dnic[4] = '\0';
 
+		my_date(buf, old_wp.date),
+		
 		printf("%-9s %s => %s %-7s ", 
 				call,
-				my_date(old_wp.date),
+				buf,
 				dnic, 
 				add+4);
 			
@@ -137,17 +139,3 @@ int main(int ac, char **av)
 	return(0);
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
-}
