@@ -1963,19 +1963,6 @@ int do_status(int argc, char **argv)
 	return 0;
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime(&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d",
-			sdate->tm_mday,
-			sdate->tm_mon + 1,
-			sdate->tm_year % 100, sdate->tm_hour, sdate->tm_min);
-	return (buf);
-}
-
 int do_wp(int argc, char **argv)
 {
 	int nb = 20;
@@ -1986,6 +1973,7 @@ int do_wp(int argc, char **argv)
 	char *add;
 	char *call;
 	char dnic[5];
+	char buf[20];
 
 	/*if (argc < 2)
 	   {
@@ -2053,8 +2041,8 @@ int do_wp(int argc, char **argv)
 			strncpy(dnic, add, 4);
 			dnic[4] = '\0';
 
-			tprintf("%-9s %s => %s %-7s ",
-					call, my_date(wp[i].date), dnic, add + 4);
+			my_date(buf, wp[i].date);
+			tprintf("%-9s %s => %s %-7s ", call, buf, dnic, add + 4);
 
 			if (wp[i].is_node)
 				tprintf("Node ");
