@@ -2,12 +2,20 @@ fpac (3.27.19)
 	* Cleaned up the SVN code base
 	* Moved the help files from /etc/ax25/fpac/help to /var/ax25/fpac/help 
 	  for better policy compliance and less security risk
-	* Added some of Charley's scripts: ax25, ax25-up, ax25-down, ax25parms
+	* Added some of K4GBB's scripts: ax25, ax25-up, ax25-down, ax25parms
 	* Remove the obsolete mkissattach code (and kiss folder)
-	* Add a buch of man pages for the binaries created by this software
+	* K4GBB added a buch of man pages for the binaries created by this software
 	* Commented some more of the source
+	* F6BVP repaired the -o option and added -d (debug) option in mon_tcp
+	* F6BVP added a usage message to call_tcp
+	* F6BVP added more usage details to wpserv
+	* F6BVP fixed 32/64 bit compatability for libwp and computing of wp record age based on GMT
+	* F6BVP added more error reporting to wpedit
+	* F6BVP cleaned up some of the debugging messages in fpacwpd
+	* F6BVP added a patch to wpedit to allow editing of a record despite age/date
+	* K4GBB cleaned up the output of the fpaccfg utility
 
- -- Lee Woldanski <ve7fet@tparc.org> Mon, 10 Oct 2011 19:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Mon, 06 Oct 2012 21:00:00 -0800
 
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database

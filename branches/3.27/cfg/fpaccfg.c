@@ -17,7 +17,6 @@
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
-
 #include "ax25compat.h"
 #include "fpac.h"
 
@@ -43,17 +42,15 @@ int main(int ac, char **av)
 
 	printf("\n");
 	printf("Last change: %s", ctime(&cfg.date));
-
 	printf("\n");
-	printf("Callsign   : %s\n", cfg.callsign);
-	printf("Alternate  : %s\n", cfg.alt_callsign);
+	printf("L3 Call    : %s\n", cfg.callsign);
+	printf("L2 Call    : %s\n", cfg.alt_callsign);
+	printf("Trace Call : %s\n", cfg.trt_callsign);
 	printf("DNIC       : %s\n", cfg.dnic);
 	printf("Address    : %s\n", cfg.address);
-	printf("Option     : %s\n", cfg.option);
 	if (cfg.cover)
 	{
-		printf("\n");
-		printf("Coverage   : ");
+		printf("Coverage   : \n");
 		for (o = cfg.cover ; o != NULL ; o = o->next)
 		{
 			printf("%s ", o->addr);
@@ -62,13 +59,16 @@ int main(int ac, char **av)
 
 	if (cfg.inetport != 0)
 	{
-		printf("\n");
-		printf("TCP/IP port: %d\n", cfg.inetport);
+		printf("UDP port   : %d\n", cfg.inetport);
 	}
+
+	printf("City       : %s\n", cfg.city);
+	printf("State      : %s\n", cfg.state);
+	printf("Country    : %s\n", cfg.country);
+	printf("Locator    : %s\n", cfg.locator);
 
 	if (cfg.port)
 	{
-		printf("\n");
 		printf("UserPort   : ");
 		for (p = cfg.port ; p != NULL ; p = p->next)
 		{
@@ -83,7 +83,7 @@ int main(int ac, char **av)
 	{
 		printf("\n");
 		printf("AddPort    : %s\n", d->name);
-		printf("  Adress   : %s\n", d->addr);
+		printf("  Address  : %s\n", d->addr);
 		printf("  Port     : %s\n", d->port);
 	}
 
@@ -93,7 +93,7 @@ int main(int ac, char **av)
 		printf("Node       : %s\n", n->name);
 		printf("  Callsign : %s\n", n->call);
 		printf("  DNIC     : %s\n", n->dnic);
-		printf("  Adress   : %s\n", n->addr);
+		printf("  Address  : %s\n", n->addr);
 		printf("  Port     : %s\n", n->port);
 		printf("  NoWp     : %d\n", n->nowp);
 	}

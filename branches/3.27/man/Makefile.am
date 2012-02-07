@@ -3,6 +3,7 @@ man_MANS = \
 	aprslist.conf.5 \
 	ax25parms.1 \
 	calibrate.1 \
+	calld.1 \
 	flexd.1 \
 	flexd.conf.5 \
 	flexd.routes.5 \
@@ -29,7 +30,9 @@ man_MANS = \
 	wpconvert.1 \
 	wpedit.1 \
 	wpmaint.1 \
-	wpserv.1
+	wpserv.1 \
+	wpstress.1 \
+	yapp.1
 
 EXTRA_DIST = $(man_MANS)
 
