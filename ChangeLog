@@ -10,12 +10,14 @@ fpac (3.27.19)
 	* F6BVP added a usage message to call_tcp
 	* F6BVP added more usage details to wpserv
 	* F6BVP fixed 32/64 bit compatability for libwp and computing of wp record age based on GMT
+	* F6BVP white pages records are now stored with GMT time to prevent timezone problems on 
+	  large systems spanning many timezones
 	* F6BVP added more error reporting to wpedit
 	* F6BVP cleaned up some of the debugging messages in fpacwpd
 	* F6BVP added a patch to wpedit to allow editing of a record despite age/date
 	* K4GBB cleaned up the output of the fpaccfg utility
 
- -- Lee Woldanski <ve7fet@tparc.org> Mon, 06 Oct 2012 21:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Thu, 09 Feb 2012 14:00:00 -0800
 
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database

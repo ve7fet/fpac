@@ -88,7 +88,7 @@ int main(int ac, char **av)
 			break;
 		case '?' :
 			printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
-			printf("              [-a unsort output] [-r revert sort] [-c remove new line]\n");
+			printf("              [-a sort by address] [-r reverse sort] [-c remove new line from output]\n");
 			return(1);
 		}
 	}
