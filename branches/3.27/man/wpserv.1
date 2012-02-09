@@ -1,25 +1,28 @@
 .TH WPSERV 1 "23 September 2011" Linux "FPAC Operator's Manual"
 .SH NAME 
-wpserv \- FPAC White Page Database server.
+wpserv \- FPAC white pages database server.
 .SH SYNOPSIS
-.B wpserv [-n] [-l num] [-c] [-r] [-a] [mask*] 
+.B wpserv [-h] [-n [num]] [-l [num]] [-c] [-r] [-a] [mask*] 
 .SH DESCRIPTION
 .LP
 .B wpserve
 returns a listing of records that match the search options.
 .SH OPTIONS
 .TP 13
-.BI \-n 
-List nodes only
+.BI \-h
+Display command line help.
 .TP 13
-.BI \-l " <num>
-List num records. The default is 10.
+.BI \-n " [num]
+List nodes only. Alternatively, display [num] nodes. 
+.TP 13
+.BI \-l " [num]
+List records. The default is 10. Alternatively, display [num] records.
 .TP 13
 .BI \-c
-Sort by call. (default)
+Remove newlines from output.
 .TP 13
 .BI \-r
-Display in reverse order.
+Display results in reverse order.
 .TP 13
 .BI \-a
 Sort by Address.
