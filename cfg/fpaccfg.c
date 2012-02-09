@@ -9,14 +9,7 @@
 */
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <syslog.h>
-#include <ctype.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <arpa/inet.h>
+#include <time.h>
 #include "ax25compat.h"
 #include "fpac.h"
 
