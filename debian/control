@@ -9,5 +9,5 @@ Homepage: http://rose.fpac.free.fr
 Package: fpac
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libax25 (>= 0.0.12)
-Description: FPAC AX.25 network switching software 
- FPAC AX.25 network switching software, featuring ROSE routing.
+Description: The FPAC AX.25 network switching software 
+ The FPAC AX.25 network switching software, featuring ROSE routing.
