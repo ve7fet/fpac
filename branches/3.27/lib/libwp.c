@@ -118,37 +118,36 @@ int ancien(wp_pdu *pdu)
 {
 	static struct tm *wpdate, *sdate;
 	int date_limite = WP_OBSOLETE;
-	int jours, annees, s_jours, wp_jours, s_annee, wp_annee;
-	time_t temps;
+	int s_jours, wp_jours, s_annee, wp_annee, days_old;
+	time_t temps, wp_age;
 
-	wpdate = gmtime(&pdu->data.wp.date);
-	wp_annee = wpdate->tm_year%100;
-	wp_jours = wpdate->tm_yday;
-	
 	temps = time(NULL);
 	sdate = gmtime(&temps);
 	s_annee = sdate->tm_year%100;
 	s_jours = sdate->tm_yday;
-
-	if (pdu->data.wp.date > temps + 84600L) 
-		syslog (LOG_INFO, "WP record date dd/mm/yy  %02d/%02d/%02d is in the future !\n", wpdate->tm_mday, wpdate->tm_mon+1, wpdate->tm_year%100);
-
-	annees = s_annee - wp_annee;
-	jours = (annees * 365 - wp_jours) + s_jours;
 	
-	syslog(LOG_INFO, "record dated year : %d and day %d - Today's year is %d and day number %d\n", wp_annee+2000, wp_jours, s_annee+2000, s_jours);
+	wpdate = gmtime(&pdu->data.wp.date);
+	wp_annee = wpdate->tm_year%100;
+	wp_jours = wpdate->tm_yday;
+	
+	wp_age = temps - pdu->data.wp.date;
+	days_old = wp_age / 86400L;
 
-	if (jours < 0) {
-		syslog (LOG_INFO, "WP record date is in the future !\n");
-		return (0);
+	syslog(LOG_INFO, "WP record is %d days old (%ld seconds)", days_old, wp_age);
+	
+	if (days_old < 0) { 
+		syslog (LOG_INFO, "WP record date dd/mm/yy  %02d/%02d/%02d is in the future ! age : %d days (%ld seconds)", wpdate->tm_mday, wpdate->tm_mon+1, wpdate->tm_year%100, days_old, wp_age);
+
+	return 1;	
 	}
+	syslog(LOG_INFO, "record dated year : %d and day %d - Today's year is %d and day number %d", wp_annee+2000, wp_jours, s_annee+2000, s_jours);
 
-	if (jours > date_limite) {
-		syslog (LOG_INFO, "WP record REFUSED %d days old - limit is %d\n",jours, date_limite);
+	if (days_old > date_limite) {
+		syslog (LOG_INFO, "WP record REFUSED %d days (%ld seconds) old - limit is %d", days_old, wp_age, date_limite);
 		return (1);
 	}
 	else {
-		syslog(LOG_INFO, "WP record ACCEPTED %d days old\n", jours);
+		syslog(LOG_INFO, "WP record ACCEPTED %d days old (%ld seconds)", days_old, wp_age);
 		return (0);
 	}
 }
