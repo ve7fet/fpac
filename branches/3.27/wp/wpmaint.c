@@ -64,42 +64,66 @@ int main(int ac, char **av)
 	strcpy(fpacwp_old, FPACWP);
 	strcat(fpacwp_old, ".old");
 	
-	if (rename(FPACWP, fpacwp_old) != 0)
+	/* Checks FPAC WP file */	
+	fptr_i = fopen(FPACWP, "r");
+
+	if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0));
+	else
 	{
-		fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", FPACWP, fpacwp_old);
-		return(1);
+		fprintf(stderr, "Could not find %s or file is corrupted ... Trying %s !\n", FPACWP, fpacwp_old);
+	
+	/* Do we have a backup FPACWP */	
+		fptr_i = fopen(fpacwp_old, "r");
+		if (fptr_i == NULL)
+		{
+			fprintf(stderr, "Could not find %s Exiting !\n", fpacwp_old);
+			return(1);
+		}
+
+	/* Lets use it */	
+		if (rename(fpacwp_old, FPACWP) != 0)
+		{
+			fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", fpacwp_old, FPACWP);
+			return(2);
+		}
 	}
 	
+	fclose(fptr_i);
+
+	/* Save FPACWP file */
+	if (rename(FPACWP, fpacwp_old) != 0)
+		{
+			fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", FPACWP, fpacwp_old);
+			return(4);
+		}
+	/* Read saved FPACWP file */
 	fptr_i = fopen(fpacwp_old, "r");
 	if (fptr_i == NULL)
-	{
-		fprintf(stderr, "Could not create %s ... Exiting !\n", FPACWP);
-		return(2);
-	}
+		{
+			fprintf(stderr, "Could not open %s Exiting !\n", fpacwp_old);
+			return(5);
+		}
+	/* Read the first record */
+	if (fread(&wph_sig, sizeof(wph), 1, fptr_i) == 0)
+		{
+			fprintf(stderr, "No signature found ... %s\n", fpacwp_old);
+			fclose(fptr_i);
+			return(6);
+		}
 
+	/* Check signature for version compatibility */
+	if (strcmp(wph_sig.signature,FILE_SIGNATURE) != 0)
+		{
+			fprintf(stderr, "WP file is not compatible\n");
+			fclose(fptr_i);
+			return(7);
+		}
+	/* Lets create new FPACWP */
 	fptr_o = fopen(FPACWP, "w");
 	if (fptr_o == NULL)
 	{
-		fprintf(stderr, "Could not find %s ... Exiting !\n", fpacwp_old);
-		fclose(fptr_i);
-		return(2);
-	}
-
-	if (fread(&wph_sig, sizeof(wph), 1, fptr_i) == 0)
-	{
-		fprintf(stderr, "No signature found in %s ... Exiting\n", fpacwp_old);
-		fclose(fptr_i);
-		fclose(fptr_o);
-		return(3);
-	}
-
-	/* Check the first record for compatibility */
-	if (strcmp(wph_sig.signature,FILE_SIGNATURE) != 0)
-	{
-		fprintf(stderr, "WP file is not compatible\n");
-		fclose(fptr_i);
-		fclose(fptr_o);
-		return(4);
+		fprintf(stderr, "Could not create %s ... Exiting !\n", FPACWP);
+		return(8);
 	}
 
 	printf("%d records in old WP database\n", wph_sig.nb_record);
