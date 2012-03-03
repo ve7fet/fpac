@@ -797,6 +797,9 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
+	/* No signal ! */
+	signal(SIGPIPE, SIG_IGN);
+	
 	if (init_adjacents(&cfg)) {
 		perror("fpacwpd : error init adjacents");
 		exit(1);
@@ -808,9 +811,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	/* No signal ! */
-	signal(SIGPIPE, SIG_IGN);
-		
 	/* Informations of the node in case of creation of database */
 	/*memset(&wp, 0, sizeof(wp));*/
 	wp = calloc(sizeof(*wp), 1);
