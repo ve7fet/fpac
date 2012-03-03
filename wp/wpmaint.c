@@ -160,24 +160,19 @@ int main(int ac, char **av)
 		
 		my_date(buf, wp.date);
 
-/* User records marked deleted and older than 8 days are erased i.e. not copied */
-		if (!wp.is_node && wp.is_deleted && wp.date < erase_temps) {
+/* Records marked deleted and older than 8 days are erased i.e. not copied */
+		if (wp.is_deleted && wp.date < erase_temps) {
 			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
-			printf("%s", " user  deleted  ERASED");
+			printf("%s", " deleted record ERASED");
 			printf("\n");
 			continue;
 		}
-/* User records older than 180 days are marked DELETED - Nodes are NEVER deleted */ 	
-		if (!wp.is_node && wp.date < delete_temps) {
+/* Records older than 180 days are marked DELETED */ 	
+		if (wp.date < delete_temps) {
 			wp.is_deleted = 1;
 			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
-			printf("%s", " user  deleted ");
+			printf("%s", " deleted ");
 			printf("\n");
-			wp.date = temps;
-		}
-/* Node records are NEVER deleted */ 	
-		if (wp.is_node) {
-			wp.is_deleted = 0;
 			wp.date = temps;
 		}
 
@@ -213,7 +208,7 @@ int main(int ac, char **av)
 
 		if (fwrite(&wp, sizeof(wp_t), 1, fptr_o) == 0)
 		{
-			fprintf(stderr, "Cannot wp record in %s ... Exiting\n", FPACWP);
+			fprintf(stderr, "Cannot write wp record in %s ... Exiting\n", FPACWP);
 			retour = 3;
 		}
 		
