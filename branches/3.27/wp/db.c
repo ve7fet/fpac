@@ -361,13 +361,38 @@ int db_open(char *file, wp_t * wpnode)
 	int i;
 	int nb;
 	int bad_nb;
+	wp_header wph;
+	wp_header wph_sig;
+	FILE *fptr_i;
+	char fpacwp_old[256];
 
 	strcpy(wp_file, file);
 
+	/* Checks FPAC WP file */	
+	fptr_i = fopen(wp_file, "r");
+
+	if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0)) {
+		fclose(fptr_i);
+	}
+	/* Checks backup database file */
+	else {
+		fprintf (stderr, "WP database %s corrupted or missing\n", wp_file);
+		strcpy(fpacwp_old, wp_file);
+		strcat(fpacwp_old, ".old");
+		fptr_i = fopen(fpacwp_old, "r");
+		if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0)) {
+		fprintf (stderr, "Copying backup database %s\n", fpacwp_old);
+			rename(fpacwp_old, wp_file);
+			fclose(fptr_i);
+		}
+	}
+
 	/* Create database file if necessary */
 
-	if (access(wp_file, R_OK | W_OK))
+	if (access(wp_file, R_OK | W_OK) ) {
+		fprintf (stderr, "Initializing new WP database %s\n", wp_file);
 		db_create(wpnode);
+	}
 
 	/* Map database in memory */
 
