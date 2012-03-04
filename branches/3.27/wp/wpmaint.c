@@ -127,8 +127,8 @@ int main(int ac, char **av)
 	}
 
 	printf("%d records in old WP database\n", wph_sig.nb_record);
-	printf("user records older than 180 days are marked 'deleted'\n");
-	printf("user records marked deleted are erased after 7 days\n");
+	printf("Records older than 180 days are marked 'deleted'\n");
+	printf("Records marked 'deleted' are erased after 7 days\n");
 
 	if (fwrite(&wph_sig, sizeof(wph), 1, fptr_o) == 0)
 	{
