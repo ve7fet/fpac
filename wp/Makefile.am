@@ -1,8 +1,9 @@
 LDADD = $(AX25_LIB) ../lib/libfpac.a
 noinst_PROGRAMS = make_tab
-sbin_PROGRAMS = fpacwpd wpedit wpstress wpmaint wpserv wpcmp wpconvert
+sbin_PROGRAMS = fpacwpd wpedit wplist wpstress wpmaint wpserv wpcmp wpconvert
 make_tab_SOURCES = make_tab.c
 fpacwpd_SOURCES = fpacwpd.c daemon.c daemon.h db.c db.h db_list.c update.c update.h hash.c hash.h crc.c crc.h sockevent.c sockevent.h wpdefs.h
+wpedit_SOURCES = wplist.c
 wpedit_SOURCES = wpedit.c
 wpstress_SOURCES = wpstress.c
 wpmaint_SOURCES = wpmaint.c
