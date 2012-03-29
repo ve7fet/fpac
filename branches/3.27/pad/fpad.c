@@ -324,6 +324,7 @@ int main(int argc, char **argv)
 	char buffer[BUFLEN];
 	struct timeval timeval;
 	time_t wp_timeout = 0L;
+	time_t temps;
 	struct hostent *hp = NULL;
 	struct full_sockaddr_rose wp;
 	struct rose_facilities_struct facilities;
@@ -403,6 +404,8 @@ int main(int argc, char **argv)
 		closelog();
 		return 1;
 	}
+
+	temps = time(NULL);
 
 	/* Open AX25 L2 sockets */
 	for (p = cfg.port ; (p != NULL) ; p = p->next)
@@ -670,13 +673,13 @@ int main(int argc, char **argv)
 			continue;
 
 		/* Check the WP connection */
-		if (!wp_is_open() && (wp_timeout < time(NULL)))
+		if (!wp_is_open() && (wp_timeout < temps))
 		{
 			if (wp_open("FPAD"))
 			{
 				fprintf(stderr, "fpad : cannot open WP service\n");
 				syslog(LOG_ERR, "Cannot open WP service\n");
-				wp_timeout = time(NULL) + 60L;
+				wp_timeout = temps + 60L;
 			}
 		}
 			
