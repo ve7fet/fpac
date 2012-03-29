@@ -75,6 +75,10 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 
 static void close_client(int client, int active)
 {
+	time_t temps;
+	
+	temps = time(NULL);
+
 	if (verbose) {
 		if (!active) {
 			syslog(LOG_INFO, "(%d) Disconnected by client %s @ %s", client, ax25_ntoa(&context[client]->address.srose_call), rose_ntoa(&context[client]->address.srose_addr));
@@ -91,7 +95,7 @@ static void close_client(int client, int active)
 		struct wp_adjacent *wpa = context[client]->adjacent;
 		wpa->state = WPA_DISCONNECTED;
 		wpa->context = -1;
-		wpa->retry_connect_date = time(NULL) + WPA_RETRY_CONNECT;
+		wpa->retry_connect_date = temps + WPA_RETRY_CONNECT;
 		context[client]->adjacent = NULL;
 	}	
 	
@@ -110,6 +114,9 @@ static void rose_write_handler(int s)
 	int rc; 
 	struct wp_adjacent *wpa;
 	wp_pdu pdu;
+	time_t temps;
+	
+	temps = time(NULL);
 
 	assert(context[s]);
 	wpa = context[s]->adjacent;
@@ -118,7 +125,7 @@ static void rose_write_handler(int s)
 		if (verbose) syslog(LOG_INFO, "(%d) Connected to adjacent %s", s, rose_ntoa(&context[s]->address.srose_addr));
 		wpa->state = WPA_CONNECTED;
 		wpa->ismaster = 0;		
-		wpa->vector_date = time(NULL);	
+		wpa->vector_date = temps;	
 		wpa->vector_when_nodirty = 1;
 	}
 	
@@ -344,6 +351,9 @@ static void listening_handler(int s)
 	unsigned int l_addrlen = sizeof(l_address);
 /*	char *fulladdr;*/
 /*	node_t *node;*/
+	time_t temps;
+	
+	temps = time(NULL);
 
 	new_client = accept(s, (struct sockaddr *)&address, &addrlen);
 
@@ -382,7 +392,7 @@ static void listening_handler(int s)
 				wpa->context = new_client;
 				wpa->state = WPA_CONNECTED;
 				wpa->ismaster = 1;
-				wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+				wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 				RegisterEventAwaited(new_client, WRITE_EVENT);
 				break;			
 			}
@@ -418,7 +428,7 @@ static void listening_handler(int s)
 				wpa->context = new_client;
 				wpa->state = WPA_CONNECTED;
 				wpa->ismaster = 1;
-				wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+				wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 				RegisterEventAwaited(new_client, WRITE_EVENT);				
 			}	
 		}
@@ -443,6 +453,9 @@ static int init_adjacents(cfg_t *cfg)
 {
 	node_t *node;
 	struct wp_adjacent *wpa;
+	time_t temps;
+	
+	temps = time(NULL);
 		
 	for (node=cfg->node; node; node=node->next) {
 		if (node->nowp) continue;
@@ -455,7 +468,7 @@ static int init_adjacents(cfg_t *cfg)
 		wpa->state = WPA_DISCONNECTED;
 		wpa->node = node;
 		wpa->context = -1;
-		wpa->retry_connect_date = time(NULL);
+		wpa->retry_connect_date = temps;
 		wpa->next = wp_adjacent_list;
 		wp_adjacent_list = wpa;
 	}
@@ -491,6 +504,9 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 	int s;
 	char addr[11];
 	struct full_sockaddr_rose remote;
+	time_t temps;
+	
+	temps = time(NULL);
 
 	if (!wpa->node) return;
 	
@@ -499,7 +515,7 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 		
 	if (verbose) syslog(LOG_INFO, "Trying to connect adjacent %s", addr);
 
-	wpa->retry_connect_date = time(NULL) + 120;
+	wpa->retry_connect_date = temps + 120;
 
 	remote.srose_family = AF_ROSE;
 	remote.srose_ndigis = 0;
@@ -523,8 +539,11 @@ static void vector_request(struct wp_adjacent *wpa)
 	vector_t vector;
 	int s = wpa->context;
 	int rc;
+	time_t temps;
+	
+	temps = time(NULL);
 			
-	wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+	wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 
 	memset(&pdu, 0, sizeof(wp_pdu));
 	pdu.type = wp_type_vector_request;
@@ -548,7 +567,9 @@ static void vector_request(struct wp_adjacent *wpa)
 static void poll_adjacents(void)
 {
 	struct wp_adjacent *wpa;
-	time_t mytime = time(NULL);
+	time_t mytime;
+       
+	mytime = time(NULL);
 	
 	for (wpa=wp_adjacent_list; wpa; wpa=wpa->next) {
 		switch (wpa->state) {
@@ -604,6 +625,9 @@ static void debug_dump(int s)
 	struct wp_adjacent *wpa;
 	struct wp_info wpi;
 	vector_t vector;
+	time_t temps;
+       
+	temps = time(NULL);
 	
 	printf_pdu(s, "WP Server version %d.%d\r", WP_VERSION >> 8, WP_VERSION & 0xff);
 	
@@ -657,7 +681,7 @@ static void debug_dump(int s)
 			break;
 		case WPA_DISCONNECTED:
 			printf_pdu(s, "%s disconnected, retry in %d s\r", str,
-				wpa->retry_connect_date - time(NULL));
+				wpa->retry_connect_date - temps);
 			break; 
 		}
 	}
@@ -784,6 +808,7 @@ int main(int argc, char *argv[])
 	int rc;
 	int fd;
 	wp_t *wp;
+	time_t temps;	
 	
 	process_options(argc, argv);
 	
@@ -815,7 +840,8 @@ int main(int argc, char *argv[])
 	/*memset(&wp, 0, sizeof(wp));*/
 	wp = calloc(sizeof(*wp), 1);
 
-	wp->date = time(NULL);
+	temps = time(NULL);
+	wp->date = temps;
 	wp->is_node = 1;
 	wp->address.srose_ndigis = 0;
 	strcpy(wp->city, cfg.city);
