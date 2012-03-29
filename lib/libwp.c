@@ -1008,13 +1008,16 @@ int wp_set(wp_t *wp)
 	int n;
 	int rc;
 	wp_pdu pdu;
+	time_t temps;
 	
 	if (wp_socket == -1) {
 		syslog(LOG_ERR, "wp_set() no wp socket\n");
 		return -1;
 	}	
-/* DEBUG F6BVP */
-/*	wp->date = time(NULL);*/
+	
+	temps = time(NULL);
+	wp->date = temps;
+	
 	call_clean(&wp->address.srose_call);
 	for (n = 0 ; n < wp->address.srose_ndigis ; n++)
 		call_clean(&wp->address.srose_digis[n]);
