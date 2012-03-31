@@ -42,6 +42,7 @@ static int ax25_check_call(ax25_address * a)
 static int db_valid(wp_t * wp)
 {
 	int n;
+	time_t temps;
 
 	/* Check the Callsign */
 	if (!ax25_check_call(&wp->address.srose_call))
@@ -81,7 +82,8 @@ static int db_valid(wp_t * wp)
 
 	/* Check the Date */
 	/* should be between 01-01-1998 and current + 1 week */
-	if ((wp->date < 883612800L) || (wp->date > (time(NULL) + 604800L)))
+	temps = time(NULL);
+	if ((wp->date < 883612800L) || (wp->date > (temps + 604800L)))
 	{
 		syslog(LOG_INFO, "Invalid record : date error");
 		return 0;
