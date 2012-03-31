@@ -414,13 +414,13 @@ int db_open(char *file, wp_t * wpnode)
 
 		/* Check database */
 		db_check();
-
+/* DEBUG F6BVP node record is systematicaly updated */
 		/* Update 1st record if necessary */
-		if (memcmp
+/*		if (memcmp
 			((char *) wpnode + sizeof(time_t),
 			 (char *) &db_records[0] + sizeof(time_t),
 			 sizeof(wp_t) - sizeof(time_t)) != 0)
-		{
+*/		{
 			fprintf(stderr, "Node information updated\n");
 			db_records[0] = *wpnode;
 		}
