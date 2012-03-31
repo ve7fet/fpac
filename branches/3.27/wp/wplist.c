@@ -75,8 +75,7 @@ int main(int argc, char **argv)
 
 	if (wp_open("NODE") == 0) {
 
-	printf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
-	printf("Callsign  Last update UTC   DNIC address\n");
+	printf("Callsign  Last update UTC   DNIC address       Status\n");
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
@@ -102,7 +101,7 @@ int main(int argc, char **argv)
 			if (wp[i].is_deleted)
 				printf(" DELETED ");
 			else
-				printf("         ");
+				printf(" ------- ");
 
 			for (j = wp[i].address.srose_ndigis - 1; j >= 0; j--)
 			{
@@ -119,7 +118,7 @@ int main(int argc, char **argv)
 		return (1);
 	}
 
-	printf("\n");
+	printf("\nFPAC White Pages database : %d callsigns\n", wp_nb_records());
 
 	wp_free_list(&wp);
 	wp_close();
