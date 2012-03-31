@@ -240,6 +240,7 @@ int do_mheard(int argc, char **argv)
 	char *port = NULL;
 	char *call = NULL;
 	long ti;
+	time_t temps;
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
@@ -345,12 +346,15 @@ int do_mheard(int argc, char **argv)
 	}
 
 	nb = 0;
+
+	temps = time(NULL);
+
 	while (list != NULL)
 	{
 		if (nb++ < NB_HEARD)
 		{
 			t = ax25_ntoa(&list->data.from_call);
-			ti = time(NULL) - list->data.last_heard;
+			ti = temps - list->data.last_heard;
 
 			if (call)
 			{

@@ -273,12 +273,15 @@ aprsl *find_aprs(char *call)
 void add_aprs(char *call, char *loc)
 {
 	aprsl *ptr;
+	time_t temps;
 	
+	temps = time(NULL);
+
 	ptr = find_aprs(call);
 	if (ptr)
 	{
 		n_cpy(ptr->loc, loc, 18);
-		ptr->last = time(NULL);
+		ptr->last = temps;
 		return;
 	}
 	
@@ -288,7 +291,7 @@ void add_aprs(char *call, char *loc)
 		
 	n_cpy(ptr->call, call, 9);
 	n_cpy(ptr->loc, loc, 18);
-	ptr->last = ptr->date = time(NULL);
+	ptr->last = ptr->date = temps;
 		
 	if (head)
 	{
