@@ -74,9 +74,7 @@ static int wait_for_local_wp(int timeout)
 	return -1;
 }
 
-/*****************************************************************************
-* WP inter-node and internal protocol functions 
-*****************************************************************************/
+/*************  WP inter-node and internal protocol functions  ******/ 
 
 static char pdu_s_cache[ROSE_MTU];
 static int  pdu_s = 0;
@@ -113,6 +111,11 @@ static int wp_write_pdu(int s, char *buf, int lg)
 
 	return lg;
 }
+/*==============================*
+ *	ancien (Ageing)          *
+ * Check the age of the record  *
+ *   Return 0 for a Good date   *
+ *==============================*/
 
 int ancien(wp_pdu *pdu)
 {
@@ -133,28 +136,22 @@ int ancien(wp_pdu *pdu)
 	wp_age = temps - pdu->data.wp.date;
 	days_old = wp_age / 86400L;
 
-	syslog(LOG_INFO, "WP record is %d days old (%ld seconds)", days_old, wp_age);
-	
-	if (days_old < 0) { 
-		syslog (LOG_INFO, "WP record date dd/mm/yy  %02d/%02d/%02d is in the future ! age : %d days (%ld seconds)", wpdate->tm_mday, wpdate->tm_mon+1, wpdate->tm_year%100, days_old, wp_age);
-
+	if (days_old < 2) { 
 	return 1;	
 	}
-	syslog(LOG_INFO, "record dated year : %d and day %d - Today's year is %d and day number %d", wp_annee+2000, wp_jours, s_annee+2000, s_jours);
 
 	if (days_old > date_limite) {
-		syslog (LOG_INFO, "WP record REFUSED %d days (%ld seconds) old - limit is %d", days_old, wp_age, date_limite);
 		return (1);
 	}
 	else {
-		syslog(LOG_INFO, "WP record ACCEPTED %d days old (%ld seconds)", days_old, wp_age);
 		return (0);
 	}
 }
 
-/*
- * Return 0 if successful or -1 if error
- */
+/*========================================*
+ * 		wp_send_pdu		  *
+ * Return 0 if successful or -1 if error  *
+ *========================================*/
 
 int wp_send_pdu(int s, wp_pdu *pdu)
 {
@@ -192,7 +189,7 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 		/* State information */
 /*		p[L++] = pdu->data.wp.is_deleted;*/
 		
-		/* Do not send deleted records older than WP_OBSOLETE days */
+/* Do not send deleted records older than WP_OBSOLETE days */
 		if ((p[L++] = pdu->data.wp.is_deleted)) {
 			if (ancien(pdu))
 				return -1;
@@ -455,10 +452,9 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		
 		/* State information */
 /*		pdu->data.wp.is_deleted = p[L++];*/
-		/* We do not accept deleted records older than WP_OBSOLETE days */
+		/* Do not accept deleted records older than WP_OBSOLETE days */
 		if ((pdu->data.wp.is_deleted = p[L++])) {
 			if (ancien(pdu)) {
-/*				syslog(LOG_ERR, "wp_receive_pdu record too old\n"); */
 				return -1;
 			}
 		}
@@ -606,15 +602,15 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 	return 0;
 }
 
-/*****************************************************************************
-* Public API section
-*****************************************************************************/
+/******************************  Public API section  **********************************/
 
-/*
- * Check if a callsign is valid or not.
- * 
- * Return 0 if correct or -1 if error
- */
+/*======================================*
+ * 	   wp_check_call		*
+ *   Check if a callsign is valid.	*
+ * 					*
+ * 	Return 0 if Valid  		*
+ * 	Return -1 if invalid		*
+ *======================================*/
  
 int wp_check_call(const char *s)
 {
@@ -645,10 +641,12 @@ int wp_check_call(const char *s)
 	return 0;
 }
 
-/*
- * Return the number of valid records in the database
- *
- */
+/*======================================*
+ *	    wp_nb_records		*
+ * 	Return the number of valid 	*
+ * 	records in the database		*
+ *					*
+ *======================================*/
  
 int wp_nb_records(void)
 {
@@ -690,14 +688,14 @@ int wp_nb_records(void)
 	return pdu.data.info_rsp.nbrec;
 }
 
-/*
- * Open a connection with the specified server. Connection
- * is open in ROSE mode with localhost.
- * 
- * If remote is NULL, this is a local call !
- *
- * Return the socket handle or -1 if error
- */
+/*======================================================*
+ *  		wp_open_remote				*
+ *    Open a connection with the specified server. 	*
+ *    Connection is open in ROSE mode with localhost.	*
+ * 							*
+ *     If remote is NULL then this is a local call !	*
+ *       Return the socket handle or -1 if error	*
+ *======================================================*/
  
 int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non_block)
 {
@@ -778,12 +776,12 @@ int wp_listen(void)
 	return fd;
 }
 
-/*
- * Open a connection with the specified server. Connection
- * is open in ROSE mode with localhost.
- *
- * Return 0 if sucessful
- */
+/*=================================================*
+ *		wp_open(char *client)		   *
+ * Open a connection with the specified server.    *
+ * Connection is open in ROSE mode with localhost. *
+ * 		Return 0 if sucessful		   *
+ *=================================================*/
  
 int wp_open(char *client)
 {	
@@ -792,36 +790,37 @@ int wp_open(char *client)
 	return 0;
 }
 
-/*
- * Tells a client if WP is opened
- *
- * Return 1 if opened, 0 if closed
- */
+/*=================================*
+ *	wp_is_open(void)	   *
+ * Tells a client if WP is opened  *
+ * Return 1 if opened, 0 if closed *
+ *=================================*/
  
 int wp_is_open(void)
 {	
 	return (wp_socket != -1);
 }
 
-/*
- * Close the currently selected WP connection
- *
- */
+/*============================================*
+ * 		wp_close()		      *
+ * Close the currently selected WP connection *
+ *============================================*/
  
 void wp_close()
 {
-	if (wp_socket >=0) {
+	if (wp_socket >=0) 
+	{
 		close(wp_socket);
 		wp_socket = -1;
 	}
 }
 
 
-/*
- * Update (or create) a WP record
- *
- * Return 0 if successful 
- */
+/*=============================== *
+ *	wp_update_addr		  *
+ * Update (or create) a WP record *
+ *   Return 0 if successful 	  *
+ *================================*/
  
 int wp_update_addr(struct full_sockaddr_rose *addr)
 {
@@ -845,11 +844,14 @@ int wp_update_addr(struct full_sockaddr_rose *addr)
 	return wp_set(&wp);
 }
 
-/*
- * Search a WP record and return associated full_sockaddr_rose.
- *
- * Return 0 if found.
- */
+/*==============================================* 
+ *		wp_search			*
+ * 	Search a WP record and return 		*
+ *  10 digit ROSE address associated with call	*
+ *         (full_sockaddr_rose.)		*
+ *						*
+ * 		Return 0 if found.		*
+ *==============================================*/
  
 int wp_search(ax25_address *call, struct full_sockaddr_rose *addr)
 {
@@ -858,8 +860,8 @@ int wp_search(ax25_address *call, struct full_sockaddr_rose *addr)
 
 	rc = wp_get(call, &wp);
 	if (rc ) {
-/*DEBUG F6BVP */
-		syslog(LOG_INFO, "wp_search() callsign '%s'\n", ax25_ntoa(call));
+/*DEBUG F6BVP 
+		syslog(LOG_INFO, "wp_search() callsign '%s'\n", ax25_ntoa(call));*/
 		return -1;
 	}
 
@@ -869,11 +871,12 @@ int wp_search(ax25_address *call, struct full_sockaddr_rose *addr)
 	return 0;
 }
 
-/*
- * Search and return a list of WP records.
- * Return 0 if ok.
- * Return -1 if not found / error.
- */
+/*==============================================*
+ *		wp_get_list			*
+ *   Search and return a list of WP records.	*
+ * 	Return 0 if ok.				*
+ * 	Return -1 if not found or error.	*
+ *==============================================*/
  
 int wp_get_list(wp_t **wp, int *nb, int flags, char *mask)
 {
@@ -948,11 +951,11 @@ void wp_free_list(wp_t **wp)
 	*wp = NULL;
 }
 
-/*
- * Search and return a WP record.
- *
- * Return 0 if found.
- */
+/*======================================*
+ * 		wp_get			*
+ *    Search and return a WP record.	*
+ *         Return 0 if found.		*
+ *======================================*/
  
 int wp_get(ax25_address *call, wp_t *wp)
 {
@@ -996,28 +999,27 @@ int wp_get(ax25_address *call, wp_t *wp)
 	return -1;
 }
 
-/*
- * Update (or create) a full WP record
- *
- * Return 0 if successful
- * else return error number
- */
+/*=====================================*
+ *		 wp_set		       *
+ * Update (or create) a full WP record *
+ * 	Return 0 if successful	       *
+ * 	else return error number       *
+ *=====================================*/
  
 int wp_set(wp_t *wp)
 {
 	int n;
 	int rc;
-	wp_pdu pdu;
 	time_t temps;
+	wp_pdu pdu;
 	
 	if (wp_socket == -1) {
 		syslog(LOG_ERR, "wp_set() no wp socket\n");
 		return -1;
 	}	
-	
-	temps = time(NULL);
+        
+  	temps = time(NULL);
 	wp->date = temps;
-	
 	call_clean(&wp->address.srose_call);
 	for (n = 0 ; n < wp->address.srose_ndigis ; n++)
 		call_clean(&wp->address.srose_digis[n]);
@@ -1044,8 +1046,6 @@ int wp_set(wp_t *wp)
 		return -1;
 	}
 	if ((pdu.type == wp_type_response) && (pdu.data.status == WP_OK)) {
-/* F6BVP */	
-		syslog(LOG_INFO, "wp_set() creates or updates a full WP record\n");
 		return 0;
 	}
 				
@@ -1053,11 +1053,11 @@ int wp_set(wp_t *wp)
 	return -1;
 }
 
-/*
- * Check if a callsign is known node
- *
- * Return 1 of found, 0 if not found/node 
- */
+/*=========================================*
+ *		wp_is_node		   *
+ * Check if a callsign is known node	   *
+ * Return 1 of found, 0 if not found/node  *
+ *=========================================*/
 int wp_is_node(char *callsign)
 {
 	wp_t wp;
