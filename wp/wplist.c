@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	   {
-	   printf ("Usage: wplist [-acdnrl number] callsign\n");
+	   printf ("Usage: wplist [-acdnrl number] <callsign index>\n");
 	   printf ("options :  -n = nodes only  -l = max number of answers\n");       
 	   printf ("sort by :  -a address  -c callsign (default)  -d date  -r reverse\n");
 	   return (1);
@@ -72,10 +72,12 @@ int main(int argc, char **argv)
 
 	if (optind == argc)
 		argv[optind] = "*";
+	else
+		strcat(argv[argc-1], "*");
 
 	if (wp_open("NODE") == 0) {
 
-	printf("Callsign  Last update UTC   DNIC address       Status\n");
+	printf("Callsign  Last update UTC   DNIC address N/U   status\n");
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
