@@ -83,9 +83,9 @@ static int db_valid(wp_t * wp)
 	/* Check the Date */
 	/* should be between 01-01-1998 and current + 1 week */
 	temps = time(NULL);
-	if ((wp->date < 883612800L) || (wp->date > (temps + 604800L)))
+	if ((wp->date < 1262304000L) || (wp->date > (temps + 86400L)))
 	{
-		syslog(LOG_INFO, "Invalid record : date error");
+		syslog(LOG_INFO, "Invalid record : date outside of accepted window");
 		return 0;
 	}
 
