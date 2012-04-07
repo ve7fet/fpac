@@ -1191,7 +1191,7 @@ static int new_l2_connection(int fd, int verbose)
 	int i;
 	int n;
 	int len;
-	int wp;
+	int via_wp;
 	int new;
 	int yes;
 	int rsfd;
@@ -1359,7 +1359,7 @@ static int new_l2_connection(int fd, int verbose)
 	roseconnect.srose_ndigis = ndigi;
 	for ( n = 0 ; n < roseconnect.srose_ndigis ; n++)
 		roseconnect.srose_digis[n] = exp.fsa_digipeater[ndigi-n-1];
-	wp = 0;
+	via_wp = 0;
 
 	if (ask_wp && ndigi == 0)	/* WP only if no more digi */
 	{
@@ -1368,11 +1368,11 @@ static int new_l2_connection(int fd, int verbose)
 		if (wp_search(&rec.fsa_ax25.sax25_call, &wpaddr) == 0)
 		{
 			roseconnect = wpaddr;
-			wp = 1;
+			via_wp = 1;
 		}
 		else 
 		{
-			wp = 2;
+			via_wp = 2;
 		}
 
 
@@ -1382,7 +1382,7 @@ static int new_l2_connection(int fd, int verbose)
 		static char *constr[] = { "Connecting", "WP routing", "Trying local" } ;
 
 		text[0] = 0xf0;
-		sprintf(text+1, "*** %s %s @ %s", constr[wp], ax25_ntoa(&rec.fsa_ax25.sax25_call), fpac2asc(&roseconnect.srose_addr));
+		sprintf(text+1, "*** %s %s @ %s", constr[via_wp], ax25_ntoa(&rec.fsa_ax25.sax25_call), fpac2asc(&roseconnect.srose_addr));
 		for (i = 0 ; i < roseconnect.srose_ndigis ; i++)
 		{
 			sprintf(str, ",%s", ax25_ntoa(&roseconnect.srose_digis[i]));
@@ -2491,7 +2491,7 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 	char text[256];
 	int i;
 	int ok;
-	int wp;
+ 	int via_wp;
 	int yes;
 	int rsfd;
 	user_t *pl3;
@@ -2589,14 +2589,12 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 
 	{
 		/* Add the local callsign to the WP */
-/*		struct full_sockaddr_rose wp; */
 
 		wp.srose_family = AF_ROSE;
 		wp.srose_ndigis = 0;
 
 		rose_aton (cfg.fulladdr, wp.srose_addr.rose_addr);
 		wp.srose_call = exp.fsa_ax25.sax25_call;
-
 		wp_update_addr(&wp);
 	}
 
@@ -2675,7 +2673,7 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 		}
 	}
 
-	wp = 0;
+	via_wp = 0;
 
 	if (!ok)
 	{
@@ -2684,21 +2682,21 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 		if (wp_search(&rec.fsa_ax25.sax25_call, &wpaddr) == 0)
 		{
 			roseconnect = wpaddr;
-			wp = 1;
+			via_wp = 1;
 		}
 		else 
 		{
-			wp = 2;
+			via_wp = 2;
 		}
 	}
 
-verbose = 1;
+	verbose = 1;
 	
 	if (verbose)
 	{
 		static char *constr[] = { "Connecting", "WP routing", "Trying local" } ;
 
-		sprintf(text, "*** %s %s @ %s", constr[wp], ax25_ntoa(&roseconnect.srose_call), fpac2asc(&roseconnect.srose_addr));
+		sprintf(text, "*** %s %s @ %s", constr[via_wp], ax25_ntoa(&roseconnect.srose_call), fpac2asc(&roseconnect.srose_addr));
 		for (i = 0 ; i < roseconnect.srose_ndigis ; i++)
 		{
 			sprintf(str, ",%s", ax25_ntoa(&roseconnect.srose_digis[0]));
