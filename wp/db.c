@@ -42,7 +42,10 @@ static int ax25_check_call(ax25_address * a)
 static int db_valid(wp_t * wp)
 {
 	int n;
-	time_t temps;
+	time_t temps, time_before, time_after;
+	char buf[20];
+	char buf1[20];
+	char buf2[20];
 
 	/* Check the Callsign */
 	if (!ax25_check_call(&wp->address.srose_call))
@@ -81,11 +84,16 @@ static int db_valid(wp_t * wp)
 	}
 
 	/* Check the Date */
-	/* should be between 01-01-1998 and current + 1 week */
+	/* should be between (current - 1) year and current + 1 week */
 	temps = time(NULL);
-	if ((wp->date < 1262304000L) || (wp->date > (temps + 86400L)))
+	my_date( buf, wp->date);
+	time_before = temps - (86400L * 365L);
+	time_after = temps + 86400L;
+	my_date( buf1, time_before);
+	my_date( buf2, time_after);
+	if ((wp->date < time_before ) || (wp->date > (time_after)))
 	{
-		syslog(LOG_INFO, "Invalid record : date outside of accepted window");
+		syslog(LOG_INFO, "Invalid record : date %s outside of accepted window [%s-%s]", buf, buf1, buf2);
 		return 0;
 	}
 
