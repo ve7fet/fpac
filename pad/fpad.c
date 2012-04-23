@@ -767,6 +767,7 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 				if (u->state == CPROGRESS)
 				{
 					connection_done = 1;
+
 					u->state = CONNECTED;
 				}
 			}
