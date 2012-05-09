@@ -199,9 +199,6 @@ int main(int argc, char **argv)
 		return 4;
 	}
 
-/* F6BVP */
-		printf("Service '%s' Protocol '%s' IP '%s' port %d\n", sp->s_name, sp->s_proto,  argv[1], atoi(argv[2]));
-
 	addrlen = sizeof(addr);
 
 	if (connect(fd, (struct sockaddr *)&addr, addrlen) == -1 && errno != EINPROGRESS) 
@@ -217,7 +214,7 @@ int main(int argc, char **argv)
 			unsigned char b[4];
 		} add;
 		add.l = addr.sin_addr.s_addr;
-		sprintf(buf, "Linked to %u.%u.%u.%u\n", add.b[0], add.b[1], add.b[2], add.b[3]);
+		sprintf(buf, "Linked to %u.%u.%u.%u port %d\n", add.b[0], add.b[1], add.b[2], add.b[3], ntohs(addr.sin_port));
 		len = strlen(buf);
 
 		if (type == AF_UNSPEC)
