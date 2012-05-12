@@ -496,7 +496,7 @@ FSA*/
 		sockaddr.ax25.fsa_digipeater[0].ax25_call[6] |= AX25_HBIT;
 		++sockaddr.ax25.fsa_ax25.sax25_ndigis;
 
-		strcpy(User.dl_name, strupr(address[1]));
+		if(address[1] != NULL)	strcpy(User.dl_name, strupr(address[1]));
 		strcpy(User.dl_port, strupr(address[0]));
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 		addrlen = sizeof(struct full_sockaddr_ax25);
