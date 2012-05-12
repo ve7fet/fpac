@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		break;
 	case AF_UNSPEC:
 		printf("Enter your callsign :");
-		fgets(caller+1, sizeof(caller)-1, stdin);
+		fgets(caller, sizeof(caller)-1, stdin);
 		caller[7] = '\0';
 		break;
 	default:
@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 			/* Wait for the login prompt */
 			if (first)
 			{
-				if (strstr(buf, "allsig"))
+				if (strstr(buf, "allsig") || strstr(buf, "login"))
 				{
 					strcat(caller, "\r");
 					write(fd, caller, strlen(caller));
