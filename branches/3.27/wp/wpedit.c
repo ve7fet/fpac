@@ -15,6 +15,7 @@
  * 09/11/2006 status display modified
  *		menu N toggles node type of record
  * 09/10/2009 if digi deleted, delete city locator and name 
+ * 22/05/2012 set date and time when creating a new record
  ******************************************************/
  
 #include <stdio.h>
@@ -56,6 +57,7 @@ int main(int ac, char **av)
 	char *call, *pt; /* *add; */
 	ax25_address addr;
 	wp_t wp;
+	time_t present_time;
 
 	if (wp_open("WPEDIT-0")) {
 		perror("Cannot open WP service");
@@ -91,7 +93,7 @@ int main(int ac, char **av)
 	}
 
 	memset(&wp, 0, sizeof(wp_t));
-
+	present_time = time(NULL);
 	p = wp_get(&addr, &wp) ;
 	
 	if(p != 0) 
@@ -113,7 +115,7 @@ int main(int ac, char **av)
 			return(0);
 
 		wp.address.srose_call = addr;
-
+		wp.date = present_time;
 	}
 
 	CR();
