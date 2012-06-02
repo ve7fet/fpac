@@ -39,6 +39,9 @@ static int ax25_check_call(ax25_address * a)
 	return (wp_check_call(ax25_ntoa(a)) == 0);
 }
 
+/* returns 1 if wp record is valid 
+ * else returns 0
+*/
 static int db_valid(wp_t * wp)
 {
 	int n;
@@ -76,7 +79,7 @@ static int db_valid(wp_t * wp)
 		return 0;
 	}
 
-	/* Check the is_node info */
+	/* Check the is_deleted info */
 	if (wp->is_deleted < 0 || wp->is_deleted > 1)
 	{
 		syslog(LOG_INFO, "Invalid record : deleted error");
@@ -84,11 +87,11 @@ static int db_valid(wp_t * wp)
 	}
 
 	/* Check the Date */
-	/* should be between (current - 1) year and current + 1 week */
+	/* should be between (current - 1) year and (current + 1 hour) */
 	temps = time(NULL);
 	my_date( buf, wp->date);
 	time_before = temps - (86400L * 365L);
-	time_after = temps + 86400L;
+	time_after = temps + 600L;
 	my_date( buf1, time_before);
 	my_date( buf2, time_after);
 	if ((wp->date < time_before ) || (wp->date > (time_after)))
@@ -429,7 +432,7 @@ int db_open(char *file, wp_t * wpnode)
 			 (char *) &db_records[0] + sizeof(time_t),
 			 sizeof(wp_t) - sizeof(time_t)) != 0)
 */		{
-			fprintf(stderr, "Node information updated\n");
+			syslog(LOG_INFO, "Node information updated\n");
 			db_records[0] = *wpnode;
 		}
 
@@ -498,7 +501,11 @@ static int db_find(ax25_address * call)
 	return index;
 }
 
-int db_get(ax25_address * call, wp_t * wp)
+/* 
+ * returns 0 if callsign vector "call" is found in WP data base record"
+ * else returns -1 or -2 if record is not valid
+*/
+ int db_get(ax25_address * call, wp_t * wp)
 {
 	int index;
 
