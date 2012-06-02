@@ -196,6 +196,19 @@ static void rose_read_handler(int s)
 		return;
 	  }
 	  
+/*
+ * reject WP record if it is deleted and callsign not in database
+ * 
+ */ 
+	if (pdu.data.wp.is_deleted && (wp_get(&pdu.data.wp.address.srose_call, &pdu.data.wp) != 0))
+		{
+		if (verbose) syslog(LOG_INFO, "rose_read_handler() received WP record '%s' from adjacent %s is REJECTED (deleted and not in database)",
+		ax25_ntoa(&pdu.data.wp.address.srose_call),
+		rose_ntoa(&context[s]->address.srose_addr));
+		close_client(s, 0);
+		return;
+	}
+
 	  again = (rc == 2);
 
 	  switch (pdu.type) {
