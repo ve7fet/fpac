@@ -58,11 +58,18 @@ int conf_changed(void)
 
 	if (stat(FPACCONF, &st) == 0)
 	{
-		if (cfg.date != st.st_mtime)
-		{
+		if (cfg.date < st.st_mtime)
 			read_conf(1);
-			return(0);
-		}
+	}
+	if (stat(FPACNODES, &st) == 0)
+	{
+		if (cfg.date < st.st_mtime)
+			read_conf(1);
+	}
+	if (stat(FPACROUTES, &st) == 0)
+	{
+		if (cfg.date < st.st_mtime)
+			read_conf(1);
 	}
 	return(0);
 }
