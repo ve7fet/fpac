@@ -175,6 +175,12 @@ int main(int argc, char **argv)
 	}
 
 	fpac_nr_config_load_ports();
+
+	if (argc  > 1) { 
+		strncpy(User.call, argv[1], 9);
+		User.call[9] = 0;
+		fprintf (stdout, "User call : %s\n", User.call);
+	}
 	
 	/*
 	rs_config_load_ports();
