@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 		fclose (fp);
 	}
 
-	node_msg("%s v %s (F6FBB - %s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
+	node_msg("%s v %s (%s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
 
 	for (;;)
 	{
