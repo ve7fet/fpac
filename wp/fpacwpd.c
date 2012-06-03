@@ -536,7 +536,7 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 	rose_aton(addr, remote.srose_addr.rose_addr);
 	s = wp_open_remote("WP", &remote, 1);	/* Non blocking mode */
 	if (s < 0) {
-		perror("Unable to connect WP adjacent");
+		if (verbose) syslog(LOG_INFO, "Unable to connect WP adjacent");
 		return;
 	}
 	init_client(s, &remote);
