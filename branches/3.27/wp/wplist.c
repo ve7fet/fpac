@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	   {
+	   printf ("Wplist (%s)\n",__DATE__);
 	   printf ("Usage: wplist [-acdnrl number] <callsign index>\n");
 	   printf ("options :  -n = nodes only  -l = max number of answers\n");       
 	   printf ("sort by :  -a address  -c callsign (default)  -d date  -r reverse\n");
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
 
 	if (wp_open("NODE") == 0) {
 
-	printf("Callsign  Last update UTC   DNIC address N/U   status\n");
+	printf("Callsign  Last update UTC   DNIC address N/U\n");
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
@@ -99,11 +100,6 @@ int main(int argc, char **argv)
 				printf("Node ");
 			else
 				printf("     ");
-
-			if (wp[i].is_deleted)
-				printf(" DELETED ");
-			else
-				printf(" ------- ");
 
 			for (j = wp[i].address.srose_ndigis - 1; j >= 0; j--)
 			{
