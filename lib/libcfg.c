@@ -346,6 +346,14 @@ int cfg_open(cfg_t *cfg)
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
 	}
+
+	/* Get the fpac.nodes last modified time/date */
+	if (stat(FPACNODES, &st) == 0)
+	{
+		if(st.st_mtime > cfg->date)
+			cfg->date = st.st_mtime;
+	}
+	
 	
 	/* Read optional FPAC ROUTES file if it exists*/
 	fptr = fopen(FPACROUTES, "r");
@@ -353,6 +361,14 @@ int cfg_open(cfg_t *cfg)
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
 	}
+
+	/* Get the fpac.routes last modified time/date */
+	if (stat(FPACROUTES, &st) == 0)
+	{
+		if(st.st_mtime > cfg->date)
+			cfg->date = st.st_mtime;
+	}
+	
 	
 	/* Check for mandatory fields */
 	if (*cfg->callsign == '\0')		errnum = CALLSIGN;
