@@ -68,8 +68,8 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	{
-		printf ("Wpmaint [built 05/13/12/14/17]\n");
-		printf ("Usage: wpmaint [-argument ]\n");
+		printf ("Wpmaint (%s)\n", __DATE__);
+		printf ("Usage: wpmaint [-argument]\n");
 		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
 		printf ("            -e = age delay (in days) for erasing deleted records\n");       
 		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
