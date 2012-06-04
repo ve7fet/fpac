@@ -1171,3 +1171,14 @@ void my_date(char *buf, time_t date)
 		sdate->tm_min);
 }
 
+void now_date(char *buf)
+{ /* Format the Current Date/time */
+	size_t r;
+	struct tm tim;
+	time_t now;
+	
+	now = time(NULL);
+	tim = *(gmtime(&now));
+	buf = strftime(buf,30,"%b %d %Y - %H:%M %Z\n",&tim);
+}
+

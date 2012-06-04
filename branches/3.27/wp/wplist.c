@@ -31,16 +31,20 @@ int main(int argc, char **argv)
 	char *add;
 	char *call;
 	char dnic[5];
-	char buf[20];
+	char buf[30];
 
 	if (argc < 2)
 	   {
-	   printf ("Wplist (%s)\n",__DATE__);
+	   printf ("Wplist (version %s)\n",__DATE__);
 	   printf ("Usage: wplist [-acdnrl number] <callsign index>\n");
 	   printf ("options :  -n = nodes only  -l = max number of answers\n");       
 	   printf ("sort by :  -a address  -c callsign (default)  -d date  -r reverse\n");
 	   return (1);
 	   }
+
+/* Print the Current Date/time */
+	        now_date(buf);
+	        printf ("     WPlist - %s",buf);
 
 	optind = 0;
 
