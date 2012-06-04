@@ -838,7 +838,6 @@ int wp_update_addr(struct full_sockaddr_rose *addr)
 		syslog(LOG_INFO, "wp_update_addr() callsign '%s' not found\n", ptr);
 	/*	return -1; */
 	}
-/*	wp.date = time(NULL); initialized in wp_set() */
 	wp.is_deleted = 0;
 	wp.address = *addr;
 	return wp_set(&wp);
@@ -860,8 +859,6 @@ int wp_search(ax25_address *call, struct full_sockaddr_rose *addr)
 
 	rc = wp_get(call, &wp);
 	if (rc ) {
-/*DEBUG F6BVP 
-		syslog(LOG_INFO, "wp_search() callsign '%s'\n", ax25_ntoa(call));*/
 		return -1;
 	}
 
@@ -1041,8 +1038,7 @@ int wp_set(wp_t *wp)
 	rc = wp_receive_pdu(wp_socket, &pdu);
 	if (rc < 0)
 	{
-		syslog(LOG_INFO, "wp_set() wp_receive_pdu() error - closing wp socket\n");
-		wp_close();
+		syslog(LOG_INFO, "wp_set() wp_receive_pdu() error\n");
 		return -1;
 	}
 	if ((pdu.type == wp_type_response) && (pdu.data.status == WP_OK)) {
