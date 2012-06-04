@@ -85,6 +85,11 @@ int main(int ac, char **av)
 	}
 
 	call = strupr(av[optind]);
+	
+	/* If there is no SSID appended to the callsign
+	then we append a -0 on the end of the call */
+	if (!strchr(call, '-'))
+		strcat(call, "-0");
 
 	if (ax25_aton_entry(call, addr.ax25_call) != 0)
 	{
