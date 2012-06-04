@@ -61,19 +61,23 @@ int main(int argc, char **argv)
 	time_t temps;
 	time_t delete_temps;
 	time_t erase_temps;
-	char buf[20];
+	char buf[30];
 	char up_date[20];
 	int e_temps = ERASETIME;
 	int d_temps = DELETETIME;
 
 	if (argc < 2)
 	{
-		printf ("Wpmaint (%s)\n", __DATE__);
+		printf ("Wpmaint (version %s)\n", __DATE__);
 		printf ("Usage: wpmaint [-argument]\n");
 		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
 		printf ("            -e = age delay (in days) for erasing deleted records\n");       
 		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
 	}
+
+/* Print the Current Date/time */
+	now_date(buf);
+	printf ("     WPmaint - %s",buf);
 
 	optind = 0;
 

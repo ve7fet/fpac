@@ -62,12 +62,13 @@ int main(int ac, char **av)
 	wp_t *wp;
 	wp_header wph;
 	char call[20];
+	char buf[30];
 	char *full_call;
 	char *ptr;
 	char *match;
 	char *add;
 
-	while ((p = getopt(ac, av, "acrnl" )) != -1)
+	while ((p = getopt(ac, av, "acrnl?" )) != -1)
 	{
 		switch (p)
 		{
@@ -87,11 +88,16 @@ int main(int ac, char **av)
 			node = 1;
 			break;
 		case '?' :
+	   		printf("Wpserv (version %s)\n",__DATE__);
 			printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
 			printf("              [-a sort by address] [-r reverse sort] [-c remove new line from output]\n");
 			return(1);
 		}
 	}
+
+/* Print the Current Date/time */
+	now_date(buf);
+	printf ("     WPserv - %s",buf);
 
 	match = strdup("*");
 	test_call = 1;
