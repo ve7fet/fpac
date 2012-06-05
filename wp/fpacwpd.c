@@ -222,11 +222,13 @@ static void rose_read_handler(int s)
 		else
 			rc = db_set(&pdu.data.wp, context[s]->type != WP_USER);
 
-		if (rc == -2 && verbose) {
-			  syslog(LOG_INFO, "Invalid received record %s from adjacent %s",
+		if (rc == -2) {
+			  if (verbose) syslog(LOG_INFO, "Invalid received record %s from adjacent %s",
 				              ax25_ntoa(&pdu.data.wp.address.srose_call),
 				              rose_ntoa(&context[s]->address.srose_addr));
-			  rc = -1;
+			rc = -1;
+			close_client(s, 0);
+			return;
 		  }
 		  if (rc >= 0) {
 			  pdu.data.status = WP_OK;
