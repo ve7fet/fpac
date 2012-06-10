@@ -287,7 +287,7 @@ int main(int argc, char **argv)
 	{
 		char str[80];
 
-		tprintf("\nFPAC-Node v %s (%s)\n\ncallsign: ", VERSION, HostName);
+		tprintf("\nFPAC-Node v (built %s) %s\n\ncallsign: ", VERSION, HostName);
 		usflush(User.fd);
 		alarm(300L);			/* 5 min timeout */
 		if ((p = readline(User.fd)) == NULL)
@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 		fclose (fp);
 	}
 
-	node_msg("%s v %s (%s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
+	node_msg("%s v %s (built %s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
 
 	for (;;)
 	{

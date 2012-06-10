@@ -444,7 +444,7 @@ int do_help(int argc, char **argv)
 	if (*argv[0] == 'i')
 	{							/* "info"   */
 		strcpy(fname, FPAC_INFO_FILE);
-		node_msg("%s v %s (F6FBB - %s) for LINUX\n", "FPAC-Node", VERSION,
+		node_msg("%s v %s (built %s) for LINUX\n", "FPAC-Node", VERSION,
 				 __DATE__);
 	}
 	else if (argc == 1)
@@ -1790,7 +1790,7 @@ int do_status(int argc, char **argv)
 		tprintf("Operating system : %s %s (%s)\n", name.sysname,
 				name.release, name.machine);
 	}
-	tprintf("FPAC version     : %s\n",VERSION);
+	tprintf("FPAC version     : %s (built %s)\n",VERSION, __DATE__);
 	/* read and calculate the amount of uptime and format it nicely */
 	uptime(&uptime_secs, &idle_secs);
 	updays = (int) uptime_secs / (60 * 60 * 24);
