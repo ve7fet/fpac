@@ -82,6 +82,8 @@ fpacwpd)
 	;;
 
 -start|start)
+	echo "Performing WP database cleanup\n"
+	$DIR/wpmaint >> $LOG 2>&1
 	FPAC_BG="yes"
 	export FPAC_BG
 	echo -n "Starting FPAC :"
