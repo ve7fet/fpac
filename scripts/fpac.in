@@ -50,6 +50,8 @@ case "$1" in
 	echo -n " [wdog]"
 	kill -TERM `/bin/pidof -x $DIR/fpacwdog`
 	echo " ok"
+	echo "Performing WP database cleanup\n"
+	$DIR/wpmaint >> $LOG 2>&1
 	;;
 -status|status)
         echo -e "\nStatus of FPAC :"
@@ -82,8 +84,6 @@ fpacwpd)
 	;;
 
 -start|start)
-	echo "Performing WP database cleanup\n"
-	$DIR/wpmaint >> $LOG 2>&1
 	FPAC_BG="yes"
 	export FPAC_BG
 	echo -n "Starting FPAC :"
