@@ -796,7 +796,6 @@ static void process_options(int argc, char *argv[])
 		case 'd':
 			fprintf(stderr, "Foreground mode\n");
 			is_daemon = 0;
-			verbose = 1;
 			break;
 		case 'x':
 			fprintf(stderr, "Debug mode\n");
