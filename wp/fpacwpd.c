@@ -340,7 +340,7 @@ static void rose_read_handler(int s)
 	  default:
 		  pdu.type = wp_type_response;
 		  pdu.data.status = WP_INVALID_COMMAND;
-		  rc = wp_send_pdu(s, &pdu);
+/* DEBUG F6BVP 		  rc = wp_send_pdu(s, &pdu); */
 		  break;
 	  }
 	} while (again);
