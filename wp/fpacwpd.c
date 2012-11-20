@@ -14,6 +14,8 @@
 *
 */
 
+#define NDEBUG
+
 #include "config.h"
 #include "wpdefs.h"
 #include "sockevent.h"
@@ -21,6 +23,8 @@
 #include "db.h"
 #include "daemon.h"
 #include "../pathnames.h"
+#include <sys/types.h>
+#include <assert.h>
 
 static cfg_t cfg;		/* FPAC configuration file */
 static int listening_socket;
@@ -54,6 +58,8 @@ static void vector_request(struct wp_adjacent *wpa);
 static int init_client(int client, struct full_sockaddr_rose *address)
 {
 	assert(context[client] == 0);
+	if (verbose) syslog(LOG_INFO, "Client handler init_client() %d", client);
+
 	context[client] = calloc(1, sizeof(*context[client]));
 	if (!context[client]) {
 		close(client);
