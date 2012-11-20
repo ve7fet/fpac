@@ -6,10 +6,12 @@
  * F1OAT 960630
  */
  
+#define NDEBUG
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
-/*#include <sys/types.h>*/
+#include <sys/select.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <assert.h>
 
@@ -41,8 +43,9 @@ int WaitEvent(int MilliSecTimeout)
 	for (i=0; i<3; i++) FdSet[i] = ActiveSet[i];
 
 	rc = select(FD_SETSIZE, &FdSet[0], &FdSet[1], &FdSet[2], &Timeout);
+/* DEBUG F6BVP
 	if (rc == -1) perror("WaitEvent : select");
-/* DEBUG F6BVP	if (rc == 0) wp_flush_pdu();*/
+	if (rc == 0) wp_flush_pdu();*/
 	if (rc <= 0) return rc-1;
 
 	for (fd=0; fd<FD_SETSIZE; fd++) {
