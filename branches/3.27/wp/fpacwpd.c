@@ -385,7 +385,14 @@ static void listening_handler(int s)
 	if (verbose) syslog(LOG_INFO, "New client %s @ %s", ax25_ntoa(&address.srose_call), rose_ntoa(&address.srose_addr));
 	
 	if (init_client(new_client, &address)) return;
-	
+
+/*DEBUG F6BVP */
+	if (!context[new_client]) {
+		if (verbose) syslog(LOG_INFO, "New client context[] empty !");
+		close_client(new_client, 1);
+		return;
+	}
+
 	if (context[new_client]->type == WP_SERVER) {
 		struct wp_adjacent *wpa;
 		wpa = find_adjacent(&address.srose_addr);
