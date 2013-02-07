@@ -1,4 +1,3 @@
-
 /******************************************************
  * fpacnode.c                                         *
  * FPAC project.            FPAC PAD                  *
@@ -177,8 +176,10 @@ int main(int argc, char **argv)
 	fpac_nr_config_load_ports();
 
 	if (argc  > 1) { 
-		strncpy(User.call, argv[1], 9);
+		strncpy(User.call, strupr(argv[1]), 9);
 		User.call[9] = 0;
+		if (strstr(User.call, "-") == NULL)
+			strcat(User.call, "-0");
 		fprintf (stdout, "User call : %s\n", User.call);
 	}
 	
@@ -303,14 +304,20 @@ int main(int argc, char **argv)
 
 	sprintf(NodeId,"%s", cfg.alt_callsign);
 
-	if ((p = strstr(User.call, "-0")) != NULL)
-		*p = 0;
+/*	if ((p = strstr(User.call, "-0")) != NULL)
+		*p = 0; */
+	if (strstr(User.call, "-") == NULL)
+		strcat(User.call, "-0");
+	strupr(User.call);
+
 	if (wp_check_call(User.call) == -1) 
 	{
 		node_msg("Invalid callsign");
 		fpaclog(LOGLVL_LOGIN, "Invalid callsign %s @ %s", User.call, User.ul_name);
 		logout("Invalid callsign");
 	}
+		
+	fprintf (stdout, "User call : %s\n", User.call);
 
 	if ((fp = fopen (FPAC_HELLO_FILE, "r")) != NULL) 
 	{
