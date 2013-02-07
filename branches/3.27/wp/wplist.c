@@ -94,6 +94,9 @@ int main(int argc, char **argv)
 			add = rose_ntoa(&wp[i].address.srose_addr);
 			call = ax25_ntoa(&wp[i].address.srose_call);
 
+			if (strstr(call,"-") == NULL)
+				strcat(call,"-0");
+
 			strncpy(dnic, add, 4);
 			dnic[4] = '\0';
 
