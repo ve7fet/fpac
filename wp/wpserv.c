@@ -285,7 +285,10 @@ static void display_results(wp_t *wp, int limit, int nb)
 
 			strncpy(dnic, add, 4); dnic[4] = '\0';
 			
+			if (strstr(call,"-") == NULL)
+				strcat(call,"-0");
 			printf("%-9s ", call);
+
 			if (wp->is_deleted == 0) 
 				printf("%s", "   Ok  ");
 			else
