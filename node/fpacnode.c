@@ -180,7 +180,6 @@ int main(int argc, char **argv)
 		User.call[9] = 0;
 		if (strstr(User.call, "-") == NULL)
 			strcat(User.call, "-0");
-		fprintf (stdout, "User call : %s\n", User.call);
 	}
 	
 	/*
