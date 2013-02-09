@@ -888,6 +888,10 @@ int do_connect(int argc, char **argv)
 		/* Check if its is a known port */
 		if (ax25_config_get_addr(argv[1]))
 		{
+			if (argc < 3) {
+				node_msg("Callsign missing : Connect port callsign");
+				return (0);
+		}
 			family = AF_AX25;
 			source = "(user port) ";
 		}
