@@ -840,8 +840,8 @@ int main(int argc, char *argv[])
 	process_options(argc, argv);
 	
 	openlog("fpacwpd", LOG_PERROR | LOG_PID, LOG_USER);	
-	syslog(LOG_WARNING, "Starting version %s - vector version %x Hex (%d dec) - file signature %s",
-				VERSION, WP_VERSION, WP_VERSION, FILE_SIGNATURE);
+	syslog(LOG_WARNING, "Starting version %s (built %s-%s) vector version %x Hex (%d dec) - file signature %s",
+				VERSION, __DATE__, __TIME__, WP_VERSION, WP_VERSION, FILE_SIGNATURE);
 	srand(time(NULL));
 	
 	if (cfg_open(&cfg) != 0) {
