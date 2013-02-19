@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 		logout("Invalid callsign");
 	}
 		
-	fprintf (stdout, "User call : %s\n", User.call);
+	node_msg ("User call : %s", User.call);
 
 	if ((fp = fopen (FPAC_HELLO_FILE, "r")) != NULL) 
 	{
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 		fclose (fp);
 	}
 
-	node_msg("%s v %s (built %s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
+	node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
 
 	for (;;)
 	{
