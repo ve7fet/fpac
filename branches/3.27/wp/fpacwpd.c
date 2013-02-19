@@ -581,8 +581,8 @@ static void vector_request(struct wp_adjacent *wpa)
 	vector.seed = random();
 	db_compute_vector(-1, &vector);
 	pdu.data.vector = vector;
-	if (verbose) syslog(LOG_INFO, "Sending vector request to %s", rose_ntoa(&context[s]->address.srose_addr));
-/*DEBUG F6BVP */  if (verbose) debug_pdu(&pdu);
+/*DEBUG F6BVP */
+      	if (verbose) debug_pdu(&pdu);
 	rc = wp_send_pdu(s, &pdu);
 	if (rc < 0) {
 		if (verbose) syslog(LOG_INFO, "Sending vector request FAILED !");
