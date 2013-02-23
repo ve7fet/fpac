@@ -3,6 +3,7 @@ AC_INIT(fpac, 3.27.19, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Determine versions for package managers.
 basever=$(echo $PACKAGE_VERSION | sed -e 's@-.*$@@')

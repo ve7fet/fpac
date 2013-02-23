@@ -19,6 +19,8 @@ install-data-hook:
 
 EXTRA_DIST = pathnames.h fpac.spec
 
+ACLOCAL_AMFLAGS = -I m4
+
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
 
