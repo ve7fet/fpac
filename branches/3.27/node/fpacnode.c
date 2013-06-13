@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 		free_proc_rs(rlist);
 		return 1;
 	}
+		free_proc_rs(rlist);
 	
 	/* Check if there are any Rose Routes or Nodes */
 	if (check_rose() <= 3 )
