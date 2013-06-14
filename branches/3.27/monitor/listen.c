@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 			return 0;
 		case ':':
 			fprintf(stderr,
-				"listen: option -p needs a port name\n");
+				"monitor: option -p needs a port name\n");
 			return 1;
 		case '?':
 			fprintf(stderr,
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	}
 
 	if (ax25_config_load_ports() == 0)
-		fprintf(stderr, "listen: no AX.25 port data configured\n");
+		fprintf(stderr, "monitor: no AX.25 port data configured\n");
 
 	if (port != NULL) {
 		if ((dev = ax25_config_get_dev(port)) == NULL) {
