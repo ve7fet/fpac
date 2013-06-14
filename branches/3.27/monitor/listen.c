@@ -115,8 +115,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (ax25_config_load_ports() == 0)
+	if (ax25_config_load_ports() == 0) {
 		fprintf(stderr, "monitor: no AX.25 port data configured\n");
+			return 1;
+	}
 
 	if (port != NULL) {
 		if ((dev = ax25_config_get_dev(port)) == NULL) {
