@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 			timestamp = 1;
 			break;
 		case 'v':
-			printf("listen: %s\n", VERSION);
+			printf("monitor: %s (built %s)\n", VERSION, __DATE__);
 			return 0;
 		case ':':
 			fprintf(stderr,
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 			return 1;
 		case '?':
 			fprintf(stderr,
-				"Usage: listen [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
+				"Usage: monitor [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
 			return 1;
 		}
 	}
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 
 	if (port != NULL) {
 		if ((dev = ax25_config_get_dev(port)) == NULL) {
-			fprintf(stderr, "listen: invalid port name - %s\n",
+			fprintf(stderr, "monitor: invalid port name - %s\n",
 				port);
 			return 1;
 		}
