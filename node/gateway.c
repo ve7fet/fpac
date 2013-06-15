@@ -776,7 +776,7 @@ static int is_netrom(char *call, char *netrom_call)
 
 	for (p = list; p != NULL; p = p->next)
 	{
-		if ((strcasecmp(p->call, call) == 0)
+		if ((strncasecmp(p->call, call, strlen(call)) == 0)
 			|| (strcasecmp(p->alias, call) == 0))
 		{
 			ptr = p->call;
