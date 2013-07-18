@@ -288,7 +288,7 @@ int main(int argc, char **argv)
 	{
 		char str[80];
 
-		tprintf("\nFPAC-Node v (built %s) %s\n\ncallsign: ", VERSION, HostName);
+		tprintf("\nFPAC-Node v %s (built %s) %s\n\ncallsign: ", VERSION, __DATE__, HostName);
 		usflush(User.fd);
 		alarm(300L);			/* 5 min timeout */
 		if ((p = readline(User.fd)) == NULL)
