@@ -204,8 +204,8 @@ static int l3_conf(int verbose)
 
 	/* DEBUG F6BVP */
 	if ((r->nodes == NULL) || (r->addr == NULL)) 
-			fprintf(stderr, "FPAD : error in route : node or address missing\n");
-
+			fprintf(stderr, "FPAD WARNING : no node or routed address configured !\n");
+	else
 	while (r)
 	{
 		if (add_route(s, r) == 0)
