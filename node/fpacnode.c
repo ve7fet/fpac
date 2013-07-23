@@ -149,10 +149,10 @@ int main(int argc, char **argv)
 	/* Check if there are any Rose Routes or Nodes */
 	if (check_rose() <= 3 )
 	{
-		printf("\nError:        Less than 3 Rose Routes or Nodes defined\n");
-		printf("\n              Check configuration or start FPAC first!\n\n");
+		printf("\nWARNING !     Less than 3 Rose Routes or Nodes defined\n");
+		printf("\n              Check routes configuration and that FPAD is running !\n\n");
 
-		return 1;
+/*		return 1;*/
 	}
 
 	memset(&saddr.srose, 0x00, sizeof(struct full_sockaddr_rose));
