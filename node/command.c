@@ -1012,6 +1012,7 @@ int do_routes(int argc, char **argv)
 /*	struct proc_ax25 *list;*/
 	int i;
 	int first = 1;
+	int first_node = 1;
 	int loopback = -1;
 	char stradd[11];
 	char *addr = NULL;
@@ -1129,6 +1130,12 @@ int do_routes(int argc, char **argv)
 		{
 			node_msg("ROSE routes :\nDNIC Address Primary   Route  | 1st Alt   Route  | 2nd Alt   Route  |");
 			first = 0;
+		}
+
+		if ((pn->mask == 10) &&  (first_node))
+		{
+			node_msg("Adjacent ROSE nodes routes :\nDNIC Address           Route");
+			first_node = 0;
 		}
 
 		for (i = pn->mask; i < 10; i++)
