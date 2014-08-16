@@ -15,6 +15,7 @@
  * 09/11/2006 status display modified
  *		menu N toggles node type of record
  * 09/10/2009 if digi deleted, delete city locator and name 
+ * 22/05/2012 set date and time when creating a new record
  ******************************************************/
  
 #include <stdio.h>
@@ -40,7 +41,6 @@
 int cr = 0;
 
 /*** Prototypes *******************/
-static char *my_date(time_t date);
 static void readline(char *, int);
 
 #define CR() printf( (cr) ? "\r" : "\n"); 
@@ -57,6 +57,7 @@ int main(int ac, char **av)
 	char *call, *pt; /* *add; */
 	ax25_address addr;
 	wp_t wp;
+	time_t present_time;
 
 	if (wp_open("WPEDIT-0")) {
 		perror("Cannot open WP service");
@@ -84,6 +85,11 @@ int main(int ac, char **av)
 	}
 
 	call = strupr(av[optind]);
+	
+	/* If there is no SSID appended to the callsign
+	then we append a -0 on the end of the call */
+	if (!strchr(call, '-'))
+		strcat(call, "-0");
 
 	if (ax25_aton_entry(call, addr.ax25_call) != 0)
 	{
@@ -92,7 +98,7 @@ int main(int ac, char **av)
 	}
 
 	memset(&wp, 0, sizeof(wp_t));
-
+	present_time = time(NULL);
 	p = wp_get(&addr, &wp) ;
 	
 	if(p != 0) 
@@ -114,7 +120,7 @@ int main(int ac, char **av)
 			return(0);
 
 		wp.address.srose_call = addr;
-
+		wp.date = present_time;
 	}
 
 	CR();
@@ -128,6 +134,7 @@ int main(int ac, char **av)
 	/*	char *p;*/
 		char *add;
 		char dnic[5];
+		char buf[20];
 
 		printf("Callsign  Status  Last update       DNIC address  Type  digis Name City Locator"); CR();
 
@@ -141,8 +148,10 @@ int main(int ac, char **av)
 		else
 			printf("         ");
 
- 		printf("%s => %s %s  ", 
-			my_date(wp.date), 
+ 		my_date(buf, wp.date),
+ 		
+		printf("%s => %s %s  ", 
+ 			buf,
 			dnic, 
 			add+4);
 
@@ -166,6 +175,9 @@ int main(int ac, char **av)
 
 		sscanf(line, "%s %[^\r\n]", command, str);
 
+/* F6BVP record is set to present date
+		wp.date = time (NULL); */
+
 		switch(toupper(command[0]))
 		{
 		case 'A':
@@ -180,8 +192,12 @@ int main(int ac, char **av)
 			else
 			{
 				rose_aton(str, wp.address.srose_addr.rose_addr);
-				wp_set(&wp);
-				printf("%s WP record updated", call); CR(); CR();
+				ret = wp_set(&wp);
+				if (ret == 0)
+					printf("WP record '%s' updated", call);
+				else	
+					printf("*** Error in address setting"); 
+				CR(); CR();
 				wp_get(&wp.address.srose_call, &wp);
 			}
 			break;
@@ -226,13 +242,10 @@ int main(int ac, char **av)
 					wp.address.srose_ndigis = num;
 					ret = wp_set(&wp);
 					if (ret == 0)
-					{
-						printf("%s WP record updated", call); CR(); CR();
-					}
+						printf("WP record '%s' updated", call);
 					else
-					{
-						printf("*** Error in list of digis"); CR(); CR();
-					}
+						printf("*** Error in list of digis");
+				       	CR(); CR();
 					wp_get(&wp.address.srose_call, &wp);
 				}
 			}
@@ -242,32 +255,33 @@ int main(int ac, char **av)
 			}
 			break;
 		case 'N':
-			if(wp.is_node == 1)
+			if (wp.is_node == 1)
 				wp.is_node = 0;
-			else
+			else 
 				wp.is_node = 1;
-			if (wp_set(&wp) == 0)
-				printf("%s Node attribute updated", call);
-			else
-				printf("%s record not updated", call);
+			ret = wp_set(&wp);
+			if (ret == 0)
+				printf("Node '%s' attribute updated", call);
+			else 
+				printf("record '%s' not updated - error %d", call, ret);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'R':
 			wp.is_deleted = 1;
 			if (wp_set(&wp) == 0)
-				printf("%s WP record deleted", call);
+				printf("WP record '%s' deleted", call);
 			else
-				printf("%s record not updated", call);
+				printf("record '%s' not updated", call);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'U':
 			wp.is_deleted = 0;
 			if (wp_set(&wp) == 0)
-				printf("%s WP record restored", call);
+				printf("WP record '%s' restored", call);
 			else
-				printf("%s record not updated", call);
+				printf("record '%s' not updated", call);
 			CR(); CR();
 			wp_get(&wp.address.srose_call, &wp);
 			break;
@@ -298,21 +312,6 @@ int main(int ac, char **av)
 	}
 
 	return(0);
-}
-
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
 }
 
 void readline(char *buf, int len)

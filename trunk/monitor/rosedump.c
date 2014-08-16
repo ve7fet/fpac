@@ -117,12 +117,12 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 		}
 		lprintf(T_ROSEHDR, "\n");
 		data_dump(totdata, totlen, 1);*/
-		data_dump(totdata, length, 1);
+/*		data_dump(totdata, length, 1);*/
 		return;
 
 	case CLEAR_CONFIRMATION:
 		lprintf(T_ROSEHDR, "CLEAR CONFIRMATION\n");
-		data_dump(totdata, length, 1);
+/*		data_dump(totdata, length, 1);*/
 		return;
 
 	case DIAGNOSTIC:

@@ -678,7 +678,7 @@ int main(int argc, char **argv)
 	int nb;
 	int nb_req;
 	fd_set read_fdset;
-	time_t date;
+	time_t date, temps;
 	struct timeval timeval;
 	FILE *fptr;
 	struct sigaction act, oact;
@@ -793,7 +793,8 @@ int main(int argc, char **argv)
 			getax25(s);
 		}
 
-		if (date <= time(NULL))
+		temps = time(NULL);
+		if (date <= temps)
 		{
 			min_request = TRUE;
 			date += PERIOD;

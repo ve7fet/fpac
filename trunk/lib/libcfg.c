@@ -178,7 +178,8 @@ char *dnic2des(char *dnic)
 	}
 	return NULL;
 }
-	
+
+/* Open the fpac.dnic file and read it in to memory. */	
 static void dnic_open(void)
 {
 	int max = 0;
@@ -187,9 +188,11 @@ static void dnic_open(void)
 	char designator[256];
 	int dnic;
 	
+	/* Abort if we can't open the fpac.dnic file */
 	if ((fptr = fopen(FPACDNIC, "r")) == NULL)
 		return;
-		
+	
+	/* Read the file line by line */	
 	while (fgets(line, sizeof(line), fptr))
 	{
 		if (nb_dnic == max)
@@ -200,10 +203,11 @@ static void dnic_open(void)
 			else
 				dnic_list = malloc(sizeof(dniclu_t) * max);
 		}
-		
+
+		/* Split the line from the file in to country designator and DNIC and store them */
 		if ((sscanf(line, "%s %d", designator, &dnic) >= 2) && dnic > 0 && dnic < 10000)
 		{
-			if (*designator == '#')
+			if (*designator == '#') /* Ignore commented lines */
 				continue;
 			
 			dnic_list[nb_dnic].country = des2long(designator);
@@ -247,6 +251,7 @@ static char *strclean(char *str)
 	return(str);
 }
 
+/* Take a line from a config file and check it for a keyword/value pair */
 /* Returns the keyword and the value */
 static int get_value(char *line, char *keyword, char *value)
 {
@@ -254,8 +259,8 @@ static int get_value(char *line, char *keyword, char *value)
 
 	*keyword = *value = '\0';
 
-	line = strclean(line);
-	if ((*line == '\0') || (*line == '#'))
+	line = strclean(line); /* Trim the line */
+	if ((*line == '\0') || (*line == '#')) /* Ignore null lines or comments */
 		return(0);
 
 	ptr = strchr(line, '=');
@@ -276,11 +281,15 @@ static void strcpy_n(char *rec, char *src, int len)
 	strncpy(rec, src, len-1);
 }
 
-/* Add a new application */
+/* Add a new application 
+format is add_application(config, keyword, value)
+*/
 static void add_application(cfg_t *cfg, char *call, char *appli)
 {
 	appli_t *a;
-
+	
+	/* If there is no SSID appended to the application's callsign
+	then we append a -0 on the end of the call */
 	if (!strchr(call, '-'))
 		strcat(call, "-0");
 
@@ -289,6 +298,8 @@ static void add_application(cfg_t *cfg, char *call, char *appli)
 	strcpy_n(a->appli, appli, sizeof(a->appli));
 	a->next = cfg->appli;
 	cfg->appli = a;
+/* FET */
+	syslog(LOG_INFO, "Adding application %s as call %s\n", a->appli, a->call);
 }
 
 int cfg_open(cfg_t *cfg)
@@ -312,14 +323,17 @@ int cfg_open(cfg_t *cfg)
 	/* Default IP address for rose ports */
 	strcpy(cfg->def_addr, "192.168.0.1");
 
+	/* Open the fpac.dnic file and store it in memory */
 	dnic_open();
 
+	/* Get the fpac.conf last modified time/date */
 	if (stat(FPACCONF, &st) == 0)
 	{
 		cfg->date = st.st_mtime;
 	}
 	
-	/* Application FPACNODE always exist */
+	/* Application FPACNODE always exists, so add it. This makes the
+	node respond to the call NODE- with any SSID */
 	add_application(cfg, "NODE-*", FPACNODE);
 
 	/* Read mandatory FPAC configuration file*/
@@ -332,6 +346,14 @@ int cfg_open(cfg_t *cfg)
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
 	}
+
+	/* Get the fpac.nodes last modified time/date */
+	if (stat(FPACNODES, &st) == 0)
+	{
+		if(st.st_mtime > cfg->date)
+			cfg->date = st.st_mtime;
+	}
+	
 	
 	/* Read optional FPAC ROUTES file if it exists*/
 	fptr = fopen(FPACROUTES, "r");
@@ -339,6 +361,14 @@ int cfg_open(cfg_t *cfg)
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
 	}
+
+	/* Get the fpac.routes last modified time/date */
+	if (stat(FPACROUTES, &st) == 0)
+	{
+		if(st.st_mtime > cfg->date)
+			cfg->date = st.st_mtime;
+	}
+	
 	
 	/* Check for mandatory fields */
 	if (*cfg->callsign == '\0')		errnum = CALLSIGN;
@@ -359,6 +389,7 @@ int cfg_open(cfg_t *cfg)
 	strcpy(cfg->fulladdr, cfg->dnic);
 	strcat(cfg->fulladdr, cfg->address);
 
+	/* Set some environment variables */
 	sprintf(line, "FPAC_L2CALL=%s",  cfg->alt_callsign);
 	putenv(line);
 	sprintf(line, "FPAC_L3CALL=%s",  cfg->callsign);
@@ -373,6 +404,8 @@ int cfg_open(cfg_t *cfg)
 	return(0);
 }
 
+/* Read the referenced config file, parse out the values, and
+populate the necessary arrays with the keywords/values */
 int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 {
 	int mode = 0;
@@ -393,6 +426,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 	port_t	*p;
 	cover_t	*o;
 
+	/* first is set when we read the fpac.conf file only */
 	if (first) {
 		d = NULL;
 		a = NULL;
@@ -404,14 +438,21 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 		o = NULL;
 	}
 
+	/* Read the file line by line until we run out of lines to read */
 	while (fgets(line, sizeof(line), fptr))
 	{
 
+		/* Figure out if the line we read has a keyword/value pair */
 		if (!get_value(line, keyword, value))
 			continue;
 
+		/* This switch is run AFTER mode has been set (if applicable)
+		by the default case down below. mode is reset after the block
+		(case) is processed, and then we move on to find the next block
+		to process. */
 		switch (mode)
 		{
+		/* Check the command block and add/overwrite any new commands we find */
 		case COMMAND :
 			switch(kwid(keyword))
 			{
@@ -433,6 +474,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Check the sysop block and add/overwrite any new commands we find */
 		case SYSOP :
 			switch(kwid(keyword))
 			{
@@ -454,6 +496,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the node blocks (either from fpac.conf or fpac.nodes */
 		case NODE:
 			switch(kwid(keyword))
 			{
@@ -479,6 +522,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the addport block */
 		case ADDPORT:
 			switch(kwid(keyword))
 			{
@@ -495,6 +539,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the application block and add any applications we find */
 		case APPLICATION:
 			switch(kwid(keyword))
 			{
@@ -506,6 +551,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the user block and add any routes for specific users */
 		case LUSER:
 			switch(kwid(keyword))
 			{
@@ -522,6 +568,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the routes block either from fpac.conf or fpac.routes */
 		case ROUTES:
 			switch(kwid(keyword))
 			{
@@ -554,6 +601,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			}
 			break;
+		/* Read in the alias block and add the routes */
 		case ALIAS:
 			switch(kwid(keyword))
 			{
@@ -575,6 +623,9 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 			}
 			break;
 		default:
+			/* This switch looks for the defined keywords in the config file
+			and if the block needs further processing, it sets the mode so
+			the above switch will run and process further. */
 			switch(kwid(keyword))
 			{
 			case OPTION:
@@ -583,13 +634,13 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 			case PASSWORD:
 				strcpy_n(cfg->password, value, sizeof(cfg->password));
 				break;
-			case CALLSIGN:
+			case CALLSIGN: /* this is the L3call of the node */
 				strcpy_n(cfg->callsign, value, sizeof(cfg->callsign));
 				break;
 			case TRCALL:
 				strcpy_n(cfg->trt_callsign, value, sizeof(cfg->trt_callsign));
 				break;
-			case ALTERNATE:
+			case ALTERNATE: /* this is the L2call of the node */
 				strcpy_n(cfg->alt_callsign, value, sizeof(cfg->alt_callsign));
 			/* Application alias callsign always exist */
 				add_application(cfg, value, FPACNODE);
@@ -676,7 +727,7 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 
 	}
 
-	if (first)
+	if (first) /* first is set if this is fpac.conf we're working on */
 	{
 	/* Create port list */
 

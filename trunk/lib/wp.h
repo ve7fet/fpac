@@ -121,6 +121,7 @@ int wp_set(wp_t *wp);
 int wp_update_addr(struct full_sockaddr_rose *addr);
 int wp_get_list(wp_t **wp, int *nb, int flags, char *mask);
 int wp_is_node(char *callsign);
+void my_date(char *buf, time_t date );
 
 int wp_nb_records(void);
 

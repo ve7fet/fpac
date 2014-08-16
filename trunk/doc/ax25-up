@@ -51,10 +51,10 @@ if [ -d /proc/sys/net/ax25/$Device ]
   ifconfig $Device netmask 255.255.255.255
   ifconfig $Device broadcast 0.0.0.0
   # Parms for axudp - Kernels > 2.6.17
-#  echo 3100 > t1_timeout # (Frack) /100 = seconds ( 1 - 30) seconds
-#  echo 1000 > t2_timeout # (RESPtime) /100 = .001 seconds (1 . 20)second
-#  echo 300000 > t3_timeout # (Check) /600 = min (0 - 3600) seconds
-#  echo 600000 > idle_timeout # Disconnect when idle /600 = min (0 or greater)
+#  echo 10000 > t1_timeout # (Frack) /1000 = seconds ( 1 - 30) seconds
+#  echo 3000 > t2_timeout # (RESPtime) /1000 = seconds (1 - 20)seconds
+#  echo 300000 > t3_timeout # (Check) /1000 = seconds (0 - 3600) seconds
+#  echo 0 > idle_timeout # Disconnect when idle /1000 = seconds (0 or greater)
 #  echo 0 > ax25_default_mode # AX25 Default Mode 0 = Normal, 1 = Extended (0)
 #  echo 0 > ip_default_mode # IP Default Mode 0 = Standard (mod 7),1 = Extended (mod 127)(0)
 #  echo 0 > backoff_type # Backoff 0 = Original, 1 = linear, 2 = exponential (1)
@@ -83,10 +83,10 @@ if [ -d /proc/sys/net/ax25/$Device ]
   ifconfig $Device netmask 255.255.255.255
   ifconfig $Device broadcast 0.0.0.0
   # Parms for vhfdrop - Kernels > 2.6.17
-#  echo 3100 > t1_timeout # (Frack) /100 = seconds ( 1 - 30) seconds
-#  echo 1000 > t2_timeout # (RESPtime) /100 = .001 seconds (1 . 20)second
-#  echo 300000 > t3_timeout # (Check) /600 = min (0 - 3600) seconds
-#  echo 600000 > idle_timeout # Disconnect when idle /600 = min (0 or greater)
+#  echo 10000 > t1_timeout # (Frack) /1000 = seconds ( 1 - 30) seconds
+#  echo 3000 > t2_timeout # (RESPtime) /1000 = seconds (1 - 20)seconds
+#  echo 300000 > t3_timeout # (Check) /1000 = seconds (0 - 3600) seconds
+#  echo 0 > idle_timeout # Disconnect when idle /1000 = seconds (0 or greater)
 #  echo 0 > ax25_default_mode # AX25 Default Mode 0 = Normal, 1 = Extended (0)
 #  echo 0 > ip_default_mode # IP Default Mode 0 = Standard (mod 7),1 = Extended (mod 127)(0)
 #  echo 0 > backoff_type # Backoff 0 = Original, 1 = linear, 2 = exponential (1)
@@ -117,10 +117,10 @@ fi
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
 #  # Parms for uhfdrop - Kernels > 2.6.17
-##  echo 3100 > t1_timeout # (Frack) /100 = seconds ( 1 - 30) seconds
-##  echo 1000 > t2_timeout # (RESPtime) /100 = .001 seconds (1 . 20)second
-##  echo 300000 > t3_timeout # (Check) /600 = min (0 - 3600) seconds
-##  echo 600000 > idle_timeout # Disconnect when idle /600 = min (0 or greater)
+##  echo 10000 > t1_timeout # (Frack) /1000 = seconds ( 1 - 30) seconds
+##  echo 3000 > t2_timeout # (RESPtime) /1000 = seconds (1 - 20)seconds
+##  echo 300000 > t3_timeout # (Check) /1000 = seconds (0 - 3600) seconds
+##  echo 0 > idle_timeout # Disconnect when idle /1000 = seconds (0 or greater)
 ##  echo 0 > ax25_default_mode # AX25 Default Mode 0 = Normal, 1 = Extended (0)
 ##  echo 0 > ip_default_mode # IP Default Mode 0 = Standard (mod 7),1 = Extended (mod 127)(0)
 ##  echo 0 > backoff_type # Backoff 0 = Original, 1 = linear, 2 = exponential (1)
@@ -151,10 +151,10 @@ fi
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
 #  # Parms for west - Kernels > 2.6.17
-##  echo 3100 > t1_timeout # (Frack) /100 = seconds ( 1 - 30) seconds
-##  echo 1000 > t2_timeout # (RESPtime) /100 = .001 seconds (1 . 20)second
-##  echo 300000 > t3_timeout # (Check) /600 = min (0 - 3600) seconds
-##  echo 600000 > idle_timeout # Disconnect when idle /600 = min (0 or greater)
+##  echo 10000 > t1_timeout # (Frack) /1000 = seconds ( 1 - 30) seconds
+##  echo 3000 > t2_timeout # (RESPtime) /1000 = seconds (1 - 20)seconds
+##  echo 300000 > t3_timeout # (Check) /1000 = seconds (0 - 3600) seconds
+##  echo 0 > idle_timeout # Disconnect when idle /1000 = seconds (0 or greater)
 ##  echo 0 > ax25_default_mode # AX25 Default Mode 0 = Normal, 1 = Extended (0)
 ##  echo 0 > ip_default_mode # IP Default Mode 0 = Standard (mod 7),1 = Extended (mod 127)(0)
 ##  echo 0 > backoff_type # Backoff 0 = Original, 1 = linear, 2 = exponential (1)
@@ -185,10 +185,10 @@ fi
 #  ifconfig $Device netmask 255.255.255.255
 #  ifconfig $Device broadcast 0.0.0.0
 #  # Parms for east - Kernels > 2.6.17
-##  echo 3100 > t1_timeout # (Frack) /100 = seconds ( 1 - 30) seconds
-##  echo 1000 > t2_timeout # (RESPtime) /100 = .001 seconds (1 . 20)second
-##  echo 300000 > t3_timeout # (Check) /600 = min (0 - 3600) seconds
-##  echo 600000 > idle_timeout # Disconnect when idle /600 = min (0 or greater)
+##  echo 10000 > t1_timeout # (Frack) /1000 = seconds ( 1 - 30) seconds
+##  echo 3000 > t2_timeout # (RESPtime) /1000 = seconds (1 - 20)seconds
+##  echo 300000 > t3_timeout # (Check) /1000 = seconds (0 - 3600) seconds
+##  echo 0 > idle_timeout # Disconnect when idle /1000 = seconds (0 or greater)
 ##  echo 0 > ax25_default_mode # AX25 Default Mode 0 = Normal, 1 = Extended (0)
 ##  echo 0 > ip_default_mode # IP Default Mode 0 = Standard (mod 7),1 = Extended (mod 127)(0)
 ##  echo 0 > backoff_type # Backoff 0 = Original, 1 = linear, 2 = exponential (1)

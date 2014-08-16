@@ -1,3 +1,35 @@
+fpac (3.27.19)
+	* Cleaned up the SVN code base
+	* Moved the help files from /etc/ax25/fpac/help to /var/ax25/fpac/help 
+	  for better policy compliance and less security risk
+	* Added some of K4GBB's scripts: ax25, ax25-up, ax25-down, ax25parms
+	* Remove the obsolete mkissattach code (and kiss folder)
+	* K4GBB added a buch of man pages for the binaries created by this software
+	* Commented some more of the source
+	* F6BVP repaired the -o option and added -d (debug) option in mon_tcp
+	* F6BVP added a usage message to call_tcp
+	* F6BVP added more usage details to wpserv
+	* F6BVP fixed 32/64 bit compatability for libwp and computing of wp record age based on GMT
+	* F6BVP white pages records are now stored with GMT time to prevent timezone problems on 
+	  large systems spanning many timezones
+	* F6BVP added more error reporting to wpedit
+	* F6BVP cleaned up some of the debugging messages in fpacwpd
+	* F6BVP added a patch to wpedit to allow editing of a record despite age/date
+	* K4GBB cleaned up the output of the fpaccfg utility
+	* F6BVP fixed wpedit and wpmaint utilities to better handle old records
+	* Shortened times that stale whitepages records are held before being discarded
+	* F6BVP improved the whitepages exchanges between nodes to speed up and reduce overhead
+	* F6BVP modified wpmaint to recover db from a backup if the working file is corrupt/missing
+	* F6BVP modified wpmaint to allow node records to be deleted or erased (like user records)
+	* K4GBB fixed a bug in wp_set() not initializing wp->date correctly
+	* F6BVP fixed how time(NULL) is used to set times properly
+	* F6BVP made some changes to wplist to change display and command line handling
+	* F6BVP fixed a segfault in call_tcp
+	* F6BVP patched gateway.c to prevent a fpad segfault
+	* F6BVP modified wpedit to create a new record with the current date and time
+
+ -- Lee Woldanski <ve7fet@tparc.org> Tue, 29 May 2012 09:00:00 -0700
+
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database
 	* Minor cosmetic changes for displaying wp data

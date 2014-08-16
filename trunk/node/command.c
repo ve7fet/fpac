@@ -32,6 +32,14 @@ struct cmd *Nodecmds = NULL;
 #define	ROSE_DEFAULT_MAXVC	50	/* Maximum number of VCs per neighbour in linux/include/net/rose.h */
 #define nb_wp() 1
 
+/*add_internal_cmd's args are:
+ -list to add the command to (&Nodecmds)
+ -command name
+ -num of chars of cmd name required (Alias = 1, HOst = 2)
+ -is visible? (1 = yes, 0 = no)
+ -subroutine to run for command
+*/
+
 void init_nodecmds(void)
 {
 	add_internal_cmd(&Nodecmds, "?", 1, 1, do_help);
@@ -232,6 +240,7 @@ int do_mheard(int argc, char **argv)
 	char *port = NULL;
 	char *call = NULL;
 	long ti;
+	time_t temps;
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
@@ -337,12 +346,15 @@ int do_mheard(int argc, char **argv)
 	}
 
 	nb = 0;
+
+	temps = time(NULL);
+
 	while (list != NULL)
 	{
 		if (nb++ < NB_HEARD)
 		{
 			t = ax25_ntoa(&list->data.from_call);
-			ti = time(NULL) - list->data.last_heard;
+			ti = temps - list->data.last_heard;
 
 			if (call)
 			{
@@ -432,7 +444,7 @@ int do_help(int argc, char **argv)
 	if (*argv[0] == 'i')
 	{							/* "info"   */
 		strcpy(fname, FPAC_INFO_FILE);
-		node_msg("%s v %s (F6FBB - %s) for LINUX\n", "FPAC-Node", VERSION,
+		node_msg("%s v %s (built %s) for LINUX\n", "FPAC-Node", VERSION,
 				 __DATE__);
 	}
 	else if (argc == 1)
@@ -1785,7 +1797,7 @@ int do_status(int argc, char **argv)
 		tprintf("Operating system : %s %s (%s)\n", name.sysname,
 				name.release, name.machine);
 	}
-	tprintf("FPAC version     : %s\n",VERSION);
+	tprintf("FPAC version     : %s (built %s)\n",VERSION, __DATE__);
 	/* read and calculate the amount of uptime and format it nicely */
 	uptime(&uptime_secs, &idle_secs);
 	updays = (int) uptime_secs / (60 * 60 * 24);
@@ -1962,19 +1974,6 @@ int do_status(int argc, char **argv)
 	return 0;
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime(&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d",
-			sdate->tm_mday,
-			sdate->tm_mon + 1,
-			sdate->tm_year % 100, sdate->tm_hour, sdate->tm_min);
-	return (buf);
-}
-
 int do_wp(int argc, char **argv)
 {
 	int nb = 20;
@@ -1985,6 +1984,7 @@ int do_wp(int argc, char **argv)
 	char *add;
 	char *call;
 	char dnic[5];
+	char buf[20];
 
 	/*if (argc < 2)
 	   {
@@ -2052,8 +2052,8 @@ int do_wp(int argc, char **argv)
 			strncpy(dnic, add, 4);
 			dnic[4] = '\0';
 
-			tprintf("%-9s %s => %s %-7s ",
-					call, my_date(wp[i].date), dnic, add + 4);
+			my_date(buf, wp[i].date);
+			tprintf("%-9s %s => %s %-7s ", call, buf, dnic, add + 4);
 
 			if (wp[i].is_node)
 				tprintf("Node ");
@@ -2099,13 +2099,13 @@ int do_dest(int argc, char **argv)
 
 	if ((fdst = read_flex_dst()) == NULL)
 	{
-/*		if (errno)
+		if (errno)
 			node_msg("flexd is probably not loaded");
 		else
 			node_msg("No FlexNet destinations");
 		
 		node_msg("Read /var/log/fpac.log file");
-*/		return 0;
+		return 0;
 	}
 
 	/* "dest" */
