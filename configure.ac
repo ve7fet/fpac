@@ -1,8 +1,11 @@
 AC_PREREQ(2.61)
-AC_INIT(fpac, 3.27.18, f6bvp@free.fr)
+AC_INIT(fpac, 3.27.19, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h])
+AC_CONFIG_MACRO_DIR([m4])
+m4_pattern_allow([AM_PROG_AR])
+AM_PROG_AR
 
 # Determine versions for package managers.
 basever=$(echo $PACKAGE_VERSION | sed -e 's@-.*$@@')
@@ -14,7 +17,7 @@ AC_SUBST(EXTRAVERSION, [$extraver])
 AC_PROG_CC
 AC_PROG_GCC_TRADITIONAL
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 
 # Checks for libraries.
 AC_SUBST(AX25_LIB)
@@ -64,5 +67,25 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(alarm dup2 gethostbyaddr gethostname gettimeofday inet_ntoa memchr memove memset mkdir munmap putenv select setenv socket sqrt strcasecmp strchar strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname)
 
 
-AC_CONFIG_FILES([Makefile lib/Makefile cfg/Makefile monitor/Makefile node/Makefile flex/Makefile pad/Makefile tcp/Makefile wp/Makefile kiss/Makefile tools/Makefile stats/Makefile doc/Makefile doc/html/Makefile help/Makefile scripts/versions:scripts/versions.in scripts/fpac.sh:scripts/fpac.in scripts/Makefile etc/Makefile fpac.spec])
+AC_CONFIG_FILES([Makefile \
+	lib/Makefile \
+	cfg/Makefile \
+	man/Makefile \
+	monitor/Makefile \
+	node/Makefile \
+	flex/Makefile \
+	pad/Makefile \
+	tcp/Makefile \
+	wp/Makefile \
+	tools/Makefile \
+	stats/Makefile \
+	doc/Makefile \
+	doc/html/Makefile \
+	help/Makefile \
+	scripts/ax25parms \
+	scripts/versions \
+	scripts/fpac.sh:scripts/fpac.in \
+	scripts/Makefile \
+	etc/Makefile \
+	fpac.spec])
 AC_OUTPUT

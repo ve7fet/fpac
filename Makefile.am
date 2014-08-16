@@ -1,7 +1,7 @@
 installconf:
 	(cd $(top_srcdir)/etc && $(MAKE) installconf)
 
-SUBDIRS = lib cfg monitor node flex pad tcp wp kiss tools stats doc help scripts etc
+SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
 
 install-data-hook:
 	@echo
@@ -18,6 +18,8 @@ install-data-hook:
 	@echo
 
 EXTRA_DIST = pathnames.h fpac.spec
+
+ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"

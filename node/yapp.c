@@ -359,12 +359,15 @@ static int yapp_download_data(int *filefd, unsigned char *buffer)
 	char *hptr, *hfield[3];
 	struct stat sb;
 	unsigned char checksum;
+	time_t temps;
 
 	if (buffer[0] == CAN || buffer[0] == NAK)
 	{
 		Write_Status("RcdABORT");
 		return(FALSE);
 	}
+
+	temps = time(NULL);
 
 	switch (state)
 	{
@@ -435,7 +438,7 @@ static int yapp_download_data(int *filefd, unsigned char *buffer)
 				}
 
 				state = STATE_RD;
-				start = time(NULL);
+				start = temps;
 				break;
 			}
 
@@ -485,7 +488,7 @@ static int yapp_download_data(int *filefd, unsigned char *buffer)
 
 			if (buffer[0] == ETX && buffer[1] == 0x01)
 			{
-				end = time(NULL);
+				end = temps;
 				if (end == start)
 					++end;
 				Send_AF();
@@ -600,12 +603,15 @@ static int yapp_upload_data(int filefd, char *filename, int filelength, unsigned
 {
 	char Message[80];
 	int len, length;
+	time_t temps;
 
 	if (buffer[0] == CAN || buffer[0] == NAK)
 	{
 		Write_Status("RcvABORT");
 		return(FALSE);
 	}
+
+	temps = time(NULL);
 
 	switch (state)
 	{
@@ -645,7 +651,7 @@ static int yapp_upload_data(int filefd, char *filename, int filelength, unsigned
 				}
 
 				state = STATE_SD;
-				start = time(NULL);
+				start = temps;
 				break;
 			}
 
@@ -713,7 +719,7 @@ static int yapp_upload_data(int filefd, char *filename, int filelength, unsigned
 		case STATE_SE:
 			if (buffer[0] == ACK && buffer[1] == 0x03)
 			{
-				end = time(NULL);
+				end = temps;
 				if (end == start)
 					++end;
 				Write_Status("SendEOT");

@@ -1,4 +1,3 @@
-
 /******************************************************
  * fpacnode.c                                         *
  * FPAC project.            FPAC PAD                  *
@@ -145,14 +144,15 @@ int main(int argc, char **argv)
 		free_proc_rs(rlist);
 		return 1;
 	}
+		free_proc_rs(rlist);
 	
 	/* Check if there are any Rose Routes or Nodes */
 	if (check_rose() <= 3 )
 	{
-		printf("\nError:        Less than 3 Rose Routes or Nodes defined\n");
-		printf("\n              Check configuration or start FPAC first!\n\n");
+		printf("\nWARNING !     Less than 3 Rose Routes or Nodes defined\n");
+		printf("\n              Check routes configuration and that FPAD is running !\n\n");
 
-		return 1;
+/*		return 1;*/
 	}
 
 	memset(&saddr.srose, 0x00, sizeof(struct full_sockaddr_rose));
@@ -175,6 +175,13 @@ int main(int argc, char **argv)
 	}
 
 	fpac_nr_config_load_ports();
+
+	if (argc  > 1) { 
+		strncpy(User.call, strupr(argv[1]), 9);
+		User.call[9] = 0;
+		if (strstr(User.call, "-") == NULL)
+			strcat(User.call, "-0");
+	}
 	
 	/*
 	rs_config_load_ports();
@@ -281,7 +288,7 @@ int main(int argc, char **argv)
 	{
 		char str[80];
 
-		tprintf("\nFPAC-Node v %s (%s)\n\ncallsign: ", VERSION, HostName);
+		tprintf("\nFPAC-Node v %s (built %s) %s\n\ncallsign: ", VERSION, __DATE__, HostName);
 		usflush(User.fd);
 		alarm(300L);			/* 5 min timeout */
 		if ((p = readline(User.fd)) == NULL)
@@ -297,14 +304,20 @@ int main(int argc, char **argv)
 
 	sprintf(NodeId,"%s", cfg.alt_callsign);
 
-	if ((p = strstr(User.call, "-0")) != NULL)
-		*p = 0;
+/*	if ((p = strstr(User.call, "-0")) != NULL)
+		*p = 0; */
+	if (strstr(User.call, "-") == NULL)
+		strcat(User.call, "-0");
+	strupr(User.call);
+
 	if (wp_check_call(User.call) == -1) 
 	{
 		node_msg("Invalid callsign");
 		fpaclog(LOGLVL_LOGIN, "Invalid callsign %s @ %s", User.call, User.ul_name);
 		logout("Invalid callsign");
 	}
+		
+	node_msg ("User call : %s", User.call);
 
 	if ((fp = fopen (FPAC_HELLO_FILE, "r")) != NULL) 
 	{
@@ -314,7 +327,7 @@ int main(int argc, char **argv)
 		fclose (fp);
 	}
 
-	node_msg("%s v %s (F6FBB - %s) for LINUX (help = h)\n", "FPAC-Node", VERSION, __DATE__);
+	node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
 
 	for (;;)
 	{

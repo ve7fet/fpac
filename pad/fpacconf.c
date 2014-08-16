@@ -58,11 +58,18 @@ int conf_changed(void)
 
 	if (stat(FPACCONF, &st) == 0)
 	{
-		if (cfg.date != st.st_mtime)
-		{
+		if (cfg.date < st.st_mtime)
 			read_conf(1);
-			return(0);
-		}
+	}
+	if (stat(FPACNODES, &st) == 0)
+	{
+		if (cfg.date < st.st_mtime)
+			read_conf(1);
+	}
+	if (stat(FPACROUTES, &st) == 0)
+	{
+		if (cfg.date < st.st_mtime)
+			read_conf(1);
 	}
 	return(0);
 }
@@ -197,8 +204,8 @@ static int l3_conf(int verbose)
 
 	/* DEBUG F6BVP */
 	if ((r->nodes == NULL) || (r->addr == NULL)) 
-			fprintf(stderr, "FPAD : error in route : node or address missing\n");
-
+			fprintf(stderr, "FPAD WARNING : no node or routed address configured !\n");
+	else
 	while (r)
 	{
 		if (add_route(s, r) == 0)

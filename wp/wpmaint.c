@@ -38,13 +38,14 @@
 int cr = 0;
 
 /*** Prototypes *******************/
-static char *my_date(time_t date);
 
 #define CR() printf( (cr) ? "\r" : "\n"); 
+#define ERASETIME 7L 
+#define DELETETIME 180L 
 
-int main(int ac, char **av)
+int main(int argc, char **argv)
 {
-	int i;
+	int i, p;
 	int ok = 0;
 	int nb = 0;
 	int retour = 0;
@@ -57,54 +58,119 @@ int main(int ac, char **av)
 	char fpacwp_old[1024];
 	char *add;
 	char dnic[5];
-	time_t temps = time(NULL);
-	time_t delete_temps = time(NULL) - 3600L * 24L * 180L;
-	time_t erase_temps   = time(NULL) - 3600L * 24L * 7L;
+	time_t temps;
+	time_t delete_temps;
+	time_t erase_temps;
+	char buf[30];
+	char up_date[20];
+	int e_temps = ERASETIME;
+	int d_temps = DELETETIME;
 
+	if (argc < 2)
+	{
+		printf ("Wpmaint (version %s)\n", __DATE__);
+		printf ("Usage: wpmaint [-argument]\n");
+		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
+		printf ("            -e = age delay (in days) for erasing deleted records\n");       
+		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
+	}
+
+/* Print the Current Date/time */
+	now_date(buf);
+	printf ("     WPmaint - %s",buf);
+
+	optind = 0;
+
+	while ((p = getopt(argc, argv, "d:e:")) != -1)
+	{
+		switch (p)
+		{
+		case 'e':
+			e_temps = strtoul(optarg, NULL, 10);
+			break;
+		case 'd':
+			d_temps = strtoul(optarg, NULL, 10);
+			break;
+		}
+	}
+
+	if (optind == argc)
+		argv[optind] = "*";
+	else
+		strcat(argv[argc-1], "*");
+
+	temps = time(NULL);
+	delete_temps  = temps - (3600L * 24L * (long)d_temps);
+	erase_temps   = temps - (3600L * 24L * (long)e_temps);
+	
 	strcpy(fpacwp_old, FPACWP);
 	strcat(fpacwp_old, ".old");
-	
-	if (rename(FPACWP, fpacwp_old) != 0)
+
+	/* Checks FPAC WP file */	
+	fptr_i = fopen(FPACWP, "r");
+
+	if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0));
+	else
 	{
-		fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", FPACWP, fpacwp_old);
-		return(1);
-	}
-	
-	fptr_i = fopen(fpacwp_old, "r");
-	if (fptr_i == NULL)
-	{
-		fprintf(stderr, "Could not create %s ... Exiting !\n", FPACWP);
-		return(2);
+		fprintf(stderr, "Could not find %s or file is corrupted ... Trying %s !\n", FPACWP, fpacwp_old);
+
+	/* Do we have a backup FPACWP */	
+		fptr_i = fopen(fpacwp_old, "r");
+		if (fptr_i == NULL)
+		{
+			fprintf(stderr, "Could not find %s Exiting !\n", fpacwp_old);
+			return(1);
+		}
+
+	/* Lets use it */	
+		if (rename(fpacwp_old, FPACWP) != 0)
+		{
+			fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", fpacwp_old, FPACWP);
+			return(2);
+		}
 	}
 
+	fclose(fptr_i);
+
+	/* Save FPACWP file */
+	if (rename(FPACWP, fpacwp_old) != 0)
+		{
+			fprintf(stderr, "Could not rename %s to %s ... Exiting !\n", FPACWP, fpacwp_old);
+			return(4);
+		}
+	/* Read saved FPACWP file */
+	fptr_i = fopen(fpacwp_old, "r");
+	if (fptr_i == NULL)
+		{
+			fprintf(stderr, "Could not open %s Exiting !\n", fpacwp_old);
+			return(5);
+		}
+	/* Read the first record */
+	if (fread(&wph_sig, sizeof(wph), 1, fptr_i) == 0)
+		{
+			fprintf(stderr, "No signature found ... %s\n", fpacwp_old);
+			fclose(fptr_i);
+			return(6);
+		}
+
+	/* Check signature for version compatibility */
+	if (strcmp(wph_sig.signature,FILE_SIGNATURE) != 0)
+		{
+			fprintf(stderr, "WP file is not compatible\n");
+			fclose(fptr_i);
+			return(7);
+		}
+	/* Lets create new FPACWP */
 	fptr_o = fopen(FPACWP, "w");
 	if (fptr_o == NULL)
 	{
-		fprintf(stderr, "Could not find %s ... Exiting !\n", fpacwp_old);
-		fclose(fptr_i);
-		return(2);
-	}
-
-	if (fread(&wph_sig, sizeof(wph), 1, fptr_i) == 0)
-	{
-		fprintf(stderr, "No signature found in %s ... Exiting\n", fpacwp_old);
-		fclose(fptr_i);
-		fclose(fptr_o);
-		return(3);
-	}
-
-	/* Check the first record for compatibility */
-	if (strcmp(wph_sig.signature,FILE_SIGNATURE) != 0)
-	{
-		fprintf(stderr, "WP file is not compatible\n");
-		fclose(fptr_i);
-		fclose(fptr_o);
-		return(4);
+		fprintf(stderr, "Could not create %s ... Exiting !\n", FPACWP);
+		return(8);
 	}
 
 	printf("%d records in old WP database\n", wph_sig.nb_record);
-	printf("user records older than 180 days are marked 'deleted'\n");
-	printf("user records marked deleted are erased after 7 days\n");
+	printf("Records older than %d days will be marked 'deleted'\n",d_temps);
+	printf("Records marked 'deleted' erased after %d days\n", e_temps);
 
 	if (fwrite(&wph_sig, sizeof(wph), 1, fptr_o) == 0)
 	{
@@ -133,35 +199,34 @@ int main(int ac, char **av)
 			printf("Illegal is_node %d : discarded\n", wp.is_node);
 			continue;
 		}
-		
-/* User records marked deleted and older than 8 days are erased i.e. not copied */
-		if (!wp.is_node && wp.is_deleted && wp.date < erase_temps) {
-			printf("%-9s %s => %s %-7s", full_call, my_date(wp.date) ,dnic, add+4);
-			printf("%s", " user  deleted  ERASED");
+
+		my_date(buf, wp.date);
+
+/* Records marked deleted and older than "e_temps" delay are erased i.e. not copied */
+		if (wp.is_deleted && wp.date > erase_temps) {
+			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
+			printf("%s", " deleted record ERASED");
 			printf("\n");
 			continue;
 		}
-/* User records older than 180 days are marked DELETED - Nodes are NEVER deleted */ 	
-		if (!wp.is_node && wp.date < delete_temps) {
+/* Records older than "d_temps" days are marked DELETED */ 	
+		printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
+		if (wp.is_node == 0)
+			printf("%s"," user ");
+		else
+			printf("%s"," node ");
+		if (wp.date < delete_temps) {
 			wp.is_deleted = 1;
-			printf("%-9s %s => %s %-7s", full_call, my_date(wp.date) ,dnic, add+4);
-			printf("%s", " user  deleted ");
-			printf("\n");
-			wp.date = temps;
-		}
-/* Node records are NEVER deleted */ 	
-		if (wp.is_node) {
-			wp.is_deleted = 0;
+			printf("%s", " deleted ");
 			wp.date = temps;
 		}
 
-		printf("%-9s %s => %s %-7s", full_call, my_date(wp.date), dnic, add+4);
-		if (wp.is_node == 0)
-		       printf("%s"," user ");
-		else
-			printf("%s"," node ");
-		if (wp.is_deleted == 1)
-			printf("%s"," deleted ");
+/* Records dated after present time are set to present time */
+		if (wp.date > temps) {
+			my_date(up_date, temps);
+			printf(" %-9s  date ERROR set to %s ", full_call, up_date);
+			wp.date = temps;
+		}
 		
 		ok = 1;
 		for (i = 0 ; i < wp.address.srose_ndigis ; i++)
@@ -173,30 +238,26 @@ int main(int ac, char **av)
 				ok = 0;
 				break;
 			}
-		
-/*			printf(" %s", full_call); */
 		}
-		
+
 		if (!ok)
 		{
 			printf("\n");
 			continue;
 		}
-					
+
 		printf("\n");
 
 		if (fwrite(&wp, sizeof(wp_t), 1, fptr_o) == 0)
 		{
-			fprintf(stderr, "Cannot wp record in %s ... Exiting\n", FPACWP);
+			fprintf(stderr, "Cannot write wp record in %s ... Exiting\n", FPACWP);
 			retour = 3;
 		}
-		
+
 		++nb;
-		
+
 	}
 
-/*	printf("%d records in old database\n", wph_sig.nb_record); */
-	
 	if (nb != wph_sig.nb_record)
 	{
 		wph_sig.nb_record = nb;
@@ -218,17 +279,3 @@ int main(int ac, char **av)
 	return(retour);
 }
 
-static char *my_date(time_t date)
-{
-	static char buf[20];
-	struct tm *sdate;
-
-	sdate = localtime (&date);
-	sprintf(buf, "%02d/%02d/%02d %02d:%02d", 
-		sdate->tm_mday,
-		sdate->tm_mon + 1, 
-		sdate->tm_year%100,
-		sdate->tm_hour,
-		sdate->tm_min);
-	return(buf);
-}

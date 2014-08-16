@@ -26,9 +26,9 @@
 
 #include "node.h"
 #include "io.h"
-#include "../lib/wp.h"
+#include "wp.h"
 
-#include "../lib/ax25compat.h"
+#include "ax25compat.h"
 
 #ifndef SOL_AX25
 #define SOL_AX25 257
@@ -496,7 +496,7 @@ FSA*/
 		sockaddr.ax25.fsa_digipeater[0].ax25_call[6] |= AX25_HBIT;
 		++sockaddr.ax25.fsa_ax25.sax25_ndigis;
 
-		strcpy(User.dl_name, strupr(address[1]));
+		if(address[1] != NULL)	strcpy(User.dl_name, strupr(address[1]));
 		strcpy(User.dl_port, strupr(address[0]));
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 		addrlen = sizeof(struct full_sockaddr_ax25);
@@ -776,7 +776,7 @@ static int is_netrom(char *call, char *netrom_call)
 
 	for (p = list; p != NULL; p = p->next)
 	{
-		if ((strcasecmp(p->call, call) == 0)
+		if ((strncasecmp(p->call, call, strlen(call)) == 0)
 			|| (strcasecmp(p->alias, call) == 0))
 		{
 			ptr = p->call;
@@ -888,6 +888,10 @@ int do_connect(int argc, char **argv)
 		/* Check if its is a known port */
 		if (ax25_config_get_addr(argv[1]))
 		{
+			if (argc < 3) {
+				node_msg("Callsign missing : Connect port callsign");
+				return (0);
+		}
 			family = AF_AX25;
 			source = "(user port) ";
 		}

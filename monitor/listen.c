@@ -102,25 +102,27 @@ int main(int argc, char **argv)
 			timestamp = 1;
 			break;
 		case 'v':
-			printf("listen: %s\n", VERSION);
+			printf("monitor: %s (built %s)\n", VERSION, __DATE__);
 			return 0;
 		case ':':
 			fprintf(stderr,
-				"listen: option -p needs a port name\n");
+				"monitor: option -p needs a port name\n");
 			return 1;
 		case '?':
 			fprintf(stderr,
-				"Usage: listen [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
+				"Usage: monitor [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
 			return 1;
 		}
 	}
 
-	if (ax25_config_load_ports() == 0)
-		fprintf(stderr, "listen: no AX.25 port data configured\n");
+	if (ax25_config_load_ports() == 0) {
+		fprintf(stderr, "monitor: no AX.25 port data configured\n");
+			return 1;
+	}
 
 	if (port != NULL) {
 		if ((dev = ax25_config_get_dev(port)) == NULL) {
-			fprintf(stderr, "listen: invalid port name - %s\n",
+			fprintf(stderr, "monitor: invalid port name - %s\n",
 				port);
 			return 1;
 		}
