@@ -1,4 +1,7 @@
-fpac (3.27.19)
+fpac (4.00.00)
+	* Released as version 4.00.00 due to significant changes. Based on 
+	  3.27.19 working code (un-released). Compatibility with versions <3.27.18 
+	  is not guaranteed
 	* Cleaned up the SVN code base
 	* Moved the help files from /etc/ax25/fpac/help to /var/ax25/fpac/help 
 	  for better policy compliance and less security risk
@@ -48,7 +51,7 @@ fpac (3.27.19)
 	* F6BVP modified fpacnode to accept callsign as a command line argument
 	* F6BVP fpacwpd rejects a WP record if it is deleted and callsign not in database
 
- -- Lee Woldanski <ve7fet@tparc.org> Wed, 19 Nov 2014 23:00:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org> Thu, 20 Nov 2014 10:00:00 -0800
 
 fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database
