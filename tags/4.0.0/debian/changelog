@@ -1,0 +1,12 @@
+fpac (4.00.00) unstable; urgency=low
+
+  * Release 3.27.19 working code as version 4.00.00 due to significant 
+    changes. Compatibility with versions <3.27.18 not guaranteed.
+
+ -- Lee Woldanski <ve7fet@tparc.org>  Thu, 20 Nov 2014 10:00:00 -0800
+
+fpac (3.27.18) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Lee Woldanski <ve7fet@tparc.org>  Mon, 12 Feb 2012 10:00:00 -0800

@@ -1,0 +1,131 @@
+#
+# FPAC configuration file
+#
+# This file MUST be @sysconfdir@/ax25/fpac.conf
+
+#
+# Node information 
+#
+L2call    = F1TVE-8
+L3call    = F1TVE-9
+Trcall    = F1TVE-10
+DNIC      = 2080
+Address   = 192502
+Coverage  = 192102 192402
+InetPort  = 10093
+InetAddr  = 44.151.75.1
+Password  = your_fpac_password_here
+City      = La Garennes Colombes
+State     = 75017
+Country   = France
+Locator   = JN18CV
+UserPort  = *
+DefPort   = 1
+# End of Node Information
+
+#
+# Command section
+#
+# Built-in Commands - remove the # to disable or add a definition to redefine.
+# 
+# ? =
+#Alias =
+#APplications =
+#Bye =
+#Connect =
+#Dest =
+Finger = 
+#Help =
+#HOst =
+#Info =
+#Links =
+#Mheard =
+#NEtrom =
+#Nodes =
+#PIng =
+#Ports =
+#Quit =
+#Routes =
+#Status =
+#SYSop =
+#Telnet =
+#TRace = connect f1tve-10 2080192502
+#Users =
+#Wp =
+# End of Built-in commands
+#
+# Additional Commands - place additional commands you would like to offer
+# in this section. Also remember to create a help file in @localstatedir@/ax25/fpac/help
+# 
+Command
+	MONitor = @prefix@/sbin/monitor -art -p%1
+	BBs     = @prefix@/sbin/call_tcp f5kck 1022
+#	CLuster = connect f6krq-3 2080931501
+	STat    = /bin/cat @localstatedir@/ax25/fpac/fpacstat.dat @localstatedir@/ax25/fpac/fpacstat.day
+	CONVers	= telnet %{2:f1tve.ampr.org} 3600 \"/n %u %{1:139}\"
+	PMs	= connect 4 f1tve
+	IPLinks = /bin/netstat --ip
+	IPRoutes= /bin/netstat -r
+	VERsions = @prefix@/sbin/versions
+End
+# End of additional commands
+
+#
+# System Operator (Sysop) Commands - commands only available in SYSop mode
+#
+Sysop
+	DIsk = /bin/df -k
+	RM   = /bin/rm /tmp/%1
+	LS   = /bin/ls -l /tmp/%1
+	CAT  = /bin/cat /tmp/%1
+	YGET = @prefix@/sbin/yapp -u /tmp/%1
+	YPUT = @prefix@/sbin/yapp -d /tmp/%1
+	SYSop= @prefix@/sbin/fpacshell
+	WEdit	= @prefix@/sbin/wpedit %*
+End
+# End of Sysop commands
+
+#
+# Applications - applications available to be run on this node
+#
+Application
+	F1TVE-1 = @prefix@/sbin/call_tcp f1tve 1022
+#	F1TVE-5	= /usr/local/conversd/bin/axconv -c 151 -n %u f1tve.ampr.org 3600
+End
+# End of application section
+
+#
+# Additional Ports - additional ports that accept connections to the node
+# These would typically be RF ports that users can connect to. DO NOT 
+# add any link/trunk ports in this section. 
+#
+AddPort = vhf_1k2
+	Address = 192202
+	Port    = 1
+End
+# End of additional ports section
+
+#
+# Users Section - This section associates a specific call to a port. 
+# This allows connections to that callsign on a link (trunk) port. 
+#
+User = F5KCK-10
+	Path = F5KCK-10
+	Port = 1
+End
+# End of users section
+
+#
+# Alias Section - aliases are similar to applications, except the 
+# connection is re-directed
+#
+Alias = F1TVE-14
+	Path = F6BVP-1,175502
+End
+# End of alias section
+
+#
+# fpac nodes list moved to @sysconfdir@/ax25/fpac.nodes
+#
+# fpac routes list moved to @sysconfdir@/ax25/fpac.routes
+#

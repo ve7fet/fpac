@@ -1,0 +1,55 @@
+.TH FPAD 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpad \- White Page element of the FPAC node."
+.SH SYNOPSIS
+.B fpad
+.SH DESCRIPTION
+.LP
+.B fpad
+is the main FPAC daemon. Upon start up 
+.B fpad 
+will read the configuration files and create the 
+.B rsports 
+file and open ROSE sockets. It controls the L2/L3 connections of ROSE and any 
+of the applications added to the Node. 
+.B fpad 
+creates the route table from the 
+.BI fpac.nodes
+and
+.BI fpac.routes 
+files.
+.P
+.B fpac.conf
+is the main configuration file for the node
+.P
+.B fpac.hello
+is the text file that is sent to the client when they connect to the node
+.P
+.B fpac.info
+is the text file that is sent to the client when they issue the 
+.I Info 
+command
+.P
+.B fpac.dnic
+holds a list of country code aliases and their associated DNIC
+.P
+.B fpac.routes
+lists what adjacent node to send traffic to for a certain ROSE address, range of addresses, or DNIC
+.P
+.B fpac.nodes
+lists the (adjacent) nodes that this node is directly connected with, and the associated port (found in 
+.I axports
+)
+.SH FILES
+.I /etc/ax25/fpac.conf
+.I /etc/ax25/fpac.hello 
+.I /etc/ax25/fpac.info 
+.I /etc/ax25/fpac.dnic 
+.I /etc/ax25/fpac.routes
+.I /etc/ax25/fpac.nodes
+.I /etc/ax25/axports
+.I /var/ax25/rsports
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+fpac.conf(5)
