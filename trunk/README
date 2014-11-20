@@ -7,6 +7,7 @@ They are using the ROSE/X25 L3 layer of the linux kernel.
 The documentation is in doc directory. HTML doc in doc/html.
 
 aprslist	lists APRS frames heard
+ax25parms	list the ax25 paramaters currently set in /proc
 calibrate	sends a sequence of UI frames to a port
 call_tcp	(ax25d/node) Calls a remote BBS via TCP
 calld		Receives calls from a remote BBS via TCP
@@ -21,12 +22,12 @@ fpacwdog	simple watchdog that sends a character to a serial port
 fpacwpd		The white pages database server daemon
 fpad		The FPAC pad. Access from/to AX25/NetRom/ROSE
 mailbbs		Simple mailer to send Fpac's services messages to a BBS
-mkissattach	** Obsolete - Multiple kissattach
 mon_tcp		Sends/receive monitoring frames to a remote BBS via TCP/IP
 monitor		Simple monitoring tool
 remote		** Obsolete
 wpcmp		WP utility
 wpedit		WP editor (to edit WP node parameters or delete a node)
+wplist		list WP data base records in local Node memory image
 wpmaint		White Pages maintenance utility
 wpserv		WP application
 wpstress	** Obsolete - WP utility
