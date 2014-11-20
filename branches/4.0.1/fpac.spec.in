@@ -1,0 +1,109 @@
+Name:          	@PACKAGE_NAME@ 
+Version:        @BASEVERSION@@EXTRAVERSION@
+Release:        @SVNREV@ 
+Summary:        FPAC AX.25 Network Switching Software
+
+Group:          Applications/Communications
+#ax25ipd is BSD licensed, rest is GPLv2+
+License:        GPLv2+ and BSD
+URL:            http://fpac.googlecode.com/
+Source0:        %{name}-@VERSION@.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-@VERSION@-%{release}-root-%(%{__id_u} -n)
+%if 0%{?mdkversion}
+BuildRequires:  libax25-devel >= 0.0.12, libncurses-devel
+%else
+BuildRequires:  libax25-devel >= 0.0.12, ncurses-devel
+%endif
+Requires:       libax25 >= 0.0.12
+
+%description
+This package provides the FPAC Network Switching software for amateur radio 
+that combines AX.25, Net/ROM, ROSE, and FLEX Net protocols.
+
+It allows nodes to connect to each other over RF or Ethernet to build 
+interconnected networks.
+
+Other applications can be layered on top to provide further functionality.
+
+%prep
+%setup -q -n %{name}-@VERSION@
+
+%build
+%configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+make installconf DESTDIR=$RPM_BUILD_ROOT
+
+#don't include these twice
+#remove the ones created in fpac (we'll pick them directly later)
+#so they get put in fpac-verison and rpmbuild doesn't have a fit
+#about files not included
+rm -rf $RPM_BUILD_ROOT%{_docdir}/%{name}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS ChangeLog COPYING README
+%doc doc/aprslist  doc/FPAC-HOWTO.man doc/FPAC-HOWTO.sgml  doc/FPAC-HOWTO.txt
+%doc doc/html/FPAC-HOWTO-1.html doc/html/FPAC-HOWTO-2.html doc/html/FPAC-HOWTO-3.html
+%doc doc/html/FPAC-HOWTO-4.html doc/html/FPAC-HOWTO-5.html doc/html/FPAC-HOWTO-6.html
+%doc doc/html/FPAC-HOWTO.html doc/html/FPAC-LINUX-FLASH-MINI-HOWTO104.html
+%doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-177.html
+%doc doc/html/FPAC-MINI-HOWTO-FR-175.html doc/html/next.gif doc/html/prev.gif doc/html/toc.gif
+%config %{_sysconfdir}/ax25/aprslist.conf.fr
+%config %{_sysconfdir}/ax25/aprslist.conf
+%config %{_sysconfdir}/ax25/flexd.conf
+%config %{_sysconfdir}/ax25/flexd.routes
+%config %{_sysconfdir}/ax25/fpac.conf
+%config %{_sysconfdir}/ax25/fpac.dnic
+%config %{_sysconfdir}/ax25/fpac.hello
+%config %{_sysconfdir}/ax25/fpac.info
+%config %{_sysconfdir}/ax25/fpac.nodes
+%config %{_sysconfdir}/ax25/fpac.routes
+%config %{_sysconfdir}/ax25/itu.dnic
+%{_sbindir}/aprslist
+%{_sbindir}/ax25parms
+%{_sbindir}/calibrate
+%{_sbindir}/calld
+%{_sbindir}/call_tcp
+%{_sbindir}/flexd
+%{_sbindir}/fpaccfg
+%{_sbindir}/fpacnode
+%{_sbindir}/fpacroute
+%{_sbindir}/fpac.sh
+%{_sbindir}/fpacshell
+%{_sbindir}/fpacstat
+%{_sbindir}/fpacwdog
+%{_sbindir}/fpacwpd
+%{_sbindir}/fpad
+%{_sbindir}/mailbbs
+%{_sbindir}/monitor
+%{_sbindir}/mon_tcp
+%{_sbindir}/remote
+%{_sbindir}/versions
+%{_sbindir}/wpcmp
+%{_sbindir}/wpconvert
+%{_sbindir}/wpedit
+%{_sbindir}/wplist
+%{_sbindir}/wpmaint
+%{_sbindir}/wpserv
+%{_sbindir}/wpstress
+%{_sbindir}/yapp
+%{_localstatedir}/ax25/fpac/*
+%{_localstatedir}/ax25/flex/*
+%{_mandir}/man?/*
+
+%changelog
+* Thu Nov 20 2014 Lee Woldanski <ve7fet@tparc.org>
+- Add man pages to distribution
+- Add missing wplist and ax25parms binaries to distribution
+- Remove obsolete mkissattach binary from distribution
+- Add support for tagging SVN version as Release in version number
+
+* Mon Jan 31 2011 Lee Woldanski <ve7fet@tparc.org>
+- Initial version

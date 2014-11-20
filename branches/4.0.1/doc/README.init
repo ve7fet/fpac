@@ -1,0 +1,75 @@
+Init scripts for the AX.25 subsystem.
+
+The following scripts are included with this package:
+	ax25
+	ax25-up
+	ax25-down
+
+These scripts are meant to be used with a modern Linux OS that uses rc.init 
+for managing services.
+
+They are specifically designed to be used on Debian.
+
+
+ax25
+----
+The ax25 script itself is meant to be copied in to /etc/init.d. It is the interface 
+with the init.d system and is used to call the ax25-up or ax25-down scripts as 
+appropriate during system startup or shutdown, respectively.
+
+In order to use this script, after copying it to /etc/init.d, issue the following command:
+
+# update-rc.d ax25 defaults 80 20
+
+This will create the necessary links to start and stop the ax25 subsystem near the 
+end of boot and at the beginning of shutdown.
+
+There shouldn't be too much you need to change in this script, unless you want to change 
+some of the stuff in the status section.
+
+Just ensure the paths to ax25-up and ax25-down are correct if you don.t put them in /etc/ax25.
+
+You can call the ax25 script with the following functions:
+	start
+	stop
+	restart
+
+This allows you to manually bring up or take down the AX.25 subsystem, as necessary.
+
+
+ax25-up
+-------
+This is the real workhorse script. It is used to start up all the necessary elements to 
+get your AX.25 system up and running.
+
+Copy it to /etc/ax25 and make sure it is executable. It will be called by init.d (ax25) 
+when it is necessary to bring up the AX.25 system.
+
+If you look in the script, it should be pretty straight forward.
+
+In general, network devices are created (ax, nr, etc) using kissattach (and nrattach if 
+you are using Net/ROM). Parameters are adjusted for each port, as needed to suit the situation.
+
+Then, the daemons are started in the desired sequence, writing out a PID file to keep track of 
+the processes and ensuring they start.
+
+You can comment or uncomment blocks of code for the daemons you are or are not using.
+
+Add in additional blocks if you are starting other daemons (make sure you also add 
+corresponding blocks to ax25-down to kill them).
+
+
+ax25-down
+---------
+This script is used to do a graceful shutdown of all the AX.25 related daemons.
+
+Copy it to /etc/ax25 and make sure it is executable. It will be called by init.d (ax25) when 
+it is necessary to shut down the AX.25 system.
+
+What this script does is look for the PID file that was created when the daemon.s were started, 
+and kill them in sequence.
+
+Then it removes any ax, ROSE, and nr devices from the networking subsystem.
+
+The result is a clean system that is ready to be restarted, if you change configurations.
+	

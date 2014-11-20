@@ -1,0 +1,132 @@
+.TH FPAC.CONF 5 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpac.conf \- FPAC configuration file  /etc/ax25/fpac.conf
+.SH DESCRIPTION
+.LP
+.B fpac.conf
+Contains the call-ssid, command definitions and other important Node configuration information.
+.B * This Node Information *
+.TP 15
+.BI "\ L2call = " call-ssid
+Level 2 (connect) This is the call-ssid Users will connect to. Suggested ssid... 8
+.TP 15
+.BI "\ L3call = " call-ssid
+Level 3 (network) This is the call-ssid that other Nodes will use for networking. Suggested ssid... 9
+.TP 15
+.BI "\ Trcall = " call-ssid
+This is the call-ssid that will be used for Route testing (TRace command). Suggested ssid... 7
+.TP 15
+.BI "\ DNIC = " "Digital Net Id Code"
+A four digit code that identifies your country. See associated documentation for the DNIC of your country.
+.TP 15
+.BI "\ Address = " "ROSE (x.121 address)"
+This unique six digit code identifies your Node. It is normally made up of your telephone area code and prefix.
+
+.B EXAMPLE
+From Telephone Number (321) 456-7890 you would create a ROSE address of 321456.
+Check with your local Amateur Radio community to see if they are using a different formula.
+.TP 10
+.B "\ Coverage = 
+May be left blank. 
+.TP 10 
+.BI "\ InetAddr = "ip-address
+An address is required. Use 44.128.0.1 if you do not require TCP/IP routing.
+.TP 10
+.BI "\ InetPort = " "UDP port #"
+The UDP port #(10093) from ax25ipd.conf. Used if you create a AxUDP port.
+.TP 10
+.BI "\ Password = " "sysop's passwd"
+This password will be used to correctly respond to the SYS challenge
+.TP 10
+.BI "\ City = " Node-QTH
+The City location of the node
+.TP 10
+.BI "\ State = " state
+State or Province location
+.TP 10
+.BI "\ Country = " country
+Country location
+.TP 10
+.BI "\ Locater = "grid-sq
+The Maidenhead Grid Square locator - See
+http://f6fvy.free.fr/qthLocator/fullScreen.php or http://aprs.fi 
+.TP 
+.BI "\ UserPort = " "user-ports
+List of port names, from axports designated as User ports.
+.TP
+.BI "\ DefPort = " default-port-name
+The name of the default port.
+.LP
+.B  * Other Commands *
+ This Block of command/definitions must be placed between a Command and a End statement.
+
+ There are a number of commands that are built into the node.
+ The node operator may add to those commands or disable/modify the ones that are built-in.
+.TP 10
+.BI "\ Command = " definition.
+Command must begin with at least one upper case letter to allow for short commands. The upper case letters are the minimum that must be entered to execute the command. If there is another command that begins with the same letter, one or both commands should have upper case characters to make the command unique.
+
+Definition may be a Linux CLI command or FPAC command.
+
+To redefine a build in command, add a command line to the Commands list with the new definition.
+ To disable a built-in command, add a command line to the Commands list without a definition.
+
+.LP
+.B  * Other Sysop Commands *
+ This Block of command/definitions must be placed between a Sysop and a End statement.
+
+These commands are only available to the SysOp after the password challenge is successfully accomplished.
+ The same rules that govern Other Commands apply to Sysop commands.
+
+.LP
+.B * Other Applications *
+ The Application section begins with the Application Statement, includes a list of statements which associates a Linux application to a call sign and ends with an END statement.
+
+.B EXAMPLE
+ When a User connects to WE4NC-10 they will execute the rmsgw application.
+
+  Application
+        WE4NC-10 = /usr/local/sbin/rmsgw -P 0 %S
+  End
+
+.B * List of routes to port *
+ The User section may contain one or more User blocks. Each block will specify a User associated with the
+port. This allows connects to and from a User on a Link port. Otherwise, only stations defined in the
+/etc/ax25/fpac.nodes file are allowed to connect to a Link port. Users specified in this block are usually a BBS or other services.
+
+.B EXAMPLE
+      User = F6BEX
+             Path = F6BEX
+             Port = 2
+      End
+
+.B *  List of aliases *
+ Alias section is similar to Application section, but redirects the connection request. 
+The Alias section may contain one or more Alias blocks. One block for each alias. 
+Use as many blocks as you need.
+
+.B EXAMPLE
+ A connect request to F6FBB-3 will be re-routed to F6KRQ-3 address 931501 (the default DNIC of the
+switch will be used).
+
+      Alias = F6FBB-3
+              Path = F6KRQ-3,931501
+      End
+
+.B * Additional ROSE ports *
+ Assigns a ROSE address to a port.
+Only User ports need to be assigned a ROSE address.
+The AddPort section may contain one or more AddPort blocks. 
+Each block will specify an address and a port. 
+The block must be closed with a END statement. 
+
+.B EXAMPLE
+      AddPort = BEX
+               Address = 931302
+               Port = 3
+      End
+
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+fpac.hello(5)  fpac.dnic(5)  fpac.info(5)  fpac.nodes(5)  fpac.routes(5)

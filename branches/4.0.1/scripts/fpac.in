@@ -1,0 +1,115 @@
+#!/bin/bash
+
+DIR="@prefix@/sbin"
+PATH=$DIR:$PATH
+
+# log file
+LOG=/var/log/fpac.log
+
+# serial port for watchdog
+# WDOG_PORT="/dev/ttyS4"
+WDOG_PORT=""
+
+# callsign of the sysop
+SYSOP="SYSOP"
+# Node Callsign
+NODECALL="$HOSTNAME"
+
+# route/callsign of the notified BBS
+CONNECT="rose0 f6bvp-1 2080175520"
+#CONNECT="MYBBS-1"
+
+export PATH SYSOP CONNECT
+
+case "$1" in
+-restart)
+	$0 -stop && $0 -start
+	sleep 3
+	$0 status
+	;;
+-stop|stop)
+	echo -n "Halting FPAC :"
+	for PROC_NAME in fpacnode fpacshell
+	do
+		PID=`/bin/pidof -x $DIR/$PROC_NAME`
+		if [ -n "$PID" ]; then
+                        kill -TERM $PID
+			sleep 4
+		fi
+	done
+	echo -n " [flexd]"
+	kill -TERM `/bin/pidof -x $DIR/flexd`
+	echo -n " [route]"
+	kill -TERM `/bin/pidof -x $DIR/fpacroute`
+	echo -n " [stats]"
+	kill -TERM `/bin/pidof -x $DIR/fpacstat`
+	echo -n " [wp]"
+	kill -TERM `/bin/pidof -x $DIR/fpacwpd`
+	echo -n " [pad]"
+	kill -KILL `/bin/pidof -x $DIR/fpad`
+	echo -n " [wdog]"
+	kill -TERM `/bin/pidof -x $DIR/fpacwdog`
+	echo " ok"
+	echo "Performing WP database cleanup\n"
+	$DIR/wpmaint >> $LOG 2>&1
+	;;
+-status|status)
+        echo -e "\nStatus of FPAC :"
+
+	for PROC_NAME in fpacwdog fpad fpacwpd fpacstat fpacroute flexd ax25ipd netromd ax25d
+	do
+	        PID=`/bin/pidof -x $DIR/$PROC_NAME`
+		if [ -n "$PID" ]; then
+			echo -e "$PROC_NAME    \tis running"
+
+		else
+			echo -e "$PROC_NAME    \tis not running"
+		fi
+	done
+	echo
+        ;;
+fpad)
+	while [ 1 ]
+	do
+		$DIR/fpad -d
+		sleep 1
+	done
+	;;
+fpacwpd)
+	while [ 1 ]
+	do
+		$DIR/fpacwpd -d
+		sleep 1
+	done
+	;;
+
+-start|start)
+	FPAC_BG="yes"
+	export FPAC_BG
+	echo -n "Starting FPAC :"
+	if [ "_$WDOG_PORT" != "_" ] ; then
+		echo -n " [wdog]"
+		$DIR/fpacwdog -p 2 $WDOG_PORT >> $LOG 2>&1
+	fi
+	echo -n " [pad]"
+	$DIR/fpad >> $LOG 2>&1 
+	echo -n " [wp]"
+	$DIR/fpacwpd >> $LOG 2>&1 
+	echo -n " [stats]"
+	$DIR/fpacstat >> $LOG 2>&1
+	echo -n " [route]"
+	$DIR/fpacroute >> $LOG 2>&1
+	echo -n " [flexd]"
+	$DIR/flexd >> $LOG 2>&1
+	(sleep 60 ; /bin/date | $DIR/mailbbs -d $SYSOP -t "FPAC node $NODECALL started" $CONNECT) &
+	echo " ok"
+	;;
+
+*) echo "Usage : $0 {-start|-stop|-restart|-status|fpad|fpacwpd}"
+exit 1
+
+esac
+
+
+exit 0
+
