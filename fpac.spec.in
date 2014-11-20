@@ -1,6 +1,6 @@
 Name:          	@PACKAGE_NAME@ 
 Version:        @BASEVERSION@@EXTRAVERSION@
-Release:        1
+Release:        @SVNREV@ 
 Summary:        FPAC AX.25 Network Switching Software
 
 Group:          Applications/Communications
@@ -90,13 +90,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/wpcmp
 %{_sbindir}/wpconvert
 %{_sbindir}/wpedit
+%{_sbindir}/wplist
 %{_sbindir}/wpmaint
 %{_sbindir}/wpserv
 %{_sbindir}/wpstress
 %{_sbindir}/yapp
 %{_localstatedir}/ax25/fpac/*
 %{_localstatedir}/ax25/flex/*
+%{_mandir}/man?/*
 
 %changelog
+* Thu Nov 20 2014 Lee Woldanski <ve7fet@tparc.org>
+- Add man pages to distribution
+- Add missing wplist binary to distribution
+- Add support for tagging SVN version as Release in version number
+
 * Mon Jan 31 2011 Lee Woldanski <ve7fet@tparc.org>
 - Initial version
