@@ -6,10 +6,12 @@
  * F1OAT 960630
  */
  
+#define NDEBUG
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
-/*#include <sys/types.h>*/
+#include <sys/select.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <assert.h>
 
@@ -28,29 +30,30 @@ static void (*HandlerList[FD_SETSIZE])(int fd);
  * 		-1   		: timeout
  *		-2	  	: select error
  */		
- 
+
 int WaitEvent(int MilliSecTimeout)
 {
 	int rc, fd, Set;
 	struct timeval Timeout;
 	int i;
-	
+
 	Timeout.tv_sec = MilliSecTimeout/1000;
 	Timeout.tv_usec = 0;
-	
+
 	for (i=0; i<3; i++) FdSet[i] = ActiveSet[i];
-	
+
 	rc = select(FD_SETSIZE, &FdSet[0], &FdSet[1], &FdSet[2], &Timeout);
+/* DEBUG F6BVP
 	if (rc == -1) perror("WaitEvent : select");
-	if (rc == 0) wp_flush_pdu();
+	if (rc == 0) wp_flush_pdu();*/
 	if (rc <= 0) return rc-1;
-	
+
 	for (fd=0; fd<FD_SETSIZE; fd++) {
 		for (Set=0; Set<3; Set++) {
 			if (FD_ISSET(fd, &FdSet[Set])) return fd;
 		}
 	}
-	
+
 	return -2;
 }
 

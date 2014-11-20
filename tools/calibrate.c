@@ -1,12 +1,13 @@
 /*
- * calibrate : Modem calibration utility
- *
- * FPAC project
- *
- * Most code is portion of beacon.c of the standard ax25-utils package
- *
- * F1OAT 980321
- */
+* calibrate.c
+* This creates the calibrate binary.
+*
+* calibrate is used to send sample data out a port
+* defined in axports to allow the deviation to be adjusted
+*
+* Most code is portion of beacon.c of the standard ax25tools package
+*
+*/
 
 #include <unistd.h>
 #include <stdio.h>
@@ -25,11 +26,9 @@
 #define NBFRAMES 100
 #define TEMPO 1000
 
-/* static char message[] = "Le bruit de la mer empeche les petits poissons de dormir RYRYRYRYRYRYRYRYRYRYRYRRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYYRYRYRY"; */
-
 static void Usage(void)
 {
-	fprintf(stderr, "Usage : calibrate [-t mseconds] port\n");
+	fprintf(stderr, "Usage : calibrate [-t seconds] port\n");
 	exit(1);
 }
 
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
 				tempo = atoi(optarg);
 				break;
 			case ':':
-				fprintf(stderr, "calibrate: option -t needs a duration in ms\n");
+				fprintf(stderr, "calibrate: option -t needs a duration in s\n");
 				return 1;
 			case '?':
 				Usage();
@@ -100,12 +99,9 @@ int main(int argc, char *argv[])
 	printf("Press return to stop calibrate\n");
 	
 	for (i = 0 ; i < BUFLEN ; i++)
-		buffer[i] = 0x55;
+		buffer[i] = 0x55; /* Fill the buffer with ASCII U */
 		
 	for (i = 0 ; i < NBFRAMES ; i++) {
-/*		fd_set rfds;
-		struct timeval tv;
-*/		
 		tv.tv_sec = tempo / 1000;
 		tv.tv_usec = (tempo % 1000) * 1000;
 		

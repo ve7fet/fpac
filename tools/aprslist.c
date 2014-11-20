@@ -1,8 +1,22 @@
 /*
- * FPAC project
- * aprslist.c (after mheardd.c)
- * modified by f6bvp 25/01/2011
- */
+* aprslist.c (after mheardd.c)
+* This creates the aprslist binary
+*
+* It uses the aprslist.conf file to beacon a
+* aprs position (and beacon) packet out a defined
+* port in axports
+*
+* It also listens to the port and logs aprs packets
+* to aprs.dat
+*
+* Options:
+*      -d don't fork in to daemon mode
+*      -l log to syslog
+*      -s show the contents of aprs.dat and exit
+*      -v show version
+*
+*/
+
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
@@ -259,12 +273,15 @@ aprsl *find_aprs(char *call)
 void add_aprs(char *call, char *loc)
 {
 	aprsl *ptr;
+	time_t temps;
 	
+	temps = time(NULL);
+
 	ptr = find_aprs(call);
 	if (ptr)
 	{
 		n_cpy(ptr->loc, loc, 18);
-		ptr->last = time(NULL);
+		ptr->last = temps;
 		return;
 	}
 	
@@ -274,7 +291,7 @@ void add_aprs(char *call, char *loc)
 		
 	n_cpy(ptr->call, call, 9);
 	n_cpy(ptr->loc, loc, 18);
-	ptr->last = ptr->date = time(NULL);
+	ptr->last = ptr->date = temps;
 		
 	if (head)
 	{
@@ -775,7 +792,7 @@ int main(int argc, char **argv)
 	{
 		read_aprs();
 		dump_aprs();
-	/*	exit(0);*/
+		exit(0);
 	}
 	
 	act.sa_handler = SignalTERM;
@@ -809,9 +826,6 @@ int main(int argc, char **argv)
 		openlog("aprslist", LOG_PID, LOG_DAEMON);
 		syslog(LOG_INFO, "starting");
 	}
-
-/*	read_aprs();
-	dump_aprs();*/
 
 	for (;;) 
 	{

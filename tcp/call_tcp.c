@@ -75,9 +75,15 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	{
-		printf("IP address missing\n");
+		printf("IP address missing - Usage call_tcp [IP address] [port]\n");
 		return 1;
 	}
+	if (argc < 3)
+	{
+		printf("Port missing - Usage call_tcp [IP address] [port]\n");
+		return 1;
+	}
+
 
 	if (cfg_open(&cfg) != 0)
 		return(1);
@@ -143,7 +149,7 @@ int main(int argc, char **argv)
 		break;
 	case AF_UNSPEC:
 		printf("Enter your callsign :");
-		fgets(caller+1, sizeof(caller)-1, stdin);
+		fgets(caller, sizeof(caller)-1, stdin);
 		caller[7] = '\0';
 		break;
 	default:
@@ -197,7 +203,7 @@ int main(int argc, char **argv)
 
 	if (connect(fd, (struct sockaddr *)&addr, addrlen) == -1 && errno != EINPROGRESS) 
 	{
-		printf("connect: %s\r", strerror(errno));
+		printf("connect: %s\n", strerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -208,7 +214,7 @@ int main(int argc, char **argv)
 			unsigned char b[4];
 		} add;
 		add.l = addr.sin_addr.s_addr;
-		sprintf(buf, "Linked to %u.%u.%u.%u\r", add.b[0], add.b[1], add.b[2], add.b[3]);
+		sprintf(buf, "Linked to %u.%u.%u.%u port %d\n", add.b[0], add.b[1], add.b[2], add.b[3], ntohs(addr.sin_port));
 		len = strlen(buf);
 
 		if (type == AF_UNSPEC)
@@ -242,7 +248,7 @@ int main(int argc, char **argv)
 			/* Wait for the login prompt */
 			if (first)
 			{
-				if (strstr(buf, "allsig"))
+				if (strstr(buf, "allsig") || strstr(buf, "login"))
 				{
 					strcat(caller, "\r");
 					write(fd, caller, strlen(caller));

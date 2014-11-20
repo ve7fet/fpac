@@ -1,16 +1,13 @@
 /*
- * mailbbs.c
- *
- * FPAC project
- *
- * mailbbs : sends the stdin to a BBS using 
- * the standard BBS forwarding protocol
- *
- * F6FBB 10-98
- *
- * Most of code from "call" of ax25utils
- *
- */
+* mailbbs.c
+* This creates the mailbbs binary.
+*
+* mailbbs sends the stdin to a BBS using
+* the standard BBS forwarding protocol
+*
+* Most of code is from "call" of ax25apps
+*
+*/
  
 /*#include <sys/types.h>*/
 /*#include <utime.h>*/
@@ -34,6 +31,7 @@
 #define WAIT2NDPROMPT 3
 #define WAITOK 4
 #define WAITLASTPROMPT 5
+#define PROC_NR_NODES_FILE "/proc/net/nr_nodes"
 
 union
 {
@@ -50,8 +48,6 @@ static int nr_ax25_aton (char *address, struct full_sockaddr_ax25 *addr)
 
 	for (call = address; *call != '\0'; call++)
 		*call = toupper (*call);
-
-#define PROC_NR_NODES_FILE "/proc/net/nr_nodes"
 
 	if ((fp = fopen (PROC_NR_NODES_FILE, "r")) == NULL)
 	{
@@ -252,14 +248,14 @@ int main (int argc, char **argv)
 			break;
 		case '?':
 		case ':':
-			fprintf (stderr, "usage: mail_bbs [-d callsign@bbs] [-f filename] [-i sender] [-t title] [-v] port bbs-callsign [[via] digis...]\n");
+			fprintf (stderr, "usage: mailbbs [-d callsign@bbs] [-f filename] [-i sender] [-t title] [-v] port bbs-callsign [[via] digis...]\n");
 			return 1;
 		}
 	}
 
 	if (optind == argc || optind == argc - 1)
 	{
-		fprintf (stderr, "usage: mail_bbs [-d callsign@bbs] [-f filename] [-i sender] [-t title] [-v] port bbs-callsign [[via] digis...]\n");
+		fprintf (stderr, "usage: mailbbs [-d callsign@bbs] [-f filename] [-i sender] [-t title] [-v] port bbs-callsign [[via] digis...]\n");
 		return 1;
 	}
 
@@ -273,12 +269,12 @@ int main (int argc, char **argv)
 
 	if (title == NULL)
 	{
-		title = "message fm mail_bbs";
+		title = "message fm mailbbs";
 	}
 
 	if (ax25_config_load_ports () == 0)
 	{
-		fprintf (stderr, "mail_bbs: no AX.25 port data configured\n");
+		fprintf (stderr, "mailbbs: no AX.25 port data configured\n");
 		return 1;
 	}
 
@@ -292,7 +288,7 @@ int main (int argc, char **argv)
 
 			if (rs_config_get_addr (port) == NULL)
 			{
-				fprintf (stderr, "mail_bbs: invalid port setting\n");
+				fprintf (stderr, "mailbbs: invalid port setting\n");
 				return 1;
 			}
 			else
@@ -318,7 +314,7 @@ int main (int argc, char **argv)
 		paclen = rs_config_get_paclen (port);
 		if (av[0] == NULL || av[1] == NULL)
 		{
-			fprintf (stderr, "mail_bbs: too few arguments for Rose\n");
+			fprintf (stderr, "mailbbs: too few arguments for Rose\n");
 			return (-1);
 		}
 		if ((fd = socket (AF_ROSE, SOCK_SEQPACKET, 0)) < 0)

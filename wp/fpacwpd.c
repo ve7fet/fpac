@@ -1,10 +1,21 @@
 /*
- * wp/fpacpwd.c : FPAC WP daemon
- *
- * FPAC project
- *
- * F1OAT 970831
- */
+* fpacpwd.c
+* This is the FPAC White Pages (WP) daemon
+*
+* It is uses to create and exchange a database of node information
+* between networked nodes.
+*
+* It can be called with the following options:
+*      -d foreground mode      don't fork to daemon mode
+*      -v verbose mode         print status to syslog
+*      -x debug mode           print more data to syslog
+*      -b passive mode
+*      -f <filename>           use alternate database filename
+*
+*/
+
+#define NDEBUG
+
 #include "config.h"
 #include "wpdefs.h"
 #include "sockevent.h"
@@ -12,6 +23,8 @@
 #include "db.h"
 #include "daemon.h"
 #include "../pathnames.h"
+#include <sys/types.h>
+#include <assert.h>
 
 static cfg_t cfg;		/* FPAC configuration file */
 static int listening_socket;
@@ -45,6 +58,8 @@ static void vector_request(struct wp_adjacent *wpa);
 static int init_client(int client, struct full_sockaddr_rose *address)
 {
 	assert(context[client] == 0);
+	if (verbose) syslog(LOG_INFO, "Client handler init_client() %d", client);
+
 	context[client] = calloc(1, sizeof(*context[client]));
 	if (!context[client]) {
 		close(client);
@@ -66,6 +81,10 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 
 static void close_client(int client, int active)
 {
+	time_t temps;
+	
+	temps = time(NULL);
+
 	if (verbose) {
 		if (!active) {
 			syslog(LOG_INFO, "(%d) Disconnected by client %s @ %s", client, ax25_ntoa(&context[client]->address.srose_call), rose_ntoa(&context[client]->address.srose_addr));
@@ -82,7 +101,7 @@ static void close_client(int client, int active)
 		struct wp_adjacent *wpa = context[client]->adjacent;
 		wpa->state = WPA_DISCONNECTED;
 		wpa->context = -1;
-		wpa->retry_connect_date = time(NULL) + WPA_RETRY_CONNECT;
+		wpa->retry_connect_date = temps + WPA_RETRY_CONNECT;
 		context[client]->adjacent = NULL;
 	}	
 	
@@ -101,6 +120,9 @@ static void rose_write_handler(int s)
 	int rc; 
 	struct wp_adjacent *wpa;
 	wp_pdu pdu;
+	time_t temps;
+	
+	temps = time(NULL);
 
 	assert(context[s]);
 	wpa = context[s]->adjacent;
@@ -109,7 +131,7 @@ static void rose_write_handler(int s)
 		if (verbose) syslog(LOG_INFO, "(%d) Connected to adjacent %s", s, rose_ntoa(&context[s]->address.srose_addr));
 		wpa->state = WPA_CONNECTED;
 		wpa->ismaster = 0;		
-		wpa->vector_date = time(NULL);	
+		wpa->vector_date = temps;	
 		wpa->vector_when_nodirty = 1;
 	}
 	
@@ -152,7 +174,7 @@ static void rose_write_handler(int s)
 			close_client(s, 1);
 		}
 		else {
-			if (verbose) syslog(LOG_INFO, "dirty record sent to adjacent rc %d", rc); 		 
+/*			if (verbose) syslog(LOG_INFO, "dirty record sent to adjacent rc %d", rc); 		 */
 			clear_dirty_context(dirty, s);
 		}	
 	}
@@ -176,12 +198,23 @@ static void rose_read_handler(int s)
 	  memset(&pdu, 0, sizeof(wp_pdu));
 	  rc = wp_receive_pdu(s, &pdu);
 	  if (rc < 0) {	/* Connection lost or protocol error */
-/* DEBUG F6BVP */		
-		if (verbose) syslog(LOG_INFO, "rose_read_handler() receive_pdu rc %d connection lost or protocol error", rc);
 		close_client(s, 0);
 		return;
 	  }
 	  
+/*
+ * reject WP record if it is deleted and callsign not in database
+ * 
+ */ 
+	if (pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &pdu.data.wp) != 0))
+		{
+		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s REJECTED",
+		ax25_ntoa(&pdu.data.wp.address.srose_call),
+		rose_ntoa(&context[s]->address.srose_addr));
+		close_client(s, 0);
+		return;
+	}
+
 	  again = (rc == 2);
 
 	  switch (pdu.type) {
@@ -195,15 +228,17 @@ static void rose_read_handler(int s)
 		else
 			rc = db_set(&pdu.data.wp, context[s]->type != WP_USER);
 
-		if (rc == -2 && verbose) {
-			  syslog(LOG_INFO, "Invalid received record %s from adjacent %s",
+		if (rc == -2) {
+			  if (verbose) syslog(LOG_INFO, "Invalid received record %s from adjacent %s",
 				              ax25_ntoa(&pdu.data.wp.address.srose_call),
 				              rose_ntoa(&context[s]->address.srose_addr));
-			  rc = -1;
+			rc = -1;
+			close_client(s, 0);
+			return;
 		  }
 		  if (rc >= 0) {
 			  pdu.data.status = WP_OK;
-			  if (verbose) syslog(LOG_INFO, "rose_read_handler() wp_type_set status WP_OK %d", pdu.data.status);
+/*			  if (verbose) syslog(LOG_INFO, "rose_read_handler() wp_type_set status WP_OK %d", pdu.data.status);*/
 			  /* Broadcast this new record */
 			  broadcast_dirty(rc, s);
 		  }
@@ -311,7 +346,7 @@ static void rose_read_handler(int s)
 	  default:
 		  pdu.type = wp_type_response;
 		  pdu.data.status = WP_INVALID_COMMAND;
-		  rc = wp_send_pdu(s, &pdu);
+/* DEBUG F6BVP 		  rc = wp_send_pdu(s, &pdu); */
 		  break;
 	  }
 	} while (again);
@@ -337,6 +372,9 @@ static void listening_handler(int s)
 	unsigned int l_addrlen = sizeof(l_address);
 /*	char *fulladdr;*/
 /*	node_t *node;*/
+	time_t temps;
+	
+	temps = time(NULL);
 
 	new_client = accept(s, (struct sockaddr *)&address, &addrlen);
 
@@ -347,7 +385,14 @@ static void listening_handler(int s)
 	if (verbose) syslog(LOG_INFO, "New client %s @ %s", ax25_ntoa(&address.srose_call), rose_ntoa(&address.srose_addr));
 	
 	if (init_client(new_client, &address)) return;
-	
+
+/*DEBUG F6BVP */
+	if (!context[new_client]) {
+		if (verbose) syslog(LOG_INFO, "New client context[] empty !");
+		close_client(new_client, 1);
+		return;
+	}
+
 	if (context[new_client]->type == WP_SERVER) {
 		struct wp_adjacent *wpa;
 		wpa = find_adjacent(&address.srose_addr);
@@ -375,7 +420,7 @@ static void listening_handler(int s)
 				wpa->context = new_client;
 				wpa->state = WPA_CONNECTED;
 				wpa->ismaster = 1;
-				wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+				wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 				RegisterEventAwaited(new_client, WRITE_EVENT);
 				break;			
 			}
@@ -411,7 +456,7 @@ static void listening_handler(int s)
 				wpa->context = new_client;
 				wpa->state = WPA_CONNECTED;
 				wpa->ismaster = 1;
-				wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+				wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 				RegisterEventAwaited(new_client, WRITE_EVENT);				
 			}	
 		}
@@ -436,6 +481,9 @@ static int init_adjacents(cfg_t *cfg)
 {
 	node_t *node;
 	struct wp_adjacent *wpa;
+	time_t temps;
+	
+	temps = time(NULL);
 		
 	for (node=cfg->node; node; node=node->next) {
 		if (node->nowp) continue;
@@ -448,7 +496,7 @@ static int init_adjacents(cfg_t *cfg)
 		wpa->state = WPA_DISCONNECTED;
 		wpa->node = node;
 		wpa->context = -1;
-		wpa->retry_connect_date = time(NULL);
+		wpa->retry_connect_date = temps;
 		wpa->next = wp_adjacent_list;
 		wp_adjacent_list = wpa;
 	}
@@ -484,6 +532,9 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 	int s;
 	char addr[11];
 	struct full_sockaddr_rose remote;
+	time_t temps;
+	
+	temps = time(NULL);
 
 	if (!wpa->node) return;
 	
@@ -492,7 +543,7 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 		
 	if (verbose) syslog(LOG_INFO, "Trying to connect adjacent %s", addr);
 
-	wpa->retry_connect_date = time(NULL) + 120;
+	wpa->retry_connect_date = temps + 120;
 
 	remote.srose_family = AF_ROSE;
 	remote.srose_ndigis = 0;
@@ -500,7 +551,7 @@ static void connect_adjacent(struct wp_adjacent *wpa)
 	rose_aton(addr, remote.srose_addr.rose_addr);
 	s = wp_open_remote("WP", &remote, 1);	/* Non blocking mode */
 	if (s < 0) {
-		perror("wp_open_remote");
+		if (verbose) syslog(LOG_INFO, "Unable to connect WP adjacent");
 		return;
 	}
 	init_client(s, &remote);
@@ -516,8 +567,11 @@ static void vector_request(struct wp_adjacent *wpa)
 	vector_t vector;
 	int s = wpa->context;
 	int rc;
+	time_t temps;
+	
+	temps = time(NULL);
 			
-	wpa->vector_date = time(NULL) + WPA_VECTOR_PERIOD;
+	wpa->vector_date = temps + WPA_VECTOR_PERIOD;
 
 	memset(&pdu, 0, sizeof(wp_pdu));
 	pdu.type = wp_type_vector_request;
@@ -527,8 +581,8 @@ static void vector_request(struct wp_adjacent *wpa)
 	vector.seed = random();
 	db_compute_vector(-1, &vector);
 	pdu.data.vector = vector;
-	if (verbose) syslog(LOG_INFO, "Sending vector request to %s", rose_ntoa(&context[s]->address.srose_addr));
-/*DEBUG F6BVP */  if (verbose) debug_pdu(&pdu);
+/*DEBUG F6BVP */
+      	if (verbose) debug_pdu(&pdu);
 	rc = wp_send_pdu(s, &pdu);
 	if (rc < 0) {
 		if (verbose) syslog(LOG_INFO, "Sending vector request FAILED !");
@@ -541,7 +595,9 @@ static void vector_request(struct wp_adjacent *wpa)
 static void poll_adjacents(void)
 {
 	struct wp_adjacent *wpa;
-	time_t mytime = time(NULL);
+	time_t mytime;
+       
+	mytime = time(NULL);
 	
 	for (wpa=wp_adjacent_list; wpa; wpa=wpa->next) {
 		switch (wpa->state) {
@@ -597,6 +653,9 @@ static void debug_dump(int s)
 	struct wp_adjacent *wpa;
 	struct wp_info wpi;
 	vector_t vector;
+	time_t temps;
+       
+	temps = time(NULL);
 	
 	printf_pdu(s, "WP Server version %d.%d\r", WP_VERSION >> 8, WP_VERSION & 0xff);
 	
@@ -650,7 +709,7 @@ static void debug_dump(int s)
 			break;
 		case WPA_DISCONNECTED:
 			printf_pdu(s, "%s disconnected, retry in %d s\r", str,
-				wpa->retry_connect_date - time(NULL));
+				wpa->retry_connect_date - temps);
 			break; 
 		}
 	}
@@ -699,7 +758,7 @@ static void debug_pdu(wp_pdu *pdu)
 	syslog(LOG_INFO, "Date %s ", tmp);
 	syslog(LOG_INFO, "vector version %u seed %u Total %d Interv:%.2f min (%u)",
 		       	pdu->data.vector.version, pdu->data.vector.seed, j, pdu->data.vector.interval/60.0, pdu->data.vector.interval);
-	str[0] = '\0';
+/*	str[0] = '\0';
 	for (i=0 ; i<WP_VECTOR_SIZE ; i++) {
 		sprintf(tmp, "%02d:%05d/%-5d", i, pdu->data.vector.crc[i], pdu->data.vector.cnt[i]);
 		strcat(str, tmp);
@@ -712,7 +771,7 @@ static void debug_pdu(wp_pdu *pdu)
 			strcat(str, " ");
 	}
 	syslog(LOG_INFO, "%s", str);
-
+*/
 }
 
 static void do_cmd(int s, char *cmd)
@@ -750,7 +809,6 @@ static void process_options(int argc, char *argv[])
 		case 'd':
 			fprintf(stderr, "Foreground mode\n");
 			is_daemon = 0;
-			verbose = 1;
 			break;
 		case 'x':
 			fprintf(stderr, "Debug mode\n");
@@ -777,18 +835,22 @@ int main(int argc, char *argv[])
 	int rc;
 	int fd;
 	wp_t *wp;
+	time_t temps;	
 	
 	process_options(argc, argv);
 	
 	openlog("fpacwpd", LOG_PERROR | LOG_PID, LOG_USER);	
-	syslog(LOG_WARNING, "Starting version %s - vector version %x Hex (%d dec) - file signature %s",
-				VERSION, WP_VERSION, WP_VERSION, FILE_SIGNATURE);
+	syslog(LOG_WARNING, "Starting version %s (built %s-%s) vector version %x Hex (%d dec) - file signature %s",
+				VERSION, __DATE__, __TIME__, WP_VERSION, WP_VERSION, FILE_SIGNATURE);
 	srand(time(NULL));
 	
 	if (cfg_open(&cfg) != 0) {
 		perror("fpacwpd : error in configuration reading");
 		exit(1);
 	}
+	
+	/* No signal ! */
+	signal(SIGPIPE, SIG_IGN);
 	
 	if (init_adjacents(&cfg)) {
 		perror("fpacwpd : error init adjacents");
@@ -805,7 +867,8 @@ int main(int argc, char *argv[])
 	/*memset(&wp, 0, sizeof(wp));*/
 	wp = calloc(sizeof(*wp), 1);
 
-	wp->date = time(NULL);
+	temps = time(NULL);
+	wp->date = temps;
 	wp->is_node = 1;
 	wp->address.srose_ndigis = 0;
 	strcpy(wp->city, cfg.city);

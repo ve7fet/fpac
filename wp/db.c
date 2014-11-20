@@ -39,9 +39,16 @@ static int ax25_check_call(ax25_address * a)
 	return (wp_check_call(ax25_ntoa(a)) == 0);
 }
 
+/* returns 1 if wp record is valid 
+ * else returns 0
+*/
 static int db_valid(wp_t * wp)
 {
 	int n;
+	time_t temps, time_before, time_after;
+	char buf[20];
+	char buf1[20];
+	char buf2[20];
 
 	/* Check the Callsign */
 	if (!ax25_check_call(&wp->address.srose_call))
@@ -72,7 +79,7 @@ static int db_valid(wp_t * wp)
 		return 0;
 	}
 
-	/* Check the is_node info */
+	/* Check the is_deleted info */
 	if (wp->is_deleted < 0 || wp->is_deleted > 1)
 	{
 		syslog(LOG_INFO, "Invalid record : deleted error");
@@ -80,10 +87,16 @@ static int db_valid(wp_t * wp)
 	}
 
 	/* Check the Date */
-	/* should be between 01-01-1998 and current + 1 week */
-	if ((wp->date < 883612800L) || (wp->date > (time(NULL) + 604800L)))
+	/* should be between (current - 1) year and (current + 1 hour) */
+	temps = time(NULL);
+	my_date( buf, wp->date);
+	time_before = temps - (86400L * 365L);
+	time_after = temps + 600L;
+	my_date( buf1, time_before);
+	my_date( buf2, time_after);
+	if ((wp->date < time_before ) || (wp->date > (time_after)))
 	{
-		syslog(LOG_INFO, "Invalid record : date error");
+		syslog(LOG_INFO, "Invalid record : date %s outside of accepted window [%s-%s]", buf, buf1, buf2);
 		return 0;
 	}
 
@@ -361,13 +374,38 @@ int db_open(char *file, wp_t * wpnode)
 	int i;
 	int nb;
 	int bad_nb;
+	wp_header wph;
+	wp_header wph_sig;
+	FILE *fptr_i;
+	char fpacwp_old[256];
 
 	strcpy(wp_file, file);
 
+	/* Checks FPAC WP file */	
+	fptr_i = fopen(wp_file, "r");
+
+	if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0)) {
+		fclose(fptr_i);
+	}
+	/* Checks backup database file */
+	else {
+		fprintf (stderr, "WP database %s corrupted or missing\n", wp_file);
+		strcpy(fpacwp_old, wp_file);
+		strcat(fpacwp_old, ".old");
+		fptr_i = fopen(fpacwp_old, "r");
+		if ((fptr_i != NULL) && (fread(&wph_sig, sizeof(wph), 1, fptr_i) != 0)) {
+		fprintf (stderr, "Copying backup database %s\n", fpacwp_old);
+			rename(fpacwp_old, wp_file);
+			fclose(fptr_i);
+		}
+	}
+
 	/* Create database file if necessary */
 
-	if (access(wp_file, R_OK | W_OK))
+	if (access(wp_file, R_OK | W_OK) ) {
+		fprintf (stderr, "Initializing new WP database %s\n", wp_file);
 		db_create(wpnode);
+	}
 
 	/* Map database in memory */
 
@@ -387,14 +425,14 @@ int db_open(char *file, wp_t * wpnode)
 
 		/* Check database */
 		db_check();
-
+/* DEBUG F6BVP node record is systematicaly updated */
 		/* Update 1st record if necessary */
-		if (memcmp
+/*		if (memcmp
 			((char *) wpnode + sizeof(time_t),
 			 (char *) &db_records[0] + sizeof(time_t),
 			 sizeof(wp_t) - sizeof(time_t)) != 0)
-		{
-			fprintf(stderr, "Node information updated\n");
+*/		{
+			syslog(LOG_INFO, "Node information updated\n");
 			db_records[0] = *wpnode;
 		}
 
@@ -463,7 +501,11 @@ static int db_find(ax25_address * call)
 	return index;
 }
 
-int db_get(ax25_address * call, wp_t * wp)
+/* 
+ * returns 0 if callsign vector "call" is found in WP data base record"
+ * else returns -1 or -2 if record is not valid
+*/
+ int db_get(ax25_address * call, wp_t * wp)
 {
 	int index;
 
@@ -674,8 +716,8 @@ void db_compute_vector(int dirty, vector_t * vector)
 				treshold = 0xFFFFFFFF;
 			else
 				treshold = treshold * 2;
-/* DEBUG F6BVP */
-		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d Treshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);
+/* DEBUG F6BVP 
+		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d Treshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);*/
 			
 			crc16_cumul(NULL, 0);
 			*(unsigned short *) crc_buf = htons(vector->seed);
