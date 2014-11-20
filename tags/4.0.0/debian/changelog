@@ -1,4 +1,4 @@
-fpac (4.00.00) unstable; urgency=low
+fpac (4.0.0) unstable; urgency=low
 
   * Release 3.27.19 working code as version 4.00.00 due to significant 
     changes. Compatibility with versions <3.27.18 not guaranteed.
