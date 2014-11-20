@@ -6,7 +6,7 @@
 @prefix@/sbin/kissattach -v
 @prefix@/bin/call -v
 @prefix@/bin/listen -v
-/usr/local/sbin/monitor -v
+@prefix@/sbin/monitor -v
 @prefix@/bin/mheard -v
 #
 

@@ -1,6 +1,6 @@
 Name:          	@PACKAGE_NAME@ 
 Version:        @BASEVERSION@@EXTRAVERSION@
-Release:        1
+Release:        @SVNREV@ 
 Summary:        FPAC AX.25 Network Switching Software
 
 Group:          Applications/Communications
@@ -55,7 +55,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/html/FPAC-HOWTO.html doc/html/FPAC-LINUX-FLASH-MINI-HOWTO104.html
 %doc doc/html/FPAC-LINUX-FLASH-MINI-HOWTO-FR104.html doc/html/FPAC-MINI-HOWTO-177.html
 %doc doc/html/FPAC-MINI-HOWTO-FR-175.html doc/html/next.gif doc/html/prev.gif doc/html/toc.gif
-%doc %{_sysconfdir}/ax25/fpac/help/*
 %config %{_sysconfdir}/ax25/aprslist.conf.fr
 %config %{_sysconfdir}/ax25/aprslist.conf
 %config %{_sysconfdir}/ax25/flexd.conf
@@ -68,6 +67,7 @@ rm -rf $RPM_BUILD_ROOT
 %config %{_sysconfdir}/ax25/fpac.routes
 %config %{_sysconfdir}/ax25/itu.dnic
 %{_sbindir}/aprslist
+%{_sbindir}/ax25parms
 %{_sbindir}/calibrate
 %{_sbindir}/calld
 %{_sbindir}/call_tcp
@@ -82,7 +82,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/fpacwpd
 %{_sbindir}/fpad
 %{_sbindir}/mailbbs
-%{_sbindir}/mkissattach
 %{_sbindir}/monitor
 %{_sbindir}/mon_tcp
 %{_sbindir}/remote
@@ -90,13 +89,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/wpcmp
 %{_sbindir}/wpconvert
 %{_sbindir}/wpedit
+%{_sbindir}/wplist
 %{_sbindir}/wpmaint
 %{_sbindir}/wpserv
 %{_sbindir}/wpstress
 %{_sbindir}/yapp
 %{_localstatedir}/ax25/fpac/*
 %{_localstatedir}/ax25/flex/*
+%{_mandir}/man?/*
 
 %changelog
+* Thu Nov 20 2014 Lee Woldanski <ve7fet@tparc.org>
+- Add man pages to distribution
+- Add missing wplist and ax25parms binaries to distribution
+- Remove obsolete mkissattach binary from distribution
+- Add support for tagging SVN version as Release in version number
+
 * Mon Jan 31 2011 Lee Woldanski <ve7fet@tparc.org>
 - Initial version

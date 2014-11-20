@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT(fpac, 3.27.19, f6bvp@free.fr)
+AC_INIT(fpac, 4.00.00, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h])
@@ -12,6 +12,12 @@ basever=$(echo $PACKAGE_VERSION | sed -e 's@-.*$@@')
 AC_SUBST(BASEVERSION, [$basever])
 extraver=$(echo $PACKAGE_VERSION | sed -e 's@'$basever'@@' -e 's@^-@_@')
 AC_SUBST(EXTRAVERSION, [$extraver])
+SVNREV=`( svnversion -n $srcdir )`
+if { ! ( svnversion ) >/dev/null 2>&1 || test "$SVNREV" = "exported"; } ;
+        then SVNREV=`cat $srcdir/SVNREV`
+        else echo $SVNREV>$srcdir/SVNREV
+fi
+AC_SUBST(SVNREV)
 
 # Checks for programs.
 AC_PROG_CC
