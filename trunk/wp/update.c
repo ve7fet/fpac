@@ -7,12 +7,15 @@
  *
  * F1OAT 980117
  */
+#define NDEBUG
 
 #include "wpdefs.h"
 #include "sockevent.h"
 #include "update.h"
 #include "db.h"
 #include "daemon.h"
+#include <sys/types.h>
+#include <assert.h>
 
 /************************************************************************************
 * Dirty bits handler

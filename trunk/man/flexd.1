@@ -1,0 +1,34 @@
+.TH FLEXD 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+flexd - FPAC plug-in to interface with FLEXNET.
+.SH SYNOPSIS
+.B flexd [-d] [-x] [-v] [-p] [-f] [-h]
+.SH DESCRIPTION
+.LP
+.B flexd
+Downloads and handles the FLEXNET destinations database.
+.SH OPTIONS
+.TP 20
+.BI \-d 
+start in foreground mode
+.TP 20 
+.BI \-x 
+turn on debug mode
+.TP 20 
+.BI \-v 
+turn on debug verbose mode
+.TP 20 
+.BI \-p 
+turn on passive mode
+.TP 20
+.BI "\-f file"
+Use an alternate flexd.routes file
+.TP 20 
+.BI \-h
+Display Usage : flexd [-h] [-d] [-x] [-v] [-f wpfile]
+.SH FILES
+.IP "/etc/ax25/flexd.conf /etc/ax25/flexd.routes"
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+flexd.conf(5) flexd.routes(5)

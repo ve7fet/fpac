@@ -80,6 +80,7 @@ char selport[80];
 
 int mask = U_MASK;
 
+int debug = FALSE;
 int logging = FALSE;
 
 /* Datagram tcp send*/
@@ -91,14 +92,13 @@ int dgx;
 
 static int ftype(unsigned char *, int *, int);
 
-static void terminate(int sig)
-{
-	if (logging) 
-	{
-		syslog(LOG_INFO, "terminating on SIGTERM\n");
-		closelog();
-	}
+static void SignalTERM(int);
 
+static void SignalTERM(int code)
+{
+	syslog(LOG_INFO, "terminating on SIGTERM\n");
+	closelog();
+	
 	exit(0);
 }
 
@@ -478,13 +478,22 @@ int main(int argc, char **argv)
 	int tcport;
 	fd_set read_fdset;
 	struct sockaddr_in sc;
-
+	struct sigaction act, oact;
+	
 	tcport = 23;
 	selport[0] = address[0] = '\0';
+	
+	if ( argc == 1) { 
+		fprintf(stderr, "Usage: mon_tcp [-l] [-a host name or IP address] [-m port_mon] [-o I|U|S mask] [-p tcp port] [-d] [-v]\n");
+		return 1;
+	}
 
-	while ((s = getopt(argc, argv, "lvp:a:m:")) != -1) 
+	while ((s = getopt(argc, argv, "dlvo:p:a:m:")) != -1) 
 	{
 		switch (s) {
+			case 'd':
+				debug = TRUE;
+				break;
 			case 'l':
 				logging = TRUE;
 				break;
@@ -504,17 +513,20 @@ int main(int argc, char **argv)
 					case 'I':
 					case 'i':
 						mask |= I_MASK;
+						if (debug) fprintf(stderr, "mon_tcp: I_mask option selected\n");
 						break;
 					case 'U':
 					case 'u':
 						mask |= U_MASK;
+						if (debug) fprintf(stderr, "mon_tcp: U_mask option selected\n");
 						break;
 					case 'S':
 					case 's':
 						mask |= S_MASK;
+						if (debug) fprintf(stderr, "mon_tcp: S_mask option selected\n");
 						break;
 					}
-					++ptr;
+				++ptr;
 				}
 				break;
 			case 'p':
@@ -527,34 +539,41 @@ int main(int argc, char **argv)
 				fprintf(stderr, "mon_tcp: option needs an argument\n");
 				return 1;
 			case '?':
-				fprintf(stderr, "Usage: mon_tcp [-l] [-a address] [-m port_mon] [-o I|U|S] [-p port] [-v]\n");
+				fprintf(stderr, "Usage: mon_tcp [-l] [-a host name or IP address] [-m port_mon] [-o I|U|S mask] [-p tcp port] [-d] [-v]\n");
 				return 1;
 		}
 	}
 
-	signal(SIGTERM, terminate);
+	act.sa_handler = SignalTERM;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	sigaction(SIGTERM, &act, &oact);
+
 
 	if (ax25_config_load_ports() == 0) 
 	{
 		fprintf(stderr, "mon_tcp: no AX.25 port data configured\n");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: AX.25 port data configured\n");
 
 	/* AX.25 receive socket */
 	/*if ((s = socket(AF_INET, SOCK_PACKET, htons(ETH_P_ALL))) == -1) */
 	if ((s = socket(AF_PACKET, SOCK_PACKET, htons(ETH_P_ALL))) == -1) 
 	{
 		perror("mon_tcp: socket ax25");
-		syslog(LOG_ERR, "mon_tcp: socket ax25");
+		syslog(LOG_ERR, "mon_tcp: AX.25 socket");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: AX.25 socket opened\n");
 	
 	/* Ethernet Send socket */
 	if ((dg = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
-		perror("mon_tcp: socket dgram/s");
+		perror("mon_tcp: Ethernet socket dgram/s");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: Ethernet socket send dgram opened\n");
 
 	sc.sin_family = AF_INET;
 	sc.sin_addr.s_addr = INADDR_ANY;
@@ -565,14 +584,16 @@ int main(int argc, char **argv)
 		perror("mon_tcp: socket bind");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: send socket bound\n");
 
 	sg.sin_family = AF_INET;
 
 	if ((hp = gethostbyname(address)) == NULL)
 	{
-		printf("Unknown host %s\n", address);
+		printf("Unknown host address '%s'\n", address);
 		return 3;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: host name (IP address) '%s' address '%s'\n", hp->h_name, hp->h_addr);
 
 	sg.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
 	sg.sin_port = htons(tcport);
@@ -580,9 +601,10 @@ int main(int argc, char **argv)
 	/* Ethernet receive socket */
 	if ((r = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
 	{
-		perror("mon_tcp: socket dgram/r");
+		perror("mon_tcp: Ethernet socket dgram/r");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: Ethernet socket receive dgram\n");
 	
 	sc.sin_family = AF_INET;
 	sc.sin_addr.s_addr = INADDR_ANY;
@@ -590,9 +612,10 @@ int main(int argc, char **argv)
 
 	if (bind(r, (struct sockaddr *)&sc, sizeof(sc)) == -1)
 	{
-		perror("mon_tcp: socket bind");
+		perror("mon_tcp: Ethernet socket bind tcp port");
 		return 1;
 	}
+	if (debug) fprintf(stderr, "mon_tcp: Ethernet receive socket bound to port %d\n", tcport);
 
 	if (!daemon_start(FALSE)) 
 	{
@@ -606,6 +629,7 @@ int main(int argc, char **argv)
 		openlog("mon_tcp", LOG_PID, LOG_DAEMON);
 		syslog(LOG_INFO, "starting");
 	}
+	fprintf(stderr, "mon_tcp: became a daemon - background monitoring\n");
 
 	for (;;) 
 	{

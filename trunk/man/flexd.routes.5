@@ -1,0 +1,56 @@
+.TH FLEXD.ROUTES 5 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+flexd.routes \- Routing file for Flex Net /etc/ax25/flexd.routes.
+.SH DESCRIPTION
+.LP
+.B flexd.routes
+Defines the route to the Flex Net Gate.
+.P
+The route statement MUST start in col 1
+.P
+For : 
+ A direct connect to <call> on Axports <port>                  via = d
+   Example:  N2BJG-2 0
+
+ A connection to a FPAC node <call> at <rose address>          via = n
+   Example: KA2VRF-2 3100772569"
+
+ A connection to <call> via <digi>                             via = v
+   Example: N2BJG-2 v KI4TOP-2
+
+ A connection to <call> thru <rose-port> via <node-rose-addr>  via = v
+   Example: KA1VRF-2 rose0 3100772569
+
+ A connection to <call> through NetRom <netnod-port>           via = v
+   Example: W4AKH-2 v VRF14
+.P
+.TP 20
+.BI \ call " Call-SSID
+The Call-SSID as declared in the /etc/ax25/flexd.conf file as the FlexGate.
+.TP
+.B * Direct Route format
+.BI \ route "     <call> " "   "<alias> " " <port> " "   d " "     'description'
+.SH EXAMPLE
+# route  <call>         <alias>       <port>     d       'description'
+  route  k2bjg-2         bjgnod          0       d       'K2BIG Node'
+  route  k2bjg-4         bjgbbs          0       d       'K2BIG BBS'
+  route  w4ot-2          otnode          0       d       'W4OT Node'
+  route  w4ot-4          otbbs           0       d       'W4OT BBS'
+  route  W4AKH-2         akhnod          0       d       'W4AKH Node'
+.TP
+.B * Routing across another node with sending a string - "C <call>"
+.BI \ route "    <call> " "   "<alias> " " <port> " "   n " "     'description' " "       <node>
+.SH EXAMPLE
+# route  <call>      <alias>    <port>  n  'description'      <node>
+  route ik5skv-8     skvbbs       3     n  'BBS ARI Empoli'   ir5vin 
+  route iw5cwb-8     cwbbbs       5     n  'BBS ARI Siena '   ir5vin
+.TP
+.B * Routing via digipeaters
+.BI \ route "    <call> " "   "<alias> " " <port> " "   v " "     'description' " "  <digipeaters>
+.SH EXAMPLE
+# route  <call>  <alias>  <port>  v   'description'    <digipeaters>
+  route  f5mzn   XntMZN     11    v   'LinuXnet F5MZN'  f5kck-11 195509
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+flexd(1) flexd.conf(5)
