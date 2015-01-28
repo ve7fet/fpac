@@ -1,3 +1,14 @@
+fpac (4.0.1)
+	* Tomi made a mistake in his code by not including a term_handler.
+	I suppose he figured grouping it in the
+	signal_handler routine would be enough but it isn't. Node may receive
+	the signal but it doesn't know quite enough to terminate the session
+	thus leaving it open. Adding the term_handler will insure proper closure
+	of the node. Newer compilers may accept this now, but I am not sure.
+	Considering G4APL's node GB7CIP was hit by this exploit last year I can
+	only think it still exists. I discovered this bug quite a while ago but
+	didn't understand what was going on until I did a trace via gdb.
+
 fpac (4.00.00)
 	* Released as version 4.00.00 due to significant changes. Based on 
 	  3.27.19 working code (un-released). Compatibility with versions <3.27.18 
