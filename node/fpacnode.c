@@ -58,6 +58,12 @@ static void term_handler(int sig)
 	logout("SIGTERM");
 }
 
+static void quit_handler(int sig)
+{
+	  axio_eolmode(User.fd, EOLMODE_TEXT);
+	    node_logout("User terminated at remote");
+}
+
 static void prompt(void)
 {
 	tprintf("%s (Commands = ?) : ", cfg.alt_callsign);
