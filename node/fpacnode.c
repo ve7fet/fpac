@@ -61,8 +61,9 @@ static void term_handler(int sig)
 static void quit_handler(int sig)
 {
 	set_eolmode(User.fd, EOLMODE_TEXT);
+	tputs("\n");
 	node_msg("User terminated at remote");
-	logout("SIGTERM");
+	logout("SIGQUIT");
 }
 
 static void prompt(void)
