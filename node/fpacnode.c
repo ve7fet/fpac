@@ -60,8 +60,9 @@ static void term_handler(int sig)
 
 static void quit_handler(int sig)
 {
-	  axio_eolmode(User.fd, EOLMODE_TEXT);
-	    node_logout("User terminated at remote");
+	set_eolmode(User.fd, EOLMODE_TEXT);
+	node_msg("User terminated at remote");
+	logout("SIGTERM");
 }
 
 static void prompt(void)
