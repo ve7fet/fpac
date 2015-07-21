@@ -183,16 +183,16 @@ static int l3_conf(int verbose)
 		return(0);
 	}
 		
-	if (ioctl(s, SIOCRSCLRRT, NULL) == -1)
+	if (ioctl(s, SIOCRSCLRRT, NULL) < 0 )
 	{
 		perror("FPAD l3_conf: SIOCRSCLRRT");
 		/* close(s);
 		return(0); */
 	}
 
-	if (ioctl(s, SIOCRSL2CALL, &rose_call) == -1) 
+	if (ioctl(s, SIOCRSSL2CALL, &rose_call) < 0) 
 	{
-		perror("FPAD l3_conf: SIOCRSL2CALL");
+		perror("FPAD l3_conf: SIOCRSSL2CALL");
 		close(s);
 		return(0);
 	}

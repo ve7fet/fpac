@@ -109,7 +109,7 @@ void clear_nodes()
 		
 	/* Obtain the Node Callsign */
 	
-	if (ioctl(s, SIOCRSL2CALL, &rose_call) == -1) {
+	if (ioctl(s, SIOCRSSL2CALL, &rose_call) < 0) {
 		close(s);
 		exit(1);
 	}
