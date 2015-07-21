@@ -1,3 +1,11 @@
+
+fpac (4.0.1-beta)
+	* failure of call to ioctl returns a <0 value in fpad.c and fpacconf.c
+	* corrected typo SIOCRSSL2CALL in fpad.c and fpacconf.c
+	* removed CR-LF end of lines in this file using DOS2UNIX utility 
+
+ -- Bernard Pidoux <f6bvp@free.fr>
+
 fpac (4.0.1)
 	* Tomi made a mistake in his code by not including a term_handler.
 	I suppose he figured grouping it in the
