@@ -628,6 +628,11 @@ int do_ports(int argc, char **argv)
 	{
 		tprintf("%-6s  %s\n", cp, ax25_config_get_desc(cp));
 	}
+	while ((cp = nr_config_get_next(cp)) != NULL)
+	{
+		tprintf("%-6s  %s\n", cp, nr_config_get_desc(cp));
+	}
+
 
 	return 0;
 }
