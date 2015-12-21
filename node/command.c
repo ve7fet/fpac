@@ -332,17 +332,17 @@ int do_mheard(int argc, char **argv)
 			tprintf("Last %d Heard details for %s on all ports :\n", nb,
 					call);
 		tprintf
-			("Callsign  Port   Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
+			("Callsign  Port    Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
 	}
 	else if (port)
 	{
 		tprintf("Last %d Heard list for port %s :\n", nb, port);
-		tprintf("Callsign  Port   Pkts-rcvd Mode Time ago\n");
+		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 	else
 	{
 		tprintf("Last %d Heard list for all ports :\n", nb);
-		tprintf("Callsign  Port   Pkts-rcvd Mode Time ago\n");
+		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 
 	nb = 0;
@@ -358,7 +358,7 @@ int do_mheard(int argc, char **argv)
 
 			if (call)
 			{
-				tprintf("%-9s %-6.6s %-9ld %-8ld %-8ld %-8ld %s\n",
+				tprintf("%-9s %-7.7s %-9ld %-8ld %-8ld %-8ld %s\n",
 						t, list->data.portname, list->data.count,
 						list->data.sframes, list->data.iframes,
 						list->data.uframes, time_ago(ti, NULL));
@@ -381,7 +381,7 @@ int do_mheard(int argc, char **argv)
 				else
 					s = "None";
 
-				tprintf("%-9s %-6.6s %-9ld %-4s %s\n",
+				tprintf("%-9s %-7.7s %-9ld %-4s %s\n",
 						t, list->data.portname, list->data.count, s,
 						time_ago(ti, NULL));
 			}
