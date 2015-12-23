@@ -1371,8 +1371,10 @@ int do_links(int argc, char **argv)
 		if (wp_check_call(np->call) != 0)
 			continue;
 
-		tprintf("%-9s   %-3s    %-6s %s\n",
-				np->call, (node_is_connected(np->call) ? "Yes" : "---"), ax25_config_get_name(np->dev),
+		if (node_is_connected(np->call))
+			tprintf("%-9s   Yes    %-6s %s\n",
+/*				np->call, (node_is_connected(np->call) ? "Yes" : "---"), ax25_config_get_name(np->dev),*/
+				np->call, ax25_config_get_name(np->dev),
 				ax25_config_get_desc(ax25_config_get_name(np->dev)));
 	}
 	free_proc_rs_neigh(nlist);
