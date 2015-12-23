@@ -617,20 +617,28 @@ int do_host(int argc, char **argv)
 int do_ports(int argc, char **argv)
 {
 	char *cp = NULL;
+	int n;
+
+	if (rs_config_get_next(cp) == NULL)
+		n = rs_config_load_ports();
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
 		node_msg("usage : ports");
 		return (0);
 	}
- 	node_msg("Ports:\nPort   Description");
+	node_msg("Ports:\nPort\tDev\tDescription");
 	while ((cp = ax25_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s  %s\n", cp, ax25_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t%s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
+	}
+	while ((cp = rs_config_get_next(cp)) != NULL)
+	{
+		tprintf("\t%-6s\t%s\n", cp, rs_config_get_desc(cp));
 	}
 	while ((cp = nr_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s  %s\n", cp, nr_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t%s\n", cp, nr_config_get_dev(cp), nr_config_get_desc(cp));
 	}
 
 
