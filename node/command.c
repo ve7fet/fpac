@@ -699,8 +699,9 @@ int do_users(int argc, char **argv)
 			p->src_addr[len - 1] = '\0';
 
 		cp = ax25_config_get_name(p->dev);
-		if (cp == NULL)
-			cp = "All";
+		if (cp != NULL) {
+/*		if (cp == NULL)
+			cp = "All";*/
 
 		tprintf("%-6s %-9s -> %-9s ", cp, p->src_addr, p->dest_addr);
 		if (!strcmp(p->dest_addr, "*"))
@@ -744,6 +745,7 @@ int do_users(int argc, char **argv)
 					p->n2count, p->n2, p->rtt/ HZ, p->sndq, p->rcvq);
 		}
 		tprintf("\n");
+		}
 	}
 	free_proc_ax25(list);
 
@@ -1157,12 +1159,14 @@ int do_routes(int argc, char **argv)
 			first = 0;
 		}
 
-		if ((pn->mask == 10) &&  (first_node))
+		if (pn->mask != 10) {
+
+/*		if ((pn->mask == 10) &&  (first_node))
 		{
 			node_msg("Adjacent ROSE nodes routes :\nDNIC Address           Route");
 			first_node = 0;
 		}
-
+*/
 		for (i = pn->mask; i < 10; i++)
 			pn->address[i] = '.';
 
@@ -1198,6 +1202,7 @@ int do_routes(int argc, char **argv)
 			}
 		}
 		tprintf("\n");
+		}
 	}
 	free_proc_rs_neigh(listv);
 	free_proc_rs_nodes(listn);
@@ -1343,6 +1348,7 @@ int do_links(int argc, char **argv)
 	struct proc_nr *nr, *nrlist;
 	struct proc_ax25 *p, *list;
 	char *cp = NULL;
+	char *pdev= NULL;
 	int n;
 
 	if (argc > 1)
@@ -1403,6 +1409,7 @@ int do_links(int argc, char **argv)
 			cp = "Unknown     ";
 			break;
 		}
+		if (pdev = ax25_config_get_name(p->dev)) {
 
 		if (netrom_node_is_connected(p->dest_addr) && (p->st > 0))
 			tprintf("%-9s %-12s %-6s %-6s %-6s\n",
@@ -1418,7 +1425,9 @@ int do_links(int argc, char **argv)
 					rs_config_get_dev(rs_config_get_name(p->dest_addr)),
 					p->dev,
 					ax25_config_get_name(p->dev));
-	}
+
+		}
+		}
 
 	free_proc_ax25(list);
 	free_proc_rs_neigh(nlist);
