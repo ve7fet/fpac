@@ -627,18 +627,18 @@ int do_ports(int argc, char **argv)
 		node_msg("usage : ports");
 		return (0);
 	}
-	node_msg("Ports:\nPort\tDev\tDescription");
+	node_msg("Ports:\nPort\tDev\t Description");
 	while ((cp = ax25_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s\t%-6s\t%s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t %s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
 	}
 	while ((cp = rs_config_get_next(cp)) != NULL)
 	{
-		tprintf("\t%-6s\t%s\n", cp, rs_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t%s\n", cp, rs_config_get_dev(cp), rs_config_get_desc(cp));
 	}
 	while ((cp = nr_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s\t%-6s\t%s\n", cp, nr_config_get_dev(cp), nr_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t %s\n", cp, nr_config_get_dev(cp), nr_config_get_desc(cp));
 	}
 
 
@@ -1340,6 +1340,10 @@ int do_manage_links(int argc, char **argv)
 int do_links(int argc, char **argv)
 {
 	struct proc_rs_neigh *np, *nlist;
+	struct proc_nr *nr, *nrlist;
+	struct proc_ax25 *p, *list;
+	char *cp = NULL;
+	int n;
 
 	if (argc > 1)
 	{
@@ -1361,23 +1365,65 @@ int do_links(int argc, char **argv)
 
 	if ((nlist = read_proc_rs_neigh()) == NULL)
 	{
-		node_msg("No FPAC adjacents");
+		if ((nrlist = read_proc_nr()) == NULL)
+			node_msg("No adjacent nodes");
 		return 0;
 	}
+
+	if (rs_config_get_next(cp) == NULL)
+		n = rs_config_load_ports();
+	list = read_proc_ax25();
+
+	node_msg("Adjacent Nodes Links:\nCallsign  Status       Dev    Iface  Port");
+
 	/* "nodes" */
-	node_msg("Links:\nCallsign Connected Port    Description");
-	for (np = nlist; np != NULL; np = np->next)
+	for (p = list; p != NULL; p = p->next)
 	{
-		if (wp_check_call(np->call) != 0)
+		if (wp_check_call(p->dest_addr) !=0)
 			continue;
 
-		if (node_is_connected(np->call))
-			tprintf("%-9s   Yes    %-6s %s\n",
-/*				np->call, (node_is_connected(np->call) ? "Yes" : "---"), ax25_config_get_name(np->dev),*/
-				np->call, ax25_config_get_name(np->dev),
-				ax25_config_get_desc(ax25_config_get_name(np->dev)));
+		switch (p->st)
+		{
+		case 0:
+			cp = "Disconnected";
+			break;
+		case 1:
+			cp = "Conn pending";
+			break;
+		case 2:
+			cp = "Disc pending";
+			break;
+		case 3:
+			cp = "Connected   ";
+			break;
+		case 4:
+			cp = "Recovery    ";
+			break;
+		default:
+			cp = "Unknown     ";
+			break;
+		}
+
+		if (netrom_node_is_connected(p->dest_addr) && (p->st > 0))
+			tprintf("%-9s %-12s %-6s %-6s %-6s\n",
+					p->dest_addr,
+					cp,
+					nr_config_get_dev(nr_config_get_name(p->dest_addr)),
+					p->dev,
+					ax25_config_get_name(p->dev));
+		if (node_is_connected(p->dest_addr))
+			tprintf("%-9s %-12s %-6s %-6s %-6s\n",
+					p->dest_addr,
+					cp,
+					rs_config_get_dev(rs_config_get_name(p->dest_addr)),
+					p->dev,
+					ax25_config_get_name(p->dev));
 	}
+
+	free_proc_ax25(list);
 	free_proc_rs_neigh(nlist);
+	free_proc_nr(nrlist);
+
 	return 0;
 }
 
