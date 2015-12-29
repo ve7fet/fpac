@@ -69,18 +69,4 @@ You can also help us to keep up to date this package (Sources, documentation...)
 
   Jean-Paul ROUBELAT <jpr@f6fbb.org>
 
-=================================
-F6BVP - December 2010
-
-	* Automatic routing has been improved in ROSE Linux module and should be found in next kernel release around
-	  2.6.37 or 38. Dynamic packet routing is still far away (...)
-
-	* >3.28.1 (F6BVP)
-	  Investigate the issue when call <portname> <callsign> is actually now interpreted as call <callsign> via <callsign>
-	  Close rose sockets when FPAC is shut down.
-	  When issuing a call from fpacnode and the call is not in fpac wp data base but
-  	   a node with same DNIC address is connected (routes), the call should go through this route.
-
-  Bernard Pidoux f6bvp <f6bvp@free.fr>
-
 
