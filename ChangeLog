@@ -1,4 +1,13 @@
 
+fpac (4.0.3)
+	* Current version under development
+	* should repare Call command tree (...)
+	* Should include default route  (...)
+	* wpcmp includes an usage message and no more segfault.
+	* REAME no more displays issues report, now in GIT repository issues
+
+ -- Bernard Pidoux <f6bvp@free.fr>
+
 fpac (4.0.2)
 	* Do not display local nodes in routes. They are listed in Links
 	* Directory m4 is needed
