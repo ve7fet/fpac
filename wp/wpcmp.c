@@ -35,6 +35,11 @@
 void diff(FILE *ftpr1, FILE *ftpr2);
 int insert(int db, unsigned record, wp_t *wp);
 
+void usage(void)
+{
+	printf("wpcmp compare two WP databases\n\tusage: wpcmp db_file_1 db_file_2\n");
+}
+
 int main(int ac, char **av)
 {
 	FILE *fptr1;
@@ -47,6 +52,11 @@ int main(int ac, char **av)
 	int p;
 	unsigned record;
 
+	if (ac < 3) {
+		usage();
+		return(1);
+	}
+
 	while ((p = getopt(ac, av, "v")) != -1) 
 	{
 		switch (p)
@@ -55,7 +65,7 @@ int main(int ac, char **av)
 			verbose = 1;
 			break;
 		case '?' :
-			printf("usage: wpcmp db_file_1 db_file_2\n");
+			usage();
 			return(1);
 		}
 	}
