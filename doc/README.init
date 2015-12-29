@@ -17,9 +17,9 @@ The ax25 script itself is meant to be copied in to /etc/init.d. It is the interf
 with the init.d system and is used to call the ax25-up or ax25-down scripts as 
 appropriate during system startup or shutdown, respectively.
 
-In order to use this script, after copying it to /etc/init.d, issue the following command:
+In order to use this script, after copying it to /etc/init.d, issue the following command
 
-# update-rc.d ax25 defaults 80 20
+chkconfig --add ax25
 
 This will create the necessary links to start and stop the ax25 subsystem near the 
 end of boot and at the beginning of shutdown.
