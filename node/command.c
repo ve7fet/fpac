@@ -40,6 +40,36 @@ struct cmd *Nodecmds = NULL;
  -subroutine to run for command
 */
 
+int wpcheck(void)
+{
+	FILE *fptr;
+	wp_t *wp;
+	wp_header wph;
+	int n = 0;
+
+	if (wp_open("NODE")== 0)
+	{
+		if ((n = wp_nb_records()) < 0)
+			n = 0;
+		wp_close();
+	}
+
+	if (n == 0)
+	{
+		fptr = fopen(FPACWP, "r");
+		if (fptr != NULL)
+		{
+			fread(&wph, sizeof(wph), 1, fptr);
+			fclose(fptr);
+		n = wph.nb_record;
+		}
+	}
+	tprintf("FPAC White Pages : %d\n", n);
+	free(wp);
+
+	return (0);
+}
+
 void init_nodecmds(void)
 {
 	add_internal_cmd(&Nodecmds, "?", 1, 1, do_help);
@@ -2034,12 +2064,7 @@ int do_status(int argc, char **argv)
 		free_proc_rs_nodes(rsnolist);
 	}
 
-	if (wp_open("NODE") == 0)
-	{
-		if ((n = wp_nb_records()) < 0) n = 0;
-		tprintf("FPAC White Pages : %d\n", n);
-		wp_close();
-	}
+	n = wpcheck();
 
 	return 0;
 }
