@@ -875,10 +875,10 @@ int do_connect(int argc, char **argv)
 		family = AF_INET;
 	}
 
-	/* Check FPAC Aliases */
 	else
 	{
 		wp_open("NODE");
+	/* Check FPAC Aliases */
 
 		if (is_alias(argv[1], &alias))
 		{
