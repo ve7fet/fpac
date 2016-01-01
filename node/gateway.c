@@ -329,14 +329,14 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		{
 			/* Country designator */
 			memcpy(path, des2dnic(address[pos]), 4);
-			++pos;
+/*			++pos;*/
 			addrlen = strlen(address[pos]);
 		}
 		else if (addrlen == 4)
 		{
 			/* DNIC */
 			memcpy(path, address[pos], 4);
-			++pos;
+/*			++pos;*/
 			addrlen = strlen(address[pos]);
 		}
 
@@ -928,7 +928,7 @@ int do_connect(int argc, char **argv)
 			if ((strlen(argv[2]) == 3) && (des2dnic(argv[2]) != NULL))
 			{
 				/* Digi is a country designator */
-/* F6BVP			strcpy(argv[2], des2dnic(argv[2]));*/
+				strcpy(argv[2], des2dnic(argv[2]));
 				family = AF_ROSE;
 			}
 			else if (strspn(argv[2], "0123456789") == strlen(argv[2]))
