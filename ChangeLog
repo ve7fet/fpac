@@ -1,11 +1,15 @@
 
-fpac (4.0.3)
+fpac (4.0.4)
 	* Current version under development
 	* should repare Call command tree (...)
 	* Should include default route  (...)
+
+fpac (4.0.3)
 	* wpcmp includes an usage message and no more segfault.
 	* REAME no more displays issues report, now in GIT repository issues
 	* If WP server returns 0 records lets check local WP database
+	* removing ++pos in gateway.c avoids segmentation faults
+	* Misplaced comment
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
