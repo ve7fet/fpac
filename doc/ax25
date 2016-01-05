@@ -1,77 +1,68 @@
 #! /bin/bash
-# Provided by Charles S Schuman ( K4GBB )
-# 04/29/09
+# Provided by Charles S Schuman ( k4gbb1@gmail.com )
+# 03/09/15
 ### BEGIN INIT INFO
 # Provides: ax25
-# Required-Start: $syslog
-# Required-Stop: $syslog
-# Should-Start: cron 
-# Should-Stop: cron 
-# Default-Start: 2 3 4 5
+# Required-Start: $syslog $network
+# Required-Stop:  $syslog $network
+# Default-Start: S
 # Default-Stop: 0 1 6
 # Short-Description: Ax.25 initialization
-# Description: This script provides the control for the ax.25 packet radio service.
-#The fine tuning is accomplished via /etc/ax25/ax25-up and /etc/ax25/ax25-down.
+# Description: This script provides the control for the ax.25 Packet Radio Service.
+#	       The fine tuning is accomplished via /etc/ax25/ax25-up and /etc/ax25/ax25-down.
 #
 ### END INIT INFO
 
-# /etc/init.d/ax25
-#
-# Kernel-Parameter "ax25=yes|no" ?
+# Using the lsb functions to perform the operations.
+. /lib/lsb/init-functions
 
-if [ "`grep -e [Aa][Xx]25=[Nn][Oo] /proc/cmdline`" != "" ] ; then
-echo -e "ax25: Aborting startup on user request (kernel boot parameter)."
-exit 1
-fi
+NAME=Ax25			# Process name ( For display )
+DAEMON=/usr/local/etc/ax25/ax25-up
+PIDFILE=/var/run/ax25.pid 	# pid file for the daemon
 
+test -x $DAEMON || exit 5
 case "$1" in
-start|-start)
-echo "/etc/init.d/ax25: Starting AX25..."
-/etc/ax25/ax25-up
-;;
+  start )
+  # Check the status of ax25
+  if [ -d /proc/sys/net/ax25/ax0 ]; then
+      echo -e " \t $NAME: is already running."
+      netstat|grep LISTENING
+      exit 1
+  fi
+      echo  "        ** $NAME $1 **"
+    /etc/ax25/ax25-up
+    ;;
 
-stop|-stop)
-echo "Stopping AX25..."
-/etc/ax25/ax25-down
-;;
+    stop )
+     echo  "        ** $NAME $1 **"
+    /etc/ax25/ax25-down
+    ;;
 
-restart|-restart)
-echo "AX25 Restart"
-/etc/ax25/ax25-down
-sleep 2
-etc/ax25/ax25-up
-;;
+   restart )
+     echo  "        ** $NAME $1 **"
+    /etc/ax25/ax25-down
+    sleep 1
+    /etc/ax25/ax25-up
+    ;;
 
-status|-status)
-if [ ! -d /proc/sys/net/ax25 ] ; then
-echo "ax25 is down"
-else
-echo "$(ls /proc/sys/net/ax25)" > /tmp/ax25-config.tmp
-read Select < /tmp/ax25-config.tmp
-i=0
-while [ "$Select" != "" ]
-do
-let i=i+1
-awk ' NR == '$i' { print $1 }' /tmp/ax25-config.tmp > /tmp/ax25-config-tmp
-read Select < /tmp/ax25-config-tmp
-if [ "$Select" != "" ]; then
-/sbin/ifconfig "$Select"
-fi
-done
-if [ -z "$(uname -r | grep kjd)" ] ;then
-netstat --ax25
-else
-/sbin/ifconfig ipax0
-cat /proc/net/ax25
-fi
-fi
-;;
-
-*)
-echo "Usage: $0 {start|stop|restart|status}"
-exit 1
-;;
+  status )
+     echo -e "\t ** $NAME $1 **"
+    if [ ! -d /proc/sys/net/ax25/ax0 ] ; then
+      echo "$NAME is down"
+    else
+        if [ -z "$(uname -r | grep kjd)" ] ;then
+          netstat --ax25
+#           netstat|grep LISTENING
+        else
+          /sbin/ifconfig ipax0
+          cat /proc/net/ax25
+        fi
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
 esac
 
 exit 0
-
