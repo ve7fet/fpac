@@ -299,7 +299,7 @@ static void add_application(cfg_t *cfg, char *call, char *appli)
 	a->next = cfg->appli;
 	cfg->appli = a;
 /* FET */
-	syslog(LOG_INFO, "Adding application %s as call %s\n", a->appli, a->call);
+/*	syslog(LOG_INFO, "Adding application %s as call %s\n", a->appli, a->call);*/
 }
 
 int cfg_open(cfg_t *cfg)
