@@ -3,6 +3,7 @@ fpac (4.0.4)
 	* Current version under development
 	* should repare Call command tree (...)
 	* Should include default route  (...)
+	* After Tom SP2L remark "syslog(LOG_INFO ..." line has been commented in order to save space on disk.
 
 fpac (4.0.3)
 	* wpcmp includes an usage message and no more segfault.
