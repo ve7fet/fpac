@@ -21,6 +21,8 @@
 #include "ax25compat.h"
 #include "wp.h"
 
+void now_date(char *buf);
+
 int main(int argc, char **argv)
 {
 	int nb = 1000;

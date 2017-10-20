@@ -14,7 +14,7 @@
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
-/*#include <sys/stat.h>*/
+#include <sys/stat.h>
 
 #include "daemon.h"
 

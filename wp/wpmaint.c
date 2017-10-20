@@ -27,7 +27,7 @@
 /*#include <sys/types.h>*/
 /*#include <sys/fcntl.h>*/
 #include <sys/file.h>
-/*#include <sys/stat.h>*/
+#include <sys/stat.h>
 #include <sys/ioctl.h>
 /*#include <sys/socket.h>*/
 
@@ -42,6 +42,8 @@ int cr = 0;
 #define CR() printf( (cr) ? "\r" : "\n"); 
 #define ERASETIME 7L 
 #define DELETETIME 180L 
+
+void now_date(char *buf);
 
 int main(int argc, char **argv)
 {

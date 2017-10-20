@@ -10,12 +10,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-/*#include <fcntl.h>*/
+#include <fcntl.h>
 #include <errno.h>
 #include <time.h>
 #include <sys/types.h>
-/*#include <sys/wait.h>*/
-/*#include <sys/socket.h>*/
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <grp.h>
 
 #include "node.h"
 #include "io.h"

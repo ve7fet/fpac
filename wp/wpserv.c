@@ -50,6 +50,8 @@ static int wp_cmp(const void *p1, const void *p2);
 
 #define CR() printf( (cr) ? "\r" : "\n"); 
 
+void now_date(char *buf);
+
 int main(int ac, char **av)
 {
 	int p;

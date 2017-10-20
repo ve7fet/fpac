@@ -1,13 +1,21 @@
 
-fpac (4.0.4)
+
+fpac (4.0.5)
 	* Current version under development
-	* should repare Call command tree (...)
-	* Should include default route  (...)
+	* next one should repare Call command tree (...)
+	* Think about building a default route  (...)
+	* A few includes uncommented to please new C compiler version
+
+ -- Bernard Pidoux <f6bvp@free.fr>
+
+fpac (4.0.4)
 	* After Tom SP2L remark "syslog(LOG_INFO ..." line has been commented in order to save space on disk.
+
+-- Bernard Pidoux <f6bvp@free.fr>
 
 fpac (4.0.3)
 	* wpcmp includes an usage message and no more segfault.
-	* REAME no more displays issues report, now in GIT repository issues
+	* README no more displays issues report, now in GIT repository issues
 	* If WP server returns 0 records lets check local WP database
 	* removing ++pos in gateway.c avoids segmentation faults
 	* Misplaced comment

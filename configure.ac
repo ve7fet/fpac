@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT(fpac, 4.0.4, f6bvp@free.fr)
+AC_INIT(fpac, 4.0.5, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h])
