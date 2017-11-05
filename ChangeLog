@@ -5,6 +5,7 @@ fpac (4.0.5)
 	* next one should repare Call command tree (...)
 	* Think about building a default route  (...)
 	* A few includes uncommented to please new C compiler version
+	* calibrate tool repared
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
