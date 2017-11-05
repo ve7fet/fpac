@@ -38,7 +38,7 @@ See INSTALL for configuration and installation instructions.
 PREREQUISITES
 =============
 
-You need to have current libax25 installed.
+You need to have current libax25 installed (see http://f6bvp.org/configuration6_RPi.html)
 
 Ensure ax25-apps and ax25-tools are also installed. Ensure all configuration files 
 exist (use `make installconf' to install defaults).
@@ -67,5 +67,5 @@ Subscription on http://www.f6fbb.org/mailman/listinfo/fpac
 
 You can also help us to keep up to date this package (Sources, documentation...)
 
-  Bernard Pidoux F6BVP <bernard.pidoux@f6bvp.free.fr>
+  Bernard Pidoux F6BVP <bernard.pidoux@free.fr>, f6bvp@free.fr
 
