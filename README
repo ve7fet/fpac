@@ -1,5 +1,8 @@
 FPAC
 ====
+
+You most probably want to use latest fpac version from branch repository.
+
 Here is a list of applications dedicated to FPAC X25 node.
 
 They are using the ROSE/X25 L3 layer of the linux kernel.
@@ -38,7 +41,7 @@ See INSTALL for configuration and installation instructions.
 PREREQUISITES
 =============
 
-You need to have current libax25 installed.
+You need to have current libax25 installed (see http://f6bvp.org/configuration6_RPi.html).
 
 Ensure ax25-apps and ax25-tools are also installed. Ensure all configuration files 
 exist (use `make installconf' to install defaults).
@@ -65,9 +68,7 @@ TODO
 You can post your bug reports or requests in the Rose/Fpac mailing list.
 Subscription on http://www.f6fbb.org/mailman/listinfo/fpac
 
-You can also help us to keep up to date this package (Sources, documentation...)
-
-  Jean-Paul ROUBELAT <jpr@f6fbb.org>
+You can also help us to keep this package up to date (Sources, documentation...)
 
 =================================
 F6BVP - December 2010
