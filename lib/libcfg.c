@@ -346,7 +346,10 @@ int cfg_open(cfg_t *cfg)
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
 	}
-
+	else {
+		fprintf(stderr, "ERROR ! Unable to find ROSE nodes. Check fpac.nodes file\n");
+		return(1);
+	}
 	/* Get the fpac.nodes last modified time/date */
 	if (stat(FPACNODES, &st) == 0)
 	{
@@ -360,6 +363,10 @@ int cfg_open(cfg_t *cfg)
 	if (fptr != NULL) {
 		open_cfg(cfg, fptr, 0);
 		fclose(fptr);
+	}
+	else {
+		fprintf(stderr, "ERROR ! Unable to find ROSE routes. Check fpac.routes file\n");
+		return(1);
 	}
 
 	/* Get the fpac.routes last modified time/date */
