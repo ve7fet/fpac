@@ -58,6 +58,14 @@ static void term_handler(int sig)
 	logout("SIGTERM");
 }
 
+static void quit_handler(int sig)
+{
+	set_eolmode(User.fd, EOLMODE_TEXT);
+	tputs("\n");
+	node_msg("User terminated at remote");
+	logout("SIGQUIT");
+}
+
 static void prompt(void)
 {
 	tprintf("%s (Commands = ?) : ", cfg.alt_callsign);
@@ -159,7 +167,8 @@ int main(int argc, char **argv)
 
 	signal(SIGALRM, alarm_handler);
 	signal(SIGTERM, term_handler);
-	signal(SIGPIPE, SIG_IGN);
+	signal(SIGPIPE, quit_handler);
+	signal(SIGQUIT, quit_handler); 
 
 	NodeId = NodeName;
 

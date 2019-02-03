@@ -332,17 +332,17 @@ int do_mheard(int argc, char **argv)
 			tprintf("Last %d Heard details for %s on all ports :\n", nb,
 					call);
 		tprintf
-			("Callsign  Port   Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
+			("Callsign  Port    Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
 	}
 	else if (port)
 	{
 		tprintf("Last %d Heard list for port %s :\n", nb, port);
-		tprintf("Callsign  Port   Pkts-rcvd Mode Time ago\n");
+		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 	else
 	{
 		tprintf("Last %d Heard list for all ports :\n", nb);
-		tprintf("Callsign  Port   Pkts-rcvd Mode Time ago\n");
+		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 
 	nb = 0;
@@ -358,7 +358,7 @@ int do_mheard(int argc, char **argv)
 
 			if (call)
 			{
-				tprintf("%-9s %-6.6s %-9ld %-8ld %-8ld %-8ld %s\n",
+				tprintf("%-9s %-7.7s %-9ld %-8ld %-8ld %-8ld %s\n",
 						t, list->data.portname, list->data.count,
 						list->data.sframes, list->data.iframes,
 						list->data.uframes, time_ago(ti, NULL));
@@ -381,7 +381,7 @@ int do_mheard(int argc, char **argv)
 				else
 					s = "None";
 
-				tprintf("%-9s %-6.6s %-9ld %-4s %s\n",
+				tprintf("%-9s %-7.7s %-9ld %-4s %s\n",
 						t, list->data.portname, list->data.count, s,
 						time_ago(ti, NULL));
 			}
@@ -617,17 +617,30 @@ int do_host(int argc, char **argv)
 int do_ports(int argc, char **argv)
 {
 	char *cp = NULL;
+	int n;
+
+	if (rs_config_get_next(cp) == NULL)
+		n = rs_config_load_ports();
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
 		node_msg("usage : ports");
 		return (0);
 	}
- 	node_msg("Ports:\nPort   Description");
+	node_msg("Ports:\nPort\tDev\t Description");
 	while ((cp = ax25_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s  %s\n", cp, ax25_config_get_desc(cp));
+		tprintf("%-6s\t%-6s\t %s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
 	}
+	while ((cp = rs_config_get_next(cp)) != NULL)
+	{
+		tprintf("%-6s\t%-6s\t%s\n", cp, rs_config_get_dev(cp), rs_config_get_desc(cp));
+	}
+	while ((cp = nr_config_get_next(cp)) != NULL)
+	{
+		tprintf("%-6s\t%-6s\t %s\n", cp, nr_config_get_dev(cp), nr_config_get_desc(cp));
+	}
+
 
 	return 0;
 }
@@ -686,8 +699,9 @@ int do_users(int argc, char **argv)
 			p->src_addr[len - 1] = '\0';
 
 		cp = ax25_config_get_name(p->dev);
-		if (cp == NULL)
-			cp = "All";
+		if (cp != NULL) {
+/*		if (cp == NULL)
+			cp = "All";*/
 
 		tprintf("%-6s %-9s -> %-9s ", cp, p->src_addr, p->dest_addr);
 		if (!strcmp(p->dest_addr, "*"))
@@ -731,6 +745,7 @@ int do_users(int argc, char **argv)
 					p->n2count, p->n2, p->rtt/ HZ, p->sndq, p->rcvq);
 		}
 		tprintf("\n");
+		}
 	}
 	free_proc_ax25(list);
 
@@ -1144,12 +1159,14 @@ int do_routes(int argc, char **argv)
 			first = 0;
 		}
 
-		if ((pn->mask == 10) &&  (first_node))
+		if (pn->mask != 10) {
+
+/*		if ((pn->mask == 10) &&  (first_node))
 		{
 			node_msg("Adjacent ROSE nodes routes :\nDNIC Address           Route");
 			first_node = 0;
 		}
-
+*/
 		for (i = pn->mask; i < 10; i++)
 			pn->address[i] = '.';
 
@@ -1185,6 +1202,7 @@ int do_routes(int argc, char **argv)
 			}
 		}
 		tprintf("\n");
+		}
 	}
 	free_proc_rs_neigh(listv);
 	free_proc_rs_nodes(listn);
@@ -1327,6 +1345,11 @@ int do_manage_links(int argc, char **argv)
 int do_links(int argc, char **argv)
 {
 	struct proc_rs_neigh *np, *nlist;
+	struct proc_nr *nr, *nrlist;
+	struct proc_ax25 *p, *list;
+	char *cp = NULL;
+	char *pdev= NULL;
+	int n;
 
 	if (argc > 1)
 	{
@@ -1348,21 +1371,68 @@ int do_links(int argc, char **argv)
 
 	if ((nlist = read_proc_rs_neigh()) == NULL)
 	{
-		node_msg("No FPAC adjacents");
+		if ((nrlist = read_proc_nr()) == NULL)
+			node_msg("No adjacent nodes");
 		return 0;
 	}
+
+	if (rs_config_get_next(cp) == NULL)
+		n = rs_config_load_ports();
+	list = read_proc_ax25();
+
+	node_msg("Adjacent Nodes Links:\nCallsign  Status       Dev    Iface  Port");
+
 	/* "nodes" */
-	node_msg("Links:\nCallsign Connected Port    Description");
-	for (np = nlist; np != NULL; np = np->next)
+	for (p = list; p != NULL; p = p->next)
 	{
-		if (wp_check_call(np->call) != 0)
+		if (wp_check_call(p->dest_addr) !=0)
 			continue;
 
-		tprintf("%-9s   %-3s    %-6s %s\n",
-				np->call, (node_is_connected(np->call) ? "Yes" : "---"), ax25_config_get_name(np->dev),
-				ax25_config_get_desc(ax25_config_get_name(np->dev)));
-	}
+		switch (p->st)
+		{
+		case 0:
+			cp = "Disconnected";
+			break;
+		case 1:
+			cp = "Conn pending";
+			break;
+		case 2:
+			cp = "Disc pending";
+			break;
+		case 3:
+			cp = "Connected   ";
+			break;
+		case 4:
+			cp = "Recovery    ";
+			break;
+		default:
+			cp = "Unknown     ";
+			break;
+		}
+		if (pdev = ax25_config_get_name(p->dev)) {
+
+		if (netrom_node_is_connected(p->dest_addr) && (p->st > 0))
+			tprintf("%-9s %-12s %-6s %-6s %-6s\n",
+					p->dest_addr,
+					cp,
+					nr_config_get_dev(nr_config_get_name(p->dest_addr)),
+					p->dev,
+					ax25_config_get_name(p->dev));
+		if (node_is_connected(p->dest_addr))
+			tprintf("%-9s %-12s %-6s %-6s %-6s\n",
+					p->dest_addr,
+					cp,
+					rs_config_get_dev(rs_config_get_name(p->dest_addr)),
+					p->dev,
+					ax25_config_get_name(p->dev));
+
+		}
+		}
+
+	free_proc_ax25(list);
 	free_proc_rs_neigh(nlist);
+	free_proc_nr(nrlist);
+
 	return 0;
 }
 
