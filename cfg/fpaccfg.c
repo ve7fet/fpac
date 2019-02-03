@@ -79,17 +79,19 @@ int main(int ac, char **av)
 		printf("  Address  : %s\n", d->addr);
 		printf("  Port     : %s\n", d->port);
 	}
-
-	for (n = cfg.node ; n != NULL ; n = n->next)
-	{
-		printf("\n");
-		printf("Node       : %s\n", n->name);
-		printf("  Callsign : %s\n", n->call);
-		printf("  DNIC     : %s\n", n->dnic);
-		printf("  Address  : %s\n", n->addr);
-		printf("  Port     : %s\n", n->port);
-		printf("  NoWp     : %d\n", n->nowp);
-	}
+	if(cfg.node)
+		for (n = cfg.node ; n != NULL ; n = n->next)
+		{
+			printf("\n");
+			printf("Node       : %s\n", n->name);
+			printf("  Callsign : %s\n", n->call);
+			printf("  DNIC     : %s\n", n->dnic);
+			printf("  Address  : %s\n", n->addr);
+			printf("  Port     : %s\n", n->port);
+			printf("  NoWp     : %d\n", n->nowp);
+		}
+	else
+		printf("\nWARNING ! No ROSE nodes defined. Check fpac.nodes file\n");
 
 	for (l = cfg.luser ; l != NULL ; l = l->next)
 	{
@@ -108,11 +110,16 @@ int main(int ac, char **av)
 		}
 	}
 
-	printf("\nRoutes :\n");
-	for (r = cfg.route ; r != NULL ; r = r->next)
-	{
-		printf("%-10s : %s\n", r->addr, r->nodes);
+	if( cfg.route) {
+		printf("\nRoutes :\n");
+			for (r = cfg.route ; r != NULL ; r = r->next)
+			{
+				printf("%-10s : %s\n", r->addr, r->nodes);
+			}
 	}
+	else
+		printf("\nWARNING ! No ROSE routes defined. Check fpac.routes file\n");
+
 
 	printf("\nApplications :\n");
 	for (ap = cfg.appli ; ap != NULL ; ap = ap->next)

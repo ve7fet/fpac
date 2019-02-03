@@ -22,7 +22,7 @@
 
 #include "ax25compat.h"
 
-#define BUFLEN 256
+#define BUFLEN 128
 #define NBFRAMES 100
 #define TEMPO 1000
 

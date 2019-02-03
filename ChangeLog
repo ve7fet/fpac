@@ -10,7 +10,16 @@ fpac (4.1.0)
 	debugging easier.
 	* Update Debian packaging files to latest compatibility.
 
- -- Lee Woldanski <ve7fet@tparc.org> Sun, 03 Feb 2019 10:45:00 -0800
+ -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 10:45:00 -0800
+
+fpac (4.0.5)
+	* Current version under development
+	* next one should repare Call command tree (...)
+	* Think about building a default route  (...)
+	* A few includes uncommented to please new C compiler version
+	* calibrate tool repared
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Wed 27 Dec 2017 00:00:00 -0000
 
 fpac (4.0.4)
 	* Current version under development

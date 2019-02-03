@@ -1,7 +1,7 @@
 #ifndef __WP_H
 #define __WP_H
 
-/*#include <netinet/in.h>*/
+#include <netinet/in.h>
 /*
  * #include <linux/ax25.h>
  * #include <linux/rose.h>
