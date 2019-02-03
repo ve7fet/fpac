@@ -2,7 +2,7 @@ AC_PREREQ(2.61)
 AC_INIT(fpac, 4.1.0, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_SRCDIR([pathnames.h])
+AC_CONFIG_SRCDIR([pathnames.h.in])
 AC_CONFIG_MACRO_DIR([m4])
 m4_pattern_allow([AM_PROG_AR])
 AM_PROG_AR

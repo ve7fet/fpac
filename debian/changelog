@@ -5,6 +5,8 @@ fpac (4.1.0) unstable; urgency=low
     them with a .dist extension, so we don't clobber existing files. The
     "make installconf" target is no longer required to install config files.
   * Remove the dependency on the SVNREV file, we're not currently using that.
+  * Change how we do variable substitution in pathnames.h to make debugging 
+    easier.
 
  -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 10:45:00 -0800
 

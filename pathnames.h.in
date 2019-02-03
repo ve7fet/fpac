@@ -1,0 +1,34 @@
+/*From FPAC sources*/
+
+#define FPACCONF        	"@ax25sysconfdir@fpac.conf"
+#define FPACNODES       	"@ax25sysconfdir@fpac.nodes"
+#define FPACROUTES      	"@ax25sysconfdir@fpac.routes"
+#define FPACDNIC        	"@ax25sysconfdir@fpac.dnic"
+#define FPAC_INFO_FILE  	"@ax25sysconfdir@fpac.info"
+#define FPAC_HELLO_FILE 	"@ax25sysconfdir@fpac.hello"
+#define FPAC_HELP_DIR   	"@ax25localstatedir@fpac/help/"
+#define FPACWP 			"@ax25localstatedir@fpac/fpacwp3.dat"
+
+#define FLEX_GT_FILE  		"@ax25localstatedir@flex/gateways"
+#define FLEX_DST_FILE 		"@ax25localstatedir@flex/destinations"
+
+#define DATA_MHEARD_FILE        "@ax25localstatedir@mheard/mheard.dat"
+
+#define DATA_NODE_LOGIN_FILE	"@ax25localstatedir@fpac/loggedin"
+
+#define FLEXD_CONF_FILE 	"@ax25sysconfdir@flexd.conf"
+#define FLEXD_TEMP_PATH 	"@ax25localstatedir@flex/"
+#define AX_ROUTES_FILE 		"@ax25sysconfdir@flexd.routes"
+
+#define CONF_RSPORTS_FILE 	"@ax25sysconfdir@rsports"
+
+#define CONF_AXPORTS_FILE       "@ax25sysconfdir@axports"
+
+#define CONF_APRSLIST_FILE 	"@ax25sysconfdir@aprslist.conf"
+#define DATA_APRSLIST_FILE 	"@ax25localstatedir@aprs.dat"
+
+#define STATLCK 		"@ax25localstatedir@fpac/fpacstat.lck"
+#define STATDAT 		"@ax25localstatedir@fpac/fpacstat.dat"
+#define STATDAY 		"@ax25localstatedir@fpac/fpacstat.day"
+#define STATPID 		"@ax25localstatedir@fpac/fpacstat.pid"
+

@@ -1,3 +1,18 @@
+BUILT_SOURCES = do_subst
+
+pathheader = pathnames.h
+
+edit = sed \
+	-e 's|@ax25sysconfdir[@]|$(AX25_SYSCONFDIR)|g' \
+	-e 's|@ax25localstatedir[@]|$(AX25_LOCALSTATEDIR)|g'
+
+do_subst:
+	@list='$(pathheader)'; for p in $$list; do \
+	$(edit) $(srcdir)/$$p.in >$$p; \
+	done
+
+CLEANFILES = $(pathheader)
+
 SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
 
 install-data-hook:
@@ -13,7 +28,7 @@ install-data-hook:
 	@echo " ***  according to your own BBS callsign and sysop name."
 	@echo
 
-EXTRA_DIST = pathnames.h fpac.spec
+EXTRA_DIST = pathnames.h.in fpac.spec
 
 ACLOCAL_AMFLAGS = -I m4
 
