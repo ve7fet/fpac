@@ -17,7 +17,7 @@ install-data-hook:
 	@echo " ***  according to your own BBS callsign and sysop name."
 	@echo
 
-EXTRA_DIST = pathnames.h fpac.spec SVNREV
+EXTRA_DIST = pathnames.h fpac.spec
 
 ACLOCAL_AMFLAGS = -I m4
 
