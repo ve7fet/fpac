@@ -73,7 +73,6 @@ install-arch:
 	# Add here commands to install the arch part of the package into
 	# debian/tmp.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fpac install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fpac installconf
 
 	dh_install -s
 # Must not depend on anything. This is to be called by

@@ -1,3 +1,13 @@
+fpac (4.1.0) unstable; urgency=low
+
+  * Change the way we install conf files in /etc/ax25. Install the
+    defaults, if they don't already exist. If they do exist, install
+    them with a .dist extension, so we don't clobber existing files. The
+    "make installconf" target is no longer required to install config files.
+  * Remove the dependency on the SVNREV file, we're not currently using that.
+
+ -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 10:45:00 -0800
+
 fpac (4.0.0) unstable; urgency=low
 
   * Release 3.27.19 working code as version 4.00.00 due to significant 

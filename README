@@ -1,7 +1,8 @@
 FPAC
 ====
 
-You most probably want to use latest fpac version from branch repository.
+You most probably want to use the latest fpac version from the Github repository, 
+https://github.com/ve7fet/fpac.
 
 Here is a list of applications dedicated to FPAC X25 node.
 
@@ -44,7 +45,7 @@ PREREQUISITES
 You need to have current libax25 installed (see http://f6bvp.org/configuration6_RPi.html).
 
 Ensure ax25-apps and ax25-tools are also installed. Ensure all configuration files 
-exist (use `make installconf' to install defaults).
+exist.
 
 Installation paths can be changed to suit local requirements, see ./configure --help or INSTALL for 
 details. Ensure you install in the same paths used by libax25, ax25-apps, and ax25-tools.

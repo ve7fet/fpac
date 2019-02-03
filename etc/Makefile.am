@@ -1,4 +1,6 @@
-noinst_SCRIPTS = do_subst
+BUILT_SOURCES = do_subst
+
+AX25_SYSCONFDIR=$(sysconfdir)/ax25
 
 etcfiles = \
 	fpac.dnic \
@@ -13,11 +15,26 @@ etcfiles = \
 	fpac.nodes \
 	fpac.routes
 
-installconf:
+install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(AX25_SYSCONFDIR)
-	@list='$(etcfiles)'; for p in $$list; do \
-	  echo " $(INSTALL_DATA) $$p $(DESTDIR)$(AX25_SYSCONFDIR)/$$p"; \
+	##On a new install, install the config files with their default names. 
+	##On an upgeade, if we find files with the same name, install these ones 
+	##with a .dist suffix, so we don't overwrite any user changed files.
+	@for p in $(etcfiles); do \
+	  if test -f $(DESTDIR)$(AX25_SYSCONFDIR)/$$p; then \
+	  echo " $(DESTDIR)$(AX25_SYSCONFDIR)/$$p already exists; installing new file as $$p.dist"; \
+	  $(INSTALL_DATA) $$p $(DESTDIR)$(AX25_SYSCONFDIR)/$$p.dist; \
+	  else \
+	  echo " Existing $$p not found; installing default $$p"; \
 	  $(INSTALL_DATA) $$p $(DESTDIR)$(AX25_SYSCONFDIR)/$$p; \
+	  fi; \
+	done
+
+#This makes distcheck happy by deleting all our files in /etc/ax25 on make uninstall
+uninstall-hook:
+	@for p in $(etcfiles); do \
+	  $(RM) -f $(DESTDIR)$(AX25_SYSCONFDIR)/$$p; \
+	  $(RM) -f $(DESTDIR)$(AX25_SYSCONFDIR)/$$p.dist; \
 	done
 
 edit = sed \
@@ -30,8 +47,6 @@ do_subst:
 	@list='$(etcfiles)'; for p in $$list; do \
 	$(edit) $(srcdir)/$$p.in >$$p; \
 	done
-
-AX25_SYSCONFDIR=$(sysconfdir)/ax25
 
 CLEANFILES = $(etcfiles)
 

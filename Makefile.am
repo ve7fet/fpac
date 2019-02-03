@@ -1,13 +1,9 @@
-installconf:
-	(cd $(top_srcdir)/etc && $(MAKE) installconf)
-
 SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
 
 install-data-hook:
 	@echo
 	@echo " ***  Read the \`README' if you haven't already done so!"
 	@echo " ***  "
-	@echo " ***  Remember to run \`make installconf' if this is a new installation."
 	@echo " ***  Don't forget to:"
 	@echo " ***    echo \"fpad 10093/tcp # FPAC\" >> /etc/services"
 	@echo " ***    echo \"fpad 10093/udp # FPAC\" >> /etc/services"

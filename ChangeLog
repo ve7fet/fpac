@@ -1,3 +1,14 @@
+fpac (4.1.0)
+	* Change the way we install conf files in /etc/ax25. Install the 
+	defaults, if they don't already exist. If they do exist, install 
+	them with a .dist extension, so we don't clobber existing files. The 
+	"make installconf" target is no longer required to install config
+	files.
+	* Remove the dependency on the SVNREV file, we're not currently using
+	that.
+
+ -- Lee Woldanski <ve7fet@tparc.org> Sun, 03 Feb 2019 10:45:00 -0800
+
 fpac (4.00.00)
 	* Released as version 4.00.00 due to significant changes. Based on 
 	  3.27.19 working code (un-released). Compatibility with versions <3.27.18 
@@ -14,7 +25,7 @@ fpac (4.00.00)
 	* F6BVP added more usage details to wpserv and have wpserv and wplist print full callsign 
 	  including -0 SSID
 	* F6BVP fixed 32/64 bit compatability for libwp and computing of wp record age based on GMT
-	* F6BVP white pages records are now stored with GMT time to prevent timezone problems on 
+	* F6BVP white pages records are now stored with GMT time to prevent timezone problems on
 	  large systems spanning many timezones
 	* F6BVP added more error reporting to wpedit
 	* F6BVP cleaned up some of the debugging messages in fpacwpd
@@ -57,7 +68,7 @@ fpac (3.27.18)
 	* Merged some of Bernard's fixes to the white pages database
 	* Minor cosmetic changes for displaying wp data
 	* Bernard updated the included How-TO to version 1.77
-	* Change the user function to fpac_user to get around a bug when 
+	* Change the user function to fpac_user to get around a bug when
 	  cross-compiling
 
  -- Lee Woldanski <ve7fet@tparc.org> Sun, 28 Aug 2011 10:00:00 -0800
@@ -96,14 +107,14 @@ fpac (3.27.15)
 	* Checked includes with splint (www.splint.org) in sources and commented out unnecessary headers
 	* Verified ./configure header/library checks
 
- -- Lee Woldanski <ve7fet@tparc.org>  Fri, 7 Jan 2011 23:00:00 -0800 
+ -- Lee Woldanski <ve7fet@tparc.org>  Fri, 7 Jan 2011 23:00:00 -0800
 
 fpac (3.27.14-pre32)
 	* FPAC White Page server still in debuging phase for compatibility between 32 and 64 bits systems.
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.14-pre31) 
+fpac (3.27.14-pre31)
 	* Fpacwpd server accepts less than WP_OBSOLETE days old DELETED records. This parameter was 180 and is now 14 days.
 	* More bugs found in White Page server due to added compatibility with faster timers and 64 bit CPUs.
 
@@ -136,14 +147,14 @@ fpac (3.27.14-pre29)
 
 fpac (3.27.14-pre28)
 	* Cosmetic change in Links display.
-	* Last line displayed with command 'ne *' was not correct. Local node had quality = 0. 
+	* Last line displayed with command 'ne *' was not correct. Local node had quality = 0.
 	* A bug corrected in AX.25 library. Please download patched libax25 from :
 	* http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.12-rc2.patched_f6bvp.tar.bz2
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
 fpac (3.27.14-pre27)
-	* fpacnode User command displayed an error message when no NetRom module was loaded. Corrected. 
+	* fpacnode User command displayed an error message when no NetRom module was loaded. Corrected.
 	* Thanks to Charlie K4GBB for reporting this issue.
 
  -- Bernard Pidoux <f6bvp@free.fr>
@@ -162,7 +173,7 @@ fpac (3.27.14-pre25)
  -- Bernard Pidoux <f6bvp@free.fr>
 
 fpac (3.27.14-pre24)
-	* node/gateway.c node_is_connected() was buggy. Corrected (in pre-23) 
+	* node/gateway.c node_is_connected() was buggy. Corrected (in pre-23)
 	* batch /usr/local/bin/versions is provided for easier SYSOPs remote system maintenance.
 	* file etc/itu.dnic is provided for Sysop information
 	* added status of ROSE connexion level in fpacnode user command
@@ -170,7 +181,7 @@ fpac (3.27.14-pre24)
  -- Bernard Pidoux <f6bvp@free.fr>
 
 fpac (3.27.14-pre23)
-	* Added the following three letters symbolic DNIC list in /etc/ax25/fpac.dnic 
+	* Added the following three letters symbolic DNIC list in /etc/ax25/fpac.dnic
 	  FRA 2080
 	  ESP 2120
 	  USA 3100
@@ -245,10 +256,10 @@ fpac (3.27.14-pre16)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.14-pre15) 
+fpac (3.27.14-pre15)
 	* FPAC log file name changed. Now LOG=/var/log/fpac.log
 	* cosmetic change in AX.25 L3 sessions and transits for better readability
-	* increased fpacwpd event timeout 
+	* increased fpacwpd event timeout
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
@@ -301,12 +312,12 @@ fpac (3.27.13)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.12) 
+fpac (3.27.12)
 	* A dedicated subroutine patched into Linux kernel rose module enables alternate routing capability.
 	* Now, a connect request or a Level 3 transit is automatically redirected to a connected
 	  adjacent neighbour that routes the target rose destination address.
 	* Whole adjacent node list is screened until rose finds a route match, including alternate routes.
-	* It was time to change WP version to limit down the size of WP update messages. 
+	* It was time to change WP version to limit down the size of WP update messages.
 	* WP database deleted records have been removed and the database name changed to exclude
 	  contamination by nodes running old WP version.
 	* make.defs compilation option -Wstrick-prototypes re-enabled
@@ -315,11 +326,11 @@ fpac (3.27.12)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.11) 
+fpac (3.27.11)
 	* Improved Traceroute algorithm (command TR). Now it explores the whole routing table to find a
 	  connected node routing the requested address. Enter either a 10 digit rose address or a 6 digit
 	  rose address (local country DNIC is assumed) or a callsign (it must be present in WP database to
-	  obtain rose address to trace). 
+	  obtain rose address to trace).
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
@@ -329,7 +340,7 @@ fpac (3.27.10)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.9) 
+fpac (3.27.9)
 	* memory status display is now in true Kb.
 	* doc/html/ includes Linux FPAC Flash mini-HOWTO to install FPAC on a bootable USB key
 
@@ -350,7 +361,7 @@ fpac (3.27.7)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.6) 
+fpac (3.27.6)
 	* release candidate - August 2007
 	* Status now reports correctly memory information on 2.6 (and 2.4 ?) kernels
 	* corrected alias bug (SSID was truncated to one character)
@@ -359,7 +370,7 @@ fpac (3.27.6)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.27.5) 
+fpac (3.27.5)
 	* release candidate for version 3.27
 	* compatible with kernel 2.6 that includes Jean-Paul F6FBB alternate ROSE routes patch
 	* connection request use any of the three adjacent nodes route available.
@@ -372,7 +383,7 @@ fpac (3.27.5)
 
  -- Bernard Pidoux <f6bvp@free.fr>
 
-fpac (3.26) 
+fpac (3.26)
 	* floppy disk image version released
 
  -- Jean-Paul Roubelat <jpr@f6fbb.org>
@@ -629,21 +640,22 @@ fpac (2.01n)
 fpac (2.01m)
 	* The distribution tree is reorganized. Makefiles have been rewritten.
 	* Only one lib : libfpac.a in static or libfpac.so in dynamic more
-  	  libax25.so is distributed
-	* added monitor program. almost identical to "listen" but it is possible 
-  	  to end with a <return> character and it does not use curses.
+	  libax25.so is distributed
+	* added monitor program. almost identical to "listen" but it is possible
+	  to end with a <return> character and it does not use curses.
 
  -- Jean-Paul Roubelat <jpr@f6fbb.org>
 
 fpac (2.01l)
-	* packet buffer of the pad increased to 4096 bytes. This version only works 
-	  with the ROSE-L3 including the M-BIT segmentation. (rose_lb_mbit.tgz)
+	* packet buffer of the pad increased to 4096 bytes. This version only works
+	  with the ROSE-L3 including the M-BIT segmentation.
+	  (rose_lb_mbit.tgz)
 
  -- Jean-Paul Roubelat <jpr@f6fbb.org>
 
 fpac (2.01k)
 	* usage of the port address (if exists) instead of the node address for users
-  	  connection and wp update
+	  connection and wp update
 
  -- Jean-Paul Roubelat <jpr@f6fbb.org>
 
