@@ -86,8 +86,6 @@ static int get_tcp_callsign(user_t *pl, char *str, int len);
 
 #define BUFLEN 5120
 
-/* #define MAXCOVER 32 */ 
-
 void clear_nodes()
 {
 	ax25_address rose_call;
@@ -468,7 +466,7 @@ int main(int argc, char **argv)
 	/* Open AX25 L3 sockets for coverage */
 	for (i = 1, o = cfg.cover ; o != NULL ; i++, o = o->next)
 	{
-		if (i == MAXCOVER)
+		if (i >= MAXCOVER)
 			break;
 			
 		strcpy(address, cfg.fulladdr);

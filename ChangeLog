@@ -16,6 +16,8 @@ fpac (4.0.4)
 	* Current version under development
 	* should repare Call command tree (...)
 	* Should include default route  (...)
+	* After Tom SP2L remark "syslog(LOG_INFO ..." line has been commented 
+	out in order to save space on disk.
 
  -- Bernard Pidoux <f6bvp@free.fr>  Tue, 05 Jan 2016 00:00:00 -0000
 

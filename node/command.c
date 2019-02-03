@@ -2043,7 +2043,7 @@ int do_status(int argc, char **argv)
 			}
 			++n;
 		}
-		tprintf("FPAC adjacents   : %d / %d maximum\n", n, MAXCOVER);
+		tprintf("FPAC adjacents   : %d\n", n);
 		free_proc_rs_neigh(rsnelist);
 	}
 

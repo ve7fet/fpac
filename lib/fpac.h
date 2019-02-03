@@ -37,7 +37,7 @@ typedef struct node_d
 	struct node_d *next;
 } node_t;
 
-#define MAXCOVER	32	/* Maximum number of adjacent nodes	*/
+#define MAXCOVER	64	/* Maximum number of adjacent nodes	*/
 
 /* Local user */
 typedef struct luser_d
