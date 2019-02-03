@@ -9,10 +9,77 @@ fpac (4.1.0) unstable; urgency=medium
   * Change how we do variable substitution in pathnames.h to make
     debugging easier.
   * Update Debian packaging files to latest compatibility.
+  * Fail configure script if any of the required header files are
+    missing.
 
  -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 10:45:00 -0800
 
-fpac (4.0.0)
+fpac (4.0.5) unstable; urgency=low
+
+  * Current version under development
+  * next one should repair Call command tree (...)
+  * Think about building a default route  (...)
+  * A few includes uncommented to please new C compiler version
+  * calibrate tool repared
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Wed, 27 Dec 2017 00:00:00 -0000
+
+fpac (4.0.4) unstable; urgency=low
+
+  * Current version under development
+  * should repair Call command tree (...)
+  * Should include default route  (...)
+  * After Tom SP2L remark "syslog(LOG_INFO ..." line has been commented
+    out in order to save space on disk.
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Tue, 05 Jan 2016 00:00:00 -0000
+
+fpac (4.0.3) unstable; urgency=low
+
+  * wpcmp includes an usage message and no more segfault.
+  * README no more displays issues report, now in GIT repository issues
+  * If WP server returns 0 records lets check local WP database
+  * removing ++pos in gateway.c avoids segmentation faults
+  * Misplaced comment
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Tue, 29 Dec 2015 00:00:00 -0000
+
+fpac (4.0.2) unstable; urgency=low
+
+  * Do not display local nodes in routes. They are listed in Links
+  * Directory m4 is needed
+  * Added to fpacnode L(inks) display of connected adjacents, ports, Ifaces and devices
+  * fpacnode L(inks) only list connected links (U(sers) command displays
+    connect status)
+  * Added Rose and NetRom ports listing in P(ort) fpacnode command
+  * Added netrom port list to fpacnode 'p(ort)' command
+  * Allowed one more character for port name in fpacnode function m(heard)
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Fri, 25 Dec 2015 00:00:00 -0000
+
+fpac (4.0.1-beta) unstable; urgency=low
+
+  * failure of call to ioctl returns a <0 value in fpad.c and fpacconf.c
+  * corrected typo SIOCRSSL2CALL in fpad.c and fpacconf.c
+  * removed CR-LF end of lines in this file using DOS2UNIX utility
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Thu, 29 Jan 2015 00:00:00 -0000
+
+fpac (4.0.1) unstable; urgency=low
+
+  * Tomi made a mistake in his code by not including a term_handler.
+    I suppose he figured grouping it in the
+    signal_handler routine would be enough but it isn't. Node may receive
+    the signal but it doesn't know quite enough to terminate the session
+    thus leaving it open. Adding the term_handler will insure proper closure
+    of the node. Newer compilers may accept this now, but I am not sure.
+    Considering G4APL's node GB7CIP was hit by this exploit last year I can
+    only think it still exists. I discovered this bug quite a while ago but
+    didn't understand what was going on until I did a trace via gdb.
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Wed, 28 Jan 2015 00:00:00 -0000
+
+fpac (4.0.0) unstable; urgency=low
 
   * Released as version 4.00.00 due to significant changes. Based on
     3.27.19 working code (un-released). Compatibility with versions <3.27.18
