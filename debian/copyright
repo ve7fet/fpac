@@ -1,39 +1,52 @@
-This package was debianized by Lee Woldanski <ve7fet@tparc.org> on
-Thu, 20 Nov 2014 10:00:00 -0800.
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: fpac
+Source: https://github.com/ve7fet/fpac 
 
-It was downloaded from http://fpac.googlecode.com 
+Files: *
+Copyright: 1997-2011 Jean-Paul Roubelat - F6FBB <jpr@f6fbb.org>
+           2006-2019 Bernard Pidoux - F6BVP <f6bvp@free.fr>
+           2011-2019 Lee Woldanski - VE7FET <ve7fet@tparc.org>
+           2011-2019 Charles Schuman - K4GBB <k4gbb1@embarqmail.com>
+           2011 Leo Lastrucci - IZ5FSA <iz5fsa@gmail.com>
+License: LGPL-3.0+
 
-Upstream Authors:
+Files: md5.c md5.h
+Copyright: 1991-1992 RSA Data Security, Inc.
+License: RSA_Data_Security
 
-    Jean-Paul Roubelat jpr@f6fbb.org
-    Bernard Pidoux f6bvp@free.fr
-    Lee Woldanski ve7fet@tparc.org
-    Charles Schuman k4gbb1@embarqmail.com
-    Leo Lastrucci iz5fsa@gmail.com
+Files: debian/*
+Copyright: 2019 Lee Woldanski <ve7fet@tparc.org>
+License: LGPL-3.0+
 
-Copyright:
+License: RSA_Data_Security
+ License to copy and use this software is granted provided that it
+ is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+ Algorithm" in all material mentioning or referencing this software
+ or this function.
+ .
+ License is also granted to make and use derivative works provided
+ that such works are identified as "derived from the RSA Data
+ Security, Inc. MD5 Message-Digest Algorithm" in all material
+ mentioning or referencing the derived work.
+ .
+ RSA Data Security, Inc. makes no representations concerning either
+ the merchantability of this software or the suitability of this
+ software for any particular purpose. It is provided "as is"
+ without express or implied warranty of any kind.
 
-    Copyright (C) 2014 Bernard Pidoux
-
-License:
-
-    This package is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this package; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
-On Debian systems, the complete text of the GNU Lesser General
-Public License can be found in `/usr/share/common-licenses/LGPL'.
-
-The Debian packaging is (C) 2012, Lee Woldanski <ve7fet@tparc.org> and
-is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
-
+License: LGPL-3.0+
+ This package is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in "/usr/share/common-licenses/LGPL-3".

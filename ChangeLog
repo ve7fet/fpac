@@ -8,6 +8,7 @@ fpac (4.1.0)
 	that.
 	* Change how we do variable substitution in pathnames.h to make
 	debugging easier.
+	* Update Debian packaging files to latest compatibility.
 
  -- Lee Woldanski <ve7fet@tparc.org> Sun, 03 Feb 2019 10:45:00 -0800
 

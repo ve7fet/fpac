@@ -1,24 +1,69 @@
-fpac (4.1.0) unstable; urgency=low
+fpac (4.1.0) unstable; urgency=medium
 
   * Change the way we install conf files in /etc/ax25. Install the
     defaults, if they don't already exist. If they do exist, install
     them with a .dist extension, so we don't clobber existing files. The
     "make installconf" target is no longer required to install config files.
-  * Remove the dependency on the SVNREV file, we're not currently using that.
-  * Change how we do variable substitution in pathnames.h to make debugging 
-    easier.
+  * Remove the dependency on the SVNREV file, we're not currently using
+    that.
+  * Change how we do variable substitution in pathnames.h to make
+    debugging easier.
+  * Update Debian packaging files to latest compatibility.
 
  -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 10:45:00 -0800
 
-fpac (4.0.0) unstable; urgency=low
+fpac (4.0.0)
 
-  * Release 3.27.19 working code as version 4.00.00 due to significant 
-    changes. Compatibility with versions <3.27.18 not guaranteed.
+  * Released as version 4.00.00 due to significant changes. Based on
+    3.27.19 working code (un-released). Compatibility with versions <3.27.18
+    is not guaranteed
+  * Cleaned up the SVN code base
+  * Moved the help files from /etc/ax25/fpac/help to /var/ax25/fpac/help
+    for better policy compliance and less security risk
+  * Added some of K4GBB's scripts: ax25, ax25-up, ax25-down, ax25parms
+  * Remove the obsolete mkissattach code (and kiss folder)
+  * K4GBB added a buch of man pages for the binaries created by this software
+  * Commented some more of the source
+  * F6BVP repaired the -o option and added -d (debug) option in mon_tcp
+  * F6BVP added a usage message to call_tcp
+  * F6BVP added more usage details to wpserv and have wpserv and wplist print full callsign
+    including -0 SSID
+  * F6BVP fixed 32/64 bit compatability for libwp and computing of wp record age based on GMT
+  * F6BVP white pages records are now stored with GMT time to prevent timezone problems on
+    large systems spanning many timezones
+  * F6BVP added more error reporting to wpedit
+  * F6BVP cleaned up some of the debugging messages in fpacwpd
+  * F6BVP added a patch to wpedit to allow editing of a record despite age/date
+  * K4GBB cleaned up the output of the fpaccfg utility
+  * F6BVP fixed wpedit and wpmaint utilities to better handle old records
+  * Shortened times that stale whitepages records are held before being discarded
+  * F6BVP improved the whitepages exchanges between nodes to speed up and reduce overhead
+  * F6BVP modified wpmaint to recover db from a backup if the working file is corrupt/missing
+  * F6BVP modified wpmaint to allow node records to be deleted or erased (like user records)
+  * K4GBB fixed a bug in wp_set() not initializing wp->date correctly
+  * F6BVP fixed how time(NULL) is used to set times properly
+  * F6BVP made some changes to wplist to change display and command line handling
+  * F6BVP fixed a segfault in call_tcp
+  * F6BVP patched gateway.c to prevent a fpad segfault
+  * F6BVP modified wpedit to create a new record with the current date and time
+  * F6BVP modified fpacconf and fpacnode to warn when routes aren't defined instead of
+    aborting with an error to allow fpacnode to run in standalone mode
+  * Patch from SP2LOB fixes error in fpacnode welcome message
+  * F6BVP modified fpacnode to accept NetRom callsigns with SSID=0 or no SSID
+  * F6BVP modified monitor to stop if no ax.25 ports are defined, clean up some error
+    messages, report version and build date, and not do frame dump for CLEAR REQUEST and
+    CLEAR CONFIRMATION
+  * F6BVP fixed a segfault in fpacwpd when verbose debugging is turned on and when
+    context[client] was empty, added build date and version, also removed wp_send_pdu()
+    in fpacwpd and wp_flush_pdu() in WaitEvent() to avoid crazy tx loops (race condition)
+  * F6BVP modified fpacnode to force callsign when using call to upper case and add
+    -0 SSID if missing
+  * K4GBB added now_date() to wplist, wpserve, and wpmaint
+  * F6BVP modified wp to not close wp socket if wp_set() wp_receive-pdu() error
+  * F6BVP modified fpacconf to check if fpac.conf, fpac.nodes, and fpac.routes have been
+    modified
+  * F6BVP added build date to wpmaint
+  * F6BVP modified fpacnode to accept callsign as a command line argument
+  * F6BVP fpacwpd rejects a WP record if it is deleted and callsign not in database
 
  -- Lee Woldanski <ve7fet@tparc.org>  Thu, 20 Nov 2014 10:00:00 -0800
-
-fpac (3.27.18) unstable; urgency=low
-
-  * Initial Release.
-
- -- Lee Woldanski <ve7fet@tparc.org>  Mon, 12 Feb 2012 10:00:00 -0800

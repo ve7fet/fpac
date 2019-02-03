@@ -1,0 +1,10 @@
+fpac for Debian
+--------------
+
+Run the bootstrap file ./autogen.sh to re-create required Autotools 
+files, if necessary, before running ./configure
+
+See ./configure --help and INSTALL for supported configure flags.
+
+ -- Lee Woldanski <ve7fet@tparc.org>  Sun, 03 Feb 2019 11:40:24 -0800
+
