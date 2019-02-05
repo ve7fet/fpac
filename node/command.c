@@ -2188,7 +2188,7 @@ int do_dest(int argc, char **argv)
 {
 	struct flex_dst *fdst, *p;
 	struct flex_gt *flgt, *q;
-	char ssid[8];
+	char ssid[12];
 	int i = 0;
 	int found = 0;
 

@@ -10,6 +10,7 @@
 */
  
 #include <stdio.h>
+#include <errno.h>
 #include <termios.h>
 #include <ctype.h>
 #include <fcntl.h>
@@ -151,7 +152,11 @@ int main(int argc, char **argv)
 	{
 		if (verbose)
 			printf("Sending CR\n");
-		write(fd, "\r", 1);
+		if ((write(fd, "\r", 1)) < 0)
+		{
+			if (errno)
+				perror("FPAC write error:");
+		}
 		sleep(period);
 	}
 }

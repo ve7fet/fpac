@@ -219,7 +219,11 @@ int main(int argc, char **argv)
 
 		if (type == AF_UNSPEC)
 			cr2lf(buf, len);
-		write(1, buf, len);
+		if ((write(1, buf, len)) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 	}
 
 	first = 1;
@@ -251,7 +255,11 @@ int main(int argc, char **argv)
 				if (strstr(buf, "allsig") || strstr(buf, "login"))
 				{
 					strcat(caller, "\r");
-					write(fd, caller, strlen(caller));
+					if ((write(fd, caller, strlen(caller))) < 0)
+					{
+                				if (errno)
+                        			perror("FPAC write error:");
+        				}
 					first = 0;
 				}
 			}

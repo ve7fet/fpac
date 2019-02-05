@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
-
+#include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,7 +201,10 @@ int main(int argc, char **argv)
 		if (color)
 			refresh();
 	}
-	read(STDIN_FILENO, buffer, BUFSIZE);
+	if ((read(STDIN_FILENO, buffer, BUFSIZE)) < 0)
+	{
+		perror("FPAC read error:");
+	}
 /* DEBUG F6BVP : wash out buffer */
 		for (i=0; i < BUFSIZE; i++)
 			buffer[i] = 0;

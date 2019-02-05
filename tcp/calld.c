@@ -41,7 +41,11 @@ void alarm_handler(int sig)
 
 void err(char *message)
 {
-	write(STDOUT_FILENO, message, strlen(message));
+	if ((write(STDOUT_FILENO, message, strlen(message))) < 0)
+	{
+                if (errno)
+                        perror("FPAC write error:");
+        }
 	sleep(1);
 	exit(1);
 }
@@ -116,7 +120,11 @@ static char *special_calls(char *ptr)
 			if (ok)
 			{
 				sprintf(str, "*** WP routing via %s\r", fpac2asc(&wpaddr.srose_addr));
-				write(STDOUT_FILENO, str, strlen(str));
+				if ((write(STDOUT_FILENO, str, strlen(str))) < 0)
+				{
+         		       		if (errno)
+                        		perror("FPAC write error:");
+        			}
 				sprintf(str, "%s %s", desti, rose_ntoa(&wpaddr.srose_addr));
 				return str;
 			}
@@ -321,7 +329,11 @@ int main(int argc, char **argv)
 		++sender;
 
 	sprintf(address, "*** Connecting %s\r", ptr);
-	write(STDOUT_FILENO, address, strlen(address));
+	if ((write(STDOUT_FILENO, address, strlen(address))) < 0)
+	{
+                if (errno)
+                        perror("FPAC write error:");
+        }
 
 	/*
 	 *
@@ -497,7 +509,11 @@ int main(int argc, char **argv)
 	alarm(0);
 
 	sprintf(buffer, "*** Connection done\r");
-	write(STDOUT_FILENO, buffer, strlen(buffer));
+	if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+	{
+                if (errno)
+                        perror("FPAC write error:");
+        }
 
 	/*
 	 * Loop until one end of the connection goes away.
@@ -543,7 +559,11 @@ int main(int argc, char **argv)
 					strcpy(address, "\r*** Disconnected\r");
 				err(address);
 			}
-			write(STDOUT_FILENO, buffer, n);
+			if ((write(STDOUT_FILENO, buffer, n)) < 0)
+			{
+                		if (errno)
+                        	perror("FPAC write error:");
+        		}
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &read_fd)) 
@@ -581,7 +601,11 @@ int main(int argc, char **argv)
 					strcpy(address, "\r*** Disconnected\r");
 				err(address);
 			}
-			write(s, buffer, n);
+			if ((write(s, buffer, n)) < 0)
+			{
+                		if (errno)
+                        	perror("FPAC write error:");
+        		}
 		}
 	}
 

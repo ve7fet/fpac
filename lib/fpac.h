@@ -122,7 +122,7 @@ typedef struct
 	char	address[7];		/* Default address of the node */
 	char	fulladdr[11];	/* Node full address */
 	char	def_port[20];	/* Default port */
-	char	password[256];	/* Password */
+	char	password[243];	/* Password */
 	char	option[20];		/* Champ option */
 	node_t	*node;			/* Head of the adjacent nodes list */
 	alias_t	*alias;			/* Head of the alias callsigns list */

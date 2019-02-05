@@ -216,7 +216,11 @@ static int msg(user_t *u, char *fmt, ...)
 		break;
 
 	}
-	write(u->fd, ptr, len);
+	if ((write(u->fd, ptr, len)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 
 	return 1;
 }
@@ -802,12 +806,20 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 					{
 						buf[0] = 0xf0; /* Pid */
 						sprintf(buf+1, "*** Connection done\r");
-						write(u->peer->fd, buf, strlen(buf));
+						if ((write(u->peer->fd, buf, strlen(buf))) < 0)
+						{
+					                if (errno)
+                        				perror("FPAC write error:");
+        					}		
 					}
 					
 					while ((b = get_queue(u)) != NULL)
 					{
-						write(u->fd, b->data, b->len);
+						if ((write(u->fd, b->data, b->len)) < 0)
+						{
+                					if (errno)
+                        				perror("FPAC write error:");
+        					}
 						free_buf(b);
 					}
 				}
@@ -872,7 +884,11 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 							rose_cause.diagnostic, 
 							reason(rose_cause.cause, rose_cause.diagnostic));
 					}
-					write(u->peer->fd, buffer, strlen(buffer));
+					if ((write(u->peer->fd, buffer, strlen(buffer))) < 0)
+					{
+                				if (errno)
+                        			perror("FPAC write error:");
+        				}
 					
 				}
 				/* Local disconnection */
@@ -889,7 +905,11 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 						sprintf(buffer+1, "*** No answer from %s\r",
 							u->user);
 					}
-					write(u->peer->fd, buffer, strlen(buffer));
+					if ((write(u->peer->fd, buffer, strlen(buffer))) < 0)
+					{
+         				        if (errno)
+                        			perror("FPAC write error:");
+        				}
 				}
 
 				end(u);
@@ -1388,7 +1408,11 @@ static int new_l2_connection(int fd, int verbose)
 			strcat(text, str);
 		}
 		strcat(text, "\r");
-		write(new, text, strlen(text));
+		if ((write(new, text, strlen(text))) < 0)
+		{
+         	       if (errno)
+                       perror("FPAC write error:");
+        	}
 
 
 	}
@@ -1454,7 +1478,11 @@ static int new_l2_connection(int fd, int verbose)
 					rose_cause.cause, 
 					rose_cause.diagnostic, 
 					reason(rose_cause.cause, rose_cause.diagnostic));
-				write(new, text, strlen(text));
+				if ((write(new, text, strlen(text))) < 0)
+				{
+         			        if (errno)
+                        		perror("FPAC write error:");
+        			}
 			}
 			close (rsfd);
 			end(pl2);
@@ -1954,7 +1982,11 @@ static int new_alias_connection(alias_t *a, int verbose)
 		}
 		*/
 		strcat(text, "\r");
-		write(new, text, strlen(text));
+		if ((write(new, text, strlen(text))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 	}
 
 	/* Start the L3 connection */
@@ -2036,7 +2068,11 @@ static int new_alias_connection(alias_t *a, int verbose)
 					rose_cause.cause, 
 					rose_cause.diagnostic, 
 					reason(rose_cause.cause, rose_cause.diagnostic));
-				write(new, text, strlen(text));
+				if ((write(new, text, strlen(text))) < 0)
+				{
+                			if (errno)
+                        		perror("FPAC write error:");
+        			}
 			}
 			close (rsfd);
 			end(pl2);
@@ -2452,7 +2488,11 @@ static int new_tcp_connection(int fd, int verbose)
 	}
 
 	ptr = "Callsign:";
-	write(new, ptr, strlen(ptr));
+	if ((write(new, ptr, strlen(ptr))) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 
 	pl2 = calloc(sizeof(user_t), 1);
 	pl2->fd = new;

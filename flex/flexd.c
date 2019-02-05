@@ -485,7 +485,11 @@ int download_dest(char *gateway, char *fname)
 	if ((s = socket(AF_AX25, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "flexd connect: cannot open AX.25 socket, %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		return (-1);
 	}
 
@@ -502,7 +506,11 @@ int download_dest(char *gateway, char *fname)
 	if (bind(s, (struct sockaddr *) &sockaddr, addrlen) != 0) {
 		sprintf(buffer, "flexd connect: cannot bind AX.25 socket, %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		close(s);
 		return (-1);
 	}
@@ -516,7 +524,11 @@ int download_dest(char *gateway, char *fname)
 	if (fcntl(s, F_SETFL, O_NONBLOCK) == -1) {
 		sprintf(buffer, "flexd connect: fcntl on socket: %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		close(s);
 		return (-1);
 	}
@@ -524,7 +536,11 @@ int download_dest(char *gateway, char *fname)
 	if (ax25_aton_arglist((const char **) dlist, &sockaddr.ax25) == -1) {
 		sprintf(buffer,
 				"flexd connect: invalid destination callsign or digipeater\n");
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		close(s);
 		return (-1);
 	}
@@ -550,7 +566,11 @@ int download_dest(char *gateway, char *fname)
 			break;
 		}
 
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		close(s);
 		return (1);
 	}
@@ -584,7 +604,11 @@ int download_dest(char *gateway, char *fname)
                                 strlwr(cp);
                                 sprintf(buffer, "flexd connect: Failure with %s error %d %s\n",
 						gateway, ret, cp);
-                                write(STDOUT_FILENO, buffer, strlen(buffer));
+                                if ((write(STDOUT_FILENO, buffer, strlen(buffer))) < 0)
+				{
+                			if (errno)
+                        		perror("FPAC write error:");
+        			}
                                 free(cp);
                                 close(s);
                                 return 1;
@@ -641,7 +665,11 @@ int download_dest(char *gateway, char *fname)
 
 		if (cmd_ack != 0) {
 			if (cmd_send < 3) {
-				write(s, commands[cmd_send], 2);
+				if ((write(s, commands[cmd_send], 2)) < 0)
+				{
+                			if (errno)
+                        		perror("FPAC write error:");
+        			}
 				cmd_send++;
 			}
 		}
