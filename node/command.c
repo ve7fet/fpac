@@ -65,7 +65,7 @@ int wpcheck(void)
 		}
 	}
 	tprintf("FPAC White Pages : %d\n", n);
-	free(wp);
+//	free(wp);
 
 	return (0);
 }
@@ -1461,7 +1461,7 @@ int do_links(int argc, char **argv)
 
 	free_proc_ax25(list);
 	free_proc_rs_neigh(nlist);
-	free_proc_nr(nrlist);
+//	free_proc_nr(nrlist);
 
 	return 0;
 }
