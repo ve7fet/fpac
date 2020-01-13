@@ -1,3 +1,26 @@
+fpac (4.1.2-beta)
+
+	* fpacnode sometimes crashed due to not needed free()
+	when "s" and "l" commands were repeated.
+
+	* 
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Sun, 12 Jan 2019 00:00:00 -0000
+
+fpac (4.1.1-beta)
+	* Reduce password buffer size from 256 to 243 to prevent buffer
+	overflow compiler warning
+	* Increase ssid buffer size from 8 to 12 to prevent buffer overflow
+	compiler warning
+	* Increase call buffer size from 10 to 13 ro prevent buffer overflow
+	complier warning
+	* Add error handling to a bunch of write calls to fix compiler
+	warnings
+	* Add error handling to chdir in wp/daemon.c
+	* Add error handling to chmod, chown, setuid, and setgid in
+	fpacshell.c
+	* Add error handling to read in listen.c
+
 fpac (4.1.0)
 	* Change the way we install conf files in /etc/ax25. Install the 
 	defaults, if they don't already exist. If they do exist, install 
