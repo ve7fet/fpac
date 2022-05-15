@@ -1,3 +1,26 @@
+fpac (4.1.3-beta)
+
+	* Removed free() crashing fpacnode when repeated
+	* Removed configure.ac check for sys/io.h
+	* Removed tools/Makefile.am references to remote (parallel port use)
+	* Removed node/fpacnode #define extern and declare missing table and pointers instead
+	* Added more verbose error messages
+	* Changed rose1 port name to rose0 in wp_listen()
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Tues, 12 Jan 2022 00:00:00 -0000
+
+fpac (4.1.2-beta) Unpublished
+
+	* fpacnode sometimes crashed due to redundant free()
+	when "s" and "l" commands were repeated.
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Sun, 12 Jan 2019 00:00:00 -0000
+
+fpac (4.1.1-beta)
+	* Reduce password buffer size from 256 to 243 to prevent buffer
+
+ -- Bernard Pidoux <f6bvp@free.fr>  Sat, 1 Jan 2021 00:00:00 -0000
+
 fpac (4.1.1-beta)
 	* Reduce password buffer size from 256 to 243 to prevent buffer
 	overflow compiler warning
@@ -754,3 +777,4 @@ fpac (2.01h)
 	* Added the client information for the white pages
 
  -- Jean-Paul Roubelat <jpr@f6fbb.org>
+
