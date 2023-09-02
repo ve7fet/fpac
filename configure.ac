@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT(fpac, 4.1.0, f6bvp@free.fr)
+AC_INIT(fpac, 4.1.3, f6bvp@free.fr)
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h.in])
@@ -37,7 +37,7 @@ AC_CHECK_LIB(m, cos, MATH_LIB="-lm", AC_MSG_ERROR([Could not find the math libra
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([assert.h ctype.h errno.h malloc.h netdb.h paths.h signal.h stdlib.h string.h syslog.h termios.h unistd.h utmp.h sys/fcntl.h sys/file.h sys/io.h sys/ioctl.h sys/ipc.h sys/mman.h sys/param.h sys/socket.h sys/stat.h sys/time.h sys/un.h sys/utsname.h sys/types.h arpa/inet.h net/ethernet.h net/if.h net/if_arp.h netinet/in.h netinet/ip_icmp.h netinet/ip.h linux/if_ether.h],,AC_MSG_ERROR([Required headers missing; aborting]))
+AC_CHECK_HEADERS([assert.h ctype.h errno.h malloc.h netdb.h paths.h signal.h stdlib.h string.h syslog.h termios.h unistd.h utmp.h sys/fcntl.h sys/file.h sys/ioctl.h sys/ipc.h sys/mman.h sys/param.h sys/socket.h sys/stat.h sys/time.h sys/un.h sys/utsname.h sys/types.h arpa/inet.h net/ethernet.h net/if.h net/if_arp.h netinet/in.h netinet/ip_icmp.h netinet/ip.h linux/if_ether.h],,AC_MSG_ERROR([Required headers missing; aborting]))
 
 # Checks for working glibc 2.1 headers
 AC_MSG_CHECKING(for working netax25/ax25.h header file)
