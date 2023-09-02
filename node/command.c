@@ -65,7 +65,7 @@ int wpcheck(void)
 		}
 	}
 	tprintf("FPAC White Pages : %d\n", n);
-	free(wp);
+/*	free(wp); */
 
 	return (0);
 }
@@ -975,8 +975,8 @@ int do_manage_routes(int argc, char **argv)
 		node_msg("routes : address error (4 to 10 digits)");
 		return 0;
 	}
-
-	strncpy(nodeaddr, argv[2], len);
+	else
+		strncpy(nodeaddr, argv[2], len);
 
 	if (argc < 4)
 	{
@@ -1461,7 +1461,7 @@ int do_links(int argc, char **argv)
 
 	free_proc_ax25(list);
 	free_proc_rs_neigh(nlist);
-	free_proc_nr(nrlist);
+/*	free_proc_nr(nrlist); */
 
 	return 0;
 }
@@ -2188,7 +2188,7 @@ int do_dest(int argc, char **argv)
 {
 	struct flex_dst *fdst, *p;
 	struct flex_gt *flgt, *q;
-	char ssid[8];
+	char ssid[12];
 	int i = 0;
 	int found = 0;
 
