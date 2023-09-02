@@ -27,15 +27,15 @@
 
 #include <arpa/inet.h>
 
-/* Variables are not extern in main */
-#define extern
-
 #include "config.h"
 #include "ax25compat.h"
 #include "wp.h"
 #include "node.h"
 #include "io.h"
 
+char HostName[40];
+char *NrPort;
+struct cmd *Syscmds;
 
 int LogLevel = LOGLVL_ERROR;
 long IdleTimeout = 900L;
@@ -275,7 +275,11 @@ int main(int argc, char **argv)
 
 	if (init_io(User.fd, paclen, p) == -1) 
 	{
-		write(User.fd, "Error initializing I/O.\r\n", 25);
+		if ((write(User.fd, "Error initializing I/O.\r\n", 25)) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 		fpaclog(LOGLVL_ERROR, "Error initializing I/O");
 		return 1;
 	}
