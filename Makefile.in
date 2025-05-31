@@ -336,9 +336,10 @@ edit = sed \
 	-e 's|@ax25sysconfdir[@]|$(AX25_SYSCONFDIR)|g' \
 	-e 's|@ax25localstatedir[@]|$(AX25_LOCALSTATEDIR)|g'
 
-CLEANFILES = $(pathheader)
+
+#CLEANFILES = $(pathheader)
 SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
-EXTRA_DIST = pathnames.h.in fpac.spec
+EXTRA_DIST = pathnames.h fpac.spec
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
@@ -741,7 +742,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
