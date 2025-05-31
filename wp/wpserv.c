@@ -52,13 +52,25 @@ static int wp_cmp(const void *p1, const void *p2);
 
 void now_date(char *buf);
 
+int usage(void)
+ {
+	printf("\n");
+	printf("Wpserv (version %s)\n",__DATE__);
+	printf("usage: wpserv [-l<nr> display nr records] [-n<nr> display nr nodes] [mask<*>]\n");
+	printf("              [-a sort by address] [-r reverse sort] [-c remove new line from output]\n");
+	printf("\n");
+	exit (0);
+}
+
 int main(int ac, char **av)
 {
 	int p;
 	int ok;
+	int opt = 0;
 	int pos;
 	int nb;
-	int limit = 10;
+	int nbr = 0;
+	int limit = 30;
 	int test_call;
 	FILE *fptr;
 	wp_t *wp;
@@ -70,55 +82,70 @@ int main(int ac, char **av)
 	char *match;
 	char *add;
 
-	while ((p = getopt(ac, av, "acrnl?" )) != -1)
+	while ((p = getopt(ac, av, "acrn:l:?" )) != -1)
 	{
 		switch (p)
 		{
 		case 'c' :
 			cr = 1;
+			opt += 1;
 			break;
 		case 'l' :
-			node = 0;
+			nbr = strtoul(optarg, NULL, 10);
+			opt += 1;
 			break;
 		case 'a' :
 			addsort = 1;
+			opt += 1;
 			break;
 		case 'r' :
 			revsort = 1;
+			opt += 1;
 			break;
 		case 'n' :
 			node = 1;
+			nbr = strtoul(optarg, NULL, 10);
+			opt += 1;
 			break;
 		case '?' :
-	   		printf("Wpserv (version %s)\n",__DATE__);
+/*	   		printf("Wpserv (version %s)\n",__DATE__);
 			printf("usage: wpserv [-l <n> display n records] [-n <n> display n nodes] [mask<*>]\n");
 			printf("              [-a sort by address] [-r reverse sort] [-c remove new line from output]\n");
 			return(1);
+*/
+			usage();
+			break;
 		}
 	}
 
 /* Print the Current Date/time */
 	now_date(buf);
-	printf ("     WPserv - %s",buf);
+	printf ("\tWPserv - %s",buf);
 
 	match = strdup("*");
-	test_call = 1;
+//	test_call = 1;
 
-	if (ac > 2) limit = atoi(av[optind]);
-	if ((ac == 4 && limit != 0) || (ac == 3 && limit == 0)) { 
+	if (ac == 1) usage();
+
+	if (ac == 2 && (opt == 1)) {
+		match = "*\0";
+	}
+	else {
 		match = av[ac-1];
 		strcat(match,"*\0");
-		test_call = 0;
-		for (ptr = match ; *ptr ; ptr++) {
-			if (isalpha(*ptr)) { 
-				*ptr = toupper((int)*ptr);
-				test_call = 1;
-			}
-		}
 	}
 	
+	test_call = 0;
+	
+	for (ptr = match ; *ptr ; ptr++) {
+		if (isalnum(*ptr)) { 
+			*ptr = toupper((int)*ptr);
+			test_call = 1;
+		}
+	}
+
 	if (limit == 0) limit = 10;
-	printf("mask : %s\n",match);
+//	printf("ac %d opt %d mask : %s\n",ac, opt, match);
 
 	fptr = fopen(FPACWP, "r");
 	if (fptr == NULL)
@@ -141,7 +168,7 @@ int main(int ac, char **av)
 		return(0);
 	}
 
-	printf("%d callsigns in WP database", wph.nb_record);
+	printf("\t%d callsigns in WP database", wph.nb_record);
 	CR();
 
 	if ((ptr = strrchr(match, '-')) != NULL)
@@ -156,7 +183,8 @@ int main(int ac, char **av)
 
 	pos = 0;
 	nb = 0;
-	
+	if (nbr ==0) nbr = limit;
+
 	while (fread(&wp[pos], sizeof(wp_t), 1, fptr))
 	{
 		full_call = ax25_ntoa(&wp[pos].address.srose_call);
@@ -201,14 +229,14 @@ int main(int ac, char **av)
 	}
 
 	fclose(fptr);
-	
-	if (nb)
+	if (nbr >= nb) nbr = nb;
+	if (nbr)
 	{
 		/* sort the results */
-		qsort(wp, (nb < limit) ? nb : limit, sizeof(wp_t), wp_cmp);
+		qsort(wp, (nbr < limit) ? nbr : limit, sizeof(wp_t), wp_cmp);
 	}
 	
-	display_results(wp, limit, nb);
+	display_results(wp, limit, nbr);
 	
 	free(wp);
 	return(0);
@@ -277,44 +305,47 @@ static void display_results(wp_t *wp, int limit, int nb)
 			nb = limit;
 		}
 
-		printf("Callsign  Status  Last update       DNIC address Type Locator City                 Digis call");
+		printf("Callsign  Last update UTC   DNIC address N/U  \tDigi \tLocator City \tStatus\n");
 		CR();
-			
+
 		for (i = 0 ; i < nb ; i++)
 		{
+			my_date(buf, wp->date);
+
 			add = rose_ntoa(&wp->address.srose_addr);
 			call = ax25_ntoa(&wp->address.srose_call);
 
-			strncpy(dnic, add, 4); dnic[4] = '\0';
-			
 			if (strstr(call,"-") == NULL)
 				strcat(call,"-0");
-			printf("%-9s ", call);
 
-			if (wp->is_deleted == 0) 
-				printf("%s", "   Ok  ");
-			else
-				printf("%s", "deleted");
+			strncpy(dnic, add, 4);
+			dnic[4] = '\0';
 
-			my_date(buf, wp->date);
+			printf("%-9s %s => %s %-7s", call, buf, dnic, add + 4);
 
-			printf(" %s => %s %-7s ",
-				buf,
-				dnic, 
-				add+4);
-			
 			if (wp->is_node)
-				printf("Node ");
+				printf(" Node ");
 			else
-				printf("User ");
+				printf(" User ");
 
-			printf("%-6s %-21s", wp->locator, wp->city);
+			if (wp->address.srose_ndigis == 0)
+				printf("\t - ");
 
-			for (j = wp->address.srose_ndigis-1 ; j >= 0  ; j--)
-				printf(" %s ", ax25_ntoa(&wp->address.srose_digis[j]));
-						
-			CR();
+			for (j = wp->address.srose_ndigis - 1; j >= 0; j--)
+			{
+				call = ax25_ntoa(&wp->address.srose_digis[j]);
+				if (strstr(call,"-") == NULL)
+					strcat(call,"-0");
+				printf("\t%-9s ", call);				
+			}
+
+			printf("\t%s \t%s", wp->locator, wp->city);
 			
+			if (wp->is_deleted == 1)
+				printf("\tDELETED\n");
+			else
+				printf("\tOk\n");
+
 			++wp;
 		}
 	CR();

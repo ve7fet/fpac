@@ -45,9 +45,21 @@ int cr = 0;
 
 void now_date(char *buf);
 
+int usage(void)
+{
+		printf ("\n");
+		printf ("Wpmaint (version %s)\n", __DATE__);
+		printf ("Usage: wpmaint [-argument]\n");
+		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
+		printf ("            -e = age delay (in days) for erasing deleted records\n");       
+//		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
+		printf ("\n");
+//		exit (0);
+}
+
 int main(int argc, char **argv)
 {
-	int i, p;
+	int i, j, p;
 	int ok = 0;
 	int nb = 0;
 	int retour = 0;
@@ -56,7 +68,7 @@ int main(int argc, char **argv)
 	wp_t wp;
 	wp_header wph;
 	wp_header wph_sig;
-	char *full_call;
+	char *call;
 	char fpacwp_old[1024];
 	char *add;
 	char dnic[5];
@@ -70,11 +82,8 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	{
-		printf ("Wpmaint (version %s)\n", __DATE__);
-		printf ("Usage: wpmaint [-argument]\n");
-		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
-		printf ("            -e = age delay (in days) for erasing deleted records\n");       
-		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
+	usage();
+	exit(0);
 	}
 
 /* Print the Current Date/time */
@@ -93,11 +102,16 @@ int main(int argc, char **argv)
 		case 'd':
 			d_temps = strtoul(optarg, NULL, 10);
 			break;
+		default :
+			usage();
+			break;
 		}
 	}
 
 	if (optind == argc)
+	{
 		argv[optind] = "*";
+	}
 	else
 		strcat(argv[argc-1], "*");
 
@@ -169,28 +183,35 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Could not create %s ... Exiting !\n", FPACWP);
 		return(8);
 	}
-
+	printf("\n");
 	printf("%d records in old WP database\n", wph_sig.nb_record);
 	printf("Records older than %d days will be marked 'deleted'\n",d_temps);
 	printf("Records marked 'deleted' erased after %d days\n", e_temps);
+	printf("\n");
 
 	if (fwrite(&wph_sig, sizeof(wph), 1, fptr_o) == 0)
 	{
+		printf("\n");
 		fprintf(stderr, "Cannot write signature in %s ... Exiting\n", FPACWP);
 		retour = 3;
 	}
 
 	while (fread(&wp, sizeof(wp_t), 1, fptr_i))
 	{
+
 		add = rose_ntoa(&wp.address.srose_addr);
 
-		full_call = ax25_ntoa(&wp.address.srose_call);
-		if (*full_call == '\0')
-			continue;
+		call = ax25_ntoa(&wp.address.srose_call);
 
-		if (wp_check_call(full_call) != 0)
+		if (strstr(call,"-") == NULL)
+			strcat(call,"-0");
+
+//		if (*call == '\0')
+//			continue;
+
+		if (wp_check_call(call) != 0)
 		{
-			printf("Illegal callsign %s : discarded\n", full_call);
+			printf("Illegal callsign %s : discarded\n", call);
 			continue;
 		}
 
@@ -206,42 +227,54 @@ int main(int argc, char **argv)
 
 /* Records marked deleted and older than "e_temps" delay are erased i.e. not copied */
 		if (wp.is_deleted && wp.date > erase_temps) {
-			printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
+			printf("%-9s %s => %s %-7s", call, buf, dnic, add+4);
 			printf("%s", " deleted record ERASED");
 			printf("\n");
 			continue;
 		}
 /* Records older than "d_temps" days are marked DELETED */ 	
-		printf("%-9s %s => %s %-7s", full_call, buf, dnic, add+4);
+		printf("%9s %s => %s %-7s", call, buf, dnic, add+4);
 		if (wp.is_node == 0)
 			printf("%s"," user ");
 		else
 			printf("%s"," node ");
+
+		if (wp.address.srose_ndigis == 0)
+			printf("\t - ");
+		
+		ok= 1;		
+		
+		for (j = wp.address.srose_ndigis - 1; j >= 0; j--)
+		{
+			call = ax25_ntoa(&wp.address.srose_digis[j]);
+			
+			if (wp_check_call(call) != 0)
+			{
+				printf("Illegal digi %s : discarded\n", call);
+				ok = 0;
+				break;
+			}	
+		
+			if (strstr(call,"-") == NULL)
+				strcat(call,"-0");
+			printf("\t%-9s ", call);
+		}
+		
+//		printf("\t%s \t%s", wp.locator, wp.city);
+
 		if (wp.date < delete_temps) {
 			wp.is_deleted = 1;
-			printf("%s", " deleted ");
+			printf("\t%s", " deleted ");
 			wp.date = temps;
 		}
 
 /* Records dated after present time are set to present time */
 		if (wp.date > temps) {
 			my_date(up_date, temps);
-			printf(" %-9s  date ERROR set to %s ", full_call, up_date);
+			printf(" %-9s  date ERROR set to %s ", call, up_date);
 			wp.date = temps;
 		}
 		
-		ok = 1;
-		for (i = 0 ; i < wp.address.srose_ndigis ; i++)
-		{
-			full_call = ax25_ntoa(&wp.address.srose_digis[i]);
-			if (wp_check_call(full_call) != 0)
-			{
-				printf("Illegal digi %s : discarded\n", full_call);
-				ok = 0;
-				break;
-			}
-		}
-
 		if (!ok)
 		{
 			printf("\n");
@@ -252,6 +285,7 @@ int main(int argc, char **argv)
 
 		if (fwrite(&wp, sizeof(wp_t), 1, fptr_o) == 0)
 		{
+			printf("\n");
 			fprintf(stderr, "Cannot write wp record in %s ... Exiting\n", FPACWP);
 			retour = 3;
 		}
@@ -267,15 +301,16 @@ int main(int argc, char **argv)
 		
 		if (fwrite(&wph_sig, sizeof(wph), 1, fptr_o) == 0)
 		{
+			printf("\n");
 			fprintf(stderr, "Cannot write signature in %s ... Exiting\n", FPACWP);
 			retour = 3;
 		}
 
 
 	}
-
+	printf("\n");
 	printf("%d records in new WP database\n", wph_sig.nb_record);
-
+	printf("\n");
 	fclose(fptr_i);
 	fclose(fptr_o);
 	return(retour);

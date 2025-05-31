@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-
+#include <errno.h>
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
@@ -56,7 +56,11 @@ int daemon_start(int ignsigcld)
 out:
 	/* Move the current directory to root, to make sure we aren't on a	*/
 	/* mounted filesystem.							*/
-	chdir("/");
+	if ((chdir("/")) < 0)
+	{
+		if (errno)
+		perror("FPAC unable to chdir:");
+	}
 
 	/* Clear any inherited file mode creation mask.	*/
 	umask(0);

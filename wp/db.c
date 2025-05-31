@@ -674,7 +674,7 @@ void db_compute_vector(int dirty, vector_t * vector)
 	dirty_first = 0;
 
 /* DEBUG F6BVP */
-	if (verbose) syslog(LOG_INFO,"FPACWPD: compute_vector() treshold = %d", treshold) ;
+	if (verbose) syslog(LOG_INFO,"FPACWPD: compute_vector() threshold = %d", treshold) ;
 
 	for (i = 0; i <= db_header->nb_record; i++)
 	{
@@ -717,7 +717,7 @@ void db_compute_vector(int dirty, vector_t * vector)
 			else
 				treshold = treshold * 2;
 /* DEBUG F6BVP 
-		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d Treshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);*/
+		if (verbose) syslog(LOG_INFO,"i:%d Index = %d / %d threshold = %u / %u", i, vec_index, WP_VECTOR_SIZE, treshold, 0xFFFFFFFF);*/
 			
 			crc16_cumul(NULL, 0);
 			*(unsigned short *) crc_buf = htons(vector->seed);

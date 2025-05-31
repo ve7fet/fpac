@@ -37,16 +37,17 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	   {
-	   printf ("Wplist (version %s)\n",__DATE__);
+	   printf ("\nWplist (version %s)\n",__DATE__);
 	   printf ("Usage: wplist [-acdnrl number] <callsign index>\n");
 	   printf ("options :  -n = nodes only  -l = max number of answers\n");       
 	   printf ("sort by :  -a address  -c callsign (default)  -d date  -r reverse\n");
+	   printf("\n");
 	   return (1);
 	   }
 
 /* Print the Current Date/time */
 	        now_date(buf);
-	        printf ("     WPlist - %s",buf);
+	        printf ("\n\tWPlist - %s",buf);
 
 	optind = 0;
 
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
 
 	if (wp_open("NODE") == 0) {
 
-	printf("Callsign  Last update UTC   DNIC address N/U\n");
+	printf("Callsign  Last update UTC   DNIC address N/U  \tDigi \tLocator City\n");
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
@@ -103,19 +104,31 @@ int main(int argc, char **argv)
 			dnic[4] = '\0';
 
 			my_date(buf, wp[i].date);
-			printf("%-9s %s => %s %-7s ", call, buf, dnic, add + 4);
+			printf("%-9s %s => %s %-7s", call, buf, dnic, add + 4);
 
 			if (wp[i].is_node)
-				printf("Node ");
+				printf(" Node ");
 			else
-				printf("     ");
+				printf(" User ");
+
+			if (wp[i].address.srose_ndigis == 0)
+				printf("\t - ");
 
 			for (j = wp[i].address.srose_ndigis - 1; j >= 0; j--)
 			{
-				printf("%s ", ax25_ntoa(&wp[i].address.srose_digis[j]));
+				call = ax25_ntoa(&wp[i].address.srose_digis[j]);
+				if (strstr(call,"-") == NULL)
+					strcat(call,"-0");
+				printf("\t%-9s ", call);				
 			}
-
-			printf("%s %s\n", wp[i].locator, wp[i].city);
+			
+			printf("\t%s \t%s\n", wp[i].locator, wp[i].city);
+/*
+			if (wp[i].is_deleted == 1)
+				printf("\tDELETED\n");
+			else
+				printf("\tOk\n");
+*/
 		}
 	}
 

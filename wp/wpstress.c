@@ -65,7 +65,7 @@ static void Usage(void)
 
 int main(int argc, char *argv[])
 {
-	char call[10];
+	char call[13];
 	ax25_address addr;
 	wp_t wp;
 	int nb_records;

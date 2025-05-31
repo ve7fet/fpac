@@ -16,6 +16,7 @@
  *		menu N toggles node type of record
  * 09/10/2009 if digi deleted, delete city locator and name 
  * 22/05/2012 set date and time when creating a new record
+ * 05/10/2024 return was incorrect after address entry
  ******************************************************/
  
 #include <stdio.h>
@@ -38,12 +39,24 @@
 
 #include "wp.h"
 
+int verbose = 0;
 int cr = 0;
 
 /*** Prototypes *******************/
 static void readline(char *, int);
 
-#define CR() printf( (cr) ? "\r" : "\n"); 
+#define CR() printf( (cr) ? "\r" : "\n");
+ 
+void readline(char *buf, int len)
+{
+	int nb;
+	
+	nb = read(STDIN_FILENO, buf, len-1);
+	if (nb <= 0)
+		exit(1);
+
+	buf[nb] = '\0';
+}
 
 int main(int ac, char **av)
 {
@@ -63,11 +76,15 @@ int main(int ac, char **av)
 		perror("Cannot open WP service");
 		exit(1);
 	}
-	
-	while ((p = getopt(ac, av, "cl:")) != -1) 
+		
+	while ((p = getopt(ac, av, "vcl:")) != -1) 
 	{
 		switch (p)
 		{
+		case 'v' :
+			printf("Verbose is set !\n");
+			verbose = 1;
+			break;
 		case 'c' :
 			cr = 1;
 			break;
@@ -80,6 +97,8 @@ int main(int ac, char **av)
 	if (optind == ac)
 	{
 		printf("Callsign is missing");
+		CR();
+		printf("usage: wpedit [-c] [-v] callsign\n");
 		CR();
 		return(1);
 	}
@@ -161,7 +180,7 @@ int main(int ac, char **av)
 			printf(" user ");
 
 		for (i = 0 ; i < wp.address.srose_ndigis ; i++)
-			printf("%s ", ax25_ntoa(&wp.address.srose_digis[i]));
+			printf("%-9s ", ax25_ntoa(&wp.address.srose_digis[i]));
 
 		printf("%s %s %s", wp.name, wp.city, wp.locator);
 		CR(); CR();
@@ -174,7 +193,7 @@ int main(int ac, char **av)
 		command[0] = str[0] = '\0';
 
 		sscanf(line, "%s %[^\r\n]", command, str);
-
+		
 /* F6BVP record is set to present date
 		wp.date = time (NULL); */
 
@@ -182,7 +201,6 @@ int main(int ac, char **av)
 		{
 		case 'A':
 			len = strlen(str);
-
 			if (len == 0)
 				error = 1;
 			else if (len != 10)
@@ -192,13 +210,35 @@ int main(int ac, char **av)
 			else
 			{
 				rose_aton(str, wp.address.srose_addr.rose_addr);
+if (verbose) syslog(LOG_INFO, "rose_aton passé");
+
+		add = rose_ntoa(&wp.address.srose_addr);
+		strncpy(dnic, add, 4); dnic[4] = '\0';
+
+		printf("%-9s", call);
+		printf("%s => %s %s  ", 
+ 			buf,
+			dnic, 
+			add+4);
+		CR(); CR();
+
+if (verbose) syslog(LOG_INFO, "calling wp_set()");
+
 				ret = wp_set(&wp);
+
+if (verbose) syslog(LOG_INFO, "retour wp_set() : %d", ret);
+
 				if (ret == 0)
-					printf("WP record '%s' updated", call);
+					fprintf(stdout, "WP record '%s' updated", call);
 				else	
-					printf("*** Error in address setting"); 
+					fprintf(stderr, "*** Error in address setting"); 
 				CR(); CR();
+
+if (verbose) syslog(LOG_INFO, "calling wp_get()");
+
 				wp_get(&wp.address.srose_call, &wp);
+if (verbose) syslog(LOG_INFO, "retour wp_get()");
+
 			}
 			break;
 		case 'B':
@@ -237,11 +277,18 @@ int main(int ac, char **av)
 						++num;
 					}
 				}
+		
 				if (pt == NULL)
 				{
+					printf("PLEASE WAIT !"); CR(); CR();
+
 					wp.address.srose_ndigis = num;
+
 					ret = wp_set(&wp);
-					if (ret == 0)
+					
+					if (verbose) printf("Ret : %d\n", ret);
+					
+					if (ret < 0)
 						printf("WP record '%s' updated", call);
 					else
 						printf("*** Error in list of digis");
@@ -278,12 +325,17 @@ int main(int ac, char **av)
 			break;
 		case 'U':
 			wp.is_deleted = 0;
+if (verbose) syslog(LOG_INFO,"calling wp_set()");
 			if (wp_set(&wp) == 0)
 				printf("WP record '%s' restored", call);
 			else
 				printf("record '%s' not updated", call);
+if (verbose) syslog(LOG_INFO, "retour wp_set()");
 			CR(); CR();
+if (verbose) syslog(LOG_INFO,"calling wp_get()");
 			wp_get(&wp.address.srose_call, &wp);
+if (verbose) syslog(LOG_INFO, "retour wp_get()");
+
 			break;
 		default :
 			printf("Unknown command %s", line); CR(); CR();
@@ -309,18 +361,11 @@ int main(int ac, char **av)
 			error = 0;
 			CR(); CR();
 		}
+
 	}
 
-	return(0);
+CR(); CR();
+
+return(0);
 }
 
-void readline(char *buf, int len)
-{
-	int nb;
-	
-	nb = read(STDIN_FILENO, buf, len-1);
-	if (nb <= 0)
-		exit(1);
-
-	buf[nb] = '\0';
-}

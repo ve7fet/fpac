@@ -15,7 +15,18 @@
 */
 
 #define NDEBUG
-
+// 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <syslog.h>
+#include <ctype.h>
+#include <time.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+//
 #include "config.h"
 #include "wpdefs.h"
 #include "sockevent.h"
@@ -25,6 +36,8 @@
 #include "../pathnames.h"
 #include <sys/types.h>
 #include <assert.h>
+#include "ax25compat.h"
+#include "wp.h"
 
 static cfg_t cfg;		/* FPAC configuration file */
 static int listening_socket;
@@ -308,7 +321,10 @@ static void rose_read_handler(int s)
 		  db_list_free(&wp_list);
 		  break;
 	  case wp_type_ascii:
-		  do_cmd(s, pdu.data.string);
+		  
+		  
+		  
+		  (s, pdu.data.string);
 		  wp_flush_pdu();
 		  break;
 	  case wp_type_vector_request:
@@ -448,10 +464,14 @@ static void listening_handler(int s)
 				strncpy(node->dnic, fulladdr, 4);
 				node->dnic[4] = 0;
 				strncpy(node->addr, fulladdr+4, 6);
+
 				node->addr[6] = 0;
+
 				strcpy(node->name, "???");
 				strcpy(node->call, "???");
-					
+// DEBUG F6BVP
+				if (verbose) syslog(LOG_INFO, "listening_handler New client fulladdr %s node %s %s", fulladdr, node->dnic, node->addr);
+//
 				context[new_client]->adjacent = wpa;
 				wpa->context = new_client;
 				wpa->state = WPA_CONNECTED;
@@ -772,6 +792,14 @@ static void debug_pdu(wp_pdu *pdu)
 	}
 	syslog(LOG_INFO, "%s", str);
 */
+// DEBUG F6BVP
+//	syslog(LOG_INFO, "ROSE Call %s ROSE address %s", pdu->data.wp.address.srose_call, pdu->data.wp.address.srose_addr);
+/*			
+	for (i = 0 ; i < ax25_ntoa(&context[client]->address.srose_ndigis) ; i++)
+		syslog(LOG_INFO,"%-9s ", ax25_ntoa(&context[client]->address.srose_digis[i]));
+	syslog(LOG_INFO,"%s %s %s", ax25_ntoa(&context[client]->name, &context[client]->city, &context[client]->locator));
+	syslog(LOG_INFO," ");
+*/
 }
 
 static void do_cmd(int s, char *cmd)
@@ -815,6 +843,7 @@ static void process_options(int argc, char *argv[])
 			wp_debug = 1;
 			break;
 		case 'v':
+			fprintf(stderr, "\n");
 			fprintf(stderr, "Verbose mode\n");
 			verbose = TRUE;
 			break;		
@@ -859,7 +888,8 @@ int main(int argc, char *argv[])
 		
 	rc = init_rose();
 	if (rc < 0) {
-		syslog(LOG_ERR, "fpacwpd : cannot init ROSE access point");
+		syslog(LOG_ERR, "fpacwpd : cannot init ROSE access point. Is fpad running ?");
+		fprintf(stderr, "fpacwpd : cannot init ROSE access point. Is fpad running ?\n", wp_file);
 		exit(1);
 	}
 	
@@ -879,11 +909,13 @@ int main(int argc, char *argv[])
 	rc = db_open(wp_file, wp);
 	if (rc) {
 		fprintf(stderr, "fpacwpd : cannot open database %s\n", wp_file);
+		syslog(LOG_ERR, "fpacwpd : cannot open database %s", wp_file);
 		exit(1);	
 	}
 		
 	if (is_daemon && !daemon_start(TRUE)) {
 		fprintf(stderr, "fpacwpd cannot become daemon\n");
+		syslog(LOG_ERR, "fpacwpd cannot become daemon");
 		exit(1);
 	}
 		
