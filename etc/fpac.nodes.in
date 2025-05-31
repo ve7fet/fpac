@@ -1,16 +1,27 @@
+# FPAC ROSE route configuration file
+# Fichier de configuration des Nodes adjacent ROSE FPAC
 #
-# FPAC configuration file
-# This optional file includes Adjacent Nodes configuration 
-# If present, this file MUST be @sysconfdir@/ax25/fpac.nodes
+# This file is in /usr/local/etc/ax25/fpac.nodes
+# Ce fichier doit etre dans /usr/local/etc/ax25/fpac.nodes
 #
 # List of adjacent nodes - these are other nodes which can be 
 # reached by a DIRECT connection (either over RF or Ethernet).
 #
-Node = KCK
-	Path     = F5KCK-11
-	DNIC     = 2080
-	Address  = 178504
-	Port     = 1
-	NoWp     = 0
+#
+Node = F6BVP-9
+ Path = F6BVP-9
+ DNIC = 2080
+ Address = 175520
+ Port = axudp
+ NoWp = 0
 End
+
+Node = F3KT-11
+ Path = F3KT-11
+ DNIC = 2080
+ Address = 444501
+ Port = axudp
+ NoWp = 0
+End
+#
 

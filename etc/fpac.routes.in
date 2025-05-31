@@ -1,22 +1,27 @@
 #
-# FPAC configuration file
-# This optional file includes routes configuration via Adjacent Nodes 
-# If present, this file MUST be @sysconfdir@/ax25/fpac.routes
+# FPAC ROSE route configuration file
+# Fichier de configuration des routes ROSE FPAC
+#
+# This file is in /usr/local/etc/ax25/fpac.routes
+# Ce fichier doit etre dans /usr/local/etc/ax25/fpac.routes
 #
 # Routes to adjacent nodes
 #
-
+# DNIC specify a default DNIC for the following addresses
+#
+# Address is 1 to 6 digits, using hierarchy
+#
 Routes
-	DNIC = 2080
-	1 = KCK
-	2 = KCK
-	3 = KCK
-	4 = KCK
-	5 = KCK
-	6 = KCK
-	7 = KCK
-	8 = KCK
-	9 = KCK
-	DNIC = 0
+DNIC	= 0
+2080    = F6BVP-9
+2080    = F3KT-11
+3100    = F6BVP-9
+#
+DNIC	= 2080
+175520  = F6BVP-9
+175     = F6BVP-9
+444501  = F3KT-11
+44      = F3KT-11
 End
+#
 

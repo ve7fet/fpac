@@ -1,0 +1,67 @@
+# /etc/ax25/ax25ipd.conf
+# fichier de configuration de ax25ipd
+#
+# Selectionner transport axip transport. 'ip' est ce que vous voulez pour etre compatible
+# avec la plupart des autres portes ...
+#
+#socket ip
+socket udp 10096
+#
+# Choisir le mode d'operation d'ax25ipd (digi ou tnc)
+#
+mode tnc
+#
+# Si vous selectionnez digi, vous devez definir un indicatif. Si vous choisissez
+# le mode tnc, l'indicatif est pour l'instant optionnel, mais cela peut changer
+# dans le futur ! (2 indicatifs en cas de mkiss avec deux ports)
+#
+#mycall2 vk5xxx-5
+# En mode digi, vous pouvez utiliser un alias. (2 pour double ports)
+#
+#myalias2 svwdn2
+#
+# Envoyer une balise toutes les 540 secondes ...
+#
+#beacon after 540
+#btext ax25ip -- tncmode untel/f6zzz -- Passerelle AXIP experimentale
+#
+# Port serie ou tunnel, connecte a kissattach dans mon cas
+# le pseudo tty /dev/ptyp1 maitre est attache au port ax0 (nom 0 dans /etc/ax25/axports)
+#device /dev/ttyp1
+device /dev/ptmx
+#
+# Initialiser la vitesse du port pseudo tty
+#
+speed 115200
+#speed 9600
+# loglevel 0 - pas de sortie
+# loglevel 1 - info de config seulement
+# loglevel 2 - evenement majeurs et erreurs
+# loglevel 3 - evenements majeurs, erreurs et trace des trames AX25
+# loglevel 4 - lister tous les evenements
+#
+loglevel 3
+#
+# Si nous sommes en mode digi, nous pourrions avoir un tnc reel ici, donc utiliser param pour
+# initialiser les parametres du tnc ...
+#
+#param 1 20
+#
+# Definition de l'adresse de diffusion. Toute adresse listee sera envoyee
+#
+broadcast QST-0 NODES-0 FBB-0
+#
+#
+#
+route f3kt-10 f3kt.hd.free.fr udp 10093
+route f3kt-11 f3kt.hd.free.fr udp 10093
+# route via HAMNET 44.168.19.18
+#route f6bvp-8 www.f6bvp.ampr.org udp 10094 
+#route f6bvp-9 www.f6bvp.ampr.org udp 10094
+# route via Internet
+route f6bvp-8 f6bvp.org udp 10094 
+route f6bvp-9 f6bvp.org udp 10094
+#
+route sv2hrt-10 sv2hrt.dyndns.org udp 10092
+#
+#

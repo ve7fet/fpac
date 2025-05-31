@@ -59,10 +59,11 @@ Finger =
 # 
 Command
 	MONitor = @prefix@/sbin/monitor -art -p%1
-	BBs     = @prefix@/sbin/call_tcp f5kck 1022
-#	CLuster = connect f6krq-3 2080931501
+#	BBs     = @prefix@/sbin/call_tcp f6bvp-1
+	BBs     = connect f6bvp-1 2080175520
+	CLuster = connect f6bvp-3 2080175520
 	STat    = /bin/cat @localstatedir@/ax25/fpac/fpacstat.dat @localstatedir@/ax25/fpac/fpacstat.day
-	CONVers	= telnet %{2:f1tve.ampr.org} 3600 \"/n %u %{1:139}\"
+	CONVers	= telnet %{2:f6bvp.ampr.org} 3600 \"/n %u %{1:139}\"
 	PMs	= connect 4 f1tve
 	IPLinks = /bin/netstat --ip
 	IPRoutes= /bin/netstat -r
@@ -88,10 +89,10 @@ End
 #
 # Applications - applications available to be run on this node
 #
-Application
-	F1TVE-1 = @prefix@/sbin/call_tcp f1tve 1022
+#Application
+#	F1TVE-1 = @prefix@/sbin/call_tcp f1tve 1022
 #	F1TVE-5	= /usr/local/conversd/bin/axconv -c 151 -n %u f1tve.ampr.org 3600
-End
+#End
 # End of application section
 
 #
@@ -99,28 +100,28 @@ End
 # These would typically be RF ports that users can connect to. DO NOT 
 # add any link/trunk ports in this section. 
 #
-AddPort = vhf_1k2
-	Address = 192202
-	Port    = 1
-End
+#AddPort = vhf_1k2
+#	Address = 192202
+#	Port    = 1
+#End
 # End of additional ports section
 
 #
 # Users Section - This section associates a specific call to a port. 
 # This allows connections to that callsign on a link (trunk) port. 
 #
-User = F5KCK-10
-	Path = F5KCK-10
-	Port = 1
-End
+#User = F5KCK-10
+#	Path = F5KCK-10
+#	Port = 1
+#End
 # End of users section
 
 #
 # Alias Section - aliases are similar to applications, except the 
 # connection is re-directed
 #
-Alias = F1TVE-14
-	Path = F6BVP-1,175502
+#Alias = F1TVE-14
+#	Path = F6BVP-1,175502
 End
 # End of alias section
 
