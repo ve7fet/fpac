@@ -1,5 +1,5 @@
-AC_PREREQ(2.61)
-AC_INIT(fpac, 4.1.3, f6bvp@free.fr)
+AC_PREREQ([2.69])
+AC_INIT([fpac],[4.1.4],[f6bvp@free.fr])
 AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([pathnames.h.in])
@@ -23,7 +23,7 @@ AC_SUBST(SVNREV)
 AC_PROG_CC
 AC_PROG_GCC_TRADITIONAL
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Checks for libraries.
 AC_SUBST(AX25_LIB)
@@ -54,7 +54,18 @@ AM_CONDITIONAL([AX25_H], [test "$has_ax25" = "yes"])
 AC_C_CONST
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
-AC_TYPE_SIGNAL
+AC_DIAGNOSE([obsolete],[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 AC_STRUCT_TM
 AC_HEADER_TIME
 
