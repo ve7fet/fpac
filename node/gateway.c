@@ -284,8 +284,9 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	switch (family)
 	{
 	case AF_ROSE:
+
+		node_msg("source %s destination %s ", cfg.alt_callsign, address[0]);		
 		
-	
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
@@ -325,6 +326,7 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		memcpy(path, rs_get_addr(NULL), 4);
 
 		addrlen = strlen(address[pos]);
+
 		if (addrlen == 3)
 		{
 			/* Country designator */
@@ -339,10 +341,12 @@ static int connect_to(char *address[], int family, int escape, char *source)
 /*			++pos;*/
 			addrlen = strlen(address[pos]);
 		}
+// DEBUG F6BVP
+//		node_msg("ROSE address DNIC : %s , %s - %d digits", path, address[pos], addrlen);
 
 		if ((addrlen != 6) && (addrlen != 10))
 		{
-			node_msg("Invalid ROSE address");
+			node_msg("Invalid ROSE address DNIC : %s , %s - %d digits", path, address[pos], addrlen);
 			return (-1);
 		}
 
@@ -385,7 +389,13 @@ static int connect_to(char *address[], int family, int escape, char *source)
 			}
 			++sockaddr.rose.srose_ndigis;
 		}
+		
 		addrlen = sizeof(struct full_sockaddr_rose);
+		
+// DEBUG F6BVP
+		node_msg("ROSE address : %s via : %s", path, address[pos]);
+//		node_msg("digi %s", ax25_ntoa(&sockaddr.rose.srose_digis[0].ax25_call));
+//				
 		paclen = rs_config_get_paclen(NULL); 
 		eol = ROSE_EOL;
 		break;

@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <errno.h>
 #include <fcntl.h>
 
 #include <string.h>
@@ -105,7 +105,11 @@ int _write_ax25 (const char *s, int len)
 	}
 
 	if (m)
-		write (1, p, m);
+		if ((write (1, p, m)) < 0)
+		{
+                	if (errno)
+                        perror("FPAC write error:");
+        	}
 
 	free (p);
 	return len;
@@ -353,14 +357,26 @@ int pty_open (int *pid, struct winsize *winsize, char **chargv, char **chenvp)
 		close (pty);
 		return -1;
 	}
-	(void) chown (line, getuid (), getgid ());
-	(void) chmod (line, 0600);
+	if ((chown (line, getuid (), getgid ())) < 0)
+	{
+		perror("FPAC chown error:");
+	}
+	if ((chmod (line, 0600)) < 0)
+	{
+		perror("FPAC chmod error:");
+	}
 
 	setsid ();					/* will break terminal affiliation */
 	ioctl (tty, TIOCSCTTY, (char *) 0);
 
-	setuid (getuid ());
-	setgid (getgid ());
+	if ((setuid (getuid ())) < 0)
+	{
+		perror("FPAC setuid error:");
+	}
+	if ((setgid (getgid ())) < 0)
+	{
+		perror("FPAC setgid error:");
+	}
 
 	devtty = open ("/dev/tty", O_RDWR);
 	if (devtty < 0)
@@ -534,7 +550,11 @@ int main (int argc, char **argv)
 						break;
 					}
 					else
-						write (fdmaster, buf, cnt);
+						if ((write (fdmaster, buf, cnt)) < 0)
+						{
+                					if (errno)
+                        				perror("FPAC write error:");
+        					}
 				}
 
 				if (FD_ISSET (fdmaster, &fds_read))

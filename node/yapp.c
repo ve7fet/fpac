@@ -173,7 +173,11 @@ static void Send_RR(void)
 	buffer[0] = ACK;
 	buffer[1] = 0x01;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_RF(void)
@@ -183,7 +187,11 @@ static void Send_RF(void)
 	buffer[0] = ACK;
 	buffer[1] = 0x02;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_RT(void)
@@ -193,7 +201,11 @@ static void Send_RT(void)
 	buffer[0] = ACK;
 	buffer[1] = ACK;
 
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_AF(void)
@@ -203,7 +215,11 @@ static void Send_AF(void)
 	buffer[0] = ACK;
 	buffer[1] = 0x03;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_AT(void)
@@ -213,7 +229,11 @@ static void Send_AT(void)
 	buffer[0] = ACK;
 	buffer[1] = 0x04;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_NR(char *reason)
@@ -228,7 +248,11 @@ static void Send_NR(char *reason)
 	buffer[1] = length;
 	memcpy(buffer + 2, reason, length);
 	
-	write(fd_out, buffer, length + 2);
+	if ((write(fd_out, buffer, length + 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 /* Send a Resume Sequence */
@@ -248,7 +272,11 @@ static void Send_RS(int length)
 	buffer[len + 1] = 0;
 	buffer[1]       = len;
 	
-	write(fd_out, buffer, len + 2);
+	if ((write(fd_out, buffer, len + 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }	 
 
 static void Send_SI(void)
@@ -258,7 +286,11 @@ static void Send_SI(void)
 	buffer[0] = ENQ;
 	buffer[1] = 0x01;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_CN(char *reason)
@@ -273,7 +305,11 @@ static void Send_CN(char *reason)
 	buffer[1] = length;
 	memcpy(buffer + 2, reason, length);
 	
-	write(fd_out, buffer, length + 2);
+	if ((write(fd_out, buffer, length + 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_HD(char *filename, long length)
@@ -304,7 +340,11 @@ static void Send_HD(char *filename, long length)
 	memcpy(buffer + 2, filename, len_filename);
 	memcpy(buffer + len_filename + 2, size_buffer, len_size);
 
-	write(fd_out, buffer, len + 2);
+	if ((write(fd_out, buffer, len + 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static void Send_ET(void)
@@ -314,7 +354,11 @@ static void Send_ET(void)
 	buffer[0] = EOT;
 	buffer[1] = 0x01;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 /*
@@ -338,7 +382,11 @@ static void Send_EF(void)
 	buffer[0] = ETX;
 	buffer[1] = 0x01;
 	
-	write(fd_out, buffer, 2);
+	if ((write(fd_out, buffer, 2)) < 0)
+	{
+                if (errno)
+                perror("FPAC write error:");
+        }
 }
 
 static unsigned char checksum(unsigned char *buf, int len)
@@ -482,7 +530,11 @@ static int yapp_download_data(int *filefd, unsigned char *buffer)
 					}
 				}
 
-				write(*filefd, buffer + 2, length);
+				if ((write(*filefd, buffer + 2, length)) < 0)
+				{
+                			if (errno)
+                        		perror("FPAC write error:");
+        			}
 				break;
 			}
 

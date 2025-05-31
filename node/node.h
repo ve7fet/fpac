@@ -42,6 +42,46 @@
 
 #define PERM_TELNET (PERM_TELNET_LOCAL & PERM_TELNET_AMPR & PERM_TELNET_INET)
 
+
+/* Character Colors */
+#define ResetColor    "\033[0m"
+/* Foreground Colours */
+#define F_Default     "\033[0;39m"
+#define F_Red         "\033[1;91m"
+#define F_Green       "\033[1;92m"
+#define F_Yellow      "\033[1;93m"
+#define F_Blue        "\033[1;94m"
+#define F_Magenta     "\033[1;95m"
+#define F_Cyan        "\033[1;96m"
+#define F_White       "\033[1;97m"
+#define F_Black       "\033[0;30m"
+#define F_DarkRed     "\033[0;31m"
+#define F_DarkGreen   "\033[0;32m"
+#define F_DarkYellow  "\033[0;33m"
+#define F_DarkBlue    "\033[0;34m"
+#define F_DarkMagenta "\033[0;35m"
+#define F_DarkCyan    "\033[0;36m"
+#define F_Gray        "\033[0;37m"
+#define F_DarkGray    "\033[1;90m"
+/*Background Colours */
+#define B_Default      "\033[49m"
+#define B_Black        "\033[40m"
+#define B_DarkRed      "\033[41m"
+#define B_DarkGreen    "\033[42m"
+#define B_DarkYellow   "\033[43m"
+#define B_DarkBlue     "\033[44m"
+#define B_DarkMagenta  "\033[45m"
+#define B_DarkCyan     "\033[46m"
+#define B_Gray         "\033[47m"
+#define B_DarkGray     "\033[100m"
+#define B_Red          "\033[101m"
+#define B_Green        "\033[102m"
+#define B_Yellow       "\033[103m"
+#define B_Blue         "\033[104m"
+#define B_Magenta      "\033[105m"
+#define B_Cyan         "\033[106m"
+#define B_White        "\033[107m"
+
 struct cmd {
 	char	*name;
 	int	valid;
@@ -133,12 +173,14 @@ extern char *read_perms(struct fpac_user *up, unsigned long peer);
 extern int read_config(void);
 
 /* in command.c */
+extern int Colored;
 extern char *roseaddr(char *addr);
 extern void init_nodecmds(void);
 extern void logout(char *reason);
 extern int do_alias(int argc, char **argv);
 extern int do_application(int argc, char **argv);
 extern int do_bye(int argc, char **argv);
+extern int do_color(int argc, char **argv);
 extern int do_mheard(int argc, char **argv);
 extern int do_dest(int argc, char **argv);
 extern int do_help(int argc, char **argv);

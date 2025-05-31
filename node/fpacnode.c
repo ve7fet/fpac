@@ -41,7 +41,7 @@ int LogLevel = LOGLVL_ERROR;
 long IdleTimeout = 900L;
 char *NodeId = NULL;
 cfg_t cfg;
-
+	
 static void alarm_handler(int sig)
 {
 	set_eolmode(User.fd, EOLMODE_TEXT);
@@ -127,7 +127,7 @@ int check_rose(void)
 
 int main(int argc, char **argv)
 {
-	int yes;
+	int s, yes;
 	char NodeName[80];
 	cmd_t *c;
 	union {
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, quit_handler); 
 
 	NodeId = NodeName;
-
+	
 	if (cfg_open(&cfg) != 0)
 	{
 		return 1;
@@ -192,9 +192,9 @@ int main(int argc, char **argv)
 			strcat(User.call, "-0");
 	}
 	
-	/*
+/*
 	rs_config_load_ports();
-	*/
+*/
 
 	/* Add commands and sysop commands */
 	for (c = cfg.cmd ; c ; c = c->next)
@@ -300,8 +300,11 @@ int main(int argc, char **argv)
 	if (User.call[0] == 0) 
 	{
 		char str[80];
+		if (Colored)
+			tprintf("\nFPAC-Node %sv %s (built %s)%s %s%s\n\ncallsign: ", F_Red, VERSION, __DATE__, F_Yellow, HostName, ResetColor);
+		else
+			tprintf("\nFPAC-Node v %s (built %s) %s\n\ncallsign: ", VERSION, __DATE__, HostName);
 
-		tprintf("\nFPAC-Node v %s (built %s) %s\n\ncallsign: ", VERSION, __DATE__, HostName);
 		usflush(User.fd);
 		alarm(300L);			/* 5 min timeout */
 		if ((p = readline(User.fd)) == NULL)
@@ -329,19 +332,30 @@ int main(int argc, char **argv)
 		fpaclog(LOGLVL_LOGIN, "Invalid callsign %s @ %s", User.call, User.ul_name);
 		logout("Invalid callsign");
 	}
-		
-	node_msg ("User call : %s", User.call);
-
+	if(Colored)	
+		node_msg ("User call : %s%s%s", F_Yellow, User.call, ResetColor);
+	else
+		node_msg ("User call : %s", User.call);
+	
 	if ((fp = fopen (FPAC_HELLO_FILE, "r")) != NULL) 
 	{
 		while (fgets (line, 256, fp) != NULL)
-			tputs (line);
+			if (Colored) {
+				tprintf("%s",F_Blue);
+				tputs (line);
+				tprintf("%s",ResetColor);
+			}
+			else
+				tputs (line);
 		tputs ("\n");
 		fclose (fp);
 	}
 
-	node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
-
+	if (Colored)
+		node_msg("%s %sv %s (built %s)%s for LINUX (help = h)", "FPAC-Node", F_Red, VERSION, __DATE__, ResetColor);
+ 	else
+		node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
+ 	
 	for (;;)
 	{
 		char *ps;
