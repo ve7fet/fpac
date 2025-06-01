@@ -1,3 +1,5 @@
-Welcome to the last release of Fpac!
-This file is fpac.hello and is displayed when 
-a user connects to the node.
+Welcome to the last release of FPAC ! a ROSE network router 
+using AX.25 Packet Layer Protocol (AX.25 PLP) by Thomas A. Moulton W2VY 
+implementation of the Radio Amateur Telecommunications Society (RATS)
+Open Systems Environment (ROSE), based on X.25 CCITT standard
+

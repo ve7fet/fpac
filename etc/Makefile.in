@@ -256,8 +256,10 @@ etcfiles = \
 	flexd.conf \
 	flexd.routes \
 	fpac.conf \
+	ax25ipd.conf \
 	fpac.nodes \
-	fpac.routes
+	fpac.routes \
+	ax25ipd.conf
 
 edit = sed \
 	-e 's|@sbindir[@]|$(sbindir)|g' \
@@ -277,7 +279,8 @@ EXTRA_DIST = \
 	flexd.routes.in \
 	fpac.conf.in \
 	fpac.nodes.in \
-	fpac.routes.in
+	fpac.routes.in \
+	ax25ipd.conf
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
