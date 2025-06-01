@@ -80,17 +80,20 @@ static int add_route(int s, route_t *r)
 	char *dev;
 	char *ptr;
 	char nodeaddr[11];
+	char node_addr[10];
 	char nodes[80];
 	char call[80];
 	node_t *n = NULL;
 	struct rose_route_struct rs_node;
 
 	nodeaddr[10] = '\0';
-	memset(&nodeaddr, '0', 10);
-	strncpy(nodeaddr, r->addr, strlen(r->addr));
-		
+	memset(&node_addr, '0', 10);
+
 	rs_node.mask = strlen(r->addr);
 
+	strcpy(nodeaddr, r->addr);
+	strncat(nodeaddr, node_addr, 10 - rs_node.mask);
+	
 	if (rose_aton(nodeaddr, rs_node.address.rose_addr) != 0) 
 	{
 		fprintf(stderr, "rsparms: nodes: invalid address %s\n", nodeaddr);
