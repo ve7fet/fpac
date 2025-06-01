@@ -1063,7 +1063,8 @@ int do_manage_routes(int argc, char **argv)
 		return 0;
 	}
 	else
-		strncpy(nodeaddr, argv[2], len);
+//		strncpy(nodeaddr, argv[2], len);
+		snprintf(nodeaddr,len, "%s", argv[2]);
 
 	if (argc < 4)
 	{
