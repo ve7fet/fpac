@@ -725,8 +725,10 @@ void load_config(void)
 		}
 		else if (ps && !strncmp(cmd, "bea", 3))
 		{ 
-			strncpy( beacon, p, BEACON_TEXT_BUFFER);
-			beacon[BEACON_TEXT_BUFFER] = '\0';
+
+			snprintf(beacon,BEACON_TEXT_BUFFER, "%s", p);
+//			strncpy( beacon, p, BEACON_TEXT_BUFFER);
+//			beacon[BEACON_TEXT_BUFFER] = '\0';
 		}
 
 	}
