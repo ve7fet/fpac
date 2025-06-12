@@ -2,7 +2,19 @@ FPAC
 ====
 
 You most probably want to use the latest fpac version from the Github repository, 
-https://github.com/ve7fet/fpac.
+https://github.com/ve7fet/fpac
+
+There are even more updates and Release Candidates available from here  :
+http:/f6bvp/org/configuration6_RPi.html
+
+You may read Linux FPAC-HOWTO
+https://www.f6fbb.org/fpac/doc/FPAC-HOWTO.html
+
+Linux FPAC mini-HOWTO is obviously not up-to-date...
+http://rose.fpac.free.fr/MINI-HOWTO/
+
+Linux FPAC mini-HOWTO n'est malheureusement pus à jour...
+http://rose.fpac.free.fr/MINI-HOWTO-FR/
 
 Here is a list of applications dedicated to FPAC X25 node.
 
@@ -52,7 +64,16 @@ details. Ensure you install in the same paths used by libax25, ax25-apps, and ax
 
 STARTING FPAC
 =============
+Before starting fpac some configuration are needed for /etc/ax25/fpac.conf, fpac.nodes, fpac.routes and ax25ipd.conf
+Pre configured nodes and ROSE routes are provided than should work and can be used as configuration examples.
+
 To start fpac, use the fpac.sh script
+Fpac daemon will run in background.
+
+Then you may run FPAC client fpacnode
+
+List of fpacnode client commands may be obtained issuing question mark from fpacnode and 
+detailed help on command usage with H followed by the command name.
 
 TODO
 ====
