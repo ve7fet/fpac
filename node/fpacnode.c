@@ -41,7 +41,7 @@ int LogLevel = LOGLVL_ERROR;
 long IdleTimeout = 900L;
 char *NodeId = NULL;
 cfg_t cfg;
-	
+
 static void alarm_handler(int sig)
 {
 	set_eolmode(User.fd, EOLMODE_TEXT);
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	cmd_t *c;
 	union {
 		struct full_sockaddr_ax25 sax;
-		struct full_sockaddr_rose      srose;
+		struct full_sockaddr_rose srose;
 		struct sockaddr_in        sin;
 	} saddr;
 	unsigned int slen = sizeof(saddr);
@@ -184,6 +184,9 @@ int main(int argc, char **argv)
 	}
 
 	fpac_nr_config_load_ports();
+//DEBUG F6BVP NetRom port exists ?
+//	nr_config_load_ports();
+//	node_msg("NetRom port ? %s ", NrPort);
 
 	if (argc  > 1) { 
 		strncpy(User.call, strupr(argv[1]), 9);
@@ -191,10 +194,14 @@ int main(int argc, char **argv)
 		if (strstr(User.call, "-") == NULL)
 			strcat(User.call, "-0");
 	}
-	
-/*
-	rs_config_load_ports();
-*/
+
+//DEBUG F6BVP is it necessary ?
+	if (rs_config_load_ports() == 0) 
+	{
+		fpaclog(LOGLVL_ERROR, "No ROSE port configured");
+		return 1;
+	}
+//
 
 	/* Add commands and sysop commands */
 	for (c = cfg.cmd ; c ; c = c->next)
@@ -203,7 +210,7 @@ int main(int argc, char **argv)
 	for (c = cfg.syscmd ; c ; c = c->next)
 		add_alias_cmd(&Syscmds, c->name, c->cmd);
 
-
+// Valid when connected from a remote FPAC client
 	if (getpeername(STDOUT_FILENO, (struct sockaddr *)&saddr, &slen) == -1)
 	{
 		if (errno != ENOTSOCK)
@@ -355,7 +362,14 @@ int main(int argc, char **argv)
 		node_msg("%s %sv %s (built %s)%s for LINUX (help = h)", "FPAC-Node", F_Red, VERSION, __DATE__, ResetColor);
  	else
 		node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
- 	
+
+
+// DEBUG F6BVP - Filled when remote FPAC client
+//	node_msg("User.ul_type %d User.ul_port %s \n", User.ul_type, User.ul_port);
+//	node_msg("User.ul_name %s User.call %s \n", User.ul_name, User.call);
+//
+
+
 	for (;;)
 	{
 		char *ps;

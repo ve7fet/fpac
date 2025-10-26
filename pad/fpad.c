@@ -808,6 +808,9 @@ syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
 					addrlen = sizeof(struct full_sockaddr_rose);
 					if (getpeername(u->fd, (struct sockaddr *)&wp, &addrlen) != -1) 
 					{
+//DEBUG F6BVP
+	syslog(LOG_INFO,"FPAD : connection_done update wp\n");
+//
 						wp_update_addr(&wp);
 					}
 
@@ -1308,7 +1311,9 @@ static int new_l2_connection(int fd, int verbose)
 			
 	strcpy(rsaddr, cfg.fulladdr);
 
-
+//DEBUG F6BVP
+	if (verbose) syslog(LOG_INFO,"new_L2_connection ndigi %d\n", ndigi);
+//
 	ask_wp = TRUE;
 
 	if (ndigi > 0)
@@ -1371,6 +1376,9 @@ static int new_l2_connection(int fd, int verbose)
 		wpu.srose_digis[n] = exp.fsa_digipeater[exp.fsa_ax25.sax25_ndigis - n - 1];
 
 	if ((wpu.srose_ndigis == 0) || (!wp_is_node(ax25_ntoa(&wpu.srose_digis[wpu.srose_ndigis-1]))))
+//DEBUG F6BVP
+	syslog(LOG_INFO,"new_L2_connection Add the local callsign to the WP");
+//
 		wp_update_addr(&wpu);
 	
 	roseconnect.srose_family = rosebind.srose_family = AF_ROSE;
@@ -1404,7 +1412,7 @@ static int new_l2_connection(int fd, int verbose)
 		}
 
 
- }
+ 	}
 	if (verbose)
 	{
 		static char *constr[] = { "Connecting", "WP routing", "Trying local" } ;
@@ -1613,21 +1621,28 @@ static int new_l3_connection(int fd, char *port, int verbose)
 		if (setsockopt(new, SOL_ROSE, ROSE_QBITINCL, &yes, sizeof(yes)) == -1) 
 		{
 			close(new);
-			syslog(LOG_ERR, "new_l3_connection() cannot setsockopt(ROSE_QBITINCL) - %s\n", strerror(errno));
+			syslog(LOG_ERR, "FPAD : new_l3_connection() cannot setsockopt(ROSE_QBITINCL) - %s\n", strerror(errno));
 			return(-1);
 		}
 		return new_appli_connection(new, TRUE, application);
 	}
 
 	/* Add requester in the WP */
+
+//DEBUG F6BVP
+	syslog(LOG_INFO,"FPAD : new_L3_connection Add requester in the WP\n");
+//
+//DEBUG F6BVP
+	syslog(LOG_INFO,"FPAD : new_L3_connection Add requester in the WP\n");
+//
 	if (wp_update_addr(&rsexp) != 0) 
-		syslog(LOG_ERR, "new_l3_connection() cannot create/update wprecord\n");
+		syslog(LOG_ERR, "FPAD : new_l3_connection() cannot create/update wprecord\n");
 
 
 	yes = 1;
 	if (setsockopt(new, SOL_ROSE, ROSE_QBITINCL, &yes, sizeof(yes)) == -1) 
 	{
-		syslog(LOG_ERR, "new_l3_connection() cannot setsockopt(ROSE_QBITINCL) - %s\n", strerror(errno));
+		syslog(LOG_ERR, "FPAD : new_l3_connection() cannot setsockopt(ROSE_QBITINCL) - %s\n", strerror(errno));
 		close(fd);
 		return(-1);
 	}
@@ -2643,6 +2658,8 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 
 		rose_aton (cfg.fulladdr, wp.srose_addr.rose_addr);
 		wp.srose_call = exp.fsa_ax25.sax25_call;
+
+
 		wp_update_addr(&wp);
 	}
 

@@ -300,7 +300,7 @@ int do_mheard(int argc, char **argv)
 			port = argv[nb];
 			if (ax25_config_get_dev(port) == NULL)
 			{
-				node_msg("Invalid port");
+				node_msg("Trying heard callsign on invalid port");
 				return 0;
 			}
 		}
@@ -497,12 +497,23 @@ int do_help(int argc, char **argv)
 			tprintf("\n");
 		return 0;
 	}
-	strcpy(fname, FPAC_HELP_DIR);
+
 	if (*argv[0] == 'i')
 	{							/* "info"   */
+		strcpy(fname, LINUX_VERSION);
+
+		if ((fp = fopen(fname, "r")) == NULL)
+			return 0;	
+		while (fgets(line, 256, fp) != NULL)
+			tputs(line);
+		tputs("\n");
+		fclose(fp);
+
+	/* "info"   */
 		strcpy(fname, FPAC_INFO_FILE);
 		node_msg("%s v %s (built %s) for LINUX\n", "FPAC-Node", VERSION,
 				 __DATE__);
+
 	}
 	else if (argc == 1)
 	{							/* "help"   */
@@ -710,7 +721,7 @@ int do_users(int argc, char **argv)
 	struct proc_rs_neigh *pv, *listv;
 	char *cp;
 	int first;
-	int len;
+	int i,j,len;
 /*	char neigh[20],	char nei1[20], nei2[20];*/
 
 	if ((argc > 1) && (*argv[1] == '?'))
@@ -718,6 +729,15 @@ int do_users(int argc, char **argv)
 		node_msg("usage : users [callsign]");
 		return (0);
 	}
+
+	if ((p = calloc(1, sizeof(struct proc_ax25))) == NULL)
+		return (0);
+	if ((rp = calloc(1, sizeof(struct proc_rs))) == NULL)
+		return (0);
+	if ((tp = calloc(1, sizeof(struct proc_rs_route))) == NULL)
+		return (0);
+	if ((listv = calloc(1, sizeof(struct proc_rs_neigh))) == NULL)
+		return (0);
 
 	first = 1;
 
@@ -727,6 +747,7 @@ int do_users(int argc, char **argv)
 			node_perror("do_users: read_proc_ax25 ", errno);
 		return 0;
 	}
+	
 	for (p = list; p != NULL; p = p->next)
 	{
 		if (argc > 1 && strcasecmp(argv[1], "*")
@@ -745,7 +766,7 @@ int do_users(int argc, char **argv)
 		{
 			first = 0;
 			node_msg("Users - AX.25 Level 2 sessions :");
-			tprintf("Port   Callsign     Callsign  AX.25 state  ROSE state  NetRom status");
+			tprintf("Port   Callsign     Callsign  Digi 1   Digi 2   AX.25 state  ROSE state  NetRom status");
 			if (is_sysop())
 				tprintf(" Unack   T1      T3      Retr  Rtt Snd-Q Rcv-Q");
 			tprintf("\n");
@@ -756,113 +777,139 @@ int do_users(int argc, char **argv)
 			p->src_addr[len - 1] = '\0';
 
 		cp = ax25_config_get_name(p->dev);
-		if (cp != NULL) {
-/*		if (cp == NULL)
-			cp = "All";*/
-// Print Port, src call, dest call
-		if(Colored)
-			tprintf("%-6s %s%-9s -> %s%-9s %s", cp, F_Yellow, p->src_addr, F_Green, p->dest_addr, ResetColor);
-		else
-		tprintf("%-6s %-9s -> %-9s", cp, p->src_addr, p->dest_addr);
-
-		if (!strcmp(p->dest_addr, "*"))
+		if (cp != NULL)
 		{
-			tprintf("Listening\n");
+	/*		if (cp == NULL)
+				cp = "All";*/
+	// Print Port, src call, dest call
+			if(Colored)
+				tprintf("%-6s %s%-9s -> %s%-9s %s", cp, F_Green, p->src_addr, F_Green, p->dest_addr, ResetColor);
+			else
+			tprintf("%-6s %-9s -> %-9s", cp, p->src_addr, p->dest_addr);
+
+			if (!strcmp(p->dest_addr, "*"))
+			{
+				cp = "Listening    ";
+				for (j = 0; j< 18 ; j++)
+					tprintf(" ");
+				if(Colored)
+					tprintf("%s%s%s%s%s\n", ResetColor, F_Green, B_Black, cp, ResetColor);
+				else
+					tprintf(" %s\n",cp);
 			continue;
-		}
-// Print AX25 connexions status
-		switch (p->st)
-		{
-		case 0:
-			cp = "Disconnected";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_DarkGreen, B_DarkRed, cp, ResetColor);
-			else
-				tprintf(" %s",cp);
-			break;
-		case 1:
-			cp = "Conn pending";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_Yellow, B_Blue, cp, ResetColor);
-			else
-				tprintf(" %s",cp);
-			break;
-		case 2:
-			cp = "Disc pending";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_DarkYellow, B_Magenta, cp, ResetColor);
-			else
-				tprintf("---------");
-			break;
-		case 3:
-			cp = "Connected   ";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_Black, B_Green, cp, ResetColor);
-			else
-				tprintf(" %s",cp);
-			break;
-		case 4:
-			cp = "Recovery    ";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_Blue, B_Yellow, cp, ResetColor);
-			else
-				tprintf(" %s",cp);
-			break;
-		default:
-			cp = "Unknown     ";
-			if(Colored)
-				tprintf("%s%s%s%s%s", ResetColor, F_White, B_Gray, cp, ResetColor);
-			else
-				tprintf(" %s",cp);
-			break;
-		}
+			}
 
-// Print ROSE connexions status
+	// Digipeaters
+			for (i=0 ; i< 2; i++)
+			{
+				if (i <= p->ndigi)
+				{
+					if (strncmp(p->digi_addr[i] , "*", 1) != 0)
+						tprintf("%-9s", p->digi_addr[i]);
+					else
+					{
+					for (j = 0; j< 9 ; j++)
+						tprintf("°");
+					}
+				}
+				else
+					for (j = 0; j< 9 ; j++)
+						tprintf(" ");
+			}
 
-		if(node_is_connected(p->dest_addr)) {
-			if(Colored)
-//				tprintf("%s %s%sConnected %s", ResetColor, F_DarkRed, B_DarkGreen, ResetColor);
-				tprintf("%s %s%sConnected %s", ResetColor, F_Black, B_Green, ResetColor);
-			else
-				tprintf(" Connected");
-		}
-		else {
-//if(!node_is_connected(p->dest_addr))
-			if(Colored)
-				tprintf("%s %s%s--------- %s", ResetColor, F_DarkGreen, B_DarkRed, ResetColor);
-			else
-				tprintf(" ---------");
-		}
+	// Print AX25 connexions status
+			switch (p->st)
+			{
+			case 0:
+				cp = "Disconnected";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_Green, B_Red, cp, ResetColor);
+				else
+					tprintf(" %s",cp);
+				break;
+			case 1:
+				cp = "Conn pending";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_Yellow, B_Blue, cp, ResetColor);
+				else
+					tprintf(" %s",cp);
+				break;
+			case 2:
+				cp = "Disc pending";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_Yellow, B_Magenta, cp, ResetColor);
+				else
+					tprintf("---------");
+				break;
+			case 3:
+				cp = "Connected   ";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_Black, B_Green, cp, ResetColor);
+				else
+					tprintf(" %s",cp);
+				break;
+			case 4:
+				cp = "Recovery    ";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_Blue, B_Yellow, cp, ResetColor);
+				else
+					tprintf(" %s",cp);
+				break;
+			default:
+				cp = "Unknown     ";
+				if(Colored)
+					tprintf("%s%s%s%s%s", ResetColor, F_White, B_Gray, cp, ResetColor);
+				else
+					tprintf(" %s",cp);
+				break;
+			}
 
-// Print NetRom connexions status
+	// Print ROSE connexions status
 
-		if(netrom_node_is_connected(p->dest_addr)) {
-			if(Colored)
-				tprintf(" %s %s%sConnected%s", ResetColor, F_DarkRed, B_DarkGreen, ResetColor);
-			else
-				tprintf("   Connected");
-		}
-//if(!netrom_node_is_connected(p->dest_addr))
-		else {
-			if(Colored)
-				tprintf("%s  %s%s---------%s", ResetColor, F_DarkYellow, B_Magenta, ResetColor);
-			else
-				tprintf("   ---------");
-		}
+			if(node_is_connected(p->dest_addr)) {
+				if(Colored)
+	//				tprintf("%s %s%sConnected %s", ResetColor, F_DarkRed, B_DarkGreen, ResetColor);
+					tprintf("%s %s%sConnected %s", ResetColor, F_Black, B_Green, ResetColor);
+				else
+					tprintf(" Connected");
+			}
+			else {
+	//if(!node_is_connected(p->dest_addr))
+				if(Colored)
+					tprintf("%s %s%s--------- %s", ResetColor, F_Green, B_Red, ResetColor);
+				else
+					tprintf(" ---------");
+			}
 
-//		tprintf("%s%s%s", ResetColor, B_Default, F_Default);
-	
-		if (is_sysop())
-		{
-			tprintf("    %02d/%02d %03lu/%03lu %03lu/%03lu %03d/%03d %03lu %5d %5d",
-					p->vs < p->va ? p->vs - p->va + 8 : p->vs - p->va,
-					p->window,
-					p->t1timer/ HZ, p->t1 / HZ,
-					p->t3timer/ HZ, p->t3 / HZ,
-					p->n2count, p->n2, p->rtt/ HZ, p->sndq, p->rcvq);
-		}
-		tprintf("\n");
-		}
+	// Print NetRom connexions status
+
+			if(netrom_node_is_connected(p->dest_addr)) {
+				if(Colored)
+					tprintf(" %s %s%sConnected%s", ResetColor, F_Black, B_Green, ResetColor);
+				else
+					tprintf("   Connected");
+			}
+	//if(!netrom_node_is_connected(p->dest_addr))
+			else {
+				if(Colored)
+					tprintf("%s  %s%s---------%s", ResetColor, F_Yellow, B_Magenta, ResetColor);
+				else
+					tprintf("   ---------");
+			}
+
+	//		tprintf("%s%s%s", ResetColor, B_Default, F_Default);
+		
+			if (is_sysop())
+			{
+				tprintf("    %02d/%02d %03lu/%03lu %03lu/%03lu %03d/%03d %03lu %5d %5d",
+						p->vs < p->va ? p->vs - p->va + 8 : p->vs - p->va,
+						p->window,
+						p->t1timer/ HZ, p->t1 / HZ,
+						p->t3timer/ HZ, p->t3 / HZ,
+						p->n2count, p->n2, p->rtt/ HZ, p->sndq, p->rcvq);
+			}
+			tprintf("\n");
+		} // cp != NULL
 	}
 	free_proc_ax25(list);
 
@@ -1023,6 +1070,7 @@ int do_manage_routes(int argc, char **argv)
 	int action;
 	char nodeaddr[11];
 	struct rose_route_struct rs_node;
+	struct proc_rs_nodes *pn, *listn;
 	struct proc_rs_neigh *pv, *listv;
 
 	/* Check for SYSOP rights */
@@ -1056,15 +1104,22 @@ int do_manage_routes(int argc, char **argv)
 
 	nodeaddr[10] = '\0';
 	memset(&nodeaddr, '0', 10);
+
+// pour le masque adresse
 	len = strlen(argv[2]);
+
 	if ((len < 4) || (len > 10) || (strspn(argv[2], "0123456789") != len))
 	{
 		node_msg("routes : address error (4 to 10 digits)");
 		return 0;
 	}
 	else
-//		strncpy(nodeaddr, argv[2], len);
-		snprintf(nodeaddr,len, "%s", argv[2]);
+		snprintf(nodeaddr,len + 1, "%s", argv[2]);
+
+	rs_node.mask = len;
+
+	for (i = rs_node.mask; i < 10; i++)
+		nodeaddr[i] = '0';
 
 	if (argc < 4)
 	{
@@ -1072,36 +1127,22 @@ int do_manage_routes(int argc, char **argv)
 		return 0;
 	}
 
-	rs_node.mask = len;
-
 	if (rose_aton(nodeaddr, rs_node.address.rose_addr) != 0)
 	{
-		node_msg("do_manage_routes: invalid address %s", nodeaddr);
+		node_msg("do_manage_routes: invalid address %s", rs_node.address.rose_addr);
 		return (0);
 	}
 
 	/* Search device for the adjacent */
-	if ((listv = read_proc_rs_neigh()) == NULL)
+	if ((listn = read_proc_rs_nodes()) == NULL)
 	{
-		node_msg("do_manage_routes: error read_proc_nr_neigh");
+		node_msg("do_manage_routes: error read_proc_nr_node");
 		return 0;
 	}
+	
+	node_msg("do_manage_routes: address %s callsign %s", nodeaddr, argv[3]);
 
-	for (pv = listv; pv != NULL; pv = pv->next)
-		if (strcasecmp(argv[3], pv->call) == 0)
-			break;
-
-	free_proc_rs_neigh(listv);
-
-	if (pv == NULL)
-	{
-		node_msg("adjacent %s not found", argv[3]);
-		return 0;
-	}
-
-	strcpy(rs_node.device, pv->dev);
-
-	if (ax25_aton_entry(argv[3], rs_node.neighbour.ax25_call) != 0)
+	if (ax25_aton_entry(argv[3], listv->call) != 0)
 	{
 		node_msg("invalid callsign %s", argv[3]);
 		return (0);
@@ -1574,7 +1615,7 @@ int do_links(int argc, char **argv)
 		if(Colored) {
 
 		if (netrom_node_is_connected(p->dest_addr) && (p->st > 0))
-			tprintf("%s%-9s %s%s%s%-12s %s%-6s %-6s %-6s\n",
+			tprintf("%s%-9s %s%s%s%-12s%s %-6s %-6s %-6s\n",
 					F_Yellow,
 					p->dest_addr, ResetColor,
 //					F_DarkRed, B_DarkGreen,
@@ -1585,7 +1626,7 @@ int do_links(int argc, char **argv)
 					ax25_config_get_name(p->dev)
 					);
 		if (node_is_connected(p->dest_addr))
-			tprintf("%s%-9s %s%s%s%-12s %s%-6s %-6s %-6s\n",
+			tprintf("%s%-9s %s%s%s%-12s%s %-6s %-6s %-6s\n",
 					F_Yellow,
 					p->dest_addr, ResetColor,
 //					F_DarkRed, B_DarkGreen,
@@ -2045,7 +2086,7 @@ int do_status(int argc, char **argv)
 		tprintf("DNIC, address    : %s%s,%s%s\n",  F_Green,cfg.dnic, cfg.address, ResetColor);
 			if (cfg.inetport != 0)
 				tprintf("UDP/TCP/IP port  : %s%d%s\n", F_Red,cfg.inetport, ResetColor);
-/*		tprintf("Inet Port        : %s\n", cfg.inetport);*/
+		tprintf("Default port     : %s\n", cfg.def_port);
 		tprintf("Inet address     : %s\n", cfg.def_addr);
 		tprintf("City             : %s\n", cfg.city);
 		tprintf("Zip - State      : %s\n", cfg.state);
@@ -2065,6 +2106,7 @@ int do_status(int argc, char **argv)
 /*		tprintf("Inet Port        : %s\n", cfg.inetport);*/
 			if (cfg.inetport != 0)
 				tprintf("UDP/TCP/IP port  : %d\n", cfg.inetport);
+		tprintf("Default port     : %s\n", cfg.def_port);
 		tprintf("Inet address     : %s\n", cfg.def_addr);
 		tprintf("City             : %s\n", cfg.city);
 		tprintf("Zip - State      : %s\n", cfg.state);
@@ -2252,6 +2294,7 @@ int do_wp(int argc, char **argv)
 //	unsigned int flags = 0;
 	int p;
 	int i, j;
+	int ndigis;
 	wp_t *wp;
 	char *add;
 	char *call;
@@ -2314,7 +2357,7 @@ int do_wp(int argc, char **argv)
 		nb = 200;
 	}
 
-	tprintf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
+//	tprintf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
@@ -2324,8 +2367,15 @@ int do_wp(int argc, char **argv)
 				break;
 
 			if (i == 0)
-				tprintf(" Callsign   Last update UTC   DNIC address  N/U  \tDigi \tLocator City\n");
+				tprintf(" Callsign   Last update UTC   DNIC address  N/U\t Digi \t  Locator City\n");
 
+// Display nodes and users with one line per digi
+			ndigis = wp[i].address.srose_ndigis;
+
+			for (j = ndigis ; j >= 0; j--)
+			{
+			if ((ndigis != j ) || wp[i].is_node || (j==0 && ndigis == 0))
+			{
 			add = rose_ntoa(&wp[i].address.srose_addr);
 			call = ax25_ntoa(&wp[i].address.srose_call);
 
@@ -2334,7 +2384,7 @@ int do_wp(int argc, char **argv)
 
 			my_date(buf, wp[i].date);
 			if (Colored)
-				tprintf("%s %-9s %s %s => %s%s %-7s %s", F_Yellow,call,ResetColor, buf, F_Green, dnic, add + 4, ResetColor);
+				tprintf("%s %-9s %s %s => %s%s %-7s %s", F_Green, call, ResetColor, buf, F_Green, dnic, add + 4, ResetColor);
 			else
 				tprintf("%-9s %s => %s %-7s ", call, buf, dnic, add + 4);
 
@@ -2347,18 +2397,22 @@ int do_wp(int argc, char **argv)
 				tprintf(" User ");
 
 			if (wp[i].address.srose_ndigis == 0)
-				tprintf("\t - ");
-		
-			for (j = wp[i].address.srose_ndigis - 1; j >= 0; j--)
+				tprintf("  -  ");
+			else
 			{
 				call = ax25_ntoa(&wp[i].address.srose_digis[j]);
-				if (strstr(call,"-") == NULL)
-					strcat(call,"-0");
-				tprintf("\t%-9s", call);
+//				if (strstr(call,"-") == NULL)
+//					strcat(call,"-0");
+				if (Colored)
+					tprintf("%s%-9s%s",F_Green, call, ResetColor);
+				else
+					tprintf("%-9s", call);
 			}
-
-			tprintf("\t%s \t%s\n", wp[i].locator, wp[i].city);
+			tprintf("\t  %s  %s\n", wp[i].locator, wp[i].city);
+			}
+			}
 		}
+		
 	}
 
 	if (nb == 0)
@@ -2368,6 +2422,9 @@ int do_wp(int argc, char **argv)
 	}
 
 	tprintf("\n");
+	
+
+	tprintf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
 
 	wp_free_list(&wp);
 	wp_close();
@@ -2376,6 +2433,8 @@ int do_wp(int argc, char **argv)
 		node_msg("Cannot open WP \n");
 		return (1);
 	}
+	
+	
 	return (0);
 }
 

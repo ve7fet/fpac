@@ -1,7 +1,6 @@
 LDADD = $(AX25_LIB) $(MATH_LIB) ../lib/libfpac.a 
-sbin_PROGRAMS = calibrate remote aprslist mailbbs fpacwdog
+sbin_PROGRAMS = calibrate aprslist mailbbs fpacwdog
 calibrate_SOURCES = calibrate.c
-remote_SOURCES = remote.c
 aprslist_SOURCES = aprslist.c
 mailbbs_SOURCES = mailbbs.c
 fpacwdog_SOURCES = fpacwdog.c

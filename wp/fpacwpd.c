@@ -321,12 +321,10 @@ static void rose_read_handler(int s)
 		  db_list_free(&wp_list);
 		  break;
 	  case wp_type_ascii:
-		  
-		  
-		  
-		  (s, pdu.data.string);
-		  wp_flush_pdu();
-		  break;
+			if (verbose) syslog(LOG_INFO, "rose_read_handler() wp_type_ascii");
+			do_cmd(s, pdu.data.string);
+			wp_flush_pdu();
+			break;		  
 	  case wp_type_vector_request:
 		  if (pdu.data.vector.version != WP_VERSION) {
 			  if (verbose) syslog(LOG_INFO, "Receiving vector request from %s : Bad version number %02x", rose_ntoa(&context[s]->address.srose_addr), pdu.data.vector.version);
@@ -888,8 +886,8 @@ int main(int argc, char *argv[])
 		
 	rc = init_rose();
 	if (rc < 0) {
-		syslog(LOG_ERR, "fpacwpd : cannot init ROSE access point. Is fpad running ?");
-		fprintf(stderr, "fpacwpd : cannot init ROSE access point. Is fpad running ?\n", wp_file);
+		syslog(LOG_ERR, "fpacwpd : cannot init ROSE access point. Is fpad %s running ?", wp_file);
+		fprintf(stderr, "fpacwpd : cannot init ROSE access point. Is fpad %s running ?\n", wp_file);
 		exit(1);
 	}
 	

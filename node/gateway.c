@@ -66,6 +66,18 @@ void free_routes(void)
 	}
 }
 
+/*Help for command Routes
+
+USAGE
+        Routes [Rose/Fpac address]
+
+DESCRIPTION
+        The Route Table shows the primary and alternate routes set for addresses.
+	Note: 
+	    Open = available 
+	    Closed = unavailable at this time. 
+
+*/
 void read_routes(void)
 {
 	struct route *r;
@@ -243,6 +255,41 @@ static char *reason(unsigned char cause)
 /*
  * Initiate a AX.25, NET/ROM, ROSE or TCP connection to the host
  * specified by `address'.
+ * 
+ * Help for command Connect
+
+USAGE
+        Connect <port> <call> [via <digi1> ...] [s|d]    For AX.25
+        Connect <call>                                   For AX.25/WP/Mheard/Flexnet
+        Connect <call | alias> [s|d]                     For NET/ROM
+	Connect <call> <address> [<digi>] [d|s]          For ROSE
+
+DESCRIPTION
+        Initiates an AX.25, NET/ROM or ROSE connection to a remote
+        host. If more than two parameters are entered and the
+        second parameter is ten characters in length then it is
+        interpreted as a ROSE connection, otherwise the first
+        parameter is interpreted as a port name and AX.25 is used
+        to make the connection via that port. If only one parameter
+        is given the connection is made using NET/ROM, Flexgate 
+
+        If the callsign is known by the WP database, you can only
+        specify it, the routing will be automatic.
+
+        If the callsign is unknown by the Wp database but heard by
+        the mheardd demon, an AX25 connection is initiated on the
+        last heard port.
+
+        If the callsign is unknown by the Wp database but known in
+        the Flexnet destinations table, an AX25 connection is initiated
+        via the Flexgate.
+
+        If a single `s' is entered as the last parameter, then when
+        the remote host disconnects you will be returned to this node.
+        If a single `d' is entered as the last parameter, you will
+        be disconnected from this node too. Default behaviour (neither
+        `s' nor `d' entered) depends on sysop configuration.
+
  */
 static int connect_to(char *address[], int family, int escape, char *source)
 {
@@ -284,8 +331,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	switch (family)
 	{
 	case AF_ROSE:
-
-		node_msg("source %s destination %s ", cfg.alt_callsign, address[0]);		
+// DEBUG F6BVP
+		node_msg("connect_to() source %s destination %s ", cfg.alt_callsign, address[0]);		
 		
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
@@ -312,6 +359,14 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 		rose_aton(addr, sockaddr.rose.srose_addr.rose_addr);
 		addrlen = sizeof(struct full_sockaddr_rose);
+// DEBUG F6BVP
+		node_msg("Connect_to() not connected to cfg.alt_callsign '%s'", cfg.alt_callsign);
+		node_msg("\tAF_ROSE family");
+		node_msg("\tsource Call %s ", call);
+		node_msg("\tRose address %s ", addr);
+		node_msg("\taddrlen %d", addrlen);
+//		node_msg("\tpath %s", path);
+//
 		if (bind(fd, (struct sockaddr *) &sockaddr, addrlen) == -1)
 		{
 			node_perror("connect_to: bind", errno);
@@ -387,14 +442,15 @@ static int connect_to(char *address[], int family, int escape, char *source)
 				close(fd);
 				return -1;
 			}
+
 			++sockaddr.rose.srose_ndigis;
 		}
 		
 		addrlen = sizeof(struct full_sockaddr_rose);
 		
 // DEBUG F6BVP
-		node_msg("ROSE address : %s via : %s", path, address[pos]);
-//		node_msg("digi %s", ax25_ntoa(&sockaddr.rose.srose_digis[0].ax25_call));
+//		node_msg("ROSE address : %s via : %s", path, address[pos]);
+//		node_msg("Connnect_to() digi %s", ax25_ntoa(&sockaddr.rose.srose_digis[0].ax25_call));
 //				
 		paclen = rs_config_get_paclen(NULL); 
 		eol = ROSE_EOL;
@@ -412,11 +468,22 @@ static int connect_to(char *address[], int family, int escape, char *source)
 			node_perror("connect_to: socket", errno);
 			return -1;
 		}
+// DEBUG F6BVP
+		node_msg("\nConnect_to() socket AF_NETROM %d", AF_NETROM);
 		/* Why on earth is this different from ax.25 ????? */
-		sprintf(path, "%s %s", nr_config_get_addr(NrPort), call);
+//		sprintf(path, "%s %s", nr_config_get_addr(NrPort), call);
+		sprintf(path, "%s", nr_config_get_addr(NrPort));
 		ax25_aton(path, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_NETROM;
 		addrlen = sizeof(struct full_sockaddr_ax25);
+// DEBUG F6BVP
+		node_msg("Connect_to() not connected to cfg.alt_callsign '%s'", cfg.alt_callsign);
+		node_msg("\tAF_NETROM family");
+		node_msg("\tsource Call %s ", call);
+		node_msg("\tNrPort %s ", NrPort);
+		node_msg("\taddrlen %d", addrlen);
+		node_msg("\tpath %s", path);
+//
 		if (bind(fd, (struct sockaddr *) &sockaddr, addrlen) == -1)
 		{
 			node_perror("connect_to: bind", errno);
@@ -451,10 +518,12 @@ static int connect_to(char *address[], int family, int escape, char *source)
             address[0]=ax25_config_get_name(address[0]);
 FSA*/
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
-                    node_msg("Invalid port");
-                    return -1;
+/* DEBUG F6BVP */
+                    node_msg("connect_to() Invalid port %s", address[0]);
+//                    return -1;
                 }
 /* DEBUG F6BVP */
+		node_msg("connect_to() Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);
 /*		fprintf (stderr, "Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);*/
 		
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
@@ -823,6 +892,12 @@ int is_wp(char *callsign, struct full_sockaddr_rose *wpaddr)
 	return (0);
 }
 
+/* Initiate a connexion to destination 
+ * via optional port specification
+ * using protocol according to callsign SSID
+ * or ROSE address
+ * */
+
 int do_connect(int argc, char **argv)
 {
 	struct flex_dst *flx;
@@ -845,7 +920,14 @@ int do_connect(int argc, char **argv)
 	char *source;
 	wp_t wpt;
 	ax25_address ax25;
-
+// F6BVP added argument table for default port connect request
+	char **argvp;
+	int default_port = 0;
+ 
+	argvp = calloc(10, sizeof(*argvp));
+	for (n=0 ; n< 3; n++)
+		argvp[n] = calloc(10, sizeof(**argvp));
+//
 	source = NULL;
 
 	/* Delete the "v" or "via" */
@@ -898,10 +980,16 @@ int do_connect(int argc, char **argv)
 		/* Check if its is a known port */
 		if (ax25_config_get_addr(argv[1]))
 		{
-			if (argc < 3) {
-				node_msg("Callsign missing : Connect port callsign");
+			if (strcasecmp(argv[1], cfg.alt_callsign) == 0)
+			{
+				node_msg("already connected to %s", cfg.alt_callsign);
+				return 0;
+			}
+ 			if (argc < 3)
+ 			{
+				node_msg("Connect %s. Usage : Connect port callsign",argv[1]);
 				return (0);
-		}
+			}
 			family = AF_AX25;
 			source = "(user port) ";
 		}
@@ -912,12 +1000,15 @@ int do_connect(int argc, char **argv)
 			argv[1] = netromcall;
 			family = AF_NETROM;
 			source = "(netrom node) ";
+// DEBUG NETROM CALL
+			node_msg ("netrom call %s argv[1] '%s'", netromcall, argv[1]);
 		}
 
 		/* Check if in FPAC WP */
 		else if ((argc == 2) && (is_wp(argv[1], &wpaddr)))
 		{
 			strcpy(roseroute, rose_ntoa(&wpaddr.srose_addr));
+
 			argv[2] = roseroute;
 			argc = 3;
 			for (n = wpaddr.srose_ndigis - 1; n >= 0; n--)
@@ -928,10 +1019,8 @@ int do_connect(int argc, char **argv)
 			argv[argc] = NULL;
 			family = AF_ROSE;
 			source = "(fpac wp) ";
-
-
 		}
-		
+
 		/* ROSE connections */
 		else if (argc > 2)
 		{
@@ -1016,26 +1105,56 @@ int do_connect(int argc, char **argv)
 		}
 		else
 		{
-			node_msg("Port missing : Connect port callsign");
+// DEBUG F6BVP DEFAULTS connect via default port source=user port & AF_AX25 family
+//			if(argc==2) argc = 3;
+			node_msg("do_connect() %d args argv[0]:'%s' argv[1]:'%s'", argc, argv[0], argv[1]);
+
+			strcpy(argvp[0], argv[0]);
+			strcpy(argvp[1], cfg.def_port);
+			strcpy(argvp[2], argv[1]);
+
+			family = AF_AX25;
+			source = "(user port) ";
+			default_port = 1;
+
+			node_msg("do_connect() %d args argvp[0]:'%s' argvp[1]:'%s' argvp[2]:'%s'", argc, argvp[0], argvp[1], argvp[2]);
+//
+/*
+			node_msg("Connect %s on port ? Port is missing. Usage: Connect <port> <callsign>", argv[1]);
 			wp_close();
 			return (0);
+*/
 		}
-		wp_close();
+	wp_close();
 	}
 
 	if (family == AF_INET && argc > 3)
 		connstr = argv[3];
 	/* escape = (check_perms(PERM_NOESC, 0L) == 0) ? -1 : EscChar; */
-
 	escape = 1;
 
-	if ((fd = connect_to(++argv, family, escape, source)) == -1)
+// DEBUG F6BVP CONNECT VIA DEFAULT PORT 
+	if (default_port == 0)
 	{
-		set_eolmode(User.fd, EOLMODE_TEXT);
-		if (fcntl(User.fd, F_SETFL, 0) == -1)
-			node_perror("do_connect: fcntl - stdin", errno);
-		return 0;
+		if ((fd = connect_to(++argv, family, escape, source)) == -1)
+		{
+			set_eolmode(User.fd, EOLMODE_TEXT);
+			if (fcntl(User.fd, F_SETFL, 0) == -1)
+				node_perror("do_connect: fcntl - stdin", errno);
+			return 0;
+		}
 	}
+	else
+	{
+		if ((fd = connect_to(++argvp, family, escape, source)) == -1)
+		{
+			set_eolmode(User.fd, EOLMODE_TEXT);
+			if (fcntl(User.fd, F_SETFL, 0) == -1)
+				node_perror("do_connect: fcntl - stdin", errno);
+			return 0;
+		}
+	}
+//
 	if (connstr)
 	{
 		usprintf(fd, "%s\n", connstr);
@@ -1147,6 +1266,26 @@ int do_connect(int argc, char **argv)
 	return 0;
 }
 
+/*
+*  
+* Help for command finger
+*
+USAGE
+        Finger [<username>][@<hostname>]
+
+DESCRIPTION
+        Retrieves information about users of a system. If the user
+        name is omitted, shows the users currently logged on the 
+        host. If the hostname is omitted, defaults to the local host.
+
+EXAMPLES
+        finger @soul.oh7rba.ampr.org
+        finger oh7lzb@soul.oh7rba.ampr.org
+        finger oh7lzb
+
+* 
+*/
+
 int do_finger(int argc, char **argv)
 {
 	int fd, c;
@@ -1241,6 +1380,23 @@ static unsigned short in_cksum(unsigned char *addr, int len)
 	return answer;
 }
 
+/*Help for command pin
+
+USAGE
+        PIng <hostname> [<length>]
+
+DESCRIPTION
+        Checks if a host can be reached trough the network by sending
+        an ICMP Echo Request packet to the host and waiting for it to
+        reply. If a reply is received the round-trip-time (RTT)
+        between the local and remote hosts is shown.
+
+        If an optional length is specified the data portion of the
+        packet is filled with length number of bytes.
+
+EXAMPLE
+        ping soul.oh7rba.ampr.org
+*/
 int do_ping(int argc, char **argv)
 {
 	static int sequence = 0;
