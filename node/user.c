@@ -119,7 +119,7 @@ int user_list(int argc, char **argv)
 	struct tm *tp;
 	struct proc_nr_nodes *np;
 	char buf[80];
-	long l;
+	time_t l;
 
 	if ((f = fopen(DATA_NODE_LOGIN_FILE, "r")) == NULL) {
 		node_perror(DATA_NODE_LOGIN_FILE, errno);

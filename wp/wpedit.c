@@ -89,7 +89,7 @@ int main(int ac, char **av)
 			cr = 1;
 			break;
 		case '?' :
-			fprintf(stderr, "usage: wpedit [-c] callsign\n");
+			fprintf(stderr, "usage: wpedit [-c CR] [-v verbose] callsign\n");
 			return(1);
 		}
 	}

@@ -1,0 +1,7 @@
+autom4te.cache/
+*.o
+*.Po
+*.a
+*.so
+*~
+.deps/

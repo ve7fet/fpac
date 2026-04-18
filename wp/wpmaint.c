@@ -50,11 +50,10 @@ int usage(void)
 		printf ("\n");
 		printf ("Wpmaint (version %s)\n", __DATE__);
 		printf ("Usage: wpmaint [-argument]\n");
-		printf ("argument :  -d = age delay (in days) for deleting old records\n");       
-		printf ("            -e = age delay (in days) for erasing deleted records\n");       
+		printf ("argument :  -d = age delay (in days) for deleting old records\n");
+		printf ("            -e = age delay (in days) for erasing deleted records\n");
 //		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
 		printf ("\n");
-//		exit (0);
 }
 
 int main(int argc, char **argv)
@@ -92,7 +91,7 @@ int main(int argc, char **argv)
 
 	optind = 0;
 
-	while ((p = getopt(argc, argv, "d:e:")) != -1)
+	while ((p = getopt(argc, argv, "e:d:")) != -1)
 	{
 		switch (p)
 		{
@@ -291,7 +290,6 @@ int main(int argc, char **argv)
 		}
 
 		++nb;
-
 	}
 
 	if (nb != wph_sig.nb_record)

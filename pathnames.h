@@ -1,3 +1,5 @@
+#define LINUX_VERSION		"/proc/version"
+
 /*From FPAC sources*/
 
 #define FPACCONF        	"/usr/local/etc/ax25/fpac.conf"

@@ -71,7 +71,11 @@ static void SignalTERM(int code)
 
 void header(int fd)
 {
-	write(fd, "\r  1st --Tries-- 3rd  L2Call       L3Call/Address    Locator City\r", 66);
+	if ((write(fd, "\r  1st --Tries-- 3rd  L2Call       L3Call/Address    Locator City\r", 66)) < 0)
+	{
+		if (errno)
+			perror("FPAC write error:");
+	}
 }
 /*
 static int callcmp(char *ref, char *call)
@@ -332,7 +336,11 @@ void check(int fd, ax25_address *destcall, ax25_address *destaddr, int nbdigis, 
 			{
 				if (!isdigit(buf[i]))
 				{
-					write(fd, buf, nb);
+					if ((write(fd, buf, nb)) < 0)
+					{
+						if (errno)
+                        			perror("FPAC write error:");
+					}
 					break;
 				}
 				roseaddr[i] = buf[i];
@@ -379,7 +387,11 @@ void check(int fd, ax25_address *destcall, ax25_address *destaddr, int nbdigis, 
 		if (daddr == NULL)
 		{
 			sprintf(txt, "*** No route to %s in %s\r", roseaddr, cfg.callsign);
-			write(fd, txt, strlen(txt));
+			if ((write(fd, txt, strlen(txt))) < 0)
+			{
+				if (errno)
+                        	perror("FPAC write error:");
+			}
 			return;
 		}
 
@@ -430,7 +442,11 @@ void check(int fd, ax25_address *destcall, ax25_address *destaddr, int nbdigis, 
 		{
 			close(s);
 			sprintf(txt, "Connect %s / %s : %s\r", ax25_ntoa(destcall), roseaddr, strerror(errno));
-			write(fd, txt, strlen(txt));
+			if ((write(fd, txt, strlen(txt))) < 0)
+			{
+				if (errno)
+                        	perror("FPAC write error:");
+			}
 		}
 		
 	alarm(60);
@@ -446,7 +462,11 @@ void check(int fd, ax25_address *destcall, ax25_address *destaddr, int nbdigis, 
 		for (j = 0 ; j < 20 ; j++)
 			str[j] = (j%26) + 'A';
 		str[j] = '\r';
-		write(s, str, 21);
+		if ((write(s, str, 21)) < 0)
+		{
+			if (errno)
+                        perror("FPAC write error:");
+		}
 		n = read(s, str, sizeof(str));
 		alarm(0);
 		if (n == -1)
@@ -464,18 +484,30 @@ void check(int fd, ax25_address *destcall, ax25_address *destaddr, int nbdigis, 
 	
 	strcat(str, buf);
 	
-	write(fd, str, strlen(str));
+	if ((write(fd, str, strlen(str))) < 0)
+	{
+		if (errno)
+                perror("FPAC write error:");
+	}
 
 	strcat(roseaddr, "\r");	
-	write(s, roseaddr, 11);
-	
+	if ((write(s, roseaddr, 11)) < 0)
+	{
+		if (errno)
+                perror("FPAC write error:");
+	}
+
 	for (;;)
 	{
 		alarm(60);
 		nb = read(s, buf, sizeof(buf));
 		if (nb <= 0)
 			break;
-		write(fd, buf, nb);
+		if ((write(fd, buf, nb)) < 0)
+		{
+			if (errno)
+                        perror("FPAC write error:");
+		}
 		alarm(0);
 	}
 
@@ -494,7 +526,11 @@ void route_menu(int fd)
 		"\rFPAC trace route application.\n\nEnter address or callsign to check : ");
 	for (;;)
 	{
-		write(fd, buf, strlen(buf));
+		if ((write(fd, buf, strlen(buf))) < 0)
+		{
+			if (errno)
+                        perror("FPAC write error:");
+		}
 		alarm(600);
 		nb = read(fd, buf, strlen(buf));
 		alarm(0);
@@ -527,14 +563,22 @@ void route_menu(int fd)
 			if (wp_get(&axcall, &wpt) == 0)
 			{
 				sprintf(buf, "Checking route %s found in WP\r", fpac2asc(&wpt.address.srose_addr));
-				write(fd, buf, strlen(buf));
+				if ((write(fd, buf, strlen(buf))) < 0)
+				{
+					if (errno)
+                        		perror("FPAC write error:");
+				}
 				strcpy(buf, rose_ntoa(&wpt.address.srose_addr));
 				nb = 10;
 			}
 			else
 			{
 				sprintf(buf, "%s not found in WP\r", buf);
-				write(fd, buf, strlen(buf));
+				if ((write(fd, buf, strlen(buf))) < 0)
+				{
+					if (errno)
+                        		perror("FPAC write error:");
+				}
 				buf[0] = '\0';
 				nb = 0;
 			}
@@ -559,14 +603,22 @@ void route_menu(int fd)
 			header(fd);
 			sprintf(buf, " 0.000  0.000  0.000 %-9s %9s/%s,%s %s %s\r",
 				cfg.alt_callsign, cfg.callsign, cfg.dnic, cfg.address, cfg.locator, cfg.city);
-			write(fd, buf, strlen(buf));
+			if ((write(fd, buf, strlen(buf))) < 0)
+			{
+				if (errno)
+                        	perror("FPAC write error:");
+			}
 			check(fd, NULL, digi, 2, 0);
 		}
 		
 		sprintf(buf, "\rEnter address or callsign to check : ");
 	}
 	
-	write(fd, "73\r", 3);
+	if ((write(fd, "73\r", 3)) < 0)
+	{
+		if (errno)
+                perror("FPAC write error:");
+	}
 	sleep(1);
 	close(fd);
 }
@@ -802,11 +854,19 @@ int main(int argc, char **argv)
 			header(new);
 			sprintf(txt, " 0.000  0.000  0.000 %-9s %9s/%s,%s %s %s\r",
 				cfg.alt_callsign, cfg.callsign, cfg.dnic, cfg.address, cfg.locator, cfg.city);
-			write(new, txt, strlen(txt));
+			if ((write(new, txt, strlen(txt))) < 0)
+			{
+				if (errno)
+                        	perror("FPAC write error:");
+			}
 			
 			if (axorig.fsa_ax25.sax25_ndigis < 2)
 			{
-				write(new, "Destination missing\r", 19);
+				if ((write(new, "Destination missing\r", 19)) < 0)
+				{
+					if (errno)
+                        		perror("FPAC write error:");
+				}
 				sleep(1);
 				close(new);
 			}
@@ -846,7 +906,11 @@ int main(int argc, char **argv)
 				/* child */
 				sprintf(txt, "%-9s %9s/%s,%s %s %s\r",
 					cfg.alt_callsign, cfg.callsign, cfg.dnic, cfg.address, cfg.locator, cfg.city);
-				write(new, txt, strlen(txt));
+				if ((write(new, txt, strlen(txt))) < 0)
+				{
+					if (errno)
+                        		perror("FPAC write error:");
+				}
 
 				check(new, NULL, NULL, 0, 1);
 				sleep(1);

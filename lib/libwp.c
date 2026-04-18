@@ -704,22 +704,23 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	char *rs_addr = rs_get_addr(NULL);
 
 	if (!rs_addr) return -1;
-	
+
 	fd = socket(AF_ROSE, SOCK_SEQPACKET, 0);
 	if (fd < 0) return -1;
 
 	memset(&rose, 0x00, sizeof(struct full_sockaddr_rose));
+
 	rose.srose_family = AF_ROSE;
 	rose.srose_ndigis = 0;
 	ax25_aton_entry(source_call, rose.srose_call.ax25_call);
 	rose_aton(rs_addr, rose.srose_addr.rose_addr);
+
 	if (bind(fd, (struct sockaddr *)&rose, sizeof(struct full_sockaddr_rose)) == -1) {
 		perror("wp_open: bind");
 		close(fd);
 		return -1;
 	}
 
-	
 	if (non_block) {
 		int flag = 1;
 		rc = ioctl(fd, FIONBIO, &flag);
@@ -729,7 +730,7 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 			return -1;
 		}
 	}
-	
+
 	if (!remote) {	
 		/* Wait a few seconds for local WP server to be ready */
 		if (wait_for_local_wp(6)) return -1;
@@ -740,7 +741,7 @@ int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non
 	else {
 		rc = connect(fd, (struct sockaddr *)remote, sizeof(struct full_sockaddr_rose));		
 	}
-		
+
 	if (rc && (errno != EINPROGRESS)) {
 		close(fd);
 		return -1;
@@ -753,12 +754,16 @@ int wp_listen(void)
 	struct full_sockaddr_rose rose;
 	int fd;
 	char *rs_addr;
-			
+
+//DEBUG F6BVP
+	memset(&rose, 0x00, sizeof(struct full_sockaddr_rose));
+//
 	rose.srose_family = AF_ROSE;
 	rose.srose_ndigis = 0;
 	ax25_aton_entry("WP", rose.srose_call.ax25_call);
 	if (!wp_debug) rs_addr = rs_get_addr(NULL);
-	else rs_addr = rs_get_addr("rose1");
+// Was rose1. Bug ? F6BVP
+	else rs_addr = rs_get_addr("rose0");
 
 	if (!rs_addr) return -1;
 	rose_aton(rs_addr, rose.srose_addr.rose_addr);
@@ -833,13 +838,18 @@ int wp_update_addr(struct full_sockaddr_rose *addr)
 		syslog(LOG_INFO, "wp_update_addr() invalid callsign '%s'\n", ptr);
 		return -1;
 	}
+
 	memset(&wp, 0, sizeof(wp_t));		
+
 	if (wp_get(&addr->srose_call, &wp) != 0) {
 		syslog(LOG_INFO, "wp_update_addr() callsign '%s' not found\n", ptr);
 	/*	return -1; */
 	}
 	wp.is_deleted = 0;
 	wp.address = *addr;
+
+	dump_rose("wp_update_addr()", addr);
+
 	return wp_set(&wp);
 }
 
@@ -892,12 +902,15 @@ int wp_get_list(wp_t **wp, int *nb, int flags, char *mask)
 	*nb = 0;
 	
 	memset(&pdu, 0, sizeof(wp_pdu));
+
 	pdu.type = wp_type_get_list;
+
 	pdu.data.list_req.mask[9] = '\0';
 	pdu.data.list_req.flags = flags;
 	pdu.data.list_req.max = max;
-	
-	memcpy(pdu.data.list_req.mask, mask, 9);
+
+	memcpy(pdu.data.list_req.mask, mask, 10);
+
 	rc = wp_send_pdu(wp_socket, &pdu);
 	if (rc < 0)
 	{
@@ -964,7 +977,9 @@ int wp_get(ax25_address *call, wp_t *wp)
 		return -1;
 		
 	call_clean(call);
+
 	memset(&pdu, 0, sizeof(wp_pdu));
+
 	pdu.type = wp_type_get;
 	pdu.data.call = *call;
 	rc = wp_send_pdu(wp_socket, &pdu);
@@ -1022,6 +1037,7 @@ int wp_set(wp_t *wp)
 		call_clean(&wp->address.srose_digis[n]);
 		
 	memset(&pdu, 0, sizeof(wp_pdu));
+
 	pdu.type = wp_type_set;
 	pdu.data.wp = *wp;		
 	rc = wp_send_pdu(wp_socket, &pdu);
@@ -1093,22 +1109,31 @@ void dump_rose(char *title, struct full_sockaddr_rose *rose)
 {
 	int i;
 
-	printf("%s\n", title);
-	printf("\tFamily   = %d\n", rose->srose_family);
-	printf("\tCallsign = %s\n", ax25_ntoa(&rose->srose_call));
-	printf("\tAddress  = %s\n", rose_ntoa(&rose->srose_addr));
-	printf("\tndigis   = %d\n", rose->srose_ndigis);
+//	printf("%s\n", title);
+//	printf("\tFamily   = %d\n", rose->srose_family);
+//	printf("\tCallsign = %s\n", ax25_ntoa(&rose->srose_call));
+//	printf("\tAddress  = %s\n", rose_ntoa(&rose->srose_addr));
+//	printf("\tndigis   = %d\n", rose->srose_ndigis);
+
+	syslog(LOG_INFO,"%s\n", title);
+	syslog(LOG_INFO,"\tFamily   = %d\n", rose->srose_family);
+	syslog(LOG_INFO,"\tCallsign = %s\n", ax25_ntoa(&rose->srose_call));
+	syslog(LOG_INFO,"\tAddress  = %s\n", rose_ntoa(&rose->srose_addr));
+	syslog(LOG_INFO,"\tndigis   = %d\n", rose->srose_ndigis);
 
 	for (i = 0; i < rose->srose_ndigis ; i++)
 	{
 		if (i == 6)
 		{
-			printf("Error : Nb digis = %d\n", rose->srose_ndigis);
+//			printf("Error : Nb digis = %d\n", rose->srose_ndigis);
+			syslog(LOG_INFO,"Error : Nb digis = %d\n", rose->srose_ndigis);
 			break;
 		}
-		printf("\tdigi %d   = %s\n", i+1, ax25_ntoa(&rose->srose_digis[i]));
+//		printf("\tdigi %d   = %s\n", i+1, ax25_ntoa(&rose->srose_digis[i]));
+		syslog(LOG_INFO,"\tdigi %d   = %s\n", i+1, ax25_ntoa(&rose->srose_digis[i]));
 	}
-	printf("\n");
+//	printf("\n");
+	syslog(LOG_INFO,"\n");
 }
 
 int strmatch (char *chaine, char *masque)

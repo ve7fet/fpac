@@ -1,6 +1,55 @@
+
+fpac (4.1.5-rc9)
+
+	* Fixes build failure with autoconf 2.72 on 32-bit ARM (armhf).
+	configure.ac: remove obsolete autoconf macros for compatibility with
+	autoconf >= 2.69
+	- Remove AC_PROG_GCC_TRADITIONAL (removed in autoconf 2.70)
+	- Remove AC_HEADER_STDC (STDC_HEADERS obsolete)
+	- Remove AC_TYPE_SIGNAL (RETSIGTYPE always void on modern systems)
+	- Remove AC_HEADER_TIME (time.h always available on modern systems)
+	- Remove residual m4_warn blocks left by autoupdate
+
+	* node/node.h: change logintime and cmdtime from long to time_t
+	* (fixes build on armhf with glibc Y2038-aware time_t = long long)
+	* node/user.c: change local variable l from long to time_t (same fix)
+
+	Tested on armhf (autoconf 2.72) and compatible with aarch64 (autoconf 2.69)."
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, april 17 2026
+
+fpac (4.1.5-rc8)
+	* Bug fix: sort_proc_nr_nodes() - infinite loop on large /proc/net/nr_nodes
+	The previous bubble sort implementation restarted from the head of the
+	list after every swap, causing an O(n²) worst-case complexity and a
+	potential infinite loop when duplicate callsigns were present (strcmp
+	comparison used <= 0 instead of < 0). Replaced by a qsort()-based
+	implementation using a temporary pointer array, giving O(n log n)
+	complexity regardless of list size.
+
+	* NetRom command new feature: 'ne' command - new sort order arguments
+	'a' : sort nodes list by callsign (alphabetic order)  [existing option]
+	'm' : sort nodes list by alias/mnemonic (alphabetic order) [new option]
+	Default (no argument) : sort by quality (decreasing order, unchanged)
+	Usage: ne [a|m]
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, march 31 2026
+
+fpac (4.1.5-rc7)
+
+	* Added up to two digipeater list in Users menu
+	* Added 'Listening' in "Users *" option for AX25 status
+	* AX25 level 3 stations are displayed even if not in White Pages
+	* status menu shows now Default port rather than Inet Port; ex : axudp
+	* tentatively improved command "routes" displays (temporarily ?) more connect infos messages
+	* messages are sent from different parts of source code to be displayed in syslog files for debuging
+	* tools/remote.c removed (obsolete parallel port control)
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>
+
 fpac (4.1.4)
 
-	* Added COLor internal command to toggle colored display mode.
+	* Added COlor internal command toggles colored display mode ON and OFF.
 	* Satisfied compiler removed warnings 
 	* SSDID of digits are still equal 0 by default. Must be corrected
 	* fpacnode connexion command needs to be optimized to improve routing 
