@@ -1,0 +1,12 @@
+#! /bin/sh
+/usr/bin/automake --version | grep automake
+/usr/local/sbin/ax25ipd -v | grep ax25ipd
+/usr/local/sbin/ax25d -v
+/usr/local/sbin/mkiss -v
+/usr/local/sbin/kissattach -v
+/usr/local/bin/call -v
+/usr/local/bin/listen -v
+/usr/local/sbin/monitor -v
+/usr/local/bin/mheard -v
+#
+

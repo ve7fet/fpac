@@ -1,0 +1,28 @@
+.TH FLEXD.CONF 5 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpac.conf \- Flexd node configuration file  /etc/ax25/flexd.conf
+.SH DESCRIPTION
+.LP
+.B flexd.conf
+defines the Flex Node's call, the neighboring flexgate and the polling rate.
+.TP 25
+.BI \ MyCall " call-ssid
+The Call-SSID of this Flex node.
+.TP 
+.BI \ PollInterval " poll-time
+The time between polling events in seconds.
+.TP
+.BI \ Flexgate " call-ssid
+The call-ssid of the Flex Node that will act as the gateway to the Flex Network.
+.SH EXAMPLE
+.EX
+# Flexd configuration file -/etc/ax25/flexd.conf
+  MyCall          KA1VRF-2
+#
+  PollInterval    3000
+#
+  Flexgate        W4OT-2
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+flexd(1) flexd.routes(5)

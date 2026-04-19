@@ -1,0 +1,31 @@
+# Configuration file for FPAC module aprslist
+# Fichier de configuration pour le module aprslist FPAC
+# @sysconfdir@/ax25/aprslist.conf
+#
+# Geographical coordinates
+# Position geographique
+#
+#         deg min sec
+longitude  2  18  80  e
+latitude  48  53  08  n
+#
+# Beacon information by port
+# port is device name in @sysconfdir@/ax25/axports 
+# Port examples : [0] or [aprs]
+# Period in minutes for sending coordinates and beacon
+# Information balise par port
+# le port correspond au nom de l'interface dans @sysconfdir@/ax25/axports
+# 
+[aprs]
+from F6BVP
+to APRS
+period 5
+#
+#[4]
+#from F6BVP
+#to APRS
+#period 5
+#
+# Additional beacon text - Texte supplementaire dans la balise
+beacon JN18DV 145,275 1200b 433,775 9600b http://f6bvp.org
+#

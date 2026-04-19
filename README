@@ -1,0 +1,95 @@
+FPAC
+====
+
+You most probably want to use the latest fpac version from the Github repository, 
+https://github.com/ve7fet/fpac
+
+There are even more updates and Release Candidates available from here  :
+http://f6bvp.org/ax25-libraries-utilities-applications/
+
+You may read Linux FPAC-HOWTO
+https://www.f6fbb.org/fpac/doc/FPAC-HOWTO.html
+
+Linux FPAC mini-HOWTO is obviously not up-to-date...
+http://rose.fpac.free.fr/MINI-HOWTO/
+
+Linux FPAC mini-HOWTO n'est malheureusement plus à jour...
+http://rose.fpac.free.fr/MINI-HOWTO-FR/
+
+Here is a list of applications dedicated to FPAC X25 node.
+
+They are using the ROSE/X25 L3 layer of the linux kernel.
+
+The documentation is in doc directory. HTML doc in doc/html.
+
+aprslist	lists APRS frames heard
+ax25parms	list the ax25 paramaters currently set in /proc
+calibrate	sends a sequence of UI frames to a port
+call_tcp	(ax25d/node) Calls a remote BBS via TCP
+calld		Receives calls from a remote BBS via TCP
+flexd		Download and handle Flexnet destinations database
+fpac.sh		Shell script to start/stop fpac 
+fpaccfg		dumps the configuration of fpac
+fpacnode	The FPAC node client
+fpacroute	daemon for traceroute
+fpacshell	(node) Runs a shell with MD5 protection
+fpacstat	computes the traffic statistics of the trunks
+fpacwdog	simple watchdog that sends a character to a serial port
+fpacwpd		The white pages database server daemon
+fpad		The FPAC pad. Access from/to AX25/NetRom/ROSE
+mailbbs		Simple mailer to send Fpac's services messages to a BBS
+mon_tcp		Sends/receive monitoring frames to a remote BBS via TCP/IP
+monitor		Simple monitoring tool
+remote		** Obsolete
+wpcmp		WP utility
+wpedit		WP editor (to edit WP node parameters or delete a node)
+wplist		list WP data base records in local Node memory image
+wpmaint		White Pages maintenance utility
+wpserv		WP application
+wpstress	** Obsolete - WP utility
+yapp		To remotely download or upload files to your node with YAPP transfert protocol.
+
+See INSTALL for configuration and installation instructions.
+
+PREREQUISITES
+=============
+
+You need to have current libax25 installed (see http://f6bvp.org/ax25-libraries-utilities-applications/).
+
+Ensure ax25-apps and ax25-tools are also installed. Ensure all configuration files 
+exist.
+
+Installation paths can be changed to suit local requirements, see ./configure --help or INSTALL for 
+details. Ensure you install in the same paths used by libax25, ax25-apps, and ax25-tools.
+
+STARTING FPAC
+=============
+Before starting fpac some configuration are needed for /etc/ax25/fpac.conf, fpac.nodes, fpac.routes and ax25ipd.conf
+Pre configured nodes and ROSE routes are provided than should work and can be used as configuration examples.
+
+To start fpac, use the fpac.sh script
+Fpac daemon will run in background.
+
+Then you may run FPAC client fpacnode
+
+List of fpacnode client commands may be obtained issuing question mark from fpacnode and 
+detailed help on command usage with H followed by the command name.
+
+TODO
+====
+	* To be compatible with libax25-0.0.9 and up now
+	* Upgrade with last ROSE fonctionalities
+	  (UI frames routed like I frames for APRS and IP datagrams and increase MTU )
+	* Do automatic cleaning of WP database.
+	* Find a solution for automatic and dynamic routing.
+	* Support an online and switchable compression algorithm.
+	* Flexnet Digipeating or perhaps convert flexnet destinations collected in WP
+	* Fix all bugs you can found and report.
+	* Add new fonctionnalities you request ;-)
+
+You can post your bug reports or requests in the Rose/Fpac mailing list.
+Subscription on http://github.com/ve7fet/fpac/issues
+
+You can also help us to keep up to date this package (Sources, documentation...)
+
+  Bernard Pidoux F6BVP <bernard.pidoux@free.fr>, bernard.f6bvp@gmail.com

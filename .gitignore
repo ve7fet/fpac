@@ -1,0 +1,17 @@
+autom4te.cache/
+*.o
+*.Po
+*.a
+*.so
+*~
+.deps/
+*.lo
+*.la
+.libs/
+libtool
+stamp-h1
+config.log
+config.status
+config.guess
+config.sub
+autom4te.cache/

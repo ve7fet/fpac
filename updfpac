@@ -1,0 +1,133 @@
+#!/bin/bash
+# script updated June-2-2025 for FPAC VE7FET's repository on github or http://f6bvp.org
+# Copy this script file in /usr/local/src/ax25/updfpac.sh
+# cd into /usr/local/src/ax25
+# and execute command : sudo chmod a+x updfpac.sh
+# execute command to run the script : sudo ./updfpac.sh
+# It will update, compile and install FPAC AX.25 ROSE application
+#
+
+VERSION=4.1.4
+SRCDIR=/usr/local/src/ax25
+FPAC=fpac-$VERSION
+FPACDIR=$SRCDIR/$FPAC 
+EXTENT=xz
+# Color Codes
+Reset='\e[0m'
+Red='\e[31m'
+Green='\e[30;42m'  # Black/Green
+Yellow='\e[33m'
+YelRed='\e[31;43m' #Red/Yellow
+YelGreen='\e[31;42m' #Red/Green
+Blue='\e[34m'
+White='\e[37m'
+BluW='\e[37;44m'
+
+
+
+if [ "$(id -u)" != "0" ]; then
+        echo "You mut be root to execute this script !"
+        exit 1
+fi
+
+
+echo -e "${BluW}\t\n\t Script provided by Charles S. Schuman modified by F6BVP for updating FPAC package\t\n\t\t\t ${Red} June-2-2025    \n \t\t${Yellow}       k4gbb1@gmail.com f6bvp@free.fr \n${Reset}"
+
+  if ! uid=0
+   then su
+  fi
+
+if [ ! -d "${SRCDIR}" ] ; then
+    mkdir ${SRCDIR}
+fi
+
+if [ -f $FPACDIR/fpacerror.txt ] ; then
+  rm -f $FPACDIR/fpacerror.txt
+fi
+if [ -f $FPACDIR/liberror.txt ] ; then
+  rm -f $FPACDIR/liberror.txt
+fi	
+# Update fpac source file package already present ?
+if [ -d $FPACDIR/.git ] ; then
+  echo -e "${Red}\t Updating $FPAC source files from repository ${Reset}"
+  cd $FPACDIR
+#  git pull
+else 
+# Existing version package was not an fpac clone - remove it
+  if [ -d $FPACDIR ] ; then
+    rm -fr $FPACDIR	
+  fi
+  echo -e "${Red}\t Getting FPAC version $VERSION source files from repository${Reset}"
+  cd $SRCDIR
+# Remove old zip files
+if [ -f ${FPAC}.xz* ] ; then
+echo -e "\n\t${Green} Deleting old file $FPAC.xz ${Reset}"
+/bin/rm -f ${FPAC}.xz
+fi
+#
+
+# Download fpac source file package 
+wget http://f6bvp.org/${FPAC}.xz
+#wget https://github.com/ve7fet/fpac/releases/download/fpac-4.1.4/fpac-4.1.4.xz
+tar -xf ${FPAC}.xz
+#  wget https://github.com/ve7fet/fpac/archive/$VERSION.zip
+#  unzip -q $VERSION.zip
+#  git clone https://github.com/ve7fet/fpac $FPAC -b $VERSION --single-branch
+  echo -e "${Green}\t Be patient while running 'autoreconf' and 'configure' to create Makefile(s)${Reset}"
+  cd $FPACDIR
+  ./autogen.sh
+  ./configure > fpacerror.txt 2>&1
+  echo -e -n "\t  *"
+fi
+# Makefile ready ?
+if [ ! -f $FPACDIR/Makefile ] ; then
+  echo -e "${Green}\t Be patient while running 'autoreconf' and 'configure' to create Makefile(s)${Reset}"
+  cd $FPACDIR
+  ./autogen.sh
+  ./configure > fpacerror.txt 2>&1
+  echo -e -n "\t  *"
+fi
+# Compile
+#  echo -e "${Green}\t Compiling FPAC will take a while !${Reset}"
+#  echo -n "  *"   
+#  make -s -j4 >> liberror.txt 2>&1
+#  if [ $? -ne 0 ]
+#    then
+#     echo -e "${Red}\t FPAC Compile error - See liberror.txt ${Reset}"
+#     exit 1
+#  fi
+#  echo -n "  *"
+# Install
+  make -s -j4 install >> liberror.txt 2>&1
+  if [ $? -ne 0 ] 
+   then
+     echo -e "${Red} FPAC Install error - See liberror.txt${Reset}"
+     exit 1
+   else   
+     echo -e "${Green}\t FPAC Installed${Reset}"
+  fi
+if [ -f $FPACDIR/fpacerror.txt ] ; then
+  rm -f $FPACDIR/fpacerror.txt
+fi
+if [ -f $FPACDIR/liberror.txt ] ; then
+  rm -f $FPACDIR/liberror.txt
+fi	
+
+# Set permissions for /usr/local/sbin/ and /usr/local/bin
+  cd /usr/local/sbin/
+  chmod 775 *
+  cd /usr/local/bin/
+  chmod 775 *
+  echo -e "${Green}\t Fpac successfully rebuilt and installed !${Reset}\n"
+  echo -e "${Green}\t If this is a first FPAC Node  install it is now time to configure your FPAC node ${Reset}"
+# Stopping and restarting ax25
+#  echo -e "${Green}\t Attempting to stop and restart AX.25${Reset}"
+#  /etc/ax25/ax25-down
+#  /etc/ax25/ax25-up
+#(End of Script)
+
+if [ "$(id -u)" != "0" ]; then
+        echo "You mut be root to execute this script !"
+        exit 1
+fi
+

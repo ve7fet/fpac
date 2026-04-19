@@ -1,0 +1,1649 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE"
+ content="text/html; charset=windows-1252">
+  <title>FPAC Linux Clef Flash mini mode d'emploi</title>
+  <meta name="GENERATOR" content="OpenOffice.org 2.0  (Win32)">
+  <meta name="CREATED" content="20060213;22041700">
+  <meta name="CHANGEDBY" content="Bernard Pidoux">
+  <meta name="CHANGED" content="20070910;14495429">
+<!-- saved from url=(0039)http://rose.fpac.free.fr/LINUX-FLASH-MINI-HOWTO-FR/ -->
+  <style>
+	<!--
+		H1 { color: #000000 }
+		P { color: #000000 }
+		H2 { color: #000000 }
+	-->
+	</style>
+  <meta content="Bernard Pidoux, F6BVP" name="author">
+  <meta
+ content="Installation pas à pas d'un routeur FPAC sur une clef USB boutable Mandriva Flash Linux"
+ name="description">
+</head>
+<body dir="ltr"
+ style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"
+ lang="en-US">
+<h1>Linux FPAC Flash Key mini-HOWTO</h1>
+<h1>ou FPAC Linux Clef Flash mini mode d'emploi</h1>
+<h2>Bernard Pidoux, F6BVP, <code>f6bvp at amsat dot org</code></h2>
+<p style="margin-bottom: 0in;">V1.0.4, 10-09-2007</p>
+<hr>
+<p>Ce mini mode d'emploi est destiné à <span style="font-weight: bold;">guider
+l'installation</span> d'un
+routeur <span style="font-weight: bold;">FPAC</span> et de programmes
+utilitaires de communication par
+paquet-radio selon le protocole AX25 <span style="font-weight: bold;">sur
+une clé USB Mandriva Flash</span>. La
+descritpion de base du logiciel FPAC est accessible dans le <a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/FPAC-HOWTO-FR/FPAC-HOWTO.html">FPAC
+HOWTO-FR</a> et&nbsp; vous devez consulter le mini mode d'emploi <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/">FPAC MINI-HOWTO-FR</a>&nbsp;
+pour apprendre à installer pas à pas un routeur FPAC sur une
+distribution Mandriva Linux. Nous ne décrirons ici que
+ce qui est spécifique à l'installation de FPAC sur une clé USB Mandriva
+Flash, y compris une <span style="font-weight: bold;">BBS F6FBB</span>.<br>
+</p>
+<hr>
+<h2><a name="toc1"></a>1. <a href="#s1">Introduction</a></h2>
+<h2><a name="toc2"></a>2. <a href="#s2">Installer le
+compilateur Gcc et les librairies de développement sur la clé Flash<br>
+</a></h2>
+<h2><a name="toc3"></a>3. <a href="#s3">Installer les
+librairies AX25</a></h2>
+<h2><a name="toc4"></a>4. <a href="#s4">Installer les outils
+AX25</a></h2>
+<h2><a name="toc5"></a>5. <a href="#s5">Installer les
+applications AX25</a></h2>
+<h2><a name="toc6"></a>6. <a href="#s6">Un script pour créer
+divers répertoires et droits de fichiers</a></h2>
+<h2><a name="toc7"></a>7. <a href="#s7">Configurer ax25ipd</a></h2>
+<h2><a name="toc8"></a>8. <a href="#s8">Installer et
+configurer FPAC 3.27</a></h2>
+<h2><a name="toc9"></a>9. <a href="#s9">Scripts de lancement de
+l'AX25</a></h2>
+<h2><a name="toc10"></a>10.1 <a href="#s101">Configurer un routeur</a></h2>
+<h2><a name="toc101"></a>10.2 <a href="#s102">Interfacer FPAC avec
+des logiciels applicatifs</a></h2>
+<h2><a name="toc11"></a>11. <a href="#s11">Autres modes d'emploi
+HOWTO</a></h2>
+<h2><a name="toc12"></a>12. <a href="#s12">Trouver de l'aide</a></h2>
+<hr>
+<h2><a name="s1"></a>1. Introduction</h2>
+<p>L'éditeur de logiciel Mandriva distribue deux versions "Live", c'est
+à dire avec un système d'exploitation Linux préinstallé et directement
+utilisable. <a href="http://www.mandriva.com/fr/download/mandrivaone">La
+distribution Mandriva live s'appelle “One”</a> est disponible sur un CD
+qui est téléchargeable gratuitement. La distribution <span
+ style="font-weight: bold;">Mandriva Flash USB</span> est vendue
+quelques dizaines d'Euros par Mandriva sous forme d'une clef USB de
+4Go. Ces deux supports permettent de bouter sous Linux depuis le CD ou
+la clef USB <span style="font-weight: bold;">sans nécessiter de disque
+dur</span>. On dispose alors d'un système Linux de base très complet
+dont la description est <a
+ href="http://www.mandriva.com/fr/linux/node_3827">disponible
+sur la page Mandriva Flash</a>. <br>
+</p>
+<p>La particularité des distributions Linux Live est en effet de ne pas
+utiliser de support
+comme un disque dur, mais simplement la mémoire vive. La
+personnalisation de Linux est cependant possible en sauvegardant des
+fichiers sur une clef mémoire USB. Toutefois, si Mandriva One peut être
+installé facilement sur disque dur, cette version ne possède pas les
+outils de développement : compilateur et librairies utilitaires. Il en
+est de même pour la Mandriva Flash. Une place est cependant disponible
+sur la clé USB pour y stocker des fichiers personnels sur une partition
+lisible sous Windows et sous Linux.<br>
+</p>
+<p>Nous allons décrire le moyen d'ajouter à la distribution Mandriva
+Flash les outils de développement (compilateur Gcc et librairies) ainsi
+que les librairies AX25, utilitaires AX25 et applications AX25. Ceci
+étant fait nous expliquerons comment compiler les sources des
+paquetages AX25 ainsi que celles de FPAC et de la BBS F6FBB.<br>
+</p>
+<p>En suivant pas à pas les indications de ce mini mode d'emploi
+l'utilisateur obtiendra un système Linux complet avec en plus les
+applications AX25 avec un routeur FPAC sur une clé USB. En boutant sur
+cette clé USB, l'utilisateur pourra se connecter sur le réseau FPAC par
+radio via un port série, par Internet via un cable ethernet ou une
+liaison sans fils WiFi.<br>
+</p>
+<br>
+<hr>
+<h2><a name="s2"></a>2. Installer le compilateur Gcc et les
+librairies de développement sur la clé Flash</h2>
+La distribution Mandriva Flash sur la clé USB ne possède pas de
+compilateur ni les librairies de développement nécessaires pour
+compiler les librairies AX25 et ses applications.<br>
+Nous devons donc télécharger différents fichiers.<br>
+Pour vous faciliter la tâche j'ai préparé une archive qui comporte
+tous les programmes de développement nécessaires.<br>
+Commencez par bouter sur votre clé Mandriva Flash. Une bogue empêche de
+bouter si un autre périphérique est branché sur une interface USB
+(souris, imprimante, etc...). <span style="font-weight: bold;">Pour
+bouter sur la clef USB, pour le moment, ne connecter aucun autre
+périphérique USB</span>. Sur mon PC portable
+DELL, au moment du boute, l'appui sur la touche de fonction
+<span style="font-weight: bold;">F12</span> ouvre un menu du BIOS pour
+le choix du périphérique. Choisir alors
+l'USB.&nbsp; Sur un autre système, l'accés au BIOS peut nécessiter
+d'appuyer sur une touche différente au moment du boute (Supprime,
+Efface, Escape, ...). Si nécessaire vous pourrez connecter un autre
+périphérique USB quand Linux sera en route (souris USB, imprimante,...)<br>
+Procédez à la mise
+en route puis configurez la liaison Internet. Lancez un navigateur
+<span style="font-weight: bold;">Konqueror</span> ou <span
+ style="font-weight: bold;">Mozilla firefox</span>.<br>
+Connectez vous sur l'URL de ce mini mode d'emploi <a
+ href="http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO-FR/">http://rose.fpac.free.fr/FPAC-LINUX-FLASH
+MINI-HOWTO-FR/</a><br>
+<br>
+<ul>
+  <li>En cliquant sur l'icone <span
+ style="font-weight: bold; font-style: italic;">Konsol </span>de la
+barre d'outils,
+ouvrez une fenêtre <span style="font-weight: bold; font-style: italic;">terminal
+    </span>sur le bureau. </li>
+</ul>
+<ul>
+  <li>Passez en mode superviseur avec la commande <span
+ style="font-weight: bold;">su</span> et entrez le mot de passe pour le
+compte <span style="font-weight: bold;">root</span>.</li>
+</ul>
+<ul>
+  <li>Créez un répertoire temporaire <span style="font-weight: bold;">/temp</span>
+avec la commande </li>
+</ul>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">mkdir
+/temp </span>et déplacez-vous dans ce répertoire avec la commande<span
+ style="font-weight: bold;"><br>
+<br>
+cd&nbsp; /temp<br style="font-weight: bold;">
+</span></div>
+<ul>
+  <li>Cliquez avec la touche droite de la
+souris sur le lien suivant pour télécharger le
+paquetage et sélectionnez le répertoire de destination<span
+ style="font-weight: bold;">&nbsp; /temp</span>.</li>
+</ul>
+<ul>
+  <p><a href="http://f6bvp.free.fr/logiciels/ax25/GCC-devel-RPMs.tgz">http://f6bvp.free.fr/logiciels/ax25/GCC-devel-RPMs.tgz</a></p>
+  <li>
+    <p>Cliquez dans la fenêtre du terminal console et procédez à
+l'extraction des fichiers
+de l'archive en tapant la commande :<b><br>
+    </b></p>
+  </li>
+  <li>
+    <p><b>tar &nbsp; xvf&nbsp;&nbsp; </b><b>GCC-devel-RPMs.tgz <br>
+    </b></p>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;">La commande <span
+ style="font-weight: bold;">ls</span> vous montrera la
+liste des fichiers RPMs. Tapez la commande <span
+ style="font-weight: bold;">install</span> pour lancer le script
+d'installation du compilateur et des librairies :<br>
+  </p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./install</span><span
+ style="font-weight: bold;"><br>
+  </span></font></p>
+</ul>
+<p style="margin-right: 0.39in; margin-left: 40px;">Après quelques
+instants tous les
+outils de développement seront installés et votre Linux sera prêt pour
+compiler les librairies ainsi que les différentes applications AX25. </p>
+<ul>
+  <li>Vous pouvez effacer les fichiers temporaires</li>
+</ul>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">rm&nbsp;
+-f&nbsp; /temp/*</span><br>
+</div>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Nous allons maintenant télécharger
+et installer les
+librairies AX25.</p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s3"></a>3. Installer les librairies AX25</h2>
+<div style="margin-left: 40px;">Cliquez sur le lien suivant pour
+télécharger le fichier dans le
+répertoire<b> /temp</b> comme précédemment :<br>
+</div>
+<p style="margin-left: 40px;"><a
+ href="http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.11.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/libax25-0.0.11.2src_f6bvp.tgz</a></p>
+<ul>
+  <li>
+    <p>Cliquez dans la fenêtre du terminal console et extraire les
+fichiers de l'archive dans <b>/temp&nbsp; </b>:</p>
+    <p><b>tar&nbsp; xvf&nbsp; libax25-0.0.11.2src_f6bvp.tgz</b></p>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;">passez dans le répertoire <b>cd&nbsp;
+libax25-0.0.11 </b>et tapez les commandes suivantes :</p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install<br>
+make installconf<br>
+  </span> </font> </p>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;">Ceci installera des fichiers de
+configuration <span style="font-weight: bold;">axports</span>, <span
+ style="font-weight: bold;">rsports</span> et <span
+ style="font-weight: bold;">nrports</span> dans <span
+ style="font-weight: bold;">/usr/local/etc/ax25</span>/&nbsp;<span
+ style="font-weight: bold;"></span>et compilera et installera des
+librairies dans le répertoire&nbsp; <b><i>/usr/local/lib</i></b>/<br>
+Des répertoires et des fichiers de documentation accessibles par la
+commande <span style="font-weight: bold;">man</span> seront aussi
+installés dans <span style="font-weight: bold; font-style: italic;">/usr/local/man</span>.<br>
+  </p>
+</ul>
+<p style="margin-left: 0.42in;">La commande&nbsp; <b>ls&nbsp;
+/usr/local/lib </b>devrait
+afficher les noms de fichiers et liens symboliques suivants (les
+tailles et dates peuvent différer) :</p>
+<pre style="margin-left: 2cm; margin-right: 1cm;">-rw-r--r--  1 root root 101464 déc  4 19:59 libax25.a<br>-rw-r--r--  1 root root  20816 déc  4 19:59 libax25io.a<br>-rwxr-xr-x  1 root root    720 déc  4 19:59 libax25io.la*<br>lrwxrwxrwx  1 root root     18 déc  4 19:59 libax25io.so -&gt; libax25io.so.0.0.0*<br>lrwxrwxrwx  1 root root     18 déc  4 19:59 libax25io.so.0 -&gt; libax25io.so.0.0.0*<br>-rwxr-xr-x  1 root root  23090 déc  4 19:59 libax25io.so.0.0.0*<br>-rwxr-xr-x  1 root root    706 déc  4 19:59 libax25.la*<br>lrwxrwxrwx  1 root root     16 déc  4 19:59 libax25.so -&gt; libax25.so.0.0.0*<br>lrwxrwxrwx  1 root root     16 déc  4 19:59 libax25.so.0 -&gt; libax25.so.0.0.0*<br>-rwxr-xr-x  1 root root  76967 déc  4 19:59 libax25.so.0.0.0*</pre>
+<hr>
+<h2><a name="s4"></a>4. Installer les outils AX25</h2>
+<p style="margin-left: 0.42in;">Cliquez avec la touche droite de la
+souris sur le lien suivant pour télécharger le
+paquetage dans le répertoire <span style="font-weight: bold;">/temp </span>comme
+précédemment :<br>
+</p>
+<ul>
+  <p><a
+ href="http://f6bvp.free.fr/logiciels/ax25/ax25-tools-0.0.8.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/ax25-tools-0.0.8.2src_f6bvp.tgz</a></p>
+  <p>Désarchivez le paquetage :<br>
+  </p>
+  <p><b>tar&nbsp; xvf&nbsp; ax25-tools-0.0.8.2src_f6bvp.tgz</b></p>
+  <p><b>cd&nbsp; ax25-tools-0.0.8</b> et tapez les commandes suivantes :</p>
+</ul>
+<ul style="font-weight: bold;">
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make installconf</span><br>
+  </font></p>
+</ul>
+<p style="margin-left: 0.42in; margin-right: 0.39in;">Ceci installera
+dans <span style="font-weight: bold;">/usr/local/etc/ax25</span> les
+exemples de
+fichiers de configuration suivants : <span style="font-weight: bold;">ax25d.conf,
+ax25.profile, ax25spawn.conf, nrbroadcast.conf, rip98d.conf,
+rxecho.conf, ttylinkd.conf</span><br>
+et compilera et
+installera des programmes utilitaires dans le répertoire&nbsp;
+<b><i>/usr/local/sbin</i></b>/&nbsp; d'autres dans <b>/usr/local/bin/<br>
+</b></p>
+<p style="margin-left: 40px;">Des répertoires et des fichiers de
+documentation accessibles par la commande <span
+ style="font-weight: bold;">man</span> seront aussi installés dans <span
+ style="font-weight: bold; font-style: italic;">/usr/local/man</span>.</p>
+<hr>
+<h2><a name="s5"></a>5. Installer les applications AX25</h2>
+<p style="margin-left: 0.42in;">Cliquez avec la touche droite de la
+souris sur le lien suivant pour télécharger le
+paquetage dans le répertoire&nbsp; <span style="font-weight: bold;">/temp
+</span>comme précédemment :<br>
+</p>
+<ul>
+  <p><a
+ href="http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.6.2src_f6bvp.tgz">http://f6bvp.free.fr/logiciels/ax25/ax25-apps-0.0.6.2src_f6bvp.tgz</a></p>
+  <p>Désarchivez le
+paquetage :</p>
+  <p><b>tar xvf ax25-apps-0.0.6.2src_f6bvp.tgz</b></p>
+  <p><b>cd&nbsp; ax25-apps-0.0.6</b>&nbsp; et tapez les commandes
+suivantes :</p>
+</ul>
+<ul>
+  <p><font face="courier new, courier, monospace"><span
+ style="font-weight: bold;">./configure</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make install</span><br
+ style="font-weight: bold;">
+  <span style="font-weight: bold;">make installconf</span><br>
+  </font> </p>
+</ul>
+<div style="margin-left: 40px;">Ceci installera dans <span
+ style="font-weight: bold;">/usr/local/etc/ax25</span> les exemples de
+fichiers
+de configuration suivants : <span style="font-weight: bold;">ax25ipd.conf,
+ax25mon.conf, ax25rtd.conf</span> et les logiciels d'application dans<span
+ style="font-weight: bold;"> /usr/local/bin et /usr/local/sbin<br>
+<br>
+</span>Des répertoires et des fichiers de documentation accessibles par
+la commande <span style="font-weight: bold;">man</span> seront aussi
+installés dans <span style="font-weight: bold; font-style: italic;">/usr/local/man</span>.<br>
+</div>
+<ul>
+  <li>Maintenant nous devons effectuer
+quelques taches de gestion. <br>
+  </li>
+</ul>
+<ul>
+  <p style="margin-right: 0.39in;"> <br>
+  </p>
+</ul>
+<hr>
+<h2><a name="s6"></a>6. Un script pour créer divers
+répertoires et droits de fichiers</h2>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Afin de réaliser notre but de mettre
+en route un nodal FPAC avec le noyau Linux 2.6 nous devons créer
+quelques répertoires et attribuer certains droits sur des fichiers.
+Ceci aurait du se faire automatiquement à l'installation des
+paquetages, librairies, outils et applications AX25, mais cela n'a pas
+été le cas.</p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">J'ai donc écrit le script suivant
+pour faciliter le travail qui doit être fait une fois pour toutes.</p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Vous pouvez le copier-coller dans un
+répertoire avec un nom de fichier comme <b>rc.init.script</b> </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><b>cd</b>&nbsp; dans ce répertoire,
+faites&nbsp; <b>chmod a+x&nbsp; rc.init.script</b>&nbsp; et exécutez
+le script avec la commande&nbsp; <b>./rc.init.script</b></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Ou bien téléchargez le fichier en
+cliquant à droite avec la souris sur le lien suivant pour le placer
+dans le répertoire de votre choix.</p>
+    <p style="margin-bottom: 0in;"><a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/rc.init.script">Téléchargez
+le script à partir d'ici</a> et exécutez les mêmes commandes que celles
+indiquées ci-dessus sur la ligne <b>cd</b>. </p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-left: 0.42in; margin-bottom: 0in;"><font size="2"><font
+ face="Courier New, monospace">#!/bin/sh<br>
+#
+rc.init.script<br>
+# dans </font></font><a href="http://rose.fpac.free.fr/MINI-HOWTO-FR"><font
+ size="2"><font face="Courier New, monospace">http://rose.fpac.free.fr/MINI-HOWTO-FR</font></font></a><br>
+<font face="Courier New, monospace"><font size="2">#
+de f6bvp at amsat point org<br>
+#<br>
+#
+Ce script doit être lancé une fois pour toutes après
+l'installation de :<br>
+#<br>
+# - libax25<br>
+# - ax25-apps<br>
+# -
+ax25-tools<br>
+#<br>
+# et avant l'installation du paquetage FPAC
+fpac327<br>
+# une fois pour toutes !<br>
+#<br>
+# Declaration des
+librairies AX25 (dans ld.so.conf)<br>
+#<br>
+echo "/usr/local/lib"
+&gt;&gt; /etc/ld.so.conf<br>
+/sbin/ldconfig<br>
+#<br>
+# Reservation du
+port 10093 protocole UDP pour le service FPAC<br>
+#<br>
+echo "fpad
+10093/tcp # FPAC" &gt;&gt; /etc/services<br>
+echo "fpad
+10093/udp # FPAC" &gt;&gt; /etc/services<br>
+#<br>
+# Creation des
+repertoires AX25 necessaires<br>
+#<br>
+ln -s /usr/local/var/ax25
+/var/ax25<br>
+ln -s /usr/local/etc/ax25 /etc/ax25<br>
+#<br>
+# Ajouter quelques
+repertoires et fichiers pour FPAC<br>
+#<br>
+mkdir
+/usr/local/var/ax25/fpac<br>
+/bin/chmod a+x /usr/local/var<br>
+/bin/chmod
+a+x /usr/local/var/ax25<br>
+/bin/chmod a+x
+/usr/local/var/ax25/fpac<br>
+/bin/touch
+/usr/local/var/ax25/fpac/loggedin<br>
+/bin/chmod a+w
+/usr/local/var/ax25/fpac/loggedin<br>
+#<br>
+mkdir
+/usr/local/var/ax25/mheard<br>
+/bin/chmod a+x
+/usr/local/var/ax25/mheard<br>
+/bin/touch
+/usr/local/var/ax25/mheard/mheard.dat<br>
+#<br>
+/bin/touch
+/usr/local/etc/ax25/axports<br>
+/bin/touch
+/usr/local/etc/ax25/nrports<br>
+/bin/touch
+/usr/local/etc/ax25/flexd.conf<br>
+/bin/touch
+/usr/local/etc/ax25/node.routes<br>
+#<br>
+echo "Ne pas oublier
+d'editer 'SYSOP=' et 'CONNECT='"<br>
+echo "dans le fichier
+/usr/local/sbin/fpac.sh"<br>
+echo "en complétant avec
+l'indicatif de la BBS et le nom du sysop"<br>
+#</font></font></p>
+<ul>
+  <p>Ne pas oublier d'éditer les champs '<b>SYSOP=</b>' et '<b>CONNECT=</b>'
+dans le fichier <b><i>/usr/local/sbin/fpac.sh</i></b> en complétant
+avec l'indicatif de la BBS et le nom du sysop.</p>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Après avoir préparé le terrain avec
+le script précédent, nous devons éditer le fichier <b><i>/usr/local/etc/ax25/axports</i></b>
+un fichier très important pour la déclaration des noms de ports AX25.
+Vous devrez remplacer F6ZZZ par votre indicatif. </p>
+    <p style="margin-bottom: 0in;">Le port 0 sera relié par kissattach
+au pseudo tty ptyq1. J'ai fixé une vitesse de 115200 bauds , mais je ne
+suis pas certain que ce paramètre soit utilisé. </p>
+    <p style="margin-bottom: 0in;">Un <b>paclen</b> à 256 est la
+limite supérieure prévue dans l'AX25 standard. Comme FPAC utilise 3
+octets pour le routage selon le protocole ROSE, les application AX25
+devront déclarer un paramètre paclen de moins de 256-3 octets lors des
+appels vers le&nbsp; port rose0.&nbsp; Dans le fichier <span
+ style="font-weight: bold;">port.sys</span> pour
+xfbb je met un paclen à 250. </p>
+    <p style="margin-bottom: 0in;">Il est impératif que les stations
+qui communiquent entre elles utilisent la même valeur pour le&nbsp;
+paramètre <b>maxframe</b>. Bien que le protocole AX25 autorise jusqu'à
+7 trames, je suis convaincu qu'un petit maxframe est meilleur,
+spécialement dans les liaisons radio. Pour l'AXIP je suggère que nous
+fixions maxframes à 4. </p>
+    <p style="margin-bottom: 0.2in;">Dans l'exemple de <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/axports">/usr/local/etc/axports</a>
+suivant j'ai mis en commentaire la déclaration des ports 1-4. Le port 0
+sera celui utilisé par FPAC pour se relier à Internet. On pourra
+utiliser les autres ports pour interfacer deux TNC doubles ports radio
+via deux
+ports série avec le pilote mkiss.</p>
+  </li>
+</ul>
+<p style="margin-left: 0.42in;"><font face="Courier New, monospace"><font
+ size="2">#
+/usr/local/etc/ax25/axports<br>
+#<br>
+# Le format de ce fichier est&nbsp; :<br>
+#<br>
+#
+nom&nbsp; indicatif vitesse paclen maxframes description<br>
+#<br>
+0&nbsp;&nbsp;
+F6ZZZ-8&nbsp; 38400&nbsp;&nbsp; 256&nbsp; 4&nbsp; Linux&nbsp;
+(AXIP)<br>
+#1&nbsp;&nbsp; F6ZZZ-4&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp;
+2&nbsp; Linux&nbsp; (VHF-1)<br>
+#2&nbsp;&nbsp; F6ZZZ-5&nbsp;&nbsp;
+38400&nbsp;&nbsp; 256&nbsp; 2&nbsp; Linux&nbsp; (UHF-1)<br>
+#3&nbsp;&nbsp;
+F6ZZZ-6&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp; 2&nbsp; Linux&nbsp;
+(VHF-2)<br>
+#4&nbsp;&nbsp; F6ZZZ-7&nbsp;&nbsp; 38400&nbsp;&nbsp; 256&nbsp;
+2&nbsp; Linux&nbsp; (UHF-2)<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p>Si vous prévoyez d'utiliser des TNC KPC9612, vous pouvez <a
+ href="http://f6bvp.free.fr/logiciels/ax25/rc.f6bvp.tnc">télécharger
+d'ici</a> un exemple de script d'initialisation pour deux TNC KPC9612
+doubles ports radio (1200 &amp; 9600 bauds). Il faudra exécuter ce
+script après le script&nbsp; <b>rc.ax25</b> présenté au chapitre 9.</p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s7"></a>7. Configurer ax25ipd</h2>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Au moment de l'installation des
+applications (<b>ax25-apps</b>) nous avons compilé <b>ax25ipd</b>.
+Cette application fonctionne en tâche de fond (démon d'arrière plan).
+Le fichier de configuration est <b><i>/usr/local/etc/ax25/ax25ipd.conf</i></b>.
+Il indique à <b>ax25ipd</b> le nom du port par lequel il doit recevoir
+ou émettre les trames de paquets AX25, le nom du port vers le monde
+Internet, et les adresses Protocole Internet (IPv4) plus les numéros de
+ports UDP des stations distantes. Avec ces indications, le démon <b>ax25ipd</b>
+route les trames dans les deux directions, en sortie et en entrée entre
+le port 10093 (protocole UDP) et le pseudo tty esclave ttyq1. Le pseudo
+tty maître ptyq1 et le pseudo tty esclave ttyq1 sont les deux
+extrêmités d'un tunnel virtuel. Lorsqu'un caractère est écrit a une
+extrémité il peut être lu de l'autre côté et vice versa. Souvenez-vous
+que <b>kissattach</b> relie ttyq1 et le port 0 AX25 dans <b><i>/usr/local/etc/ax25/axports</i></b>
+(c'est à dire ax0 dans notre exemple). Ainsi le port ax0 AX25 se
+trouve connecté sur Internet via cette chaîne compliquée. <b>Ax25ipd</b>
+effectue un autre travail important. Il réalise l'encapsulation des
+trames AX25 à l'intérieur de trames Protocole Internet. Les trames
+AX25&nbsp; sont incluses dans des trames standard IP qu'Internet sait
+gérer (AXIP). Dans le sens inverse, les trames IP qui arrivent sur le
+port UDP 10093 sont épluchées par <b>ax25ipd</b> et finallement les
+trames AX25 sont présentées au port ax0. Quand le démon <b>ax25ipd</b>
+fonctionne, toutes les applications AX25 locales peuvent dialoguer de
+façon transparente via Internet avec d'autres application AX25
+distantes en écrivant ou en lisant sur le port ax0 sans avoir à
+connaître les opérations effectuées après cette étape.</p>
+  </li>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Ci-après se trouve un exemple de
+fichier <b><i>ax25ipd.conf</i></b>. Vous pouvez le copier-coller dans <b>/usr/local/etc/ax25/ax25ipd.conf</b>,
+éditer le fichier existant
+ou le <a href="http://rose.fpac.free.fr/MINI-HOWTO-FR/ax25ipd.conf">télécharger
+depuis ici.</a></p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-left: 0.42in;"><font face="Courier New, monospace"><font
+ size="2">#
+/usr/local/etc/ax25/ax25ipd.conf<br>
+# fichier de configuration de ax25ipd<br>
+#<br>
+#
+Selectionner transport axip transport. 'ip' est ce que vous voulez
+pour etre compatible<br>
+# avec la plupart des autres portes
+...<br>
+#<br>
+socket ip<br>
+socket udp 10093<br>
+#<br>
+# Choisir le mode
+d'operation d'ax25ipd (digi ou tnc)<br>
+#<br>
+mode tnc<br>
+#<br>
+# Si
+vous selectionnez digi, vous devez definir un indicatif. Si vous
+choisissez<br>
+# le mode tnc, l'indicatif est pour l'instant
+optionnel, mais cela peut changer<br>
+# dans le futur ! (2 indicatifs
+en cas de mkiss avec deux ports)<br>
+#<br>
+#mycall2 vk5xxx-5<br>
+#<br>
+#
+En mode digi, vous pouvez utiliser un alias. (2 pour double
+ports)<br>
+#<br>
+#myalias2 svwdn2<br>
+#<br>
+# Envoyer une balise toutes
+les 540 secondes ...<br>
+#<br>
+#beacon after 540<br>
+#btext ax25ip --
+tncmode untel/f6zzz -- Passerelle AXIP experimentale<br>
+#<br>
+# Port
+serie ou tunnel, connecte a kissattach dans mon cas<br>
+# le pseudo
+tty /dev/ptyq1 maitre est attache au port ax0 (nom 0 dans
+/usr/local/etc/ax25/axports)<br>
+#<br>
+device /dev/ttyq1<br>
+#<br>
+# Initialiser la
+vitesse du port pseudo tty<br>
+#<br>
+speed 38400<br>
+#<br>
+# loglevel 0
+- pas de sortie<br>
+# loglevel 1 - info de config seulement<br>
+#
+loglevel 2 - evenement majeurs et erreurs<br>
+# loglevel 3 -
+evenements majeurs, erreurs et trace des trames AX25<br>
+# loglevel 4
+- lister tous les evenements<br>
+#<br>
+loglevel 2<br>
+#<br>
+# Si nous
+sommes en mode digi, nous pourrions avoir un tnc reel ici, donc
+utiliser param pour<br>
+# initialiser les parametres du tnc
+...<br>
+#<br>
+#param 1 20<br>
+#<br>
+# Definition de l'adresse de
+diffusion. Toute adresse listee sera envoyee<br>
+# sur chaque route
+marquee par un drapeau diffusion.<br>
+#<br>
+broadcast QST-0 NODES-0<br>
+#<br>
+#
+Definition des routes ax.25, Definissez en autant que necessaire.<br>
+#
+Le format est route (indicatif / joker ) (adresse ip de l'hote
+destination)<br>
+# un ssid a 0 routera tous les ssid<br>
+#<br>
+# route
+&lt;indicatif_dest&gt; &lt;addresse_dest&gt; [drapeaux]<br>
+#<br>
+# Les
+drapeaux valides sont :<br>
+# b - autorise la diffusion par cette
+route<br>
+# d - cette route est la route par defaut<br>
+#<br>
+#route
+vk2sut-0 44.136.8.68 b<br>
+route f5mtz-0 f5mtz.no-ip.org udp
+10093<br>
+route kp4djt-0 24.129.134.206 udp 10093<br>
+route f1hci-0
+f1hci.org udp 10093<br>
+route f5kbw-0 147.210.91.241 udp 10093<br>
+route
+f6bvp-0 f6bvp.org udp 10093 b<br>
+#<br>
+#delay f5mzn-0 35<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Comme vous pouvez le voir sur les
+lignes "route" ci-dessus, dans la nouvelle version <b>ax25ipd</b> peut
+gérer les adresses IP fixes (nombres) ainsi que les adresses IP
+dynamiques (adresses symboliques). Que Steve VK5ASF en soit remercié<font
+ size="2"><font face="Courier New">.</font></font></p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<hr>
+<h2><a name="s8"></a>8. Installer et configurer FPAC 3.27</h2>
+<p><em>Jean-Paul F6FBB, l'auteur de FPAC pour Linux, en a cessé
+le dévelopement avec la version 3.25 adaptée au noyau Linux 2.2, mais
+Jean-Paul a publié
+une version compilée 3.26 sur une disquette boutable dont vous
+pouvez télécharger l'image depuis <a
+ href="ftp://ftp.funet.fi/pub/ham/packet/bbs/f6fbb/distrib/fpac-linux/floppy">ce
+site miroir F6FBB</a>. Ce <a
+ href="ftp://ftp.funet.fi/pub/ham/packet/bbs/f6fbb/distrib/fpac-linux/floppy/rawwritewin.exe">programme
+Windows</a> vous servira à écrire l'image sur une
+disquette 1,44 Mo. FPAC 3.26 était associé avec la librairie
+glibc6 Linux compatible avec les noyaux 2.4. Pour notre projet, nous
+avons besoin de compiler les sources de FPAC.</em></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">La compilation des sources de FPAC
+avec le récent compilateur GCC donnait des erreurs. Avec l'aide de
+Jean-Paul F6FBB, j'ai inclus quelques changements pour compiler FPAC.
+Cette nouvelle version de FPAC est compilable avec les noyaux 2.4
+et 2.6. <span style="font-weight: bold;">Avec cette version FPAC
+devient capable de choisir automatiquement une route ouverte parmi
+trois disponibles via des noeuds FPAC adjacents</span>. <br>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Téléchargez&nbsp; <a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/fpac327-8src.tgz">fpac327-8src.tgz
+depuis ici</a>.<span style="font-style: italic;"><span
+ style="font-weight: bold;"></span></span><br>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Ensuite <b>tar&nbsp; xvf&nbsp;
+fpac327-8src.tgz</b> </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Puis <b>cd&nbsp; fpac327.8</b></p>
+  </li>
+</ul>
+<ul>
+  <p style="margin-bottom: 0.2in;"><font face="Times New Roman, serif"><font
+ size="3">Lancez ensuite la compilation :</font></font></p>
+</ul>
+<p style="margin-left: 0.42in; font-weight: bold;"><font
+ face="Courier New, monospace">make<br>
+make
+install<br>
+make installconf<br>
+</font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Les fichiers binaires exécutables
+seront installés dans <b><i>/usr/local/sbin</i></b></p>
+  </li>
+  <li>
+    <p>Des sous répertoires et fichiers de configuration seront créés
+dans <span style="font-weight: bold; font-style: italic;">/usr/local/etc/ax25</span><br>
+    </p>
+  </li>
+  <li>
+    <p>Des répertoires et fichiers utiles au fonctionnement de FPAC
+seront également créés dans<b><i> /usr/local/var/ax25</i></b></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Le fichier de configuration de FPAC
+est dans&nbsp; <b><i>/usr/local/etc/ax25/fpac.conf</i></b>&nbsp; <br>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><a
+ href="http://f6bvp.free.fr/logiciels/rose-fpac/FPAC-HOWTO-FR/">FPAC
+HOWTO</a> explique comment l'éditer selon votre configuration. </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">J'ai cependant écrit un exemple de
+fichier de configuration <b><i>fpac.conf</i></b>&nbsp; qui
+fonctionnera avec une station FPAC reliée à Internet.</p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/fpac.conf">Vous pouvez le
+télécharger à partir d'ici</a>.<br>
+    <br>
+    </p>
+  </li>
+</ul>
+<p style="margin-left: 0.42in; margin-bottom: 0in;"><font
+ face="Courier New, monospace"><font size="2">#</font><br>
+<font size="2">#
+Fichier de configuration pour le nodal FPAC</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+Ce fichier est /usr/local/etc/ax25/fpac.conf</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+Informations sur le nodal</font><br>
+<font size="2">#</font><br>
+<font size="2">L2call
+= F6ZZZ-10</font><br>
+<font size="2">L3call = F6ZZZ-11</font><br>
+<font size="2">Trcall
+= F6ZZZ-14</font><br>
+<font size="2">DNIC = 2080</font><br>
+<font size="2">Address
+= 175522</font><br>
+<font size="2">Coverage =</font><br>
+<font size="2">InetPort
+= 10093</font><br>
+<font size="2">InetAddr = 44.151.75.153</font><br>
+<font size="2">Password
+= abcdefghi</font><br>
+<font size="2">City = PARIS-17</font><br>
+<font size="2">locator
+= JN18DV</font><br>
+<font size="2">UserPort = *</font><br>
+<font size="2">DefPort
+= 0</font><br>
+<font size="2">#</font><br>
+<font size="2"># Commandes
+aditionnelles</font><br>
+<font size="2">#</font><br>
+<font size="2">Command</font><br>
+<font size="2">BBs
+= connect f6bvp-1 2080175502</font><br>
+<font size="2"># BBs =
+/usr/local/sbin/call_tcp f6bvp 1022</font><br>
+<font size="2">CLu =
+connect f6bvp-3 2080175502</font><br>
+<font size="2">STat= /bin/cat
+/usr/local/var/ax25/fpac/fpacstat.dat
+/usr/local/var/ax25/fpac/fpacstat.day</font><br>
+<font size="2">Telnet
+=</font><br>
+<font size="2">IPLinks = /bin/netstat --ip</font><br>
+<font size="2">IPRoutes=
+/bin/netstat -r</font><br>
+<font size="2">TRace = connect f6bvp-14
+2080175502</font><br>
+<font size="2">HCI = connect f1hci-10
+2080191601</font><br>
+<font size="2">End</font><br>
+<font size="2"># La
+commande Bbs connectera l'utilisateur au BBS sur la meme machine</font><br>
+<font size="2">#
+ou un nodal distant via la couche rose</font><br>
+<font size="2"># idem
+pour la commande CLu qui connectera l'utilisateur au serveur de spots
+DX</font><br>
+<font size="2"># La commande STat affichera les
+statistiques de connexion</font><br>
+<font size="2"># La commande vide
+telnet ne fera rien</font><br>
+<br>
+<font size="2"># Commandes reservees
+au Sysop</font><br>
+<font size="2">#</font><br>
+<font size="2">Sysop</font><br>
+<font size="2">DIsk
+= /bin/df -k</font><br>
+<font size="2">SYSop =
+/usr/local/sbin/fpacshell</font><br>
+<font size="2">YGET =
+/usr/local/sbin/yapp -u /tmp/%1</font><br>
+<font size="2">YPUT =
+/usr/local/sbin/yapp -d /tmp/%1</font><br>
+<font size="2">RM =
+/bin/rm /tmp/%1</font><br>
+<font size="2">LS = ls -l /usr/local/etc/ax25/%1</font><br>
+<font size="2">CAT
+= sh -c cat /usr/local/etc/ax25/%1</font><br>
+<font size="2">WEdit =
+/usr/local/sbin/wpedit %*</font><br>
+<font size="2">Hci = telnet
+f1hci.org 3282</font><br>
+<font size="2">end</font><br>
+<font size="2">#</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+Port specifique vers une adresss</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+VHF user access port has address 175502</font><br>
+<font size="2">#
+AddPort = VHF</font><br>
+<font size="2"># Address = 175302</font><br>
+<font size="2">#
+Port = 0</font><br>
+<font size="2"># End</font><br>
+<br>
+<font size="2">#
+L'utilisateur qui accede au port UHF a l'adresse 175502</font><br>
+<br>
+<font size="2">#AddPort
+= UHF</font><br>
+<font size="2"># Address = 175502</font><br>
+<font size="2">#
+Port = 1</font><br>
+<font size="2">#End</font><br>
+<br>
+<font size="2">#
+Port UHF 9600 via carte SCC4 et T7F (experimental)</font><br>
+<br>
+<font size="2">#AddPort
+= UHF-9600</font><br>
+<font size="2"># Address = 175402</font><br>
+<font size="2">#
+Port = 4</font><br>
+<font size="2">#End</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+List des utilisateurs predifinis (pour specifier un port non par
+defaut)</font><br>
+<font size="2">#</font><br>
+<font size="2"># La commande
+USER etait utilisee pour envoyer des trames via le niveau reseau
+rose.</font><br>
+<font size="2"># C'etait quand Kissnetd servait a creer
+un reseau interne</font><br>
+<font size="2"># pour relier des
+applications entre elles. Mais maintenant, ax25d, xfbb,</font><br>
+<font size="2">#
+ou DxNet sont capables d'ecouter les connexions rose, et peuvent donc
+se connecter</font><br>
+<font size="2"># directement par le port rose0
+en initiant une commande de niveau L3.</font><br>
+<font size="2">#</font><br>
+<font size="2">#User
+= BBS</font><br>
+<font size="2"># Path = F6KDS-1</font><br>
+<font size="2">#
+port =</font><br>
+<font size="2">#End</font><br>
+<br>
+<font size="2">#</font><br>
+<font size="2">#
+Liste des alias pour se connecter facilement a certaines
+adresses</font><br>
+<font size="2">#</font><br>
+<br>
+<font size="2">#Alias =
+F6BVP-3</font><br>
+<font size="2"># Path = F6PTT-1,191501</font><br>
+<font size="2">#End</font><br>
+<br>
+<font size="2">#Alias
+= F6BVP-4</font><br>
+<font size="2"># Path = F5KCK-1,178504</font><br>
+<font size="2">#End</font><br>
+<br>
+<font size="2">#Alias
+= F6BVP-4</font><br>
+<font size="2"># Path = F6KDS-1,194501</font><br>
+<font size="2">#End</font><br>
+<br>
+<font size="2">#</font><br>
+<font size="2">#
+Liste des nodaux adjacents</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+NoWP = 1 signifie pas de page blanche (WP)</font><br>
+<font size="2">#
+car FPAC sous DOS ne savait pas gerer les pages blanches (WP)</font><br>
+<br>
+<font size="2">Node
+= DJT</font><br>
+<font size="2">path = KP4DJT-9</font><br>
+<font size="2">DNIC
+= 3100</font><br>
+<font size="2">Address = 813626</font><br>
+<font size="2">Port
+= 0</font><br>
+<font size="2">NoWP = 0</font><br>
+<font size="2">End</font><br>
+<br>
+<font size="2">Node
+= XEO</font><br>
+<font size="2">path = N4XEO-9</font><br>
+<font size="2">DNIC
+= 3100</font><br>
+<font size="2">Address = 772467</font><br>
+<font size="2">Port
+= 0</font><br>
+<font size="2">NoWP = 0</font><br>
+<font size="2">End</font><br>
+<br>
+<font size="2">Node
+= BVP</font><br>
+<font size="2">path = F6BVP-11</font><br>
+<font size="2">DNIC
+= 2080</font><br>
+<font size="2">Address = 175502</font><br>
+<font size="2">Port
+= 0</font><br>
+<font size="2">NoWp = 0</font><br>
+<font size="2">End</font><br>
+<br>
+<font size="2">Node
+= HCI</font><br>
+<font size="2">path = F1HCI-11</font><br>
+<font size="2">DNIC
+= 2080</font><br>
+<font size="2">Address = 191601</font><br>
+<font size="2">Port
+= 0</font><br>
+<font size="2">NoWp = 0</font><br>
+<font size="2">End</font><br>
+<br>
+<font size="2">Node
+= KBW</font><br>
+<font size="2">path = F5KBW-9</font><br>
+<font size="2">DNIC
+= 2080</font><br>
+<font size="2">Address = 833501</font><br>
+<font size="2">Port
+= 0</font><br>
+<font size="2">NoWp = 0</font><br>
+<font size="2">End</font><br>
+<br>
+<font size="2">#</font><br>
+<font size="2">#
+Routes vers les nodaux adjacents</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+DNIC specifie un DNIC par defaut pour les adresses qui suivent</font><br>
+<font size="2">#</font><br>
+<font size="2">#
+L'adresse doit comporter de 1 a 6 chiffres, en utilisant la
+hierarchie</font><br>
+<font size="2">#</font><br>
+<br>
+<font size="2">Routes</font><br>
+<font size="2">DNIC
+= 0</font><br>
+<font size="2">3100 = DJT</font><br>
+<font size="2">DNIC =
+3100</font><br>
+<font size="2">772 = DJT</font><br>
+<font size="2">772 =
+XEO</font><br>
+<font size="2">DNIC = 2080</font><br>
+<font size="2">* =
+BVP</font><br>
+<font size="2">8 = HCI</font><br>
+<font size="2">8 =
+KBW</font><br>
+<font size="2">177202 = HCI</font><br>
+<font size="2">End</font></font></p>
+<ul>
+  <li>Vous devrez éditez le fichier exemple précédent pour votre propre
+installation.Editez les lignes <span
+ style="font-style: italic; font-weight: bold;">L2,
+L3 </span>et<span style="font-style: italic;"></span><span
+ style="font-style: italic; font-weight: bold;"> Trcall, DNIC, Address,
+InetAddr, Password, City, locator</span>. Ne changez pas <span
+ style="font-style: italic; font-weight: bold;">InetPort 10093</span>
+le port standard
+FPAC. Editez <span style="font-style: italic; font-weight: bold;">callsign</span>
+et <span style="font-style: italic; font-weight: bold;">address</span>
+du chapitre <span style="font-weight: bold;">Command</span>.<span
+ style="font-weight: bold;"> </span>Editez les nodes adjacents. Gardez
+le Port 0 pour l'acces Internet. Chaque <span
+ style="font-style: italic; font-weight: bold;">callsign</span> du <span
+ style="font-weight: bold;">path </span>doit avoir une <span
+ style="font-weight: bold;">route</span> définie dans <span
+ style="font-weight: bold;">/usr/local/etc/ax25/ax25ipd.conf</span>.<br>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Notez que plusieurs stations nodales
+adjacentes peuvent partager la même adresse de destination. Cette
+intéressante possibilité est utile en cas de non fonctionnement d'une
+liaison. FPAC demandera à ROSE de rechercher un autre nodal adjacent
+capable de fournir une route vers la même destination.</p>
+  </li>
+</ul>
+<br>
+<hr>
+<h2><a name="s9"></a>9. Scripts de lancement de l'AX25</h2>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;"><font face="serif"><font size="3">De
+nos jours il n'est pas rare d'avoir plus d'un ordinateur à domicile et
+il partagent habituellement la connexion à Internet par un routeur qui
+offre un portail d'accès à Internet pour le réseau local. Pour faire
+tourner nos applications FPAC il n'est pas judicieux de configurer les
+adresses du réseau local par DHCP. Il vaut mieux donner des adresses IP
+fixes. C'est pourquoi je vais supposer que l'adresse de votre réseau
+local est <b>192.168.0.0</b> et que l'adresse de la passerelle est <b>192.168.0.1</b>.</font></font></p>
+  </li>
+</ul>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.2in;"><font face="serif"><font size="3">Il
+est nécessaire d'initialiser les interfaces et ports AX25 avant de
+lancer FPAC. Pour cela un exemple de script exécutable est donné
+ci-après.Vous
+pouvez le copier-coller dans le fichier <b><i>/etc/rc.d/rc.ax25</i></b>
+et lui donner les permissions d'exécution : </font></font> </p>
+    <p><font face="serif"><b>chmod a+x /etc/rc.d/rc.ax25</b></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font face="serif"><font size="3">L'adresse
+IP du port Ethernet <span style="font-weight: bold;">eth0</span> (<span
+ style="font-weight: bold;">192.168.0.200</span>) et de la passerelle (<span
+ style="font-weight: bold;">192.168.0.1</span>) ont été
+choisies de manière arbitraire et vous devrez les éditer afin de
+répondre à vos particularités locales. Vous devrez également éditer
+l'adresse ampr.org du nodal (44.151.75.153) et l'indicatif (F6ZZZ).</font></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font face="serif">Vous pouvez
+également télécharger le script suivant <a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/rc.ax25">depuis cette
+adresse</a>.</font></p>
+  </li>
+</ul>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-left: 0.42in;"><font face="Courier New, monospace"><font
+ size="2">#!/bin/sh<br>
+#
+/etc/rc.d/rc.ax25<br>
+#<br>
+# Cet exemple de script lancera
+l'application AX25 FPAC sur un systeme Linux 2.6<br>
+# de la
+distribution Mandriva Linux 2006 au moment du démarrage avec
+l'indicatif F6ZZZ.<br>
+# rc.eth0 : initialise l'adresse de l'interface
+Ethernet eth0 sur le reseau local<br>
+# et une route vers Internet via
+une passerelle<br>
+# rc.tnc : attache le peripherique ax0 au pseudo
+peripherique ptyq1<br>
+# rc.axip : installe un tunnel entre les pseudo
+tty ptyq1 et ttyq1<br>
+# et lance le demon ax25ipd qui effectue
+l'encapsulation des trames AX25 dans les trames IP<br>
+# et route les
+pacquets encapsules depuis ax0 vers l'adresse Internet rose FPAC<br>
+#
+rc.fpac : lance la suite de programmes FPAC et le demon mheardd<br>
+#
+rc.beacon : lance l'application listen sur la console virtuelle 2 a
+l'ecoute du port 0<br>
+# et indstalle une diffusion de balise sur le
+port ax0<br>
+#<br>
+echo 15 &gt; /proc/sys/kernel/panic<br>
+echo 1 &gt;
+/proc/sys/net/ipv4/ip_forward<br>
+#<br>
+# arret du service reseau (
+n'est plus necessaire)<br>
+#service network stop<br>
+# arret du serveur
+samba qui diffuse vers les ports AX25<br>
+#service smb
+stop<br>
+#<br>
+#/etc/rc.d/rc.eth0<br>
+#<br>
+#/sbin/ifconfig eth0
+192.168.0.200<br>
+#/sbin/route add -net 192.168.0.0 netmask
+255.255.255.0 eth0<br>
+#/sbin/ifconfig lo 127.0.0.1<br>
+#/sbin/route add
+-net 127.0.0.0 netmask 255.0.0.0 lo<br>
+#/sbin/route add default gw
+192.168.0.1<br>
+#<br>
+# /etc/rc.d/rc.tnc<br>
+#<br>
+/usr/local/sbin/kissattach
+/dev/ptyq1 0 44.151.75.153<br>
+/bin/sleep
+2<br>
+#<br>
+#/etc/rc.d/rc.axip<br>
+#<br>
+/bin/date &gt;
+/var/log/ax25ipd.log<br>
+/usr/local/sbin/ax25ipd -l2 &gt;&gt;
+/var/log/ax25ipd.log 2&gt;&amp;1<br>
+#<br>
+#/etc/rc.d/rc.fpac<br>
+#<br>
+/bin/date
+&gt;
+/var/log/fpac<br>
+/usr/local/sbin/fpac.sh <br>
+/usr/local/sbin/mheardd<br>
+#<br>
+#/etc/rc.d/rc.beacon<br>
+#<br>
+#/usr/local/bin/listen
+-char &gt;&gt; /dev/tty2 &amp;<br>
+/usr/local/sbin/beacon -c F6ZZZ -d
+QST -t 10 0 'Nodal Rose FPAC F6ZZZ'<br>
+#<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0.2in;"><font face="Times New Roman, serif">Vous
+pouvez lancer automatiquement au moment du boute tout le système AX25
+si le script <i>/<b>etc/rc.d/rc.ax25</b></i> est appelé par <i>/<b>etc/rc.d/rc.local</b></i>.
+Voici un exemple de </font><a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/rc.local"><i><font
+ face="Times New Roman, serif">/<b>etc/rc.d/rc.local</b></font></i></a>&nbsp;
+    <font face="Times New Roman, serif">qui initialisera l'AX25 et le
+node FPAC à chaque démarrage de l'ordinateur.</font></p>
+  </li>
+</ul>
+<p style="margin-left: 0.42in;"><font face="Courier New, monospace"><font
+ size="2">#!/bin/sh<br>
+#<br>
+#
+Ce script sera execute *apres* tous les autres scripts
+d'initialisation.<br>
+# Vous pouvez placer vos propres initialisations
+ici si vous ne voulez pas<br>
+# suivre le systeme complet
+d'initialisation dans le style Sys V.<br>
+#<br>
+echo 30 &gt;
+/proc/sys/kernel/panic<br>
+#<br>
+#/etc/rc.d/rc.eth0<br>
+#<br>
+/etc/rc.d/rc.ax25<br>
+#<br>
+touch
+/var/lock/subsys/local<br>
+#</font></font></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;"><font face="Times New Roman, serif"><font
+ size="3">Si vous préferez ne pas lancer l'AX25 automatiquement, éditez
+    <b><i>rc.local</i></b>&nbsp; et mettez un <b>#</b> au début de la
+ligne qui commence par&nbsp; <b><i>/etc/rc.d/rc.ax25</i></b>. Vous
+lancerez l'AX25 avec la commande <b>/etc/rc.d/rc.ax25</b></font></font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0.2in;"><font face="Times New Roman, serif"><font
+ size="3">Si vous aimez lancer une tâche sans taper trop de caractères
+vous pouvez créer un raccourci pour lancer l'AX25 à partir de la
+commande <span style="font-weight: bold;">ax25</span> : </font></font>
+    </p>
+  </li>
+</ul>
+<p style="margin-left: 0.42in;"><big><font face="Times New Roman, serif"><b><font
+ size="2"><big>cd
+/usr/local/bin</big></font></b><br>
+<b><font size="2"><big>ln &nbsp; -s&nbsp;&nbsp;
+/etc/rc.d/rc.ax25&nbsp;&nbsp;
+ax25</big></font></b></font></big></p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;"><font face="Times New Roman, serif"><font
+ size="3">Vous pouvez maintenant entrer la commande <b>ax25</b> pour
+initialiser l'application FPAC.</font></font></p>
+  </li>
+  <li>
+    <p><font face="Times New Roman, serif"><font size="3">Vous pouvez
+de la même manière créer un raccourci avec le nom symbolique <b>fpac</b>
+qui lancera <b>fpacnode</b> à la demande depuis un terminal console. </font></font>
+    </p>
+  </li>
+</ul>
+<hr>
+<h2><a name="s101"></a>10.1 Configurer un routeur</h2>
+<p><em>Si votre ordinateur Linux est directement connecté à
+votre modem ADSL sans routeur de réseau local, les
+instructions suivantes s'appliquent à la configuration de
+votre boîtier modem ADSL.</em></p>
+<p>Un routeur n'effectue pas seulement les fonctions de base de
+routage pour lequel il est conçu, il comporte en outre une
+fonction de filtrage afin de protéger votre ordinateur ou
+votre réseau local contre les tentatives d'intrusion. La
+conséquence c'est que par défaut le trafic qui traverse
+votre routeur est filtré dans les deux directions. Les paquets
+IP allant du réseau local vers Internet ou dans le sens opposé
+sont acheminés uniquement si vous en donnez la permission.
+Vous avez déja certainement pris les dispositions pour que le
+trafic Internet habituel passe par votre routeur. Cependant, les
+applications AX25 utilisent des numéros de ports spécifiques
+qu'ils faut ouvrir dans les deux sens en configurant le routeur. Les
+ports jusqu'au numéro 1024 sont réservés aux
+applications standards et ne doivent pas être utilisés.
+Regardez dans le fichier <b><i>/etc/services</i></b>. Le&nbsp; port
+habituellement utilisé pour FPAC dans les deux directions est
+le numéro 10093 avec les protocoles UDP et TCP. Le script
+<b>rc.init.script</b><span style=""> décrit
+au chapitre 6 effectue la déclaration du <span
+ style="font-weight: bold;">port 10093</span> (protocoles TCP/UDP) pour
+votre
+système Linux.</span><b> </b>Veuillez lire la documentation de
+votre routeur ADSL pour le déclarer afin qu'il laisse passer
+le trafic sur ce port. Idem pour le port Internet utilisé par la BBS
+(TCP <span style="font-weight: bold;">6300</span>) et DxNet (UDP <span
+ style="font-weight: bold;">9000</span>).<br>
+</p>
+<p><br>
+<br>
+</p>
+<hr>
+<h2><a name="s102"></a>10.2 Interfacer FPAC avec des logiciels
+applicatifs</h2>
+<p><em>Plusieurs applications qui tournent sur la même machine
+Linux peuvent écouter un port local et s'interfacer facilement
+avec le nodal fpac.</em></p>
+<p>La <span style="font-weight: bold;">BBS F6FBB</span> et DxNet
+peuvent communiquer avec FPAC sans programme
+supplémentaire. <span style="font-weight: bold;">NetRomd</span>
+nécessite <span style="font-weight: bold;">ax25d</span> pour
+s'interfacer avec FPAC.</p>
+<p>Exécuter le script suivant au lancement de l'AX25. Il
+créera un périphérique NetRom qui sera utilisé
+par les applications suivantes et lancera le démon NetRomd.</p>
+<p style="margin-bottom: 0.2in;"><font face="Courier New, monospace"><font
+ size="2">#!/bin/sh<br>
+#
+/etc/rc.d/rc.netrom<br>
+#<br>
+#echo "NETROM"<br>
+&nbsp;
+/sbin/modprobe netrom<br>
+#<br>
+killall -KILL netromd<br>
+ifconfig nr1
+down<br>
+ifconfig nr0 down<br>
+ifconfig nr2 down<br>
+ifconfig nr3 down<br>
+#
+creating NET/ROM devices (please edit your own ampr.org network
+address)<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256
+netnod<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256
+netbbs<br>
+/usr/local/sbin/nrattach -i 44.151.75.15 -m 256 netclu<br>
+#
+adjacent NET/ROM nodes creation via port 4=ax4 (ax25 over
+ip)<br>
+/usr/local/sbin/nrparms -nodes k4gbb-14&nbsp; + CIT03 120 6 4
+k4gbb-14<br>
+/usr/local/sbin/nrparms -nodes kp4djt-14 + DJT14 120 6 4
+kp4djt-14<br>
+/usr/local/sbin/nrparms -nodes vk2tv-14&nbsp; + KEMPC
+120 6 4 vk2tv-14<br>
+/usr/local/sbin/nrparms -nodes vk2vy-2&nbsp;&nbsp;
++ VYNODE 120 6 4 vk2vy-2<br>
+# start ax25d daemon to link NetRom and
+FPAC node<br>
+/usr/local/sbin/ax25d<br>
+# Broadcast
+NET/ROM<br>
+/usr/local/sbin/netromd -lid -t 10<br>
+# remove default
+routes<br>
+/sbin/route del -net 44.0.0.0/8 nr0<br>
+/sbin/route del -net
+44.0.0.0/8 nr1<br>
+/sbin/route del -net 44.0.0.0/8 nr2<br>
+/sbin/route
+del -net 44.0.0.0/8 nr3<br>
+/sbin/route del -net 44.0.0.0 netmask
+255.255.255.255 eth0<br>
+#<br>
+</font></font>
+</p>
+<p style="margin-bottom: 0.5cm;"><font style="font-size: 16pt;" size="4"><b>10.2.1.
+Interfacer FPAC avec une BBS</b></font></p>
+<p style="margin-bottom: 0.51cm;"><em>Votre système Linux peut héberger
+une BBS F6FBB qui sera reliée en interne au routeur ROSE FPAC et
+interfacé via NetRom. Ceci donne un acces mondial aux stations AX25 par
+packet radio ou Internet.</em></p>
+<p style="margin-bottom: 0.2in;">Voici un extrait du fichier de
+description des ports de la BBS /<b>usr/local/etc/ax25/port.sys</b> </p>
+<p><font face="Courier New, Courier, monospace"><font size="2">#Com
+Interface Adress (Hex)&nbsp;&nbsp; Baud<br>
+&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*****&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+115200<br>
+&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+189C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br>
+#TNC NbCh
+Com MultCh Pacln Maxfr NbFwd MxBloc M/P-Fwd Mode&nbsp; Freq<br>
+&nbsp;&nbsp;
+0&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00/01&nbsp;&nbsp; ---- File-fwd.<br>
+&nbsp;&nbsp;
+1&nbsp; 20&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; rose0&nbsp;&nbsp;
+250&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp;
+15/10&nbsp;&nbsp; XULWY Rose0</font></font><br>
+&nbsp; &nbsp; &nbsp; <font size="2"><font
+ face="Courier New, Courier, monospace">2&nbsp;&nbsp;
+4&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+250&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp; 08/10&nbsp;&nbsp; XULWY UHF<br>
+&nbsp;&nbsp;
+3&nbsp; 10&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+250&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp; 15/15&nbsp;&nbsp; TUWY&nbsp; Telnet<br>
+&nbsp;&nbsp;
+4&nbsp;&nbsp; 4&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp; netbbs&nbsp;
+250&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp;
+15/15&nbsp;&nbsp; XULWY NetRom<br>
+#</font></font></p>
+<p>La BBS est connectée au nodal fpac via le port rose0.</p>
+<p>Un TNC est branché au port 3 AX25 défini dans le
+fichier <span style="font-weight: bold;">/usr/local/etc/ax25/axports</span>.</p>
+<p>Le port Telnet 189C correspond à 6300 en décimal. La
+commande est : telnet &lt;hote&gt; 6300 pour accéder à
+la BBS.</p>
+<p>Le port <b>netbbs</b> interface la BBS avec NetRom.</p>
+<p>A propos, avec le noyau Linux 2.6 il faut utiliser une version
+récente des
+sources de la <span style="font-weight: bold;">BBS F6FBB</span> pour
+que l'application fonctionne.</p>
+<p>Vous pouvez télécharger l'archive des fichiers sources
+via FTP <a
+ href="ftp://f6bvp.org:32221/logiciels/BBS-f6fbb/xd704n-src.tgz">xd704n-src.tgz</a>.
+dans le répertoire <span style="font-weight: bold;">/temp</span><br>
+Vous pouvez
+alternativement <a
+ href="http://f6bvp.free.fr/logiciels/BBS-f6fbb/xd704n-src.tgz">télécharger
+l'archive xd704n-src.tgz</a>&nbsp;&nbsp; via HTTP dans le répertoire <span
+ style="font-weight: bold;">/temp</span>.<br>
+<br>
+</p>
+<ul>
+  <li>
+    <p style="margin-bottom: 0in;">Cliquez dans la fenêtre de la Konsol
+et faites l'extraction de l'archive :</p>
+  </li>
+</ul>
+<ul>
+</ul>
+<p style="margin-bottom: 0in; margin-left: 40px; font-weight: bold;"><b>tar&nbsp;
+xvf&nbsp;
+xd704n-src.tgz</b> <br>
+<span style="font-weight: bold;">cd
+&nbsp; fbbsrc.704n<br>
+cd src</span><br>
+make</p>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">make
+install</span><br>
+</div>
+<ul>
+</ul>
+Pour
+démarrer l'application, tapez&nbsp; <span style="font-weight: bold;">fbb</span>
+ce qui lancera le script <span style="font-weight: bold;">/usr/local/sbin/fbb</span>.
+La première fois celui-ci procédera à
+l'initialisation de la BBS en créant différents fichiers dont <span
+ style="font-weight: bold;">/usr/local/etc/ax25/fbb.conf</span> et <span
+ style="font-weight: bold;">/usr/local/etc/ax25/port.sys</span> s'il ne
+préexistaient pas. Les fois suivantes il lancera <span
+ style="font-weight: bold;">xfbbd</span> le programme démon de la BBS
+en arrière plan.<br>
+<p>Pour se connecter localement, éditer l'<span
+ style="font-weight: bold; font-style: italic;">INDICATIF</span> et le <span
+ style="font-weight: bold; font-style: italic;">MOT DE PASSE</span> du <span
+ style="font-weight: bold;">sysop</span> <span
+ style="font-weight: bold; font-style: italic;"></span><span
+ style="font-weight: bold; font-style: italic;"></span>dans le fichier <span
+ style="font-weight: bold;">/etc/ax25/fbb/passwrd.sys</span> et lancer
+le client <br>
+</p>
+<p><span style="font-weight: bold;">xfbbC -c &nbsp; -i <span
+ style="font-style: italic;">INDICATIF&nbsp; </span>-w <span
+ style="font-style: italic;">MOT DE PASSE</span></span></p>
+<br>
+<h2><font style="font-size: 16pt;" size="4">10.2.2. Interfacer FPAC
+avec
+une application DxCluster</font></h2>
+<p style="margin-bottom: 0.2in;"><em>Pour interfacer le DX cluster
+DxNet avec FPAC et NetRom il faut déclarer les ports <b>rose0</b>
+et <b>netclu</b> dans <b>dxnet.cfg</b></em></p>
+<p style="margin-bottom: 0.2in;">Le fichier <b><i>system/dxnet.cfg</i></b>
+sera comme suit :</p>
+<p style="margin-bottom: 0.2in;"><font size="2"><font
+ face="Courier New, monospace">set/node
++f8kgk-3 +f5mtz-3 +f5kbw-3 +f6cdd-3 +tu5ex-3 +kp4ig-5 <br>
+set/call
+f6bvp-3<br>
+set/sys +F6BVP<br>
+set/ssid +3<br>
+<b>set/port 0 1 3 4 rose0
+inet:9000 netclu</b><br>
+set/tz +2</font></font><br>
+<br>
+Il sera
+possible d'accéder au Dx cluster via les ports radio AX25 <b>0,
+1, 3</b> et <b>4</b>, via les ports FPAC <b>rose0</b>, telnet <b>9000</b>
+et NetRom <b>netclu</b>.</p>
+<h2><font style="font-size: 16pt;" size="4">10.2.3. Interfacer FPAC
+avec
+NetRom</font></h2>
+<p style="margin-bottom: 0.2in;"><em><em>Voici comment interfacer FPAC
+avec le réseau NetRom</em>.</em></p>
+<p style="margin-bottom: 0.2in;">Exemple de fichier <b>/usr/local/etc/ax25/nrports</b></p>
+<p style="margin-bottom: 0.2in;"><font face="Courier New, monospace"><font
+ size="2">#
+/usr/local/etc/ax25/nrports <br>
+# <br>
+# The format of this file is: <br>
+# name
+callsign alias paclen description <br>
+# <br>
+netnod&nbsp; F6BVP-14&nbsp;
+BVPNOD&nbsp;&nbsp;&nbsp; 235&nbsp;&nbsp;&nbsp; F6BVP FPAC node
+<br>
+netbbs&nbsp; F6BVP-1&nbsp;&nbsp; BVPBBS&nbsp;&nbsp;&nbsp;
+235&nbsp;&nbsp;&nbsp;
+F6BVP BBS <br>
+netclu&nbsp; F6BVP-3&nbsp;&nbsp; BVPDX&nbsp;&nbsp;&nbsp;&nbsp;
+235&nbsp;&nbsp;&nbsp; F6BVP Dx Cluster <br>
+# </font></font>
+</p>
+<p style="margin-bottom: 0.2in;">Le contenu du fichier
+<b>/usr/local/etc/ax25/ax25d.conf</b> sera <br>
+<br>
+#<br>
+&lt;netrom&gt;<br>
+parameters
+1&nbsp;&nbsp; 10 * * * * *<br>
+NOCALL * * * * * * L<br>
+default&nbsp; *
+* * * * * *&nbsp;&nbsp;&nbsp; root /usr/sbin/fpacnode fpacnode -q
+%S<br>
+#<br>
+<br>
+Ajouter la lettre <b>b</b> après le port UDP
+qui décrit la route dans <b><i>/usr/local/etc/ax25ipd.conf</i></b>
+pour
+diffuser les routes NetRom.</p>
+<hr>
+<h2><a name="s11"></a>11. Autres modes d'emploi HOWTO</h2>
+<p>Il existe beaucoup de documentations sur des sujets proches. De
+nombreux documents décrivent les réseaux sous Linux
+d'une manière plus générale et je recommande
+fortement la lecture de ces autres sources documentaires car ils
+pourront vous aider dans vos efforts et vous apporter une vue plus
+approfondie d'autres configurations possibles. </p>
+<p>Ce sont : </p>
+<p><a
+ href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/pdf/Kernel-HOWTO.pdf">le
+mode d'emploi du noyau Linux</a></p>
+<p><a
+ href="http://www.ibiblio.org/pub/Linux/docs/HOWTO/translations/fr/text/AX25-HOWTO.txt">le
+AX25-HOWTO</a>, </p>
+<p><a href="http://www.pingouin-land.com/howto/HAM-HOWTO.html">le
+Linux HAM-HOWTO</a>, </p>
+<p><a
+ href="http://www.root66.net/linux/HowtoEnFrancais/html/NET-3-HOWTO.htmlhttp://sunsite.unc.edu/LDP/HOWTO/NET-3-HOWTO.html">le
+Linux NET-3-HOWTO</a>, </p>
+<p><a href="http://sunsite.unc.edu/LDP/HOWTO/Ethernet-HOWTO.html">le
+Ethernet-HOWTO</a>, </p>
+<p>et : </p>
+<p><a href="http://www.freenix.fr/unix/linux/HOWTO/Firewall-HOWTO.html">le
+Firewall-HOWTO</a></p>
+<p>Vous pourrez trouver des informations plus générales
+sur Linux dans les différents <a
+ href="http://www.freenix.fr/unix/linux/HOWTO/">Linux
+HOWTO</a>.</p>
+<hr>
+<h2><a name="s12"></a>12. Trouver de l'aide </h2>
+<p>Souvenez-vous que FPAC est un commutateur réseau. Votre
+nodal doit donc se trouver connecté à au moins un autre
+nodal FPAC et à des stations utilisateurs en paquet-radio pour
+fonctionner. Plus grand sera le nombre de stations adjacentes reliées
+à votre nodal, mieux votre réseau fonctionnera.</p>
+<p>Vous devez contacter une ou plusieurs stations qui utilisent déja
+un nodal FPAC pour obtenir de l'aide et éventuellement vous
+interconnecter.</p>
+<p>Lire les messages de la liste de diffusion paquet-radio Linux
+francophone est pratiquement obligatoire. <br>
+Pour cela <a href="http://fr.groups.yahoo.com/group/frpacket-linux/">rendez-vous
+sur cette adresse</a>.<br>
+Pour s'inscrire à cette liste
+<a
+ href="http://rose.fpac.free.fr/MINI-HOWTO-FR/frpacket-linux-subscribe@yahoogroupes.fr">envoyer
+un message à cette adresse</a>.</p>
+<p>Pour la liste internationale visitez <a
+ href="http://mailman.f6fbb.org/pipermail/fpac/">les
+archives FPAC</a>. </p>
+<p>Vous pouvez vous inscrire à la liste internationale <a
+ href="http://mailman.f6fbb.org/mailman/listinfo/fpac/">en
+allant sur cette page</a>.</p>
+<p>Vous pouvez demander une aide plus globale sur Linux et
+radioamateur via la Linux Ham list (en anglais).<br>
+Vous pouvez
+d'abord consulter les <a href="http://he.fi/archive/linux-hams/">Linux-hams
+archive</a>. Linux-hams est une liste de diffusion où l'on
+peut discuter du système d'exploitation Linux et son usage
+radioamateur. Quiconque ayant un intérêt envers ces deux
+sujets est encouragé à y souscrire. La discussion est
+principalement centrée sur l'usage et le dévelopement
+du code AX.25 dans le noyau Linux. Si vous voulez souscrire à
+la Linux-hams mailing list et recevoir ses messages dans votre propre
+boîte aux lettres, envoyez un message à
+<a href="mailto:majordomo@vger.kernel.org">majordomo@vger.kernel.org</a>,
+en mettant la ligne&nbsp;</p>
+<p><code><b>subscribe linux-hams</b></code><br>
+<br>
+dans le corps de
+votre message. </p>
+<p>Vous pourrez également trouver utile de naviguer sur les
+liens suivants :</p>
+<p><a href="http://www.qsl.net/fpac/">FPAC International Home page</a></p>
+<p>Un groupe FPAC très actif s'est développé en
+Floride (USA), <a href="http://fcrosby.com/fadca/">le Florida Amateur
+Digital Communication Association</a></p>
+<p>La version la plus récente du <span style="font-weight: bold;">MINI
+MODE D'EMPLOI FPAC</span> se
+trouve ici : <a href="http://rose.fpac.free.fr/MINI-HOWTO-FR/">MINI-HOWTO-FR/</a></p>
+<p>La version la plus récente de ce <span style="font-weight: bold;">MINI
+MODE D'EMPLOI LINUX FLASH FPAC</span> se
+trouve ici : <a
+ href="http://rose.fpac.free.fr/FPAC-LINUX-FLASH-MINI-HOWTO-FR/">FPAC-LINUX-FLASH
+MINI-HOWTO-FR/</a></p>
+<p><br>
+J'apprécierais de recevoir tout rapport d'erreurs ou
+remarques sur cette documentation. <br>
+Veuillez contacter Bernard
+F6BVP à l'adresse mentionnée dans le titre.</p>
+<p>Joyeux paquet-radio en réseau !</p>
+<p><br>
+<br>
+</p>
+</body>
+</html>

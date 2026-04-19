@@ -1,0 +1,51 @@
+.TH FPAC.ROUTES 5 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpac.routes \- FPAC routing table for ROSE addresses. /etc/ax25/fpac.routes
+.SH DESCRIPTION
+.LP
+.B fpac.routes
+contains the routing table for ROSE addresses.
+It consists of a list of up to six (6) digit addresses and four digit DNICs followed by an = character and the NodeID of the Neighboring node. The routing table may contain up to three (3) routes for each address. The routing table is read from the bottom of the fpac.routes file to the top.
+
+.B Route
+The table begins with a Route statement and end with an End statement.
+
+DNIC = 0 
+This statement tells the route table generator that the following lines will determine what adjacent node particular DNICs should be routed to.
+The character string to the right of the = corresponds to the Node name of the adjacent node defined in fpac.nodes. 
+ Example: 
+    DNIC = 0 
+ 	5020 = ORL  # calls for DNIC 5020 routed to the adjacent node with Node = ORL in fpac.nodes
+ 	3120 = OPK 
+ 	2020 = MBL
+
+Addresses with the same DNIC may be grouped together when they follow a DNIC =  statement.
+ Example: Assume DNIC 3100 for addresses that follow.
+ 	    Calls for the listed addresses are to be routed to the adjacent node with the associated Node name.
+    DNIC = 3100   
+ 	813224 = ORL
+ 	813223 = ORL   
+ 	804435 = MBL    
+ 	772569 = OPK    
+ 	727464 = MBL     
+
+Each adjacent node must be specifically listed in the Route Table.
+ Example: In the following IR5AG-3 (NODE = ITL) is configured in the fpac.nodes list at  DNIC = 2220, Address = 055741.
+
+     DNIC = 2220
+  	 055741 = ITL
+
+Each address may be assigned up three routes.
+ They are listed in reverse order of preference.
+ 	EXAMPLE:
+  	   352726 = ABC # 	2nd Alternate
+ 	   352726 = DEF # 	1st Alternate
+ 	   352726 = GHI # 	Primary Route
+
+.B End
+The table must close with an End statement.
+
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+fpac.nodes(5) fpac.conf(5)

@@ -1,0 +1,54 @@
+.TH FPAC.NODES 5 "23 September 2011" Linux "FPAC Operator's Manual"
+.SH NAME 
+fpac.nodes \- information about adjacent nodes. /etc/ax25/fpac.nodes
+.SH DESCRIPTION
+.LP
+.B fpac.nodes
+contains the information on adjacent nodes.
+The node information will be used to set up routes/links to neighboring nodes.
+The fpac.nodes file may contain up to 32 Node Blocks.
+
+Each block must start with ....
+.TP 20
+.BI "Node = "NodeID
+A 2 to 5 character ID. Must be unique to each node, will be used in the fpac.routes file.
+
+ and contain:
+.TP 26
+.BI "Path = "Call-ssid_path
+Call-ssid and path to be used when connecting to the Node
+.TP 32
+.BI "DNIC = "Digital-Network-Id-Code
+The 4 digit code that Identifies the Country of the Neighboring node.
+.TP 22
+.BI "Address = "ROSE_addr
+The 6 digit code that identifies the Neighboring node.
+.TP 20
+.BI "Port = "Port_name
+The name of the port, from axports, through which the node will connect to the Neighboring node.
+.TP 20
+.BI "NoWp = "0 " or "1
+Disable WP Dbase exchange to this node.
+
+0 = WP transfer will be made.
+
+1 = WP transfers will NOT be made.
+
+.TP 13
+.B END
+Each block must close with a END statement
+
+.SH
+.B EXAMPLE
+ Node = ITL
+      Path = IR5AG-13
+      DNIC = 2220
+      Address= 055741
+      Port = 9
+      NoWp = 0
+ End
+
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+fpac.conf(5) fpac.routes(5)

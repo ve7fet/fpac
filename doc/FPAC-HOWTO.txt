@@ -1,0 +1,1254 @@
+  Linux FPAC-HOWTO, Amateur Radio.
+  Jean-Paul ROUBELAT, F6FBB, jpr@f6fbb.org
+  v1.0, 24 September 1998
+
+  The Linux Operating System has a kernel buil-in protocol named ROSE.
+  FPAC is a set of tools to configure and interface ROSE.  This document
+  aims to describe how to install and configure FPAC.
+  ______________________________________________________________________
+
+  Table of Contents
+
+
+  1. Introduction.
+
+     1.1 Version of FPAC.
+     1.2 Where to obtain new versions of this document.
+     1.3 Other related documentation.
+
+  2. FPAC tools
+
+     2.1 fpad
+     2.2 fpacnode
+     2.3 fpacshell
+     2.4 fpacstat
+     2.5 fpacwpd
+
+  3. Installation of FPAC
+
+     3.1 Binaries
+     3.2 Directories
+
+  4. Starting FPAC
+
+     4.1 The fpac.sh start file
+     4.2 Calling fpac.sh during linux start-up
+
+  5. Configuration of FPAC
+
+     5.1 The fpac.conf configuration file
+     5.2 Header information
+     5.3 Command section
+     5.4 Sysop section
+     5.5 Application section
+     5.6 AddPort section
+     5.7 User section
+     5.8 Alias section
+     5.9 Node section
+     5.10 Routes section
+
+  6. Special files
+
+     6.1 fpac.hello file
+     6.2 fpac.info information file
+     6.3 fpac.dnic lookup file
+     6.4 Help files
+
+
+  ______________________________________________________________________
+
+  1.  Introduction.
+
+  ROSE protocol is based on X25 and allows fast and efficient packet
+  switching with a very small protocol overhead (only three bytes).
+
+  Before configuring and running FPAC, the AX25 and ROSE kernel must
+  have been installed and running.
+  If you need more information on AX25 and ROSE, read carefully Terry's
+  AX25-HOWTO. Parts of this documentation are taken from this HOWTO.
+
+
+  1.1.  Version of FPAC.
+
+  This document refers to FPAC version 3.09.
+
+
+  1.2.  Where to obtain new versions of this document.
+
+  To day this document is only available with FPAC distribution.
+
+
+  1.3.  Other related documentation.
+
+  There is a lot of related documentation. There are many documents that
+  relate to Linux networking in more general ways and I strongly
+  recommend you also read these as they will assist you in your efforts
+  and provide you with stronger insight into other possible
+  configurations.
+
+  They are:
+
+  the AX25-HOWTO <http://sunsite.unc.edu/LDP/HOWTO/AX25-HOWTO.html>,
+
+  the HAM-HOWTO <http://sunsite.unc.edu/LDP/HOWTO/HAM-HOWTO.html>,
+
+  the NET-3-HOWTO <http://sunsite.unc.edu/LDP/HOWTO/NET-3-HOWTO.html>,
+
+  the Ethernet-HOWTO <http://sunsite.unc.edu/LDP/HOWTO/Ethernet-
+  HOWTO.html>,
+
+  and:
+
+  the Firewall-HOWTO <http://sunsite.unc.edu/LDP/HOWTO/Firewall-
+  HOWTO.html>
+
+  More general Linux information may be found by reference to other
+  Linux HOWTO <http://sunsite.unc.edu/LDP/HOWTO/> documents.
+
+
+  2.  FPAC tools
+
+  FPAC distribution includes a set of tools. Hereafter is a brief
+  description of each of them.
+
+
+  2.1.  fpad
+
+  fpad is the main piece of code. It makes the interface between AX25
+  (and other protocols) and ROSE. It allows connections from ax25 users
+  to the network and vice-versa in pseudo-digipeating mode, this is
+  without first connecting a node application.
+
+  FPAC will give some information on the link setup and will report any
+  incident.
+
+  Example of connection via fpad :
+
+
+
+
+
+
+
+  Cmd: C F6FBB-1 via F6FBB-8
+
+  *** Connected to f6fbb-1
+  *** WP routing F6FBB-1 @ 2080,931502
+  *** Connection done
+  [FBB-7.00g-AB1FHMRX$]
+  Hello Jean-Paul >
+  B
+  *** Disconnected from F6FBB-1 at F6FBB-11 @ 2080,931502
+  *** 0000 - Remote Station cleared connection
+  *** Disconnected
+  Cmd:
+
+
+
+
+  FPAC includes a white pages system which records the address of each
+  node and user of the network. This information is also distributed to
+  every other FPAC system in the network. This allows to connect any
+  known callsign without giving any node or routing information.
+
+
+  2.2.  fpacnode
+
+  fpacnode acts like the linuxnode. Many parts of the code have been
+  taken from linuxnode. Some additions have been made for the ROSE
+  protocol.
+
+  fpacnode makes the interface to ax25/netrom/rose and tcpip networking.
+  It also reports informations and statistics on the system.
+
+  fpacnode has a built-in set of commands. They can be disabled or new
+  commands may be easily added. A second set of commands is added after
+  the SYS (sysop) command is successfull.
+
+  Password to change to sys mode is either plain text, netrom or MD2/MD5
+  keys.
+
+  Here are some examples of the node commands :
+
+
+       *** Connection done
+       Hello, you are on the FPAC-linux switch F6FBB-10
+       located in Roquettes, 15 Km south Toulouse, JN03QL.
+
+       FPAC-Node v 3.09 (F6FBB - Sep 22 1998) for LINUX (help = h)
+
+       F6FBB-10 (Commands = ?) : ?
+       ?, Alias, Bye, Connect, CONVers, Help, Info, Links, Mheard, Nodes,
+       Ports, Routes, STat, Status, SYSop, Telnet, Users, Wp
+
+       F6FBB-10 (Commands = ?) :
+
+
+
+
+  A command gives the list of aliases. An alias allow to connect any
+  callsign (even remote) using a local callsign. For instance callsign
+  F6FBB-3 will route to the cluster F6KRQ-3 through the network. Aliases
+  may be also directly connected by the user without using fpacnode.
+
+
+
+
+
+
+  F6FBB-10 (Commands = ?) : A
+  Aliases:
+   F6FBB-3   : F6KRQ-3 931501
+  ----
+
+
+
+
+  L command gives the list of L3 links (trunks)
+
+
+       F6FBB-10 (Commands = ?) : L
+       Links:
+       Callsign  Port   Description
+       F6BEX-9   0      (F6BEX-9) UHF  9600 Bds Full Duplex
+       F5JTU-9   3      (F5JTU-9) UHF  2400 Bds Full Duplex
+       F6FBB-9   5      (F6FBB-9) Ethernet axip Full Duplex
+
+
+
+
+  M command gives a list of the last 20 heard stations.  Giving a port
+  as first argument will list the stations only for this port.
+
+
+       F6FBB-10 (Commands = ?) : M
+       Last 20 Heard list for all ports :
+       Callsign  Port   Pkts-rcvd Mode Time ago
+       F6FBB-14  5      357       AX25 00s
+       F5OYA-1   1      12184     AX25 16s
+       F6BEX-9   0      961440    FPAC 19s
+       F5JTU-9   3      905412    FPAC 20s
+       F1AMY-7   1      60        AX25 33s
+       F1BIS-1   1      247       AX25 44s
+       F5NXI     1      49        AX25 01m 15s
+       F6FBB-9   5      77        FPAC 01m 30s
+       F1AMY     1      14        AX25 04m 15s
+       F5OYA     1      85        AX25 05m 15s
+       FA1ANP    1      37        AX25 05m 17s
+       F1BIS     1      10        AX25 06m 32s
+       F6GZM     1      233       AX25 15m 28s
+       F5PRP     1      91        AX25 15m 29s
+       F5UFI-1   1      92        AX25 16m 11s
+       F5GNY-5   1      267       AX25 17m 58s
+       FA1CKT-1  1      37        AX25 19m 49s
+       F5GNY     1      17        AX25 20m 03s
+       F5NUF     1      5659      AX25 20m 23s
+       F5UFI     1      22        AX25 21m 29s
+
+
+
+
+  N command gives the list of known NETROM nodes and FPAC switches.  A
+  list of callsigns may be given as argument, or a star giving long
+  format dump.
+
+
+
+
+
+
+
+
+
+
+
+  F6FBB-10 (Commands = ?) : N
+  FPAC Nodes:
+    F5FVC-8 2080,982501    F5JTU-8 2080,909501    F5KBQ-5 2080,981501
+    F6BEX-8 2080,931501   F6FBB-10 2080,931502    F6FBB-8 2080,931503
+    F6GGY-7 2080,847502    F6GGY-8 2080,847501    F6HRW-8 2080,847503
+     F8BK-8 2080,981502
+
+  NetRom Nodes:
+    #DEV:F6FBB-4  (255)    #BBS:F6FBB-6  (254)   JTU09:F5JTU-2  (192)
+
+  F6FBB-10 (Commands = ?) : N F6GGY-7 F5JTU-8 JTU09
+  FPAC Nodes:
+    F6GGY-7  2080,847502  FRA  JN04IL  MONFLANQUIN
+    F5JTU-8  2080,909501  FRA  JN02TW  Prat d'Albis
+
+  Routes to        Which Quality Obsolescence Port   Neighbour
+   JTU09:F5JTU-2   >     192     5            3      F5JTU-2
+
+
+
+
+  P command gives the list and description of available ports.
+
+
+       F6FBB-10 (Commands = ?) : P
+       Ports:
+       Port   Description
+       0      (F6BEX-9) UHF  9600 Bds Full Duplex
+       1      (LOCAL  ) VHF  1200 Bds Simplex
+       2      (LOCAL  ) UHF  9600 Bds Simplex
+       3      (F5JTU-9) UHF  2400 Bds Full Duplex
+       4      (F6FBB-9) Kiss 9600 Bds Full Duplex
+       5      (F6FBB-9) Ethernet axip Full Duplex
+
+
+
+
+  R command gives all information on addresses and the routing table.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  F6FBB-10 (Commands = ?) : R
+  Coverage
+  2080,931102  2080,931202  2080,931602
+
+  Address      Port    Description
+  2080,931302  0       (F6BEX-9) UHF  9600 Bds Full Duplex
+  2080,931402  5       (F6FBB-9) Ethernet axip Full Duplex
+
+  Routes:
+  DNIC Address Adjacent
+  2080,8.....  F6BEX-9
+  2080,7.....  F5JTU-9
+  2080,6.....  F6BEX-9
+  2080,5.....  F6BEX-9
+  2080,4.....  F6BEX-9
+  2080,3.....  F6BEX-9
+  2080,2.....  F6BEX-9
+  2080,1.....  F6BEX-9
+  2080,982...  F6BEX-9
+  2080,981...  F6BEX-9
+  2080,966...  F5JTU-9
+  2080,965...  F6BEX-9
+  2080,946...  F6BEX-9
+  2080,934...  F5JTU-9
+  2080,930...  F5JTU-9
+  2080,911...  F5JTU-9
+  2080,909...  F5JTU-9
+  2080,981501  F5JTU-9
+  2080,931503  F6FBB-9
+  2080,931203  F6FBB-9
+  2080,931501  F6BEX-9
+  2080,931201  F6BEX-9
+  2080,909502  F6BEX-9
+  2080,909202  F6BEX-9
+
+
+
+
+  S command gives a status on the LINUX and FPAC resources
+
+
+       F6FBB-10 (Commands = ?) : s
+       Status:
+       System time      : Thu Sep 24 19:57:55 1998
+       Hostname         : fpac
+       Operating system : Linux 2.0.35 (i486)
+       Uptime           : 2 hours 6 minutes
+       Load average     : 0.00, 0.00, 0.00
+       Memory           :  6568 KB available,  3920 KB used,  2648 KB free
+       Swap             : 31128 KB available,  1324 KB used, 29804 KB free
+
+       L2 Users         : 7
+       FPAC L3 Users    : 2
+       FPAC L3 Transits : 1
+       FPAC adjacents   : 3
+       FPAC Routes      : 24
+       FPAC White Pages : 800
+
+
+
+
+  ST command gives the statistics of the ROSE/FPAC trunks. This is not a
+  built-in command. It displays the contents of the files updated by
+  fpacstat application.
+
+
+  F6FBB-10 (Commands = ?) : st
+  Current hour statistics - Starting date : Thu Sep 24 19:56:56 1998
+
+     Adjacent  data-size qual i-frame     rr  rnr  rej sabm disc   ua   dm
+  to F6FBB-9           0   0%       0      2    0    0    0    0    0    0
+  fm F6FBB-9           0            0      2    0    0    0    0    0    0
+
+  to F6BEX-9         446 100%      18     20    0    0    0    0    0    0
+  fm F6BEX-9         711           19     13    0    0    0    0    0    0
+
+  to F5JTU-9        1453  65%      18      6    0    0    0    0    0    0
+  fm F5JTU-9         181           11     18    0    0    0    0    0    0
+
+  Last 24 hours statistics - Starting date : Wed Sep 23 19:56:56 1998
+
+     Adjacent  data-size qual i-frame     rr  rnr  rej sabm disc   ua   dm
+  to F6FBB-9         375 100%      11     29    0    0    1    0    0    0
+  fm F6FBB-9         258           12     34    0    0    0    0    1    0
+
+  to F6BEX-9      183597  99%    1298    713    0    0    1    0    0    0
+  fm F6BEX-9       21304          682    854    0   22    0    0    1    0
+
+  to F5JTU-9       29544  74%     470    427    0   11    2    0    0    1
+  fm F5JTU-9       57445          438    470    0    1    0    0    2    0
+
+
+
+
+
+  U command gives the list of users on the ROSE/FPAC system
+
+
+       F6FBB-10 (Commands = ?) : u
+       Users - AX.25 L2 Sessions :
+       Port   Callsign     Callsign  State
+       0      F6BEX-9   -> F6FBB-11  Connected
+       5      F6FBB-9   -> F6FBB-11  Connected
+       3      F5JTU-9   -> F6FBB-11  Connected
+       1      F1AMY-7   -> F6FBB-1   Recovery
+       1      F1BIS-1   -> F6FBB-1   Connected
+       5      F6FBB-14  -> F6HRW-8   Disconnected
+       5      F6FBB-14  -> F6FBB-10  Connected
+
+       Users - X.25 L3 Sessions :
+       Callsign  DNIC addr   Callsign  DNIC addr   LCI Adjacent    State
+       F6HRW-8   2080,847503 F6FBB-14  2080,931402 032 (F6BEX-9)   Disconnected
+       F6DSP-1   2080,911301 F6FBB-1   2080,931502 001 (F5JTU-9)   Connected
+
+       Users - X.25 L3 Transits :
+       Callsign  DNIC addr   LCI Adjacent   Callsign  DNIC addr   LCI Adjacent
+       F6KRQ-3   2080,931501 003 (F6BEX-9)  F5UHX-3   2080,934401 030 (F5JTU-9)
+
+
+
+
+  SYS command switches to SYSOP mode
+
+
+
+
+
+
+
+
+
+
+  F6FBB-10 (Commands = ?) : SYS
+  F6FBB-10> 5 2 8 19 3 [0906667192]
+  4D060A9951C81AAAAF4568F1CAA31AEC
+  MD5 OK
+
+  F6FBB-10 (Commands = ?) : ?
+  Sysop:
+  ?, Alias, BBs, Bye, CLu, Connect, Help, Info, Links, Mheard
+  Nodes, Ports, Routes, STat, Status, SYSop, Telnet, Users, Wp, CAT
+  GET, LS, MV, RM, SYSop, WEdit, YGET, YPUT
+
+  F6FBB-10 (Commands = ?) :
+
+
+
+
+  W command gives access to the FPAC white pages database.
+
+
+       F6FBB-10 (Commands = ?) : w
+       Usage: wp [-acdnrl nb] callsign
+       options :
+         n = nodes only
+         l = max number of answers
+       sort by :
+         a address
+         c callsign (default)
+         d date
+         r reverse
+
+       F6FBB-10 (Commands = ?) :  w f6hrw
+       FPAC White Pages database : 800 callsigns
+       F6HRW-0   22/09/98 08:30 => 2080 847503
+       F6HRW-1   22/09/98 21:26 => 2080 847401
+       F6HRW-12  22/09/98 20:08 => 2080 847401
+       F6HRW-3   22/09/98 20:08 => 2080 847503
+       F6HRW-8   21/09/98 15:45 => 2080 847503  Node JN04IK VILLENEUVE/LOT
+
+
+       F6FBB-10 (Commands = ?) : w F6HRW-1
+       FPAC White Pages database : 800 callsigns
+       F6HRW-1   22/09/98 21:26 => 2080 847401
+
+
+       F6FBB-10 (Commands = ?) : w -dl5 *
+       FPAC White Pages database : 800 callsigns
+       F6DEV-1   24/09/98 21:48 => 2080 981502
+       F5PHI-2   24/09/98 21:37 => 2080 982501
+       F6BEX-0   24/09/98 19:00 => 2080 931501
+       F5NXB-0   24/09/98 17:47 => 2080 981502
+       F6CDD-0   24/09/98 16:44 => 2080 931501
+
+
+       F6FBB-10 (Commands = ?) : w -nl4 *
+       FPAC White Pages database : 800 callsigns
+       F5JTU-8   18/07/98 12:14 => 2080 909501  Node JN02TW Prat d'Albis
+       F5KBQ-5   01/09/98 19:14 => 2080 981501  Node JN13CO Castres
+       F6BEX-8   13/08/98 19:30 => 2080 931501  Node JN03RM Rebigue
+       F6FBB-10  24/07/98 13:59 => 2080 931502  Node JN03QL Roquettes
+
+
+
+
+
+
+
+  2.3.  fpacshell
+
+  fpacshell opens a LINUX shell session to the user, normally in sysop
+  mode.  This session is opened mostly for maintenance with root
+  priviledges.
+
+  For safety reasons a password accepting plain text, NetRom key or
+  MD2/MD5 key is provided.
+
+  fpacshell is run from the command or sysop section of the FPAC
+  configuration file. See ``Sysop section''.
+
+
+  2.4.  fpacstat
+
+  fpacstat is the statistics applications. It computes the traffic
+  statistics of the trunks (L3 links between switches) and updates each
+  minute a last-hour file /var/ax25/fpac/fpacstat.dat and each hour a
+  last-day file /var/ax25/fpac/fpacstat.day.
+
+  These files can be read at any time and sent to the user.
+
+  The "-c" option writes <CR> characters instead of <LF> to be
+  compatible with the packet radio protocole in which <CR> characters
+  are used as end of line.
+
+
+  2.5.  fpacwpd
+
+  fpacwpd is the white pages database server daemon. It will answer to
+  any local or remote query. The database is stored in
+  /var/ax25/fpac/fpacwp2.dat.
+
+  To get a report on this server, only connect WP via ROSE/L3 and type
+  ":". The server will dump its current status. Type return to end the
+  connection.
+
+
+       *** Connecting WP-0 @ 2080,931501
+       *** Connection done
+       :
+       :WP Server version 1.5
+       :Node F6BEX-9 @ 2080,931501
+       :Database (records) : size=896 used=812
+       :
+       :Client Callsign  Address     Type   Dirty
+       :     6 WP-0      2080,931502 Server 0
+       :     7 WP-0      2080,981502 Server 0
+       :     8 WP-0      2080,982501 Server 0
+       :     9 F6FBB-14  2080,931402 User   0
+       :
+       :Adjacent-Name    Callsign  Address      State
+       :Roquettes        F6FBB-11  2080,931502  connected #6 #dirty=0
+       :Rabastens        F8BK-9    2080,981502  connected #7 #dirty=0
+       :Montauban        F5FVC-9   2080,982501  connected #8 #dirty=0
+       :
+       :=== End ===
+
+
+
+
+
+  3.  Installation of FPAC
+
+  ROSE kernel must be installed for FPAC to work. If you are running
+  kernels from 2.0.33 to 2.0.35, apply the patch rose0728 to the kernel.
+  If you are running 2.0.36, you don't have anything to do.
+
+  ROSE is configured by the rsparms file in /etc/ax25.  This file will
+  be created or replaced when running fpad.  So ROSE kernel does not
+  need any special configuration. All is done when starting fpad.
+
+  3.1.  Binaries
+
+  Copy the set of applications from fpac/bin to /usr/sbin or
+  /usr/local/bin directory.  Add the line /usr/sbin/fpac.sh or
+  /usr/local/bin/fpac.sh to the rc file, after the ax25 initialisation.
+
+
+  3.2.  Directories
+
+  The configuration files are in /etc/ax25 and the tree of the help
+  files is in /etc/ax25/fpac. See section ``Help files''.
+
+  The working directory /var/ax25/fpac will be created when running
+  FPAC. The files created at runtime will be put in this directory
+
+
+  4.  Starting FPAC
+
+  FPAC is run from the fpac.sh file.
+
+
+  4.1.  The fpac.sh start file
+
+  This file creates a shell to give to fpac and fpacstat the needed
+  environment. It includes a PATH to the bin directory of the fpac
+  binaries.
+
+
+  4.2.  Calling fpac.sh during linux start-up
+
+  To start fpac, only run /usr/sbin/fpac.sh from your rc.local or start-
+  up file.
+
+  There is no need to add a & (ampersand) at the end of the line.
+
+  fpac.sh must be run after the ax25 layers are fully initalised.
+
+
+  5.  Configuration of FPAC
+
+  FPAC is configured by only one file. This file is named "fpac.conf"
+  and must be located in /etc/ax25 directory.
+
+
+  5.1.  The fpac.conf configuration file
+
+  Here is an example of fpac.conf.
+
+  This file is made of keywords to which are given values or block of
+  values.  A block is always ended by a "end" keyword alone.  Keywords
+  are not case dependant, but values are often case dependant.
+
+
+
+
+
+
+
+
+
+  #
+  # FPAC configuration file
+  #
+
+  #
+  # Informations on the node
+  #
+
+  L2call    = F6FBB-10
+  L3call    = F6FBB-11
+  DNIC      = 2080
+  Address   = 931502
+  Coverage  = 931602 931202 931102
+  InetPort  = 1022
+  Password  = mypassword
+  City      = Roquettes
+  Locator   = JN03QL
+  UserPort  = *
+  DefPort   = 1
+
+  #
+  # Other commands
+  #
+
+  Command
+          BBs = /usr/sbin/call_tcp serveur 1022
+          CLuster = connect f6krq-3 2080931501
+          STat = /bin/cat /var/ax25/fpac/fpacstat.dat /var/ax25/fpac/fpacstat.day
+          CONVers = /usr/sbin/convers -l %u
+                  Telnet =
+  end
+
+  #
+  # Other SysOp commands
+  #
+
+  Sysop
+          DIsk = /bin/df -k
+          RM   = /bin/rm /tmp/%1
+          LS   = /bin/ls -l /tmp/%1
+          CAT  = /bin/cat /tmp/%1
+          YGET = /usr/sbin/yapp -u /tmp/%1
+          YPUT = /usr/sbin/yapp -d /tmp/%1
+          SYSop= /usr/sbin/fpacshell
+  end
+
+  #
+  # Other applications
+  #
+
+  Application
+          F6FBB-1 = /usr/sbin/call_tcp serveur 1022
+  End
+
+  #
+  # List of routes to port
+  #
+
+  AddPort = UHF
+          Address = 931402
+          Port = 5
+  End
+
+  AddPort = BEX
+          Address = 931302
+          Port = 0
+  End
+
+  #
+  # List of users on specific port
+  #
+
+  User = F6BEX
+          Path = F6BEX
+          Port = 2
+  End
+
+  #
+  # List of aliases
+  #
+
+  Alias = F6FBB-2
+          Path = F6FBB-2,931501
+  End
+
+  Alias = F6FBB-3
+          Path = F6KRQ-3,931501
+  End
+
+  #
+  # List of adjacent nodes
+  #
+
+  Node = Prat
+          Path     = F5JTU-9
+          DNIC     = 2080
+          Address  = 909501
+          Port     = 3
+  End
+
+  Node = Rebigue
+          Path     = F6BEX-9
+          DNIC     = 2080
+          Address  = 931501
+          Port     = 0
+  End
+
+  Node = Test
+          Path     = F6FBB-9
+          DNIC     = 2080
+          Address  = 931503
+          Port     = 5
+  End
+
+  #
+  # Routes to adjacent nodes
+  #
+
+  Routes
+          DNIC = 2080
+
+          1 = Rebigue
+          2 = Rebigue
+          3 = Rebigue
+          4 = Rebigue
+          5 = Rebigue
+          6 = Rebigue
+          7 = Prat
+          8 = Rebigue
+
+          909 = Prat
+
+          909202 = Rebigue
+          909502 = Rebigue
+
+          931201 = Rebigue
+          931501 = Rebigue
+
+          931203 = Test
+          931503 = Test
+
+          911 = Prat
+          930 = Prat
+          934 = Prat
+          946 = Rebigue
+          965 = Rebigue
+          966 = Prat
+          981 = Rebigue
+          981501 = Prat
+          982 = Rebigue
+  End
+
+
+
+
+
+  5.2.  Header information
+
+  All the keywords of the header are mandatory and must be defined.
+
+
+       #
+       # Informations on the node
+       #
+
+       L2call    = F6FBB-10
+       L3call    = F6FBB-11
+       DNIC      = 2080
+       Address   = 931502
+       Coverage  = 931602 931202 931102
+       InetPort  = 1022
+       Password  = mypassword
+       City      = Roquettes
+       Locator   = JN03QL
+       UserPort  = *
+       DefPort   = 1
+
+
+
+
+
+  o  L2call is the main callsign seen by users. Connecting this callsign
+     will give access to fpacnode. Using this callign as digipeater will
+     give access to local or remote station via the network.
+
+  o  L3call is the callsign used to tranport the X25 frames. This
+     callsign should not be connected by users (no text or other thing
+     is sent). It will be used by remote switches to tranport the X25
+     circuits with the PID 01 (X25). Using this callsign as digipeater
+     will give a silent connection and disconnection, no message or
+     report will be sent. Mostly interesting for machines such as BBS.
+
+  o  DNIC is the country designator. It follows the CCITT standard.  It
+     is 2080 for France. Some designators are given in annex.
+
+  o  Address is the numerical reference of the switch. This address is
+     generaly copied from the telephone number hierarchy.
+
+  o  Coverage is the list of addresses that a switch will answer to
+     added to the generic address
+
+  o  InetPort is the port number (decimal) listened by FPAC for telnet
+     connections
+
+  o  Password is the word or sentence to compute the password for the
+     SYS command
+
+  o  City is the location of the switch
+
+  o  Locator is the QTH locator of the switch
+
+  o  UserPort is a list of ports available for the users connection. A
+     star enables all ports.
+
+  o  DefPort is the port to which the outgoing connections will be sent
+     by default
+
+  5.3.  Command section
+
+  The Command section adds or remove commands to/from the main menu.
+  Think that these commands will be executed with the root priviledges,
+  so avoid if possible destructive commands.
+
+
+       #
+       # Other commands
+       #
+
+       Command
+               BBs = /usr/sbin/call_tcp serveur 1022
+               CLuster = connect f6krq-3 2080931501
+               STat = /bin/cat /var/ax25/fpac/fpacstat.dat /var/ax25/fpac/fpacstat.day
+               CONVers = /usr/sbin/convers -l %u
+                       Telnet =
+       end
+
+
+
+
+  The Command section includes a list of keywords which will appear in
+  the main menu of fpacnode. If no value is given to the keyword, this
+  last one will be deleted from the default commands of the menu.
+
+  A keyword identical to an existing command will redefine it. So the
+  previous default command will be replaced by the new one.
+
+  Upcase characters are the mandatory characters to be received for the
+  command to be interpreted.
+
+  The value is a command which can be executed by LINUX. The user will
+  be linked to this command, sending what he types and receiving the
+  answers, until the commands ends. Then the user will go back to the
+  fpacnode menu.
+
+  A special command is connect which sends a L2 or L3 connection.  If a
+  port is specified after "connect" then a L2 local connection will be
+  issued. If no port is specified, a L3 NetRom connection will be done
+  if the callsign is a known NetRom node or a L3 ROSE connection. In
+  case of a L3 ROSE connection, if no address is specified (address is
+  always 10 digits) then a route will be guessed (if the callisgn is
+  known) from the FPAC white pages database.
+
+
+
+  5.4.  Sysop section
+
+  The Sysop section adds extended commands to the main menu when the
+  SYSop command has succeded. Generally, maintenance commands are added.
+  Think that these commands will be executed with the root priviledges,
+  so avoid if possible destructive commands. The SYSop command is
+  redefined to allow running a LINUX shell via fpacshell.
+
+
+       #
+       # Other SysOp commands
+       #
+
+       Sysop
+               DIsk = /bin/df -k
+               RM   = /bin/rm /tmp/%1
+               LS   = /bin/ls -l /tmp/%1
+               CAT  = /bin/cat /tmp/%1
+               YGET = /usr/sbin/yapp -u /tmp/%1
+               YPUT = /usr/sbin/yapp -d /tmp/%1
+               SYSop= /usr/sbin/fpacshell
+       end
+
+
+
+
+  5.5.  Application section
+
+  The Application section includes a list of lines. Each line associates
+  a LINUX application to a callsign. So if the user connects the
+  specified callsign, he will be linked to the LINUX program.
+
+
+       #
+       # Other applications
+       #
+
+       Application
+               F6FBB-1 = /usr/sbin/call_tcp serveur 1022
+       End
+
+
+
+
+
+  5.6.  AddPort section
+
+  The AddPort section will hold one or more AddPort blocks. Each block
+  will specify an address associated to a port. If a remote user
+  connects anybody specifying this address, the connection will be
+  issued to the corresponding port.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  #
+  # List of routes to port
+  #
+
+  AddPort = UHF
+          Address = 931402
+          Port = 5
+  End
+
+  AddPort = BEX
+          Address = 931302
+          Port = 0
+  End
+
+
+
+
+
+  5.7.  User section
+
+  The User section will hold one or more User blocks. Each block will
+  specify a user associated to a port. If a remote user connects this
+  callsign, the connection will be issued to the corresponding port.
+
+
+       #
+       # List of users on specific port
+       #
+
+       User = F6BEX
+               Path = F6BEX
+               Port = 2
+       End
+
+
+
+
+
+  5.8.  Alias section
+
+  Alias section is similar to Application section, but maps a new
+  connection to the requested callsign. For instance the user connection
+  F6FBB-3 will be re-routed to F6KRQ-3 address 931501 (the default DNIC
+  of the switch will be used).
+
+  The Alias section will hold one or more Alias blocks. Each block will
+  specify one alias. Use as many blocks as needed in this section.
+
+
+       #
+       # List of aliases
+       #
+
+       Alias = F6FBB-2
+               Path = F6FBB-2,931501
+       End
+
+       Alias = F6FBB-3
+               Path = F6KRQ-3,931501
+       End
+
+
+
+
+
+
+  5.9.  Node section
+
+  The Node section will hold one or more Node blocks. Each block will
+  specify one adjacent switch. Use as many blocks as needed in this
+  section.
+
+
+       #
+       # List of adjacent nodes
+       #
+
+       Node = Prat
+               Path     = F5JTU-9
+               DNIC     = 2080
+               Address  = 909501
+               Port     = 3
+               NoWp     = 0
+       End
+
+       Node = Rebigue
+               Path     = F6BEX-9
+               DNIC     = 2080
+               Address  = 931501
+               Port     = 0
+       End
+
+       Node = Test
+               Path     = F6FBB-9
+               DNIC     = 2080
+               Address  = 931503
+               Port     = 5
+       End
+
+
+
+
+  Each block gets the name of the adjacent switch. This name will be
+  used later in the routing section. Be aware of the letter case. Four
+  keywords must be defined.
+
+  o  Path specifies the callsign/ssid of the adjacent switch optionnaly
+     followed by one or more digipeaters
+
+  o  DNIC specifies the DNIC (4 digits) of the adjacent switch
+
+  o  Address specifies the main address of the adjacent switch
+
+  o  Port specifies the port on which the adjacent switch will be
+     linked.
+
+  o  NoWP = 1 specifies that the adjacent does not support white pages
+     (default 0).
+
+  Do not forget to finish each block with a End line.
+
+
+  5.10.  Routes section
+
+  This section holds only one block which defines the routing table.
+
+  Routing is made on hierarchical bases first with DNIC and then with
+  the address from left to right.
+
+  o  DNIC, 4 digits for the country
+
+
+  o  Address, up to 6 digits for the region/city/district/number. This
+     last organization is country dependant.
+
+
+
+       #
+       # Routes to adjacent nodes
+       #
+
+       Routes
+               DNIC = 2080
+
+               1 = Rebigue
+               2 = Rebigue
+               3 = Rebigue
+               4 = Rebigue
+               5 = Rebigue
+               6 = Rebigue
+               7 = Prat
+               8 = Rebigue
+
+               909 = Prat
+
+               909202 = Rebigue
+               909502 = Rebigue
+
+               931201 = Rebigue
+               931501 = Rebigue
+
+               931203 = Test
+               931503 = Test
+
+               911 = Prat
+               930 = Prat
+               934 = Prat
+               946 = Rebigue
+               965 = Rebigue
+               966 = Prat
+               981 = Rebigue
+               981501 = Prat
+               982 = Rebigue
+       End
+
+
+
+
+  A DNIC line will define that all the following lines will refer to
+  this DNIC (country), until a new DNIC definition or the end of the
+  block.
+
+  If the numerical information is smaller than 6 digits long, it means
+  that all addresses starting with this numerical information will be
+  routed to the corresponding switch.
+
+  The name of the switch is the one taken from the node section.
+
+  A longuest numerical information will have a highest priority. For
+  instance :
+
+          DNIC = 2080
+          981 = Rebigue
+          981501 = Prat
+
+
+
+
+  means that all addresses starting by 981 for the DNIC 2080 will be
+  routed to Rebigue except 981501 which will be routed to Prat. The
+  order is not important, the addresses are sorted in the routing
+  algorithm.
+
+
+  6.  Special files
+
+  6.1.  fpac.hello file
+
+  This optional file is in /etc/ax25 and sent first when connecting the
+  fpacnode.
+
+
+  6.2.  fpac.info information file
+
+  This file is in /etc/ax25 and sent when the Info command is requested
+  from the main menu.
+
+
+  6.3.  fpac.dnic lookup file
+
+  This file is in /etc/ax25 and associates a DNIC to a 3 characters
+  country. This country designator will be displayed in some commands
+  (Node for instance) or can be used instead of the DNIC as digipeater
+  when sending a connection.
+
+  Only the two first words on each line define an association. The rest
+  of the line is ignored.
+
+  Empty lines or lines starting starting with a # character are ignored.
+
+
+       #
+       # Example of fpac.dnic file
+       #
+
+       FRA 2080
+       ESP 2120
+
+
+
+
+
+  6.4.  Help files
+
+  Help files are in the directory /etc/ax25/fpac/help. The filename must
+  be the representation of the command and is case dependant.
+
+  For instance the helpfile for the Connect command will be Connect.hlp
+  the helpfile for the SYSop command will be SYSop.hlp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

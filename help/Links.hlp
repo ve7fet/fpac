@@ -1,0 +1,10 @@
+
+USAGE
+        Links [* | <call>]
+
+DESCRIPTION
+        Gives a list of active AX.25 connections to and from the
+        local host. With an asterisk (*) as an argument shows also
+        AX.25 sockets in listening state. With a callsign as an
+        argument gives a list of all connections with either
+        source or destination callsign <call>.

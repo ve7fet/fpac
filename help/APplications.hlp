@@ -1,0 +1,7 @@
+
+USAGE
+	APplications
+
+DESCRIPTION
+	Gives a list of Call-ssids and the application that will be
+	run in response to a connect request to that Call-ssid.
