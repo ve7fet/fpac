@@ -15789,7 +15789,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile cfg/Makefile man/Makefile monitor/Makefile node/Makefile flex/Makefile pad/Makefile tcp/Makefile wp/Makefile tools/Makefile stats/Makefile doc/Makefile doc/html/Makefile help/Makefile scripts/ax25parms scripts/versions scripts/fpac.sh:scripts/fpac.in scripts/Makefile etc/Makefile fpac.spec"
+ac_config_files="$ac_config_files Makefile lib/Makefile cfg/Makefile man/Makefile monitor/Makefile node/Makefile flex/Makefile pad/Makefile tcp/Makefile wp/Makefile tools/Makefile stats/Makefile doc/Makefile doc/html/Makefile help/Makefile scripts/ax25parms scripts/versions scripts/myfpac.sh:scripts/myfpac.in scripts/Makefile etc/Makefile fpac.spec"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -16824,7 +16824,7 @@ do
     "help/Makefile") CONFIG_FILES="$CONFIG_FILES help/Makefile" ;;
     "scripts/ax25parms") CONFIG_FILES="$CONFIG_FILES scripts/ax25parms" ;;
     "scripts/versions") CONFIG_FILES="$CONFIG_FILES scripts/versions" ;;
-    "scripts/fpac.sh") CONFIG_FILES="$CONFIG_FILES scripts/fpac.sh:scripts/fpac.in" ;;
+    "scripts/myfpac.sh") CONFIG_FILES="$CONFIG_FILES scripts/myfpac.sh:scripts/myfpac.in" ;;
     "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "fpac.spec") CONFIG_FILES="$CONFIG_FILES fpac.spec" ;;

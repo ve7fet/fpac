@@ -1,4 +1,4 @@
-sbin_SCRIPTS = ax25parms versions fpac.sh
+sbin_SCRIPTS = ax25parms versions myfpac.sh
 
 fpacdir = $(AX25_LOCALSTATEDIR)fpac
 fpac_DATA = loggedin

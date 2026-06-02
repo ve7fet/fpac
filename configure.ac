@@ -108,7 +108,7 @@ AC_CONFIG_FILES([Makefile \
 	help/Makefile \
 	scripts/ax25parms \
 	scripts/versions \
-	scripts/fpac.sh:scripts/fpac.in \
+	scripts/myfpac.sh:scripts/myfpac.in \
 	scripts/Makefile \
 	etc/Makefile \
 	fpac.spec])

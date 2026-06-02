@@ -26,7 +26,7 @@ config.h
 stamp-h1
 fpac.spec
 scripts/versions
-scripts/fpac.sh
+scripts/myfpac.sh
 cfg/fpaccfg
 # configs runtime générées depuis etc/*.in
 /etc/*.conf
@@ -67,3 +67,8 @@ wp/wplist
 wp/wpmaint
 wp/wpserv
 wp/wpstress
+
+# sorties de make dist / make distcheck
+*.tar.gz
+*.tar.xz
+/fpac-*/

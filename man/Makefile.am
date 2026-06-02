@@ -13,7 +13,7 @@ man_MANS = \
 	fpac.info.5 \
 	fpac.nodes.5 \
 	fpac.routes.5 \
-	fpac.sh.1 \
+	myfpac.sh.1 \
 	fpaccfg.1 \
 	fpacnode.1 \
 	fpacroute.1 \

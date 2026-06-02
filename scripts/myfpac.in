@@ -1,0 +1,170 @@
+#!/bin/bash
+# Description: Start/Stop/Status FPAC node services (application daemons only).
+#
+# The AX.25 link layer (ax0, kissattach, ax25ipd, netromd, mheardd, beacon,
+# ax25d) is owned by ax25up/ax25stop and is deliberately NOT torn down here,
+# so FPAC can be cycled while the AX.25 stack keeps running.
+
+if [ "$(id -u)" != "0" ]; then
+    echo "You need to be root to execute this script"
+    exit 1
+fi
+
+
+DIR="@prefix@/sbin"
+PATH=$DIR:$PATH
+
+# log file
+LOG=/var/log/fpac.log
+echo "=========================================" >> $LOG
+echo "MYFPAC.SH : " >> $LOG
+/bin/date >> $LOG
+#rm -f $LOG
+
+# serial port for watchdog
+# WDOG_PORT="/dev/ttyS4"
+WDOG_PORT=""
+
+# callsign of the sysop
+SYSOP="SYSOP"
+# Node Callsign
+NODECALL="$HOSTNAME"
+
+# route/callsign of the notified BBS (edit for your node)
+#CONNECT="rose0 mybbs-1 2080175520"
+#CONNECT="MYBBS-1"
+
+export PATH SYSOP CONNECT
+
+# Stop a process cleanly: SIGTERM, wait up to 5s, then SIGKILL if still alive.
+# $1 = binary basename (resolved with pidof -x)
+stop_proc() {
+	local name="$1" pid i
+	pid=`/bin/pidof -x "$name"`
+	[ -z "$pid" ] && return 0
+	kill -TERM $pid 2>/dev/null
+	for i in 1 2 3 4 5; do
+		pid=`/bin/pidof -x "$name"`
+		[ -z "$pid" ] && return 0
+		sleep 1
+	done
+	pid=`/bin/pidof -x "$name"`
+	if [ -n "$pid" ]; then
+		echo -n "(KILL)"
+		kill -KILL $pid 2>/dev/null
+		sleep 1
+	fi
+	return 0
+}
+
+case "$1" in
+-restart|restart)
+	echo -n "Restartting FPAC  :" >> $LOG
+	$0 -stop && $0 -start
+	sleep 3
+	$0 status
+	;;
+-stop|stop)
+	echo " "
+	echo -n "Halting FPAC :"
+	echo -n "Halting FPAC  :" >> $LOG
+
+	# FPAC application daemons ONLY. The AX.25 link layer (ax0, kissattach,
+	# ax25ipd, netromd, mheardd, beacon, ax25d) is owned by ax25up/ax25stop
+	# and is deliberately NOT touched here, so FPAC can be cycled while the
+	# AX.25 stack keeps running. Each daemon is TERMed, waited on, and KILLed
+	# only if it survives.
+	for PROC_NAME in fpacshell fpacnode mailbbs flexd fpacroute fpacstat fpacwpd fpad fpacwdog
+	do
+		echo -n " [$PROC_NAME]"
+		stop_proc "$PROC_NAME"
+	done
+
+	# Give the kernel time to emit CLEAR (ROSE) / DISC (AX.25) for the FPAC
+	# circuits just released. We do NOT tear down ax0/kissattach: any AX.25
+	# socket still clearing drains over the live port and disappears on its
+	# own timers.
+	echo -n " [drain]"
+	for i in 1 2 3 4 5; do
+		sleep 1
+	done
+
+	echo " "
+	echo " ok "
+	;;
+-status|status)
+	echo " "
+        echo -e "\nStatus of FPAC :"
+
+	for PROC_NAME in fpacwdog fpad fpacwpd fpacstat fpacroute flexd mailbbs ax25ipd netromd kissattach
+	do
+	        PID=`/bin/pidof -x $DIR/$PROC_NAME`
+		if [ -n "$PID" ]; then
+			echo -e "$PROC_NAME    \tis running"
+
+		else
+			echo -e "$PROC_NAME    \tis not running"
+		fi
+	done
+	echo
+        ;;
+fpad)
+	while [ 1 ]
+	do
+		$DIR/fpad -d
+		sleep 1
+	done
+	;;
+fpacwpd)
+	while [ 1 ]
+	do
+		$DIR/fpacwpd -d -v -x
+		sleep 1
+	done
+	;;
+
+-start|start)
+	FPAC_BG="yes"
+	export FPAC_BG
+	echo " "
+	echo -n "Starting FPAC : " >> $LOG
+	echo -n "Starting FPAC : "
+	if [ "_$WDOG_PORT" != "_" ] ; then
+		echo -n " [wdog] "
+		$DIR/fpacwdog -p 2 $WDOG_PORT >> $LOG 2>&1
+	fi
+#	echo -n " [ax25d] "
+#	$DIR/ax25d >> $LOG 2>&1
+#	sleep 2
+	echo -n " [rc-netrom] "
+	/etc/ax25/rc.netrom >> $LOG 2>&1
+	sleep 2
+#	echo -n " [netromd] "
+#	$DIR/netromd -d -l -i -t 10
+#	sleep 2
+	echo -n " [fpad] "
+	$DIR/fpad >> $LOG 2>&1
+	echo -n " [fpacwpd] "
+	sleep 2
+	$DIR/fpacwpd >> $LOG 2>&1
+	echo -n " [fpacstat] "
+	sleep 2
+	$DIR/fpacstat >> $LOG 2>&1
+	echo -n " [fpacroute] "
+	sleep 2
+	$DIR/fpacroute >> $LOG 2>&1
+	echo -n " [flexd] "
+	$DIR/flexd >> $LOG 2>&1
+	sleep 2
+	(sleep 10 ; /bin/date | $DIR/mailbbs -d $SYSOP -t "FPAC node $NODECALL started" $CONNECT) &
+	sleep 2
+	echo " ok "
+	;;
+
+*) echo "Usage : $0 {-start|-stop|-restart|-status|fpad|fpacwpd}"
+exit 1
+
+esac
+
+
+exit 0
