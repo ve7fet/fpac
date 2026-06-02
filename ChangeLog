@@ -1,6 +1,23 @@
 
 fpac (4.1.5-rc14)
 
+	* scripts/Makefile.am, scripts/myfpac.in: replace the fpac.sh startup
+	  script with myfpac.sh, a reworked version that drives ONLY the FPAC
+	  application daemons.  The AX.25 layer (ax0, kissattach, ax25ipd,
+	  netromd, beacon, ax25d) is now handled separately by ax25up/ax25stop
+	  and is deliberately left untouched, so FPAC can be restarted without
+	  bringing down the AX.25 stack.  Adds a stop_proc() helper (TERM, 5 s
+	  wait, then KILL), generic template defaults (SYSOP, NODECALL=$HOSTNAME,
+	  CONNECT commented out) and DIR=@prefix@/sbin; renames sbin_SCRIPTS,
+	  AC_CONFIG_FILES and the man page from fpac.sh to myfpac.sh.
+
+	* etc/Makefile.am, Makefile.am: distribute and install ax25udp.conf.
+	  Its template ax25udp.conf.in was present in the tree but was neither
+	  substituted, installed nor distributed (missing from etcfiles and
+	  EXTRA_DIST), unlike its ax25ipd.conf counterpart.  It is now added to
+	  both lists and handled like ax25ipd.conf (substitution, upgrade-safe
+	  install, dist).
+
 	* wp/Makefile.am: give the build-only helper make_tab an empty
 	  per-target LDADD (make_tab_LDADD =) so it no longer links against
 	  ../lib/libfpac.a.  "make dist"/"make distcheck" generate the
@@ -31,7 +48,7 @@ fpac (4.1.5-rc14)
 	  release archives to xz (AM_INIT_AUTOMAKE dist-xz instead of
 	  dist-bzip2) to match the published .tar.xz.
 
--- Bernard Pidoux <bernard.f6bvp@gmail.com>  Friday, may 29 2026
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, june 2 2026
 
 	Assisted by Claude Opus 4.8 (Anthropic) <noreply@anthropic.com>.
 
