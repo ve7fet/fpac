@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 	{
 		if (verbose)
 			printf("Sending CR\n");
-		write(fd, "\r", 1);
+		{ ssize_t r = write(fd, "\r", 1); (void)r; }
 		sleep(period);
 	}
 }

@@ -31,6 +31,12 @@
 #define DEFAULT_POLL_TIME 600
 #define MINIMUM_POLL_TIME 300
 
+static inline void write_discard(int fd, const void *buf, size_t n)
+{
+	ssize_t r = write(fd, buf, n);
+	(void)r;
+}
+
 int poll_time = DEFAULT_POLL_TIME;
 static char flexgate[10] = "\0";
 static char mycall[10] = "\0";
@@ -485,7 +491,7 @@ int download_dest(char *gateway, char *fname)
 	if ((s = socket(AF_AX25, SOCK_SEQPACKET, 0)) < 0) {
 		sprintf(buffer, "flexd connect: cannot open AX.25 socket, %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 		return (-1);
 	}
 
@@ -502,7 +508,7 @@ int download_dest(char *gateway, char *fname)
 	if (bind(s, (struct sockaddr *) &sockaddr, addrlen) != 0) {
 		sprintf(buffer, "flexd connect: cannot bind AX.25 socket, %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
 		return (-1);
 	}
@@ -516,7 +522,7 @@ int download_dest(char *gateway, char *fname)
 	if (fcntl(s, F_SETFL, O_NONBLOCK) == -1) {
 		sprintf(buffer, "flexd connect: fcntl on socket: %s\n",
 				strerror(errno));
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
 		return (-1);
 	}
@@ -524,7 +530,7 @@ int download_dest(char *gateway, char *fname)
 	if (ax25_aton_arglist((const char **) dlist, &sockaddr.ax25) == -1) {
 		sprintf(buffer,
 				"flexd connect: invalid destination callsign or digipeater\n");
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
 		return (-1);
 	}
@@ -550,7 +556,7 @@ int download_dest(char *gateway, char *fname)
 			break;
 		}
 
-		write(STDOUT_FILENO, buffer, strlen(buffer));
+		write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 		close(s);
 		return (1);
 	}
@@ -584,7 +590,7 @@ int download_dest(char *gateway, char *fname)
                                 strlwr(cp);
                                 sprintf(buffer, "flexd connect: Failure with %s error %d %s\n",
 						gateway, ret, cp);
-                                write(STDOUT_FILENO, buffer, strlen(buffer));
+                                write_discard(STDOUT_FILENO, buffer, strlen(buffer));
                                 free(cp);
                                 close(s);
                                 return 1;
@@ -641,7 +647,7 @@ int download_dest(char *gateway, char *fname)
 
 		if (cmd_ack != 0) {
 			if (cmd_send < 3) {
-				write(s, commands[cmd_send], 2);
+				write_discard(s, commands[cmd_send], 2);
 				cmd_send++;
 			}
 		}

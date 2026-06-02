@@ -1,4 +1,383 @@
 
+fpac (4.1.5-rc14)
+
+	* wp/Makefile.am: give the build-only helper make_tab an empty
+	  per-target LDADD (make_tab_LDADD =) so it no longer links against
+	  ../lib/libfpac.a.  "make dist"/"make distcheck" generate the
+	  BUILT_SOURCES (crc_tab.h, produced by make_tab) before the libraries
+	  are built; the directory-wide LDADD made make_tab require libfpac.a
+	  at that point and dist aborted.  Installed programs are unaffected.
+
+	* Makefile.am, etc/Makefile.am: distribute the *.in source templates
+	  consumed by do_subst rather than the generated files.  EXTRA_DIST
+	  now ships pathnames.h.in (was pathnames.h) and etc/ax25ipd.conf.in
+	  (was ax25ipd.conf); without them the unpacked tarball could not be
+	  reconfigured during "make distcheck".  Removed a duplicate
+	  ax25ipd.conf entry in etcfiles.
+
+	* Makefile.am: uncomment CLEANFILES = $(pathheader) so the generated
+	  pathnames.h is removed by "make clean"/"distclean"; distcleancheck
+	  used to fail on this leftover file.
+
+	* Makefile.am: add a distclean-local rule removing autom4te.cache,
+	  which "make distclean" previously left behind, so source tarballs
+	  are clean without manual cleanup.
+
+	* README: fix typos, drop the obsolete "libax25-0.0.9" TODO entry, and
+	  reword the bug-report pointer (GitHub issues, not a mailing list).
+	  README.svn rewritten for git and renamed README.git.
+
+	* configure.ac: bump version from 4.1.5-rc13 to 4.1.5-rc14, and switch
+	  release archives to xz (AM_INIT_AUTOMAKE dist-xz instead of
+	  dist-bzip2) to match the published .tar.xz.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Friday, may 29 2026
+
+	Assisted by Claude Opus 4.8 (Anthropic) <noreply@anthropic.com>.
+
+fpac (4.1.5-rc13)
+
+	* tools/mailbbs.c: fix three bugs causing segmentation faults on nodes
+	  where the linfbb BBS application and/or ROSE kernel support are not
+	  loaded.
+
+	  1. NULL pointer dereference in AF_ROSE setup (primary segfault cause):
+	     rs_get_addr(NULL) reads the ROSE routing table via /proc/net/rose.
+	     When the ROSE kernel module is not loaded, read_proc_rs() returns
+	     NULL and rs_get_addr() propagates it.  The unguarded call
+	     rose_aton(rs_get_addr(NULL), ...) then dereferences NULL.
+	     Fix: capture the return value of rs_get_addr() in a local variable,
+	     test for NULL, and exit with an explicit diagnostic message before
+	     calling rose_aton().
+
+	  2. NULL pointer dereference on local callsign lookup (AF_ROSE,
+	     AF_NETROM, AF_AX25): when option -i is not supplied and the
+	     port-address lookup (*_config_get_addr()) returns NULL (port not
+	     configured), ax25_aton_entry()/ax25_aton() was called with a NULL
+	     pointer.
+	     Fix: add a NULL check after each *_config_get_addr() call in all
+	     three address-family branches, with a diagnostic message directing
+	     the user to supply -i.
+
+	  3. Off-by-one buffer overflow in readbbs(): when a received line fills
+	     the entire buffer (i == maxlen), nb was set to i+1 (= maxlen+1)
+	     instead of i (= maxlen = pos).  In verbose mode the subsequent
+	     buffer[nb] = '\0' wrote one or two bytes past the end of the
+	     caller's stack buffer (char buf[256]).  Even in the normal \r-
+	     terminated case, nb == pos could equal maxlen, making buffer[nb]
+	     one byte past the end.
+	     Fix (two parts):
+	     - Change nb = i+1 to nb = i in the i==maxlen branch so that nb
+	       correctly reflects the number of bytes written (== pos).
+	     - Change buffer[nb] = '\0' to buffer[pos] = '\0' so the null
+	       terminator is always placed at the first unused byte.
+	     - Pass sizeof(buf)-1 instead of sizeof(buf) from main() so that
+	       maxlen leaves one byte of headroom for the terminator.
+
+	* configure.ac: bump version from 4.1.5-rc12 to 4.1.5-rc13.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, may 26 2026
+
+fpac (4.1.5-rc12)
+
+	* node/command.c: fix segmentation fault triggered by the sequence
+	  "s" (Status) then "u" (Users).
+
+	  do_status() declared a local cfg_t variable that shadowed the
+	  global cfg, then called cfg_open() a second time.  That second
+	  call leaked all heap memory allocated for the local config
+	  (alias/command/node/route linked lists), called dnic_open() again
+	  appending duplicate entries to the global dnic_list, and invoked
+	  putenv() with a pointer to a stack-local char[256] buffer.  After
+	  cfg_open() returned, those five environment-variable pointers
+	  became dangling, corrupting the Nodecmds linked list on the next
+	  stack reuse and causing cmdparse() to crash on cmdp->name.
+
+	  Fix: remove the local "cfg_t cfg" declaration and the cfg_open()
+	  call from do_status().  The global cfg loaded at startup by
+	  fpacnode.c is used directly, as it always was for every other
+	  command function.
+
+	* node/command.c (do_routes): remove unwanted colour on the DNIC
+	  Address column of the "r" (Routes) table.  The field was wrapped
+	  in NodeColors.adresse / ResetColor; it is now printed as plain
+	  text, consistent with the surrounding route data.
+
+	* node/command.c (do_links): fix uniform green colour applied to
+	  the Status column of the "l" (Links) table.  The switch(p->st)
+	  block previously assigned only the text label (cp) per state
+	  while always using NodeColors.ax25_connected for the colour.
+	  A state_color variable is now set alongside cp for each case,
+	  mapping the six AX.25 states to the same NodeColors fields used
+	  by do_users():
+	    0 Disconnected → ax25_disconnected
+	    1 Conn pending → ax25_conn_pending
+	    2 Disc pending → ax25_disc_pending
+	    3 Connected    → ax25_connected
+	    4 Recovery     → ax25_recovery
+	    default        → ax25_unknown
+
+	* node/colors.h, node/colors.c: new source files implementing a
+	runtime-configurable colour system for fpacnode's interactive display.
+
+	  - node_colors_t struct holds one ANSI escape sequence per semantic
+	    element (24 fields): version, node, hello, en_tete, indicatif,
+	    adresse, port, date, ax25_disconnected, ax25_conn_pending,
+	    ax25_disc_pending, ax25_connected, ax25_recovery, ax25_unknown,
+	    rose_connected, rose_idle, netrom_connected, netrom_idle,
+	    qualite_bonne, qualite_moyenne, qualite_nulle, ind_oui, ind_non.
+
+	  - colors_set_defaults() initialises every field to its built-in
+	    ANSI macro (F_*/B_* from node.h), reproducing the rc11 behaviour
+	    exactly when no configuration file is present.
+
+	  - read_colors() opens /usr/local/etc/ax25/fpacnode.colors, parses
+	    INI-style [section] / key = value lines, maps French colour names
+	    (rouge, vert + fond_rouge, …) to ANSI sequences via fg_table[] and
+	    bg_table[] lookup arrays, and stores the result in NodeColors.
+	    Unknown colour names are silently ignored (default kept).
+	    Returns 1 if the file was read, 0 if absent.
+
+	* node/fpacnode.c: add #include "colors.h"; call read_colors()
+	immediately after cfg_open() so the palette is ready before any
+	output.  Replace hardcoded F_Red/F_Yellow/F_Blue macros in the
+	connection banner (version number, hostname, hello/info file) and
+	User.call display with NodeColors.version, NodeColors.node,
+	NodeColors.hello, NodeColors.indicatif.
+
+	* node/command.c: add #include "colors.h"; replace all 94 hardcoded
+	F_*/B_* colour macro occurrences with NodeColors.* references:
+
+	  - Column headers (F_Yellow) → NodeColors.en_tete throughout
+	    do_mheard(), do_routes(), do_links(), do_rose(), do_ports(),
+	    do_netrom(), do_status(), do_wp() and related helpers.
+
+	  - AX.25 callsigns (F_Green) → NodeColors.indicatif.
+	    ROSE/DNIC addresses (F_Green) → NodeColors.adresse.
+
+	  - AX.25 link states in do_links() switch(p->st):
+	      case 0 Disconnected  F_Green+B_Red     → ax25_disconnected
+	      case 1 Conn pending  F_Yellow+B_Blue   → ax25_conn_pending
+	      case 2 Disc pending  F_Yellow+B_Magenta→ ax25_disc_pending
+	      case 3 Connected     F_Black+B_Green   → ax25_connected
+	      case 4 Recovery      F_Blue+B_Yellow   → ax25_recovery
+	      default Unknown      F_White+B_Gray    → ax25_unknown
+	    Format strings updated from "%s%s%s%s%s" to "%s%s%s%s" since
+	    fg and bg sequences are now stored pre-concatenated in NodeColors.
+
+	  - ROSE circuit states in do_rose() switch(rp->st): same six states
+	    mapped to the same ax25_* fields for consistency.
+
+	  - ROSE neighbour state in do_links():
+	      Connected   F_Black+B_Green → rose_connected
+	      --------- F_Green+B_Red   → rose_idle
+
+	  - NET-ROM neighbour status in do_links():
+	      Connected   F_Black+B_Green   → netrom_connected
+	      --------- F_Yellow+B_Magenta→ netrom_idle
+
+	  - Route quality in do_stat_file():
+	      qual==0     F_Red    → qualite_nulle
+	      qual<=50    F_Yellow → qualite_moyenne
+	      qual>50     F_Green  → qualite_bonne
+
+	  - Boolean "yes/no" column in do_rose_ckt(): restructured from
+	    compile-time string-literal concatenation
+	    (F_Black B_Green " yes" ResetColor) to a runtime expression
+	    using NodeColors.ind_oui / NodeColors.ind_non; tprintf format
+	    string updated accordingly.
+
+	  - "Opened"/"Closed" route indicators → ind_oui / ind_non.
+
+	  - do_status() hostname → NodeColors.node; callsigns →
+	    NodeColors.indicatif; DNIC address → NodeColors.adresse;
+	    version number → NodeColors.version; build date → NodeColors.node.
+
+	* node/Makefile.am: add colors.c and colors.h to fpacnode_SOURCES.
+
+	* configure.ac: bump version from 4.1.5-rc11 to 4.1.5-rc12.
+
+	* /usr/local/etc/ax25/fpacnode.colors: new configuration file
+	installed by generate_colors_conf.py.  Plain-text key=value syntax
+	with INI sections; comment field on each line contains the colour name
+	rendered as a live ANSI preview for self-documentation.
+
+	* fpacnode_colors.py: Python utility that displays the complete ANSI
+	palette (foreground and background) with live colour rendering, plus a
+	full preview of all fpacnode.colors settings in their configured colours.
+
+	* generate_colors_conf.py: Python utility that writes (or regenerates)
+	/usr/local/etc/ax25/fpacnode.colors with embedded ANSI codes in the
+	comment field of each line.  Accepts an optional destination path as
+	argument; use "-" to preview on stdout.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Saturday, may 24 2026
+
+fpac (4.1.5-rc11)
+
+	* node/node.h: fix PERM_TELNET macro — operator '&' replaced by '|';
+	the macro always evaluated to zero, making the telnet permission test
+	permanently false regardless of the individual flags set.
+	Add missing extern declaration for do_manage_routes().
+
+	* node/io.c: fix two bugs in usflush() causing heap buffer overflow
+	and silent data corruption:
+
+	  1. When write() returns -1 (e.g. EBADF), the function returned
+	     immediately without resetting iop->opointer.  On the next call
+	     to rsendchar(), the character was written at obuf[opointer] with
+	     opointer >= paclen — one byte past the end of the heap-allocated
+	     output buffer.  The overflow corrupts heap metadata and causes a
+	     segmentation fault on the subsequent command (reproducible: "ne"
+	     followed by "?").  Fix: reset iop->opointer = 0 before returning
+	     -1.
+
+	  2. Partial-write handling: after writing ret bytes out of opointer,
+	     the remaining data was correctly shifted to the front of the
+	     buffer with memmove(), but opointer was then set to ret (bytes
+	     already written) instead of opointer - ret (bytes still pending),
+	     leading to silent output truncation on slow or flow-controlled
+	     links.  Fix: iop->opointer = iop->opointer - ret.
+
+	  Both bugs were confirmed with AddressSanitizer:
+	    heap-buffer-overflow — WRITE of size 1, 0 bytes past the end of
+	    a 1024-byte region: rsendchar (io.c:202) <- do_netrom (command.c:2472)
+
+	* node/io.c: fix potential buffer overflow in usvprintf() — replace
+	vsprintf() with vsnprintf(buf, sizeof(buf), ...) and cap the returned
+	length to prevent writing beyond the static buffer.
+
+	* node/command.c: fix do_help() — fname[80] was used uninitialised;
+	all three code paths that assemble the help file path now use
+	snprintf(fname, sizeof(fname), "%s%s", FPAC_HELP_DIR, ...) so the
+	directory prefix is always set correctly.
+	Enlarge fname buffer from 80 to 256 bytes to avoid -Wformat-truncation
+	with long filenames under FPAC_HELP_DIR.
+	Register do_manage_routes() in init_nodecmds() as built-in command
+	'MRoutes' (min. 2 chars); the function was defined but never reachable.
+
+	* node/gateway.c: remove all debug node_msg() calls tagged
+	"DEBUG F6BVP" from get_address(), connect_to() (AF_ROSE, AF_NETROM,
+	AF_AX25 branches) and do_connect(); these messages were emitted on the
+	user's terminal during normal operation.
+	Clean up invalid-port error message to a user-readable form.
+	Fix do_connect(): add wp_opened flag so wp_close() is called in every
+	exit path, including early returns for "already connected", argc < 3,
+	invalid callsign and "no FlexNet gateway" conditions.
+	Fix do_connect(): save original argvp pointer in argvp_base before
+	the ++argvp pre-increment passed to connect_to(); add 'done:' label
+	at function end for consistent cleanup of all three calloc'd strings
+	and the pointer array.
+	Remove dead commented-out code blocks in do_connect().
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Thursday, may 22 2026
+
+fpac (4.1.5-rc10)
+
+	* node/command.c: extensive compiler-warning cleanup and coloured-
+	output additions throughout:
+	- wpcheck(): fix uninitialised variable; guard fread() return value
+	  before using wph.nb_record.
+	- do_bye(), do_color(), do_application(), do_alias(): suppress unused
+	  argc/argv parameter warnings with (void) casts.
+	- do_help(): fix sign-compare warning (strlen result cast to int).
+	- do_ports(): add coloured column headers; suppress unused return
+	  value from rs_config_load_ports().
+	- do_users() AX.25 L2 section: add coloured column headers; fix
+	  sign-compare warnings on neigh comparisons (cast to unsigned int).
+	- do_users() ROSE L3 and transit sections: add coloured column
+	  headers; fix sign-compare warnings.
+	- do_manage_routes(): fix struct field access — listv->call replaced
+	  by rs_node.neighbour.ax25_call; fix sign-compare; remove unused
+	  variables pn/listv.
+	- do_rose(): add coloured header for ROSE routes table; fix
+	  sign-compare warnings; remove unused variable first_node.
+	- do_links(): add coloured column headers; fix potential NULL pointer
+	  dereference in ax25_config_get_name() assignment; change connected
+	  status colour from F_Yellow to F_Green.
+	- do_status(): add coloured header for WP display section; fix
+	  sign-compare warning (cast loopback to unsigned int).
+	- do_wp(): add coloured column header; fix sign-compare warning.
+	- do_netrom(): add coloured column headers; fix sign-compare warnings;
+	  remove unused variables.
+
+	* flex/flexd.c: add write_discard() inline wrapper to suppress
+	-Werror=unused-result on write() calls (7 call sites updated).
+
+	* tcp/calld.c: add write_discard() inline wrapper (6 call sites);
+	enlarge str buffer from 256 to 512 bytes; replace sprintf() with
+	snprintf() at 3 locations; limit callsign in error messages to %.9s
+	to prevent potential overflow.
+
+	* tcp/call_tcp.c: add write_discard() inline wrapper (2 call sites);
+	fix fgets() return value not checked — initialise caller[] to empty
+	string on NULL return.
+
+	* lib/md5.c: convert 4 function signatures from K&R style to ANSI C
+	prototypes (MD5Init, MD5Update, MD5Final, MD5Transform).
+
+	* monitor/listen.c: suppress unused-result warning on read() call.
+
+	* node/yapp.c: enlarge size_buffer from 10 to 12 bytes.
+
+	* tools/aprslist.c: replace sprintf() with snprintf() and add field-
+	width limits (%.8s/%.9s) for APRS locator string assembly.
+
+	* tools/fpacwdog.c: suppress unused-result warning on write() call.
+
+	* tools/mailbbs.c: fix fgets() return value not checked — add proper
+	error handling with fclose() on NULL return.
+
+	* wp/wpcmp.c: fix fread() return value not checked — initialise wp
+	struct to zero when fread() returns != 1.
+
+	* etc/: add missing configuration example files (aprslist.conf,
+	aprslist.conf.fr, ax25ipd.conf, flexd.conf, flexd.routes, fpac.conf,
+	fpac.dnic, fpac.hello, fpac.info, fpac.nodes, fpac.routes, itu.dnic).
+
+	* scripts/: add ax25parms, fpac.sh and versions helper scripts.
+
+	* Miscellaneous: add .gitignore and fpac.spec; update README with
+	current documentation URL and maintainer e-mail address.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Sunday, april 20 2026
+
+fpac (4.1.5-rc9)
+
+	* Fixes build failure with autoconf 2.72 on 32-bit ARM (armhf).
+	configure.ac: remove obsolete autoconf macros for compatibility with
+	autoconf >= 2.69
+	- Remove AC_PROG_GCC_TRADITIONAL (removed in autoconf 2.70)
+	- Remove AC_HEADER_STDC (STDC_HEADERS obsolete)
+	- Remove AC_TYPE_SIGNAL (RETSIGTYPE always void on modern systems)
+	- Remove AC_HEADER_TIME (time.h always available on modern systems)
+	- Remove residual m4_warn blocks left by autoupdate
+
+	* node/node.h: change logintime and cmdtime from long to time_t
+	* (fixes build on armhf with glibc Y2038-aware time_t = long long)
+	* node/user.c: change local variable l from long to time_t (same fix)
+
+	Tested on armhf (autoconf 2.72) and compatible with aarch64 (autoconf 2.69)."
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, april 17 2026
+
+fpac (4.1.5-rc8)
+	* Bug fix: sort_proc_nr_nodes() - infinite loop on large /proc/net/nr_nodes
+	The previous bubble sort implementation restarted from the head of the
+	list after every swap, causing an O(n²) worst-case complexity and a
+	potential infinite loop when duplicate callsigns were present (strcmp
+	comparison used <= 0 instead of < 0). Replaced by a qsort()-based
+	implementation using a temporary pointer array, giving O(n log n)
+	complexity regardless of list size.
+
+	* NetRom command new feature: 'ne' command - new sort order arguments
+	'a' : sort nodes list by callsign (alphabetic order)  [existing option]
+	'm' : sort nodes list by alias/mnemonic (alphabetic order) [new option]
+	Default (no argument) : sort by quality (decreasing order, unchanged)
+	Usage: ne [a|m]
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, march 31 2026
+
 fpac (4.1.5-rc7)
 
 	* Added up to two digipeater list in Users menu
@@ -9,7 +388,7 @@ fpac (4.1.5-rc7)
 	* messages are sent from different parts of source code to be displayed in syslog files for debuging
 	* tools/remote.c removed (obsolete parallel port control)
 
--- Bernard Pidoux <f6bvp@free.fr>  Wednesday, September
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>
 
 fpac (4.1.4)
 

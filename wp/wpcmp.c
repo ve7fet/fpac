@@ -238,7 +238,8 @@ char *mtime(char *buf, time_t date)
 void get_record(FILE *fptr, unsigned rec, wp_t *wp)
 {
 	fseek(fptr, sizeof(wp_header) + rec * sizeof(wp_t), SEEK_SET);
-	fread(wp, sizeof(wp_t), 1, fptr);
+	if (fread(wp, sizeof(wp_t), 1, fptr) != 1)
+		memset(wp, 0, sizeof(wp_t));
 }
 
 void diff(FILE *fptr1, FILE *fptr2)

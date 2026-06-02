@@ -88,11 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = make_tab$(EXEEXT)
-sbin_PROGRAMS = fpacwpd$(EXEEXT) wpedit$(EXEEXT) wplist$(EXEEXT) \
-	wpstress$(EXEEXT) wpmaint$(EXEEXT) wpserv$(EXEEXT) \
-	wpcmp$(EXEEXT) wpconvert$(EXEEXT)
-subdir = wp
+subdir = lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -105,50 +101,17 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(sbindir)"
-PROGRAMS = $(noinst_PROGRAMS) $(sbin_PROGRAMS)
-am_fpacwpd_OBJECTS = fpacwpd.$(OBJEXT) daemon.$(OBJEXT) db.$(OBJEXT) \
-	db_list.$(OBJEXT) update.$(OBJEXT) hash.$(OBJEXT) \
-	crc.$(OBJEXT) sockevent.$(OBJEXT)
-fpacwpd_OBJECTS = $(am_fpacwpd_OBJECTS)
-fpacwpd_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
-fpacwpd_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
-am_make_tab_OBJECTS = make_tab.$(OBJEXT)
-make_tab_OBJECTS = $(am_make_tab_OBJECTS)
-make_tab_DEPENDENCIES =
-am_wpcmp_OBJECTS = wpcmp.$(OBJEXT) crc.$(OBJEXT)
-wpcmp_OBJECTS = $(am_wpcmp_OBJECTS)
-wpcmp_LDADD = $(LDADD)
-wpcmp_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wpconvert_OBJECTS = wpconvert.$(OBJEXT)
-wpconvert_OBJECTS = $(am_wpconvert_OBJECTS)
-wpconvert_LDADD = $(LDADD)
-wpconvert_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wpedit_OBJECTS = wpedit.$(OBJEXT)
-wpedit_OBJECTS = $(am_wpedit_OBJECTS)
-wpedit_LDADD = $(LDADD)
-wpedit_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wplist_OBJECTS = wplist.$(OBJEXT)
-wplist_OBJECTS = $(am_wplist_OBJECTS)
-wplist_LDADD = $(LDADD)
-wplist_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wpmaint_OBJECTS = wpmaint.$(OBJEXT)
-wpmaint_OBJECTS = $(am_wpmaint_OBJECTS)
-wpmaint_LDADD = $(LDADD)
-wpmaint_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wpserv_OBJECTS = wpserv.$(OBJEXT)
-wpserv_OBJECTS = $(am_wpserv_OBJECTS)
-wpserv_LDADD = $(LDADD)
-wpserv_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_wpstress_OBJECTS = wpstress.$(OBJEXT)
-wpstress_OBJECTS = $(am_wpstress_OBJECTS)
-wpstress_LDADD = $(LDADD)
-wpstress_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
+LIBRARIES = $(noinst_LIBRARIES)
+ARFLAGS = cru
+AM_V_AR = $(am__v_AR_@AM_V@)
+am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
+am__v_AR_0 = @echo "  AR      " $@;
+am__v_AR_1 = 
+libfpac_a_AR = $(AR) $(ARFLAGS)
+libfpac_a_LIBADD =
+am_libfpac_a_OBJECTS = libwp.$(OBJEXT) libcfg.$(OBJEXT) \
+	libmd.$(OBJEXT) md5.$(OBJEXT) procutils.$(OBJEXT)
+libfpac_a_OBJECTS = $(am_libfpac_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -164,17 +127,16 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/crc.Po ./$(DEPDIR)/daemon.Po \
-	./$(DEPDIR)/db.Po ./$(DEPDIR)/db_list.Po \
-	./$(DEPDIR)/fpacwpd.Po ./$(DEPDIR)/hash.Po \
-	./$(DEPDIR)/make_tab.Po ./$(DEPDIR)/sockevent.Po \
-	./$(DEPDIR)/update.Po ./$(DEPDIR)/wpcmp.Po \
-	./$(DEPDIR)/wpconvert.Po ./$(DEPDIR)/wpedit.Po \
-	./$(DEPDIR)/wplist.Po ./$(DEPDIR)/wpmaint.Po \
-	./$(DEPDIR)/wpserv.Po ./$(DEPDIR)/wpstress.Po
+am__depfiles_remade = ./$(DEPDIR)/libcfg.Po ./$(DEPDIR)/libmd.Po \
+	./$(DEPDIR)/libwp.Po ./$(DEPDIR)/md5.Po \
+	./$(DEPDIR)/procutils.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
@@ -191,12 +153,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(fpacwpd_SOURCES) $(make_tab_SOURCES) $(wpcmp_SOURCES) \
-	$(wpconvert_SOURCES) $(wpedit_SOURCES) $(wplist_SOURCES) \
-	$(wpmaint_SOURCES) $(wpserv_SOURCES) $(wpstress_SOURCES)
-DIST_SOURCES = $(fpacwpd_SOURCES) $(make_tab_SOURCES) $(wpcmp_SOURCES) \
-	$(wpconvert_SOURCES) $(wpedit_SOURCES) $(wplist_SOURCES) \
-	$(wpmaint_SOURCES) $(wpserv_SOURCES) $(wpstress_SOURCES)
+SOURCES = $(libfpac_a_SOURCES)
+DIST_SOURCES = $(libfpac_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -347,30 +305,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-LDADD = $(AX25_LIB) ../lib/libfpac.a
-make_tab_SOURCES = make_tab.c
-# make_tab is a standalone build helper (generates crc_tab.h); it must NOT link
-# against ../lib/libfpac.a, otherwise "make dist" fails building BUILT_SOURCES
-# before the library exists. Override the global LDADD for this target only.
-make_tab_LDADD = 
-fpacwpd_SOURCES = fpacwpd.c daemon.c daemon.h db.c db.h db_list.c update.c update.h hash.c hash.h crc.c crc.h sockevent.c sockevent.h wpdefs.h
-wplist_SOURCES = wplist.c
-wpedit_SOURCES = wpedit.c
-wpstress_SOURCES = wpstress.c
-wpmaint_SOURCES = wpmaint.c
-wpserv_SOURCES = wpserv.c
-wpcmp_SOURCES = wpcmp.c crc.c
-wpconvert_SOURCES = wpconvert.c
-BUILT_SOURCES = crc_tab.h
-CLEANFILES = crc_tab.h
+noinst_LIBRARIES = libfpac.a
+libfpac_a_SOURCES = libwp.c libcfg.c libmd.c md5.c md5.h procutils.c ax25compat.h fpac.h global.h wp.h
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
-              -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \
-              -I$(srcdir)/../lib
+              -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
 
 AX25_SYSCONFDIR = @sysconfdir@/ax25/
 AX25_LOCALSTATEDIR = @localstatedir@/ax25/
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -383,9 +325,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu wp/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu wp/Makefile
+	  $(AUTOMAKE) --gnu lib/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -404,99 +346,13 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
-install-sbinPROGRAMS: $(sbin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(sbindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(sbindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
-	    } \
-	; done
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
-uninstall-sbinPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
-
-clean-sbinPROGRAMS:
-	@list='$(sbin_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
-
-fpacwpd$(EXEEXT): $(fpacwpd_OBJECTS) $(fpacwpd_DEPENDENCIES) $(EXTRA_fpacwpd_DEPENDENCIES) 
-	@rm -f fpacwpd$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(fpacwpd_OBJECTS) $(fpacwpd_LDADD) $(LIBS)
-
-make_tab$(EXEEXT): $(make_tab_OBJECTS) $(make_tab_DEPENDENCIES) $(EXTRA_make_tab_DEPENDENCIES) 
-	@rm -f make_tab$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(make_tab_OBJECTS) $(make_tab_LDADD) $(LIBS)
-
-wpcmp$(EXEEXT): $(wpcmp_OBJECTS) $(wpcmp_DEPENDENCIES) $(EXTRA_wpcmp_DEPENDENCIES) 
-	@rm -f wpcmp$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpcmp_OBJECTS) $(wpcmp_LDADD) $(LIBS)
-
-wpconvert$(EXEEXT): $(wpconvert_OBJECTS) $(wpconvert_DEPENDENCIES) $(EXTRA_wpconvert_DEPENDENCIES) 
-	@rm -f wpconvert$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpconvert_OBJECTS) $(wpconvert_LDADD) $(LIBS)
-
-wpedit$(EXEEXT): $(wpedit_OBJECTS) $(wpedit_DEPENDENCIES) $(EXTRA_wpedit_DEPENDENCIES) 
-	@rm -f wpedit$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpedit_OBJECTS) $(wpedit_LDADD) $(LIBS)
-
-wplist$(EXEEXT): $(wplist_OBJECTS) $(wplist_DEPENDENCIES) $(EXTRA_wplist_DEPENDENCIES) 
-	@rm -f wplist$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wplist_OBJECTS) $(wplist_LDADD) $(LIBS)
-
-wpmaint$(EXEEXT): $(wpmaint_OBJECTS) $(wpmaint_DEPENDENCIES) $(EXTRA_wpmaint_DEPENDENCIES) 
-	@rm -f wpmaint$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpmaint_OBJECTS) $(wpmaint_LDADD) $(LIBS)
-
-wpserv$(EXEEXT): $(wpserv_OBJECTS) $(wpserv_DEPENDENCIES) $(EXTRA_wpserv_DEPENDENCIES) 
-	@rm -f wpserv$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpserv_OBJECTS) $(wpserv_LDADD) $(LIBS)
-
-wpstress$(EXEEXT): $(wpstress_OBJECTS) $(wpstress_DEPENDENCIES) $(EXTRA_wpstress_DEPENDENCIES) 
-	@rm -f wpstress$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(wpstress_OBJECTS) $(wpstress_LDADD) $(LIBS)
+libfpac.a: $(libfpac_a_OBJECTS) $(libfpac_a_DEPENDENCIES) $(EXTRA_libfpac_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libfpac.a
+	$(AM_V_AR)$(libfpac_a_AR) libfpac.a $(libfpac_a_OBJECTS) $(libfpac_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libfpac.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -504,22 +360,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crc.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daemon.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/db.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/db_list.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fpacwpd.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_tab.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockevent.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpcmp.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpconvert.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpedit.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wplist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpmaint.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpserv.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpstress.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcfg.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmd.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwp.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/procutils.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -639,17 +484,11 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(PROGRAMS)
+check: check-am
+all-am: Makefile $(LIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(sbindir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
-install-exec: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
+install: install-am
+install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -670,7 +509,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -679,29 +517,17 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	clean-sbinPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/crc.Po
-	-rm -f ./$(DEPDIR)/daemon.Po
-	-rm -f ./$(DEPDIR)/db.Po
-	-rm -f ./$(DEPDIR)/db_list.Po
-	-rm -f ./$(DEPDIR)/fpacwpd.Po
-	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/make_tab.Po
-	-rm -f ./$(DEPDIR)/sockevent.Po
-	-rm -f ./$(DEPDIR)/update.Po
-	-rm -f ./$(DEPDIR)/wpcmp.Po
-	-rm -f ./$(DEPDIR)/wpconvert.Po
-	-rm -f ./$(DEPDIR)/wpedit.Po
-	-rm -f ./$(DEPDIR)/wplist.Po
-	-rm -f ./$(DEPDIR)/wpmaint.Po
-	-rm -f ./$(DEPDIR)/wpserv.Po
-	-rm -f ./$(DEPDIR)/wpstress.Po
+		-rm -f ./$(DEPDIR)/libcfg.Po
+	-rm -f ./$(DEPDIR)/libmd.Po
+	-rm -f ./$(DEPDIR)/libwp.Po
+	-rm -f ./$(DEPDIR)/md5.Po
+	-rm -f ./$(DEPDIR)/procutils.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -724,7 +550,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-sbinPROGRAMS
+install-exec-am:
 
 install-html: install-html-am
 
@@ -747,22 +573,11 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/crc.Po
-	-rm -f ./$(DEPDIR)/daemon.Po
-	-rm -f ./$(DEPDIR)/db.Po
-	-rm -f ./$(DEPDIR)/db_list.Po
-	-rm -f ./$(DEPDIR)/fpacwpd.Po
-	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/make_tab.Po
-	-rm -f ./$(DEPDIR)/sockevent.Po
-	-rm -f ./$(DEPDIR)/update.Po
-	-rm -f ./$(DEPDIR)/wpcmp.Po
-	-rm -f ./$(DEPDIR)/wpconvert.Po
-	-rm -f ./$(DEPDIR)/wpedit.Po
-	-rm -f ./$(DEPDIR)/wplist.Po
-	-rm -f ./$(DEPDIR)/wpmaint.Po
-	-rm -f ./$(DEPDIR)/wpserv.Po
-	-rm -f ./$(DEPDIR)/wpstress.Po
+		-rm -f ./$(DEPDIR)/libcfg.Po
+	-rm -f ./$(DEPDIR)/libmd.Po
+	-rm -f ./$(DEPDIR)/libwp.Po
+	-rm -f ./$(DEPDIR)/md5.Po
+	-rm -f ./$(DEPDIR)/procutils.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -779,30 +594,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-sbinPROGRAMS
+uninstall-am:
 
-.MAKE: all check install install-am install-exec install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-generic clean-libtool clean-noinstPROGRAMS \
-	clean-sbinPROGRAMS cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-sbinPROGRAMS install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-generic clean-libtool clean-noinstLIBRARIES \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-sbinPROGRAMS
+	tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
-
-crc_tab.h:	make_tab
-	./make_tab > crc_tab.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

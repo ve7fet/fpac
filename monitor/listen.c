@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 		if (color)
 			refresh();
 	}
-	read(STDIN_FILENO, buffer, BUFSIZE);
+	{ ssize_t r = read(STDIN_FILENO, buffer, BUFSIZE); (void)r; }
 /* DEBUG F6BVP : wash out buffer */
 		for (i=0; i < BUFSIZE; i++)
 			buffer[i] = 0;

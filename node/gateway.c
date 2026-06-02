@@ -181,23 +181,19 @@ char *get_address(int fd, char *address)
 			while (n)
 			{
 			for (nroute=0; nroute < f->ndigi; nroute++)
-				{		
+				{
 				strtok(n->call, " \t,;");
-	node_msg("\nroute %d - n->call %s mask %d node[nroute] %s\n", nroute, n->call, mask, f->node[nroute] );
 				if (strcasecmp(f->node[nroute], n->call) == 0)
 				{
-	node_msg("dest %s ", f->node[nroute]);
-		/* Only return address of a connected neighbour */ 
+		/* Only return address of a connected neighbour */
 				if (node_is_connected(n->call))
-					{		
-	node_msg(" CONNECTED \n");						
+					{
 					strcpy(retaddr, n->dnic);
 					strcat(retaddr, n->addr);
 					return retaddr;
 					}
-	node_msg("NOT CONNECTED \n");				
 				}
-				}	
+				}
 				n = n->next;
 				}
 			}			
@@ -331,9 +327,6 @@ static int connect_to(char *address[], int family, int escape, char *source)
 	switch (family)
 	{
 	case AF_ROSE:
-// DEBUG F6BVP
-		node_msg("connect_to() source %s destination %s ", cfg.alt_callsign, address[0]);		
-		
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
 			node_msg("already connected to %s", cfg.alt_callsign);
@@ -350,7 +343,6 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		ax25_aton_entry(call, sockaddr.rose.srose_call.ax25_call);
 		addr = rs_get_addr(NULL);
 
-
 		if (addr == NULL)
 		{
 			node_perror("connect_to: no rose address", errno);
@@ -359,14 +351,7 @@ static int connect_to(char *address[], int family, int escape, char *source)
 		}
 		rose_aton(addr, sockaddr.rose.srose_addr.rose_addr);
 		addrlen = sizeof(struct full_sockaddr_rose);
-// DEBUG F6BVP
-		node_msg("Connect_to() not connected to cfg.alt_callsign '%s'", cfg.alt_callsign);
-		node_msg("\tAF_ROSE family");
-		node_msg("\tsource Call %s ", call);
-		node_msg("\tRose address %s ", addr);
-		node_msg("\taddrlen %d", addrlen);
-//		node_msg("\tpath %s", path);
-//
+
 		if (bind(fd, (struct sockaddr *) &sockaddr, addrlen) == -1)
 		{
 			node_perror("connect_to: bind", errno);
@@ -468,22 +453,12 @@ static int connect_to(char *address[], int family, int escape, char *source)
 			node_perror("connect_to: socket", errno);
 			return -1;
 		}
-// DEBUG F6BVP
-		node_msg("\nConnect_to() socket AF_NETROM %d", AF_NETROM);
 		/* Why on earth is this different from ax.25 ????? */
-//		sprintf(path, "%s %s", nr_config_get_addr(NrPort), call);
 		sprintf(path, "%s", nr_config_get_addr(NrPort));
 		ax25_aton(path, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_NETROM;
 		addrlen = sizeof(struct full_sockaddr_ax25);
-// DEBUG F6BVP
-		node_msg("Connect_to() not connected to cfg.alt_callsign '%s'", cfg.alt_callsign);
-		node_msg("\tAF_NETROM family");
-		node_msg("\tsource Call %s ", call);
-		node_msg("\tNrPort %s ", NrPort);
-		node_msg("\taddrlen %d", addrlen);
-		node_msg("\tpath %s", path);
-//
+
 		if (bind(fd, (struct sockaddr *) &sockaddr, addrlen) == -1)
 		{
 			node_perror("connect_to: bind", errno);
@@ -518,13 +493,8 @@ static int connect_to(char *address[], int family, int escape, char *source)
             address[0]=ax25_config_get_name(address[0]);
 FSA*/
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
-/* DEBUG F6BVP */
-                    node_msg("connect_to() Invalid port %s", address[0]);
-//                    return -1;
+                    node_msg("Port AX.25 invalide : %s", address[0]);
                 }
-/* DEBUG F6BVP */
-		node_msg("connect_to() Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);
-/*		fprintf (stderr, "Family = AF_AX25 =%d address[0] ='%s' address[1] ='%s' call ='%s' dest ='%s' cfg.alt_callsign ='%s'\n", family, address[0], address[1], call, dest, cfg.alt_callsign);*/
 		
 		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
 		{
@@ -920,14 +890,15 @@ int do_connect(int argc, char **argv)
 	char *source;
 	wp_t wpt;
 	ax25_address ax25;
-// F6BVP added argument table for default port connect request
 	char **argvp;
+	char **argvp_base = NULL;
 	int default_port = 0;
- 
+	int wp_opened = 0;
+
 	argvp = calloc(10, sizeof(*argvp));
+	argvp_base = argvp;
 	for (n=0 ; n< 3; n++)
 		argvp[n] = calloc(10, sizeof(**argvp));
-//
 	source = NULL;
 
 	/* Delete the "v" or "via" */
@@ -958,7 +929,7 @@ int do_connect(int argc, char **argv)
 		else
 			node_msg
 				("Usage: connect [<port>] <call> [via <call1> ...] [d|s]");
-		return 0;
+		goto done;
 	}
 
 	/* Telnet connection */
@@ -970,6 +941,7 @@ int do_connect(int argc, char **argv)
 	else
 	{
 		wp_open("NODE");
+		wp_opened = 1;
 	/* Check FPAC Aliases */
 
 		if (is_alias(argv[1], &alias))
@@ -983,12 +955,12 @@ int do_connect(int argc, char **argv)
 			if (strcasecmp(argv[1], cfg.alt_callsign) == 0)
 			{
 				node_msg("already connected to %s", cfg.alt_callsign);
-				return 0;
+				goto done;
 			}
  			if (argc < 3)
  			{
 				node_msg("Connect %s. Usage : Connect port callsign",argv[1]);
-				return (0);
+				goto done;
 			}
 			family = AF_AX25;
 			source = "(user port) ";
@@ -1000,8 +972,6 @@ int do_connect(int argc, char **argv)
 			argv[1] = netromcall;
 			family = AF_NETROM;
 			source = "(netrom node) ";
-// DEBUG NETROM CALL
-			node_msg ("netrom call %s argv[1] '%s'", netromcall, argv[1]);
 		}
 
 		/* Check if in FPAC WP */
@@ -1040,8 +1010,7 @@ int do_connect(int argc, char **argv)
 				if (ax25_aton_entry(argv[2], ax25.ax25_call) == -1)
 				{
 					node_msg("invalid AX.25 port callsign - %s", argv[2]);
-					wp_close();
-					return (0);
+					goto done;
 				}
 
 				/* Check if it is a node callsign from wp */
@@ -1069,7 +1038,7 @@ int do_connect(int argc, char **argv)
 			if (flgt == NULL)
 			{
 				node_msg ("Error: No gateway for destination %s", netromcall);
-				return 0;
+				goto done;
 			}
 
 /*			argv[k++] = ax25_config_get_name(flgt->dev); */
@@ -1105,10 +1074,7 @@ int do_connect(int argc, char **argv)
 		}
 		else
 		{
-// DEBUG F6BVP DEFAULTS connect via default port source=user port & AF_AX25 family
-//			if(argc==2) argc = 3;
-			node_msg("do_connect() %d args argv[0]:'%s' argv[1]:'%s'", argc, argv[0], argv[1]);
-
+			/* Fallback : connexion via le port par défaut de la configuration */
 			strcpy(argvp[0], argv[0]);
 			strcpy(argvp[1], cfg.def_port);
 			strcpy(argvp[2], argv[1]);
@@ -1116,16 +1082,9 @@ int do_connect(int argc, char **argv)
 			family = AF_AX25;
 			source = "(user port) ";
 			default_port = 1;
-
-			node_msg("do_connect() %d args argvp[0]:'%s' argvp[1]:'%s' argvp[2]:'%s'", argc, argvp[0], argvp[1], argvp[2]);
-//
-/*
-			node_msg("Connect %s on port ? Port is missing. Usage: Connect <port> <callsign>", argv[1]);
-			wp_close();
-			return (0);
-*/
 		}
-	wp_close();
+		wp_opened = 0;
+		wp_close();
 	}
 
 	if (family == AF_INET && argc > 3)
@@ -1133,7 +1092,6 @@ int do_connect(int argc, char **argv)
 	/* escape = (check_perms(PERM_NOESC, 0L) == 0) ? -1 : EscChar; */
 	escape = 1;
 
-// DEBUG F6BVP CONNECT VIA DEFAULT PORT 
 	if (default_port == 0)
 	{
 		if ((fd = connect_to(++argv, family, escape, source)) == -1)
@@ -1141,7 +1099,7 @@ int do_connect(int argc, char **argv)
 			set_eolmode(User.fd, EOLMODE_TEXT);
 			if (fcntl(User.fd, F_SETFL, 0) == -1)
 				node_perror("do_connect: fcntl - stdin", errno);
-			return 0;
+			goto done;
 		}
 	}
 	else
@@ -1151,10 +1109,9 @@ int do_connect(int argc, char **argv)
 			set_eolmode(User.fd, EOLMODE_TEXT);
 			if (fcntl(User.fd, F_SETFL, 0) == -1)
 				node_perror("do_connect: fcntl - stdin", errno);
-			return 0;
+			goto done;
 		}
 	}
-//
 	if (connstr)
 	{
 		usprintf(fd, "%s\n", connstr);
@@ -1263,11 +1220,22 @@ int do_connect(int argc, char **argv)
 	}
 	else
 		logout("No reconnect");
+
+done:
+	if (wp_opened)
+		wp_close();
+	if (argvp_base)
+	{
+		free(argvp_base[0]);
+		free(argvp_base[1]);
+		free(argvp_base[2]);
+		free(argvp_base);
+	}
 	return 0;
 }
 
 /*
-*  
+*
 * Help for command finger
 *
 USAGE

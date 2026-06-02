@@ -8,10 +8,12 @@ edit = sed \
 
 do_subst:
 	@list='$(pathheader)'; for p in $$list; do \
-	$(edit) $(srcdir)/$$p.in >$$p; \
+	if [ ! -f $$p ] || [ $(srcdir)/$$p.in -nt $$p ]; then \
+		$(edit) $(srcdir)/$$p.in >$$p; \
+	fi; \
 	done
 
-#CLEANFILES = $(pathheader)
+CLEANFILES = $(pathheader)
 
 SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
 
@@ -28,7 +30,10 @@ install-data-hook:
 	@echo " ***  according to your own BBS callsign and sysop name."
 	@echo
 
-EXTRA_DIST = pathnames.h fpac.spec
+distclean-local:
+	-rm -rf autom4te.cache
+
+EXTRA_DIST = pathnames.h.in fpac.spec
 
 ACLOCAL_AMFLAGS = -I m4
 

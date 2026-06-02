@@ -24,6 +24,12 @@
 
 #define BUFLEN 4096
 
+static inline void write_discard(int fd, const void *buf, size_t n)
+{
+	ssize_t r = write(fd, buf, n);
+	(void)r;
+}
+
 void cr2lf(char *str, int len)
 {
 	while (len--)
@@ -149,7 +155,8 @@ int main(int argc, char **argv)
 		break;
 	case AF_UNSPEC:
 		printf("Enter your callsign :");
-		fgets(caller, sizeof(caller)-1, stdin);
+		if (fgets(caller, sizeof(caller)-1, stdin) == NULL)
+			caller[0] = '\0';
 		caller[7] = '\0';
 		break;
 	default:
@@ -219,7 +226,7 @@ int main(int argc, char **argv)
 
 		if (type == AF_UNSPEC)
 			cr2lf(buf, len);
-		write(1, buf, len);
+		write_discard(1, buf, len);
 	}
 
 	first = 1;
@@ -251,7 +258,7 @@ int main(int argc, char **argv)
 				if (strstr(buf, "allsig") || strstr(buf, "login"))
 				{
 					strcat(caller, "\r");
-					write(fd, caller, strlen(caller));
+					write_discard(fd, caller, strlen(caller));
 					first = 0;
 				}
 			}

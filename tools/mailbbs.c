@@ -54,7 +54,11 @@ static int nr_ax25_aton (char *address, struct full_sockaddr_ax25 *addr)
 		fprintf (stderr, "call: NET/ROM not included in the kernel\n");
 		return -1;
 	}
-	fgets (buffer, 100, fp);
+	if (fgets (buffer, 100, fp) == NULL)
+	{
+		fclose(fp);
+		return -1;
+	}
 
 	while (fgets (buffer, 100, fp) != NULL)
 	{
@@ -97,7 +101,7 @@ static int readbbs (int fd, char *buffer, int maxlen, int timeout, int verbose)
 		{
 			if (i == maxlen)
 			{
-				nb = i+1;
+				nb = i;	/* nb == pos: maxlen bytes written, no room for \0 */
 				line = 1;
 			}
 			else if (line == 0)
@@ -147,7 +151,7 @@ static int readbbs (int fd, char *buffer, int maxlen, int timeout, int verbose)
 	
 	if (verbose)
 	{
-	buffer[nb] = '\0';
+	buffer[pos] = '\0';
 	printf ("%s\n", buffer);
 	}
 
@@ -327,8 +331,23 @@ int main (int argc, char **argv)
 		sockaddr.rose.srose_ndigis = 0;
 		if (call == NULL)
 			call = ax25_config_get_addr (NULL);
+		if (call == NULL)
+		{
+			fprintf (stderr, "mailbbs: cannot determine local AX.25 callsign (use -i)\n");
+			close (fd);
+			return (-1);
+		}
 		ax25_aton_entry(call, sockaddr.rose.srose_call.ax25_call);
-		rose_aton(rs_get_addr(NULL), sockaddr.rose.srose_addr.rose_addr);
+		{
+			char *rs_addr = rs_get_addr(NULL);
+			if (rs_addr == NULL)
+			{
+				fprintf (stderr, "mailbbs: cannot determine local ROSE address (ROSE not configured?)\n");
+				close (fd);
+				return (-1);
+			}
+			rose_aton(rs_addr, sockaddr.rose.srose_addr.rose_addr);
+		}
 		addrlen = sizeof(struct full_sockaddr_rose);
 		if (bind (fd, (struct sockaddr *) &sockaddr, addrlen) == -1)
 		{
@@ -389,6 +408,12 @@ int main (int argc, char **argv)
 		
 		if (call == NULL)
 			call = nr_config_get_addr (port);
+		if (call == NULL)
+		{
+			fprintf (stderr, "mailbbs: cannot determine local NET/ROM callsign (use -i)\n");
+			close (fd);
+			return (-1);
+		}
 		ax25_aton (call, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_NETROM;
 		addrlen = sizeof (struct full_sockaddr_ax25);
@@ -424,6 +449,12 @@ int main (int argc, char **argv)
 		}
 		if (call == NULL)
 			call = ax25_config_get_addr (port);
+		if (call == NULL)
+		{
+			fprintf (stderr, "mailbbs: cannot determine local AX.25 callsign (use -i)\n");
+			close (fd);
+			return (-1);
+		}
 		ax25_aton (call, &sockaddr.ax25);
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_AX25;
 		addrlen = sizeof (struct full_sockaddr_ax25);
@@ -465,7 +496,7 @@ int main (int argc, char **argv)
 
 	for (;;)
 	{
-		len = readbbs (fd, buf, sizeof (buf), 300, verbose);
+		len = readbbs (fd, buf, sizeof (buf) - 1, 300, verbose);
 		if (len <= 0)
 		{
 			/* Disconnection or timeout */

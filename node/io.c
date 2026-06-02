@@ -187,11 +187,13 @@ int usflush(int fd)
 	if (iop->opointer == 0)
 		return 0;
 	ret = write(iop->fd, iop->obuf, iop->opointer);
-	if (ret < 0)
+	if (ret < 0) {
+		iop->opointer = 0;	/* reset so next rsendchar doesn't overflow */
 		return -1;
+	}
 	if (ret < iop->opointer) {
 		memmove(iop->obuf, &iop->obuf[ret], iop->opointer - ret);
-		iop->opointer = ret;
+		iop->opointer = iop->opointer - ret;	/* remaining bytes, not bytes written */
 	} else
 		iop->opointer = 0;
 	return 0;
@@ -350,7 +352,9 @@ static int usvprintf(int fd, const char *fmt, va_list args)
 	static char buf[BUFLEN];
 	int len, i;
 
-	len = vsprintf(buf, fmt, args);
+	len = vsnprintf(buf, sizeof(buf), fmt, args);
+	if (len >= (int)sizeof(buf))
+		len = (int)sizeof(buf) - 1;   /* message tronqué mais sans débordement */
 	for (i = 0; i < len; i++)
 		if (usputc(buf[i], fd) == -1)
 			return -1;

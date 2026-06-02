@@ -25,6 +25,7 @@
 #include "ax25compat.h"
 #include "wp.h"
 #include "io.h"
+#include "colors.h"
 #include "sysinfo.h"
 
 // Lets there be color !
@@ -46,9 +47,8 @@ struct cmd *Nodecmds = NULL;
 int wpcheck(void)
 {
 	FILE *fptr;
-	wp_t *wp;
 	wp_header wph;
-	int i, n = 0;
+	int n = 0;
 
 	if (wp_open("NODE")== 0)
 	{
@@ -62,9 +62,9 @@ int wpcheck(void)
 		fptr = fopen(FPACWP, "r");
 		if (fptr != NULL)
 		{
-			i = fread(&wph, sizeof(wph), 1, fptr);
+			if (fread(&wph, sizeof(wph), 1, fptr) == 1)
+				n = wph.nb_record;
 			fclose(fptr);
-		n = wph.nb_record;
 		}
 	}
 	tprintf("FPAC White Pages : %d\n", n);
@@ -72,6 +72,14 @@ int wpcheck(void)
 
 	return (0);
 }
+
+/* prototypes anticipés */
+int do_hrd(int argc, char **argv);
+int do_rs_neigh(int argc, char **argv);
+int do_rs_nodes(int argc, char **argv);
+int do_rose_ckt(int argc, char **argv);
+int do_stat_heure(int argc, char **argv);
+int do_stat_jour(int argc, char **argv);
 
 void init_nodecmds(void)
 {
@@ -87,18 +95,25 @@ void init_nodecmds(void)
 	add_internal_cmd(&Nodecmds, "HOst", 2, 1, do_host);
 	add_internal_cmd(&Nodecmds, "Info", 1, 1, do_help);
 	add_internal_cmd(&Nodecmds, "Links", 1, 1, do_links);
+	add_internal_cmd(&Nodecmds, "HRD", 3, 1, do_hrd);
 	add_internal_cmd(&Nodecmds, "Mheard", 1, 1, do_mheard);
 	add_internal_cmd(&Nodecmds, "NEtrom", 2, 1, do_netrom);
+	add_internal_cmd(&Nodecmds, "ROse",    2, 1, do_rose_ckt);
+	add_internal_cmd(&Nodecmds, "RS_NEigh", 4, 1, do_rs_neigh);
+	add_internal_cmd(&Nodecmds, "RS_NOdes", 4, 1, do_rs_nodes);
 	add_internal_cmd(&Nodecmds, "Nodes", 1, 1, do_rose);
 	add_internal_cmd(&Nodecmds, "PIng", 2, 1, do_ping);
 	add_internal_cmd(&Nodecmds, "Ports", 1, 1, do_ports);
 	add_internal_cmd(&Nodecmds, "Quit", 1, 1, do_bye);
 	add_internal_cmd(&Nodecmds, "Routes", 1, 1, do_routes);
 	add_internal_cmd(&Nodecmds, "Status", 1, 1, do_status);
+	add_internal_cmd(&Nodecmds, "STHeure", 3, 1, do_stat_heure);
+	add_internal_cmd(&Nodecmds, "STJour",  3, 1, do_stat_jour);
 	add_internal_cmd(&Nodecmds, "SYSop", 3, 1, do_sysop);
 	add_internal_cmd(&Nodecmds, "Telnet", 1, 1, do_connect);
 	add_internal_cmd(&Nodecmds, "Users", 1, 1, do_users);
 	add_internal_cmd(&Nodecmds, "Wp", 1, 1, do_wp);
+	add_internal_cmd(&Nodecmds, "MRoutes", 2, 1, do_manage_routes);
 
 	/*
 	   add_internal_cmd(&Nodecmds, "Connect",  1, 1, do_connect);
@@ -154,6 +169,7 @@ void logout(char *reason)
 
 int do_bye(int argc, char **argv)
 {
+	(void)argc; (void)argv;
 	logout("Bye");
 	return 0;					/* Keep gcc happy */
 }
@@ -161,6 +177,7 @@ int do_bye(int argc, char **argv)
 /* Toggle colored menu mode ON or OFF*/
 int do_color(int argc, char **argv)
 {
+	(void)argc; (void)argv;
 	Colored = !Colored;
 	return 0;					/* Keep gcc happy */
 }
@@ -228,6 +245,415 @@ int node_is_connected(char *call)
 	free_proc_rs_neigh(list);
 	return (state);
 }
+
+/* ------------------------------------------------------------------ */
+/* do_hrd : equivalent interne de "mheard -d m" avec couleurs         */
+/* ------------------------------------------------------------------ */
+static char *hrd_types[] = {
+	"SABM", "SABME", "DISC", "UA", "DM",
+	"RR", "RNR", "REJ", "FRMR", "I", "UI", "????"
+};
+#define HRD_NTYPES ((int)(sizeof(hrd_types)/sizeof(hrd_types[0])))
+
+int do_hrd(int argc, char **argv)
+{
+	FILE *fp;
+	struct mheard_struct mh;
+	char *call, *u;
+
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : hrd");
+		return 0;
+	}
+
+	if ((fp = fopen(DATA_MHEARD_FILE, "r")) == NULL)
+	{
+		node_perror(DATA_MHEARD_FILE, errno);
+		return 0;
+	}
+
+	if (Colored)
+		tprintf("%sCallsign   Port    Packets  Type  PIDs%s\n",
+				NodeColors.en_tete, ResetColor);
+	else
+		tprintf("Callsign   Port    Packets  Type  PIDs\n");
+
+	while (fread(&mh, sizeof(struct mheard_struct), 1, fp) == 1)
+	{
+		if (!mh.count)
+			continue;
+		if (mh.type >= (unsigned int)HRD_NTYPES)
+			continue;
+		call = ax25_ntoa(&mh.from_call);
+		u = strstr(call, "-0");
+		if (u != NULL)
+			*u = '\0';
+
+		if (Colored)
+			tprintf("%s%-9s%s  %-5s  %8u %5s",
+					NodeColors.indicatif, call, ResetColor,
+					mh.portname, mh.count, hrd_types[mh.type]);
+		else
+			tprintf("%-9s  %-5s  %8u %5s",
+					call, mh.portname, mh.count, hrd_types[mh.type]);
+
+		if (mh.mode & MHEARD_MODE_ARP)     tprintf(" ARP");
+		if (mh.mode & MHEARD_MODE_FLEXNET) tprintf(" FlexNet");
+		if (mh.mode & MHEARD_MODE_IP_DG)   tprintf(" IP-DG");
+		if (mh.mode & MHEARD_MODE_IP_VC)   tprintf(" IP-VC");
+		if (mh.mode & MHEARD_MODE_NETROM)  tprintf(" NET/ROM");
+		if (mh.mode & MHEARD_MODE_ROSE)    tprintf(" Rose");
+		if (mh.mode & MHEARD_MODE_SEGMENT) tprintf(" Segment");
+		if (mh.mode & MHEARD_MODE_TEXNET)  tprintf(" TexNet");
+		if (mh.mode & MHEARD_MODE_TEXT)    tprintf(" Text");
+		if (mh.mode & MHEARD_MODE_PSATFT)  tprintf(" PacsatFT");
+		if (mh.mode & MHEARD_MODE_PSATPB)  tprintf(" PacsatPB");
+		if (mh.mode & MHEARD_MODE_UNKNOWN) tprintf(" Unknown");
+		tprintf("\n");
+	}
+	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_rose_ckt : equivalent colorisé de "cat /proc/net/rose"          */
+/* ------------------------------------------------------------------ */
+int do_rose_ckt(int argc, char **argv)
+{
+	FILE *fp;
+	char line[256];
+	int first = 1;
+	char dest_addr[16], dest_call[16], src_addr[16], src_call[16];
+	char dev[16], lci[8], neigh_s[8], idle[16];
+	int st, vs, vr, va, t, t1, t2, t3, hb, sndq, rcvq, inode;
+
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : ro");
+		return 0;
+	}
+
+	if ((fp = fopen("/proc/net/rose", "r")) == NULL)
+	{
+		node_perror("/proc/net/rose", errno);
+		return 0;
+	}
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\n")] = '\0';
+
+		if (first)
+		{
+			/* ligne d'en-tete */
+			if (Colored)
+				tprintf("%s%s%s\n", NodeColors.en_tete, line, ResetColor);
+			else
+				tprintf("%s\n", line);
+			first = 0;
+			continue;
+		}
+
+		/* lignes de données */
+		if (sscanf(line,
+				"%15s %15s %15s %15s %15s %7s %7s"
+				" %d %d %d %d %d %d %d %d %d %15s %d %d %d",
+				dest_addr, dest_call, src_addr, src_call,
+				dev, lci, neigh_s,
+				&st, &vs, &vr, &va,
+				&t, &t1, &t2, &t3, &hb,
+				idle, &sndq, &rcvq, &inode) >= 10)
+		{
+			if (Colored)
+			{
+				/* dest_call en vert si pas "*", src_call toujours en vert */
+				if (strcmp(dest_call, "*") != 0)
+					tprintf("%-10s %s%-9s%s %-10s %s%-9s%s"
+							" %-5s %3s %5s %2d %2d %2d %2d"
+							" %3d %3d %3d %3d %3d %8s %5d %5d %d\n",
+							dest_addr,
+							NodeColors.indicatif, dest_call, ResetColor,
+							src_addr,
+							NodeColors.indicatif, src_call, ResetColor,
+							dev, lci, neigh_s, st, vs, vr, va,
+							t, t1, t2, t3, hb, idle, sndq, rcvq, inode);
+				else
+					tprintf("%-10s %-9s %-10s %s%-9s%s"
+							" %-5s %3s %5s %2d %2d %2d %2d"
+							" %3d %3d %3d %3d %3d %8s %5d %5d %d\n",
+							dest_addr, dest_call,
+							src_addr,
+							NodeColors.indicatif, src_call, ResetColor,
+							dev, lci, neigh_s, st, vs, vr, va,
+							t, t1, t2, t3, hb, idle, sndq, rcvq, inode);
+			}
+			else
+				tprintf("%s\n", line);
+		}
+		else
+			tprintf("%s\n", line);
+	}
+	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_rs_neigh : equivalent interne de "cat /proc/net/rose_neigh"     */
+/* ------------------------------------------------------------------ */
+int do_rs_neigh(int argc, char **argv)
+{
+	FILE *fp;
+	char line[256];
+	int first = 1;
+	char addr[16], callsign[16], dev[16], mode[8], restart[8];
+	int count, use, t0, tf;
+
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : rs_neigh");
+		return 0;
+	}
+
+	if ((fp = fopen("/proc/net/rose_neigh", "r")) == NULL)
+	{
+		node_perror("/proc/net/rose_neigh", errno);
+		return 0;
+	}
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\n")] = '\0';
+
+		if (first)
+		{
+			/* ligne d'en-tete */
+			if (Colored)
+				tprintf("%s%s%s\n", NodeColors.en_tete, line, ResetColor);
+			else
+				tprintf("%s\n", line);
+			first = 0;
+			continue;
+		}
+
+		/* lignes de donnees */
+		if (sscanf(line, "%15s %15s %15s %d %d %7s %7s %d %d",
+				   addr, callsign, dev, &count, &use,
+				   mode, restart, &t0, &tf) >= 7)
+		{
+			if (Colored)
+			{
+				const char *rst_color = (strcmp(restart, "yes") == 0)
+					? NodeColors.ind_oui
+					: NodeColors.ind_non;
+				tprintf("%s %s%-9s%s %-4s %5d %3d  %-3s %s%s%s %3d %3d\n",
+						addr,
+						NodeColors.indicatif, callsign, ResetColor,
+						dev, count, use, mode,
+						rst_color, (strcmp(restart, "yes") == 0) ? " yes" : "  no", ResetColor, t0, tf);
+			}
+			else
+				tprintf("%s\n", line);
+		}
+		else
+			tprintf("%s\n", line);
+	}
+	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_rs_nodes : equivalent interne de "cat /proc/net/rose_nodes"     */
+/* ------------------------------------------------------------------ */
+int do_rs_nodes(int argc, char **argv)
+{
+	FILE *fp;
+	char line[256];
+	int first = 1;
+	char address[16], mask[8];
+	int n;
+	unsigned int neigh1, neigh2, neigh3;
+
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : rs_nodes");
+		return 0;
+	}
+
+	if ((fp = fopen("/proc/net/rose_nodes", "r")) == NULL)
+	{
+		node_perror("/proc/net/rose_nodes", errno);
+		return 0;
+	}
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\n")] = '\0';
+
+		if (first)
+		{
+			/* ligne d'en-tete */
+			if (Colored)
+				tprintf("%s%s%s\n", NodeColors.en_tete, line, ResetColor);
+			else
+				tprintf("%s\n", line);
+			first = 0;
+			continue;
+		}
+
+		/* lignes de donnees : address mask n neigh [neigh [neigh]] */
+		neigh1 = neigh2 = neigh3 = 0;
+		int parsed = sscanf(line, "%15s %7s %d %u %u %u",
+							address, mask, &n,
+							&neigh1, &neigh2, &neigh3);
+		if (parsed >= 3)
+		{
+			if (Colored)
+			{
+				tprintf("%s%s%s %s %d",
+						NodeColors.adresse, address, ResetColor,
+						mask, n);
+				if (neigh1) tprintf(" %05u", neigh1);
+				if (neigh2) tprintf(" %05u", neigh2);
+				if (neigh3) tprintf(" %05u", neigh3);
+				tprintf("\n");
+			}
+			else
+				tprintf("%s\n", line);
+		}
+		else
+			tprintf("%s\n", line);
+	}
+	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_stat_file : affiche colorisé un fichier de statistiques FPAC    */
+/* (partagé par do_stat_heure et do_stat_jour)                        */
+/* ------------------------------------------------------------------ */
+static int do_stat_file(const char *filename)
+{
+	FILE *fp;
+	char line[256];
+	int first = 1;
+	char call[16];
+	long data, qual, iframe, rr, rnr, rej, sabm, disc, ua, dm;
+	const char *qual_color;
+
+	if ((fp = fopen(filename, "r")) == NULL)
+	{
+		node_perror((char *)filename, errno);
+		return 0;
+	}
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\n")] = '\0';
+
+		if (first)
+		{
+			/* Ligne de titre */
+			if (Colored)
+				tprintf("%s%s%s\n", NodeColors.en_tete, line, ResetColor);
+			else
+				tprintf("%s\n", line);
+			first = 0;
+			continue;
+		}
+
+		/* Ligne d'en-tête des colonnes */
+		if (strncmp(line, "   Adjacent", 11) == 0)
+		{
+			if (Colored)
+				tprintf("%s%s%s\n", NodeColors.en_tete, line, ResetColor);
+			else
+				tprintf("%s\n", line);
+			continue;
+		}
+
+		/* Ligne "to CALL data qual% iframe rr rnr rej sabm disc ua dm" */
+		if (strncmp(line, "to ", 3) == 0)
+		{
+			int n = sscanf(line, "to %15s %ld %ld%% %ld %ld %ld %ld %ld %ld %ld %ld",
+						   call, &data, &qual, &iframe,
+						   &rr, &rnr, &rej, &sabm, &disc, &ua, &dm);
+			if (n == 11)
+			{
+				if (Colored)
+				{
+					qual_color = (qual == 0) ? NodeColors.qualite_nulle
+					           : (qual <= 50) ? NodeColors.qualite_moyenne
+					           : NodeColors.qualite_bonne;
+					tprintf("to %s%-10s%s %8ld %s%3ld%%%s %7ld %6ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
+							NodeColors.indicatif, call, ResetColor,
+							data,
+							qual_color, qual, ResetColor,
+							iframe, rr, rnr, rej, sabm, disc, ua, dm);
+				}
+				else
+					tprintf("%s\n", line);
+			}
+			else
+				tprintf("%s\n", line);
+			continue;
+		}
+
+		/* Ligne "fm CALL data iframe rr rnr rej sabm disc ua dm" */
+		if (strncmp(line, "fm ", 3) == 0)
+		{
+			int n = sscanf(line, "fm %15s %ld %ld %ld %ld %ld %ld %ld %ld %ld",
+						   call, &data, &iframe,
+						   &rr, &rnr, &rej, &sabm, &disc, &ua, &dm);
+			if (n == 10)
+			{
+				if (Colored)
+					tprintf("fm %s%-10s%s %8ld      %7ld %6ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
+							NodeColors.indicatif, call, ResetColor,
+							data, iframe, rr, rnr, rej, sabm, disc, ua, dm);
+				else
+					tprintf("%s\n", line);
+			}
+			else
+				tprintf("%s\n", line);
+			continue;
+		}
+
+		/* Lignes vides et autres */
+		tprintf("%s\n", line);
+	}
+
+	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_stat_heure : équivalent colorisé de "cat fpacstat.dat"          */
+/* ------------------------------------------------------------------ */
+int do_stat_heure(int argc, char **argv)
+{
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : sth  (statistiques de l'heure en cours)");
+		return 0;
+	}
+	return do_stat_file(STATDAT);
+}
+
+/* ------------------------------------------------------------------ */
+/* do_stat_jour : équivalent colorisé de "cat fpacstat.day"           */
+/* ------------------------------------------------------------------ */
+int do_stat_jour(int argc, char **argv)
+{
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : stj  (statistiques des dernieres 24h)");
+		return 0;
+	}
+	return do_stat_file(STATDAY);
+}
+
+/* ------------------------------------------------------------------ */
 
 struct mheard_list
 {
@@ -372,18 +798,27 @@ int do_mheard(int argc, char **argv)
 		else
 			tprintf("Last %d Heard details for %s on all ports :\n", nb,
 					call);
-		tprintf
-			("Callsign  Port    Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
+		if (Colored)
+			tprintf("%sCallsign  Port    Pkts-rcvd I-Frames S-Frames U-Frames Time ago%s\n",
+					NodeColors.en_tete, ResetColor);
+		else
+			tprintf("Callsign  Port    Pkts-rcvd I-Frames S-Frames U-Frames Time ago\n");
 	}
 	else if (port)
 	{
 		tprintf("Last %d Heard list for port %s :\n", nb, port);
-		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
+		if (Colored)
+			tprintf("%sCallsign  Port    Pkts-rcvd Mode Time ago%s\n", NodeColors.en_tete, ResetColor);
+		else
+			tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 	else
 	{
 		tprintf("Last %d Heard list for all ports :\n", nb);
-		tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
+		if (Colored)
+			tprintf("%sCallsign  Port    Pkts-rcvd Mode Time ago%s\n", NodeColors.en_tete, ResetColor);
+		else
+			tprintf("Callsign  Port    Pkts-rcvd Mode Time ago\n");
 	}
 
 	nb = 0;
@@ -400,8 +835,8 @@ int do_mheard(int argc, char **argv)
 			if (call)
 			{
 				if(Colored)
-				tprintf("%s%-9s %s%-7.7s %-9ld %-8ld %-8ld %-8ld %s\n",
-						F_Yellow,t,ResetColor,
+				tprintf("%s%-9s%s %-7.7s %-9ld %-8ld %-8ld %-8ld %s\n",
+						NodeColors.indicatif, t, ResetColor,
 						list->data.portname, list->data.count,
 						list->data.sframes, list->data.iframes,
 						list->data.uframes, time_ago(ti, NULL));
@@ -431,8 +866,8 @@ int do_mheard(int argc, char **argv)
 				else
 					s = "None";
 				if(Colored)
-				tprintf("%s%-9s %s%-7.7s %-9ld %-4s %s\n",
-						F_Yellow,t,ResetColor,
+				tprintf("%s%-9s%s %-7.7s %-9ld %-4s %s\n",
+						NodeColors.indicatif, t, ResetColor,
 						list->data.portname, list->data.count, s,
 						time_ago(ti, NULL));
 				else
@@ -453,7 +888,7 @@ int do_mheard(int argc, char **argv)
 int do_help(int argc, char **argv)
 {
 	FILE *fp;
-	char fname[80], line[256];
+	char fname[256], line[256];
 	struct cmd *cmdp;
 	int i = 0;
 	int found, len;
@@ -517,23 +952,17 @@ int do_help(int argc, char **argv)
 	}
 	else if (argc == 1)
 	{							/* "help"   */
-		strcat(fname, "Help.hlp");
+		snprintf(fname, sizeof(fname), "%s%s", FPAC_HELP_DIR, "Help.hlp");
 	}
 	else
 	{							/* "help <cmd>" */
-/*int */	found = 0;
-/*		DIR *dir;
-		struct dirent *ent;
-*/
+		found = 0;
 		dir = opendir(FPAC_HELP_DIR);
 		if (dir)
 		{
 			/* Search in the help directory the best matching name */
 			for (;;)
 			{
-/*				int len;
-				char *ptr;
-*/
 				ent = readdir(dir);
 				if (ent == NULL)
 					break;
@@ -548,12 +977,13 @@ int do_help(int argc, char **argv)
 					++ptr;
 				}
 
-				if ((len == 0) || (len < strlen(argv[1])))
+				if ((len == 0) || (len < (int)strlen(argv[1])))
 					len = strlen(argv[1]);
 
 				if (strncasecmp(ent->d_name, argv[1], len) == 0)
 				{
-					strcat(fname, ent->d_name);
+					snprintf(fname, sizeof(fname), "%s%s",
+							 FPAC_HELP_DIR, ent->d_name);
 					found = 1;
 					break;
 				}
@@ -561,7 +991,8 @@ int do_help(int argc, char **argv)
 
 			if (!found)
 			{
-				strcat(fname, "not_found.hlp");
+				snprintf(fname, sizeof(fname), "%s%s",
+						 FPAC_HELP_DIR, "not_found.hlp");
 			}
 
 			closedir(dir);
@@ -586,6 +1017,7 @@ int do_help(int argc, char **argv)
 int do_application(int argc, char **argv)
 {
 	appli_t *al;
+	(void)argc; (void)argv;
 
 	tputs("Applications: \n");
 
@@ -606,6 +1038,7 @@ int do_application(int argc, char **argv)
 int do_alias(int argc, char **argv)
 {
 	alias_t *al;
+	(void)argc; (void)argv;
 
 	tputs("Aliases: \n");
 
@@ -685,17 +1118,21 @@ int do_host(int argc, char **argv)
 int do_ports(int argc, char **argv)
 {
 	char *cp = NULL;
-	int n;
 
 	if (rs_config_get_next(cp) == NULL)
-		n = rs_config_load_ports();
+		(void)rs_config_load_ports();
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
 		node_msg("usage : ports");
 		return (0);
 	}
-	node_msg("Ports:\nPort\tDev\t Description");
+
+	if (Colored)
+		node_msg("Ports:\n%sPort%s\t%sDev%s\t %sDescription%s", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+	else
+		node_msg("Ports:\nPort\tDev\t Description");
+
 	while ((cp = ax25_config_get_next(cp)) != NULL)
 	{
 		tprintf("%-6s\t%-6s\t %s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
@@ -766,9 +1203,19 @@ int do_users(int argc, char **argv)
 		{
 			first = 0;
 			node_msg("Users - AX.25 Level 2 sessions :");
-			tprintf("Port   Callsign     Callsign  Digi 1   Digi 2   AX.25 state  ROSE state  NetRom status");
+			if (Colored)	
+				tprintf("%sPort%s   %sCallsign%s     %sCallsign%s  %sDigi 1%s   %sDigi 2%s   %sAX.25 state%s  %sROSE state%s  %sNetRom status%s", 
+				NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+			else
+				tprintf("Port   Callsign     Callsign  Digi 1   Digi 2   AX.25 state  ROSE state  NetRom status");
 			if (is_sysop())
-				tprintf(" Unack   T1      T3      Retr  Rtt Snd-Q Rcv-Q");
+			{
+				if (Colored)
+					tprintf(" %sUnack%s   %sT1%s      %sT3%s      %sRetr%s  %sRtt%s %sSnd-Q Rcv-Q%s",
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+				else
+					tprintf(" Unack   T1      T3      Retr  Rtt Snd-Q Rcv-Q");
+			}
 			tprintf("\n");
 		}
 
@@ -783,7 +1230,7 @@ int do_users(int argc, char **argv)
 				cp = "All";*/
 	// Print Port, src call, dest call
 			if(Colored)
-				tprintf("%-6s %s%-9s -> %s%-9s %s", cp, F_Green, p->src_addr, F_Green, p->dest_addr, ResetColor);
+				tprintf("%-6s %s%-9s -> %s%-9s%s", cp, NodeColors.indicatif, p->src_addr, NodeColors.indicatif, p->dest_addr, ResetColor);
 			else
 			tprintf("%-6s %-9s -> %-9s", cp, p->src_addr, p->dest_addr);
 
@@ -793,7 +1240,7 @@ int do_users(int argc, char **argv)
 				for (j = 0; j< 18 ; j++)
 					tprintf(" ");
 				if(Colored)
-					tprintf("%s%s%s%s%s\n", ResetColor, F_Green, B_Black, cp, ResetColor);
+					tprintf("%s%s%s%s\n", ResetColor, NodeColors.indicatif, cp, ResetColor);
 				else
 					tprintf(" %s\n",cp);
 			continue;
@@ -823,42 +1270,42 @@ int do_users(int argc, char **argv)
 			case 0:
 				cp = "Disconnected";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_Green, B_Red, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_disconnected, cp, ResetColor);
 				else
 					tprintf(" %s",cp);
 				break;
 			case 1:
 				cp = "Conn pending";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_Yellow, B_Blue, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_conn_pending, cp, ResetColor);
 				else
 					tprintf(" %s",cp);
 				break;
 			case 2:
 				cp = "Disc pending";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_Yellow, B_Magenta, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_disc_pending, cp, ResetColor);
 				else
 					tprintf("---------");
 				break;
 			case 3:
 				cp = "Connected   ";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_Black, B_Green, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_connected, cp, ResetColor);
 				else
 					tprintf(" %s",cp);
 				break;
 			case 4:
 				cp = "Recovery    ";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_Blue, B_Yellow, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_recovery, cp, ResetColor);
 				else
 					tprintf(" %s",cp);
 				break;
 			default:
 				cp = "Unknown     ";
 				if(Colored)
-					tprintf("%s%s%s%s%s", ResetColor, F_White, B_Gray, cp, ResetColor);
+					tprintf("%s%s%s%s", ResetColor, NodeColors.ax25_unknown, cp, ResetColor);
 				else
 					tprintf(" %s",cp);
 				break;
@@ -869,14 +1316,14 @@ int do_users(int argc, char **argv)
 			if(node_is_connected(p->dest_addr)) {
 				if(Colored)
 	//				tprintf("%s %s%sConnected %s", ResetColor, F_DarkRed, B_DarkGreen, ResetColor);
-					tprintf("%s %s%sConnected %s", ResetColor, F_Black, B_Green, ResetColor);
+					tprintf("%s %sConnected %s", ResetColor, NodeColors.rose_connected, ResetColor);
 				else
 					tprintf(" Connected");
 			}
 			else {
 	//if(!node_is_connected(p->dest_addr))
 				if(Colored)
-					tprintf("%s %s%s--------- %s", ResetColor, F_Green, B_Red, ResetColor);
+					tprintf("%s %s--------- %s", ResetColor, NodeColors.rose_idle, ResetColor);
 				else
 					tprintf(" ---------");
 			}
@@ -885,14 +1332,14 @@ int do_users(int argc, char **argv)
 
 			if(netrom_node_is_connected(p->dest_addr)) {
 				if(Colored)
-					tprintf(" %s %s%sConnected%s", ResetColor, F_Black, B_Green, ResetColor);
+					tprintf(" %s %sConnected%s", ResetColor, NodeColors.netrom_connected, ResetColor);
 				else
 					tprintf("   Connected");
 			}
 	//if(!netrom_node_is_connected(p->dest_addr))
 			else {
 				if(Colored)
-					tprintf("%s  %s%s---------%s", ResetColor, F_Yellow, B_Magenta, ResetColor);
+					tprintf("%s  %s---------%s", ResetColor, NodeColors.netrom_idle, ResetColor);
 				else
 					tprintf("   ---------");
 			}
@@ -955,21 +1402,44 @@ int do_users(int argc, char **argv)
 			first = 0;
 			tprintf("\n");
 			node_msg("Users - AX.25 Level 3 sessions :");
-			tprintf
+			if (Colored)	
+				tprintf("%sCallsign%s  %sDNIC addr%s   <-> %sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s    %sAX.25 state%s", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+			else
+				tprintf
 				("Callsign  DNIC addr   <-> Callsign  DNIC addr   LCI Adjacent    AX.25 state");
 			if (is_sysop())
-				tprintf("    Unack Snd-Q Rcv-Q");
+			{
+				if (Colored)
+					tprintf("    %sUnack Snd-Q Rcv-Q%s", NodeColors.en_tete, ResetColor);
+				else
+					tprintf("    Unack Snd-Q Rcv-Q");
+			}
 			tprintf("\n");
 		}
 
 		*neigh = '\0';
 		for (pv = listv; pv != NULL; pv = pv->next)
-			if (rp->neigh == pv->addr)
+			if (rp->neigh == (unsigned int)pv->addr)
 				sprintf(neigh, "(%s)", pv->call);
 
-		tprintf("%-9s %-10s ", rp->src_call, roseaddr(rp->src_addr));
-		tprintf("<-> %-9s %-10s %03X %-11s ",
-				rp->dest_call, roseaddr(rp->dest_addr), rp->lci, neigh);
+		if (Colored)
+		{
+			tprintf("%s%-9s%s %-10s ",
+					NodeColors.indicatif, rp->src_call, ResetColor,
+					roseaddr(rp->src_addr));
+			tprintf("<-> %s%-9s%s %-10s %03X %s%-11s%s ",
+					NodeColors.indicatif, rp->dest_call, ResetColor,
+					roseaddr(rp->dest_addr),
+					rp->lci,
+					NodeColors.indicatif, neigh, ResetColor);
+		}
+		else
+		{
+			tprintf("%-9s %-10s ", rp->src_call, roseaddr(rp->src_addr));
+			tprintf("<-> %-9s %-10s %03X %-11s ",
+					rp->dest_call, roseaddr(rp->dest_addr), rp->lci, neigh);
+		}
+
 		if (!strcmp(rp->dest_addr, "*"))
 		{
 			tprintf("Listening\n");
@@ -978,25 +1448,44 @@ int do_users(int argc, char **argv)
 		switch (rp->st)
 		{
 		case 0:
-			cp = "Disconnected";
+			if (Colored)
+				tprintf("%sDisconnected%s", NodeColors.ax25_disconnected, ResetColor);
+			else
+				cp = "Disconnected";
 			break;
 		case 1:
-			cp = "Conn pending";
+			if (Colored)
+				tprintf("%sConn pending%s", NodeColors.ax25_conn_pending, ResetColor);
+			else
+				cp = "Conn pending";
 			break;
 		case 2:
-			cp = "Disc pending";
+			if (Colored)
+				tprintf("%sDisc pending%s", NodeColors.ax25_disc_pending, ResetColor);
+			else
+				cp = "Disc pending";
 			break;
 		case 3:
-			cp = "Connected   ";
+			if (Colored)
+				tprintf("%sConnected   %s", NodeColors.ax25_connected, ResetColor);
+			else
+				cp = "Connected   ";
 			break;
 		case 4:
-			cp = "Recovery    ";
+			if (Colored)
+				tprintf("%sRecovery    %s", NodeColors.ax25_recovery, ResetColor);
+			else
+				cp = "Recovery    ";
 			break;
 		default:
-			cp = "Unknown     ";
+			if (Colored)
+				tprintf("%sUnknown     %s", NodeColors.ax25_unknown, ResetColor);
+			else
+				cp = "Unknown     ";
 			break;
 		}
-		tprintf("%s", cp);
+		if (!Colored)
+			tprintf("%s", cp);
 		if (is_sysop())
 		{
 			tprintf("   %02d   %5d %5d",
@@ -1037,23 +1526,43 @@ int do_users(int argc, char **argv)
 			first = 0;
 			tprintf("\n");
 			node_msg("Users - AX.25 Level 3 transits :");
-			tprintf
+			if (Colored)	
+				tprintf("%sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s   <-> %sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s\n", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+			else
+				tprintf
 				("Callsign  DNIC addr   LCI Adjacent   <-> Callsign  DNIC addr   LCI Adjacent\n");
 		}
 
 		*nei1 = '\0';
 		for (pv = listv; pv != NULL; pv = pv->next)
-			if (tp->neigh1 == pv->addr)
+			if (tp->neigh1 == (unsigned int)pv->addr)
 				sprintf(nei1, "(%s)", pv->call);
-		tprintf("%-9s %-10s %03X %-11s",
-				tp->call1, roseaddr(tp->address1), tp->lci1, nei1);
 
 		*nei2 = '\0';
 		for (pv = listv; pv != NULL; pv = pv->next)
-			if (tp->neigh2 == pv->addr)
+			if (tp->neigh2 == (unsigned int)pv->addr)
 				sprintf(nei2, "(%s)", pv->call);
-		tprintf("<-> %-9s %-10s %03X %s\n",
-				tp->call2, roseaddr(tp->address2), tp->lci2, nei2);
+
+		if (Colored)
+		{
+			tprintf("%s%-9s%s %-10s %03X %s%-11s%s",
+					NodeColors.indicatif, tp->call1, ResetColor,
+					roseaddr(tp->address1),
+					tp->lci1,
+					NodeColors.indicatif, nei1, ResetColor);
+			tprintf("<-> %s%-9s%s %-10s %03X %s%s%s\n",
+					NodeColors.indicatif, tp->call2, ResetColor,
+					roseaddr(tp->address2),
+					tp->lci2,
+					NodeColors.indicatif, nei2, ResetColor);
+		}
+		else
+		{
+			tprintf("%-9s %-10s %03X %-11s",
+					tp->call1, roseaddr(tp->address1), tp->lci1, nei1);
+			tprintf("<-> %-9s %-10s %03X %s\n",
+					tp->call2, roseaddr(tp->address2), tp->lci2, nei2);
+		}
 
 	}
 	free_proc_rs_routes(tlist);
@@ -1070,8 +1579,7 @@ int do_manage_routes(int argc, char **argv)
 	int action;
 	char nodeaddr[11];
 	struct rose_route_struct rs_node;
-	struct proc_rs_nodes *pn, *listn;
-	struct proc_rs_neigh *pv, *listv;
+	struct proc_rs_nodes *listn;
 
 	/* Check for SYSOP rights */
 	if (!is_sysop())
@@ -1108,7 +1616,7 @@ int do_manage_routes(int argc, char **argv)
 // pour le masque adresse
 	len = strlen(argv[2]);
 
-	if ((len < 4) || (len > 10) || (strspn(argv[2], "0123456789") != len))
+	if ((len < 4) || (len > 10) || (strspn(argv[2], "0123456789") != (size_t)len))
 	{
 		node_msg("routes : address error (4 to 10 digits)");
 		return 0;
@@ -1142,7 +1650,7 @@ int do_manage_routes(int argc, char **argv)
 	
 	node_msg("do_manage_routes: address %s callsign %s", nodeaddr, argv[3]);
 
-	if (ax25_aton_entry(argv[3], listv->call) != 0)
+	if (ax25_aton_entry(argv[3], rs_node.neighbour.ax25_call) != 0)
 	{
 		node_msg("invalid callsign %s", argv[3]);
 		return (0);
@@ -1198,7 +1706,6 @@ int do_routes(int argc, char **argv)
 /*	struct proc_ax25 *list;*/
 	int i;
 	int first = 1;
-	int first_node = 1;
 	int loopback = -1;
 	char stradd[11];
 	char *addr = NULL;
@@ -1225,7 +1732,7 @@ int do_routes(int argc, char **argv)
 			return do_manage_routes(argc, argv);
 
 		if (((len != 4) && (len != 6) && (len != 10))
-			|| (strspn(argv[1], "0123456789") != len))
+			|| (strspn(argv[1], "0123456789") != (size_t)len))
 		{
 			node_msg("routes : fpac dnic/address error");
 			return (0);
@@ -1241,11 +1748,18 @@ int do_routes(int argc, char **argv)
 	if (cfg.cover)
 	{
 		cover_t *cl;
-		tprintf("Coverage\n");
+		if (Colored)
+			tprintf("%sCoverage%s\n", NodeColors.en_tete, ResetColor);
+		else
+			tprintf("Coverage\n");
 		for (i = 0, cl = cfg.cover; cl; cl = cl->next)
 		{
-			tprintf("%s,%s %c", cfg.dnic, cl->addr,
-					((i + 1) % 4) ? ' ' : '\n');
+			if (Colored)
+				tprintf("%s%s,%s%s %c", NodeColors.adresse, cfg.dnic, cl->addr, ResetColor,
+						((i + 1) % 4) ? ' ' : '\n');
+			else
+				tprintf("%s,%s %c", cfg.dnic, cl->addr,
+						((i + 1) % 4) ? ' ' : '\n');
 			++i;
 		}
 		if ((i % 4) != 0)
@@ -1257,14 +1771,23 @@ int do_routes(int argc, char **argv)
 	if (cfg.addrp)
 	{
 		addrp_t *al;
-		node_msg("Address      Port    Description");
+		if (Colored)
+			node_msg("%sAddress      Port    Description%s", NodeColors.en_tete, ResetColor);
+		else
+			node_msg("Address      Port    Description");
 		for (al = cfg.addrp; al; al = al->next)
 		{
-			tprintf("%s,%s  %-6s  %s\n",
-					cfg.dnic,
-					al->addr,
-					(al->port[0]) ? al->port : "?",
-					(al->port[0]) ? ax25_config_get_desc(al->port) : "None");
+			if (Colored)
+				tprintf("%s%s,%s%s  %-6s  %s\n",
+						NodeColors.adresse, cfg.dnic, al->addr, ResetColor,
+						(al->port[0]) ? al->port : "?",
+						(al->port[0]) ? ax25_config_get_desc(al->port) : "None");
+			else
+				tprintf("%s,%s  %-6s  %s\n",
+						cfg.dnic,
+						al->addr,
+						(al->port[0]) ? al->port : "?",
+						(al->port[0]) ? ax25_config_get_desc(al->port) : "None");
 		}
 		tprintf("\n");
 	}
@@ -1303,7 +1826,7 @@ int do_routes(int argc, char **argv)
 
 	for (pn = listn; pn != NULL; pn = pn->next)
 	{
-		if (pn->neigh1 == loopback)
+		if (pn->neigh1 == (unsigned int)loopback)
 			continue;
 
 		if ((addr) && (strncmp(addr, pn->address, pn->mask) != 0))
@@ -1314,7 +1837,10 @@ int do_routes(int argc, char **argv)
 
 		if (first)
 		{
-			node_msg("ROSE routes :\nDNIC Address Primary   Route  | 1st Alt   Route  | 2nd Alt   Route  |");
+			if (Colored)
+				node_msg("ROSE routes :\n%sDNIC Address%s %sPrimary   Route%s  | %s1st Alt   Route%s  | %s2nd Alt   Route%s  |", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+			else
+				node_msg("ROSE routes :\nDNIC Address Primary   Route  | 1st Alt   Route  | 2nd Alt   Route  |");
 			first = 0;
 		}
 
@@ -1332,23 +1858,23 @@ int do_routes(int argc, char **argv)
 		tprintf("%s ", roseaddr(pn->address));
 		for (pv = listv; pv != NULL; pv = pv->next)
 		{
-			if (pn->neigh1 == pv->addr)
+			if (pn->neigh1 == (unsigned int)pv->addr)
 			{
 				if(Colored) 
-					tprintf("%s %-9s%s", F_Green, pv->call, ResetColor);
+					tprintf("%s %-9s%s", NodeColors.indicatif, pv->call, ResetColor);
 				else
 					tprintf(" %-9s", pv->call);
 				if (!strcmp("yes",pv->restart)) {
 					if(Colored) 
 //						tprintf("%s%s Opened %s|",F_DarkRed,B_DarkGreen,ResetColor);
-						tprintf("%s%s Opened %s|",F_Black,B_Green,ResetColor);
+						tprintf("%s Opened %s|", NodeColors.ind_oui, ResetColor);
 					else
 						tprintf(" Opened |");
 				}
 				else {
 					if(Colored)
 //						tprintf("%s%s Closed %s|",F_DarkGreen,B_DarkRed,ResetColor);
-						tprintf("%s%s Closed %s|",F_Black,B_Red,ResetColor);
+						tprintf("%s Closed %s|", NodeColors.ind_non, ResetColor);
 					else
 						tprintf(" Closed |");
 				}
@@ -1356,23 +1882,23 @@ int do_routes(int argc, char **argv)
 		}
 		for (pv = listv; pv != NULL; pv = pv->next)
 		{
-			if (pn->neigh2 == pv->addr)
+			if (pn->neigh2 == (unsigned int)pv->addr)
 			{
 				if(Colored) 
-					tprintf("%s %-9s%s", F_Green, pv->call, ResetColor);
+					tprintf("%s %-9s%s", NodeColors.indicatif, pv->call, ResetColor);
 				else
 					tprintf(" %-9s", pv->call);
 				if (!strcmp("yes",pv->restart)) {
 					if(Colored)
 //						tprintf("%s%s Opened %s|",F_DarkRed,B_DarkGreen,ResetColor);
-						tprintf("%s%s Opened %s|",F_Black,B_Green,ResetColor);
+						tprintf("%s Opened %s|", NodeColors.ind_oui, ResetColor);
 					else
 						tprintf(" Opened |");
 				}
 				else {
 					if(Colored) 
 //						tprintf("%s%s Closed %s|",F_DarkGreen,B_DarkRed,ResetColor);
-						tprintf("%s%s Closed %s|",F_Black,B_Red,ResetColor);
+						tprintf("%s Closed %s|", NodeColors.ind_non, ResetColor);
 					else
 						tprintf(" Closed |");
 				}
@@ -1380,23 +1906,23 @@ int do_routes(int argc, char **argv)
 		}
 		for (pv = listv; pv != NULL; pv = pv->next)
 		{
-			if (pn->neigh3 == pv->addr)
+			if (pn->neigh3 == (unsigned int)pv->addr)
 			{
 				if(Colored) 
-					tprintf("%s %-9s%s", F_Green, pv->call, ResetColor);
+					tprintf("%s %-9s%s", NodeColors.indicatif, pv->call, ResetColor);
 				else
 					tprintf(" %-9s", pv->call);
 				if (!strcmp("yes",pv->restart)) {
 					if(Colored) 
 //						tprintf("%s%s Closed %s|",F_DarkGreen,B_DarkRed,ResetColor);
-						tprintf("%s%s Opened %s|",F_Black,B_Green,ResetColor);
+						tprintf("%s Opened %s|", NodeColors.ind_oui, ResetColor);
 					else
 						tprintf(" Opened |");
 				}
 				else {
 					if(Colored) 
 //						tprintf("%s%s Closed %s|",F_DarkGreen,B_DarkRed,ResetColor);
-						tprintf("%s%s Closed %s|",F_Black,B_Red,ResetColor);
+						tprintf("%s Closed %s|", NodeColors.ind_non, ResetColor);
 					else
 						tprintf(" Closed |");
 				}
@@ -1545,12 +2071,11 @@ int do_manage_links(int argc, char **argv)
 
 int do_links(int argc, char **argv)
 {
-	struct proc_rs_neigh *np, *nlist;
-	struct proc_nr *nr, *nrlist;
+	struct proc_rs_neigh *nlist;
+	struct proc_nr *nrlist;
 	struct proc_ax25 *p, *list;
 	char *cp = NULL;
 	char *pdev= NULL;
-	int n;
 
 	if (argc > 1)
 	{
@@ -1578,60 +2103,66 @@ int do_links(int argc, char **argv)
 	}
 
 	if (rs_config_get_next(cp) == NULL)
-		n = rs_config_load_ports();
+		(void)rs_config_load_ports();
 	list = read_proc_ax25();
-
-	node_msg("Adjacent Nodes Links:\nCallsign  Status       Dev    Iface  Port");
-
+	if (Colored)
+		node_msg("Adjacent Nodes Links:\n%sCallsign%s  %sStatus%s       %sDev%s    %sIface%s  %sPort%s", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+	else
+		node_msg("Adjacent Nodes Links:\nCallsign  Status       Dev    Iface  Port");
 	/* "nodes" */
 	for (p = list; p != NULL; p = p->next)
 	{
 		if (wp_check_call(p->dest_addr) !=0)
 			continue;
 
+		const char *state_color;
 		switch (p->st)
 		{
 		case 0:
 			cp = "Disconnected";
+			state_color = NodeColors.ax25_disconnected;
 			break;
 		case 1:
 			cp = "Conn pending";
+			state_color = NodeColors.ax25_conn_pending;
 			break;
 		case 2:
 			cp = "Disc pending";
+			state_color = NodeColors.ax25_disc_pending;
 			break;
 		case 3:
 			cp = "Connected   ";
+			state_color = NodeColors.ax25_connected;
 			break;
 		case 4:
 			cp = "Recovery    ";
+			state_color = NodeColors.ax25_recovery;
 			break;
 		default:
 			cp = "Unknown     ";
+			state_color = NodeColors.ax25_unknown;
 			break;
 		}
-		if (pdev = ax25_config_get_name(p->dev)) {
+		if ((pdev = ax25_config_get_name(p->dev)) != NULL) {
 
 		if(Colored) {
 
 		if (netrom_node_is_connected(p->dest_addr) && (p->st > 0))
-			tprintf("%s%-9s %s%s%s%-12s%s %-6s %-6s %-6s\n",
-					F_Yellow,
+			tprintf("%s%-9s%s %s%-12s%s %-6s %-6s %-6s\n",
+					NodeColors.indicatif,
 					p->dest_addr, ResetColor,
-//					F_DarkRed, B_DarkGreen,
-					F_Black, B_Green,
-					cp,ResetColor,
+					state_color,
+					cp, ResetColor,
 					nr_config_get_dev(nr_config_get_name(p->dest_addr)),
 					p->dev,
 					ax25_config_get_name(p->dev)
 					);
 		if (node_is_connected(p->dest_addr))
-			tprintf("%s%-9s %s%s%s%-12s%s %-6s %-6s %-6s\n",
-					F_Yellow,
+			tprintf("%s%-9s%s %s%-12s%s %-6s %-6s %-6s\n",
+					NodeColors.indicatif,
 					p->dest_addr, ResetColor,
-//					F_DarkRed, B_DarkGreen,
-					F_Black, B_Green,
-					cp,ResetColor,
+					state_color,
+					cp, ResetColor,
 					rs_config_get_dev(rs_config_get_name(p->dest_addr)),
 					p->dev,
 					ax25_config_get_name(p->dev)
@@ -1666,66 +2197,69 @@ int do_links(int argc, char **argv)
 	return 0;
 }
 
-struct proc_nr_nodes *sort_proc_nr_nodes(struct proc_nr_nodes *list, int alphabetic_order) 
+/* Comparateurs pour qsort */
+static int cmp_alpha(const void *a, const void *b)
 {
-	struct proc_nr_nodes *p, *prec;
-
-	if (list)
-	{
-		prec = NULL;
-		/* Sort the list by decreasing quality or alphabetic callsign order */
-		for (p = list; p->next;)
-		{
-			if (alphabetic_order)
-			{
-				if (strcmp(p->next->call,  p->call) <= 0)
-				{	
-				/* swap current and next */
-				if (prec)
-				{
-					prec->next = p->next;
-					p->next = prec->next->next;
-					prec->next->next = p;
-				}
-				else
-				{
-					list = p->next;
-					p->next = list->next;
-					list->next = p;
-				}
-				p = list;
-				prec = NULL;
-				continue;
-				}
-			}
-			else
-			{
-				if (p->next->qual1 > p->qual1)
-				{
-				/* swap current and next */
-				if (prec)
-				{
-					prec->next = p->next;
-					p->next = prec->next->next;
-					prec->next->next = p;
-				}
-				else
-				{
-					list = p->next;
-					p->next = list->next;
-					list->next = p;
-				}
-				p = list;
-				prec = NULL;
-				continue;
-				}
-			}
-			prec = p;
-			p = p->next;
-		}
-	}
-	return list;
+    const struct proc_nr_nodes *na = *(const struct proc_nr_nodes **)a;
+    const struct proc_nr_nodes *nb = *(const struct proc_nr_nodes **)b;
+    return strcmp(na->call, nb->call);
 }
+
+static int cmp_mnemonic(const void *a, const void *b)
+{
+    const struct proc_nr_nodes *na = *(const struct proc_nr_nodes **)a;
+    const struct proc_nr_nodes *nb = *(const struct proc_nr_nodes **)b;
+    return strcmp(na->alias, nb->alias);
+}
+
+static int cmp_qual(const void *a, const void *b)
+{
+    const struct proc_nr_nodes *na = *(const struct proc_nr_nodes **)a;
+    const struct proc_nr_nodes *nb = *(const struct proc_nr_nodes **)b;
+    if (nb->qual1 > na->qual1) return  1;
+    if (nb->qual1 < na->qual1) return -1;
+    return 0;
+}
+
+/* sort_order : 'a' = callsign alphabétique
+**              'm' = alias alphabétique
+**              autre = qualité décroissante
+*/
+struct proc_nr_nodes *sort_proc_nr_nodes(struct proc_nr_nodes *list, char sort_order)
+{
+    if (!list || !list->next)
+        return list;
+
+    int n = 0;
+    struct proc_nr_nodes *p;
+    for (p = list; p; p = p->next)
+        n++;
+
+    struct proc_nr_nodes **arr = malloc(n * sizeof(*arr));
+    if (!arr)
+        return list;
+
+    int i = 0;
+    for (p = list; p; p = p->next)
+        arr[i++] = p;
+
+    int (*cmp)(const void *, const void *);
+    switch (sort_order) {
+        case 'a': cmp = cmp_alpha;    break;
+        case 'm': cmp = cmp_mnemonic; break;
+        default:  cmp = cmp_qual;     break;
+    }
+    qsort(arr, n, sizeof(*arr), cmp);
+
+    for (i = 0; i < n - 1; i++)
+        arr[i]->next = arr[i + 1];
+    arr[n - 1]->next = NULL;
+
+    list = arr[0];
+    free(arr);
+    return list;
+}
+
 
 /*
 static int rose_sort(const void *a, const void *b)
@@ -1757,15 +2291,29 @@ int do_rose(int argc, char **argv)
 	if (argc == 1)
 	{
 		node_msg("FPAC Nodes:");
-		tprintf ("Callsign  DNIC addr    Callsign  DNIC addr    Callsign  DNIC addr\n");
+		if (Colored)
+			node_msg("%sCallsign%s  %sDNIC addr%s    %sCallsign%s  %sDNIC addr%s    %sCallsign%s  %sDNIC addr%s",
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+		else
+			tprintf ("Callsign  DNIC addr    Callsign  DNIC addr    Callsign  DNIC addr\n");
 		if (wp_get_list(&wp, &nb, WP_NODE_FLAG, "*") != -1)
 		{
 			for (i = 0; i < nb; i++)
 			{
-				tprintf("%9.9s %s %c",
-						ax25_ntoa(&wp[i].address.srose_call),
-						fpac2asc(&wp[i].address.srose_addr),
-						((i + 1) % 3) ? ' ' : '\n');
+				if (Colored)
+					tprintf("%s%9.9s%s %s %c",
+							NodeColors.indicatif,
+							ax25_ntoa(&wp[i].address.srose_call),
+							ResetColor,
+							fpac2asc(&wp[i].address.srose_addr),
+							((i + 1) % 3) ? ' ' : '\n');
+				else
+					tprintf("%9.9s %s %c",
+							ax25_ntoa(&wp[i].address.srose_call),
+							fpac2asc(&wp[i].address.srose_addr),
+							((i + 1) % 3) ? ' ' : '\n');
 			}
 			if ((i % 3) != 0)
 				tprintf("\n");
@@ -1791,8 +2339,14 @@ int do_rose(int argc, char **argv)
 				addr = fpac2asc(&wp[i].address.srose_addr);
 				country = dnic2des(addr);
 
-				tprintf("%9.9s  %s  %3s  %s  %s\n", call, addr,	
-						(country) ? country : "", wp[i].locator, wp[i].city);
+				if (Colored)
+					tprintf("%s%9.9s%s  %s  %3s  %s  %s\n",
+							NodeColors.indicatif, call, ResetColor,
+							addr,
+							(country) ? country : "", wp[i].locator, wp[i].city);
+				else
+					tprintf("%9.9s  %s  %3s  %s  %s\n", call, addr,
+							(country) ? country : "", wp[i].locator, wp[i].city);
 				ret = 0;
 			}
 		}
@@ -1822,9 +2376,16 @@ int do_rose(int argc, char **argv)
 					first = 0;
 				}
 
-				tprintf("%9.9s  %s  %3s  %s  %s\n",
-						ax25_ntoa(&wpu.address.srose_call), addr,
-						(country) ? country : "", wpu.locator, wpu.city);
+				if (Colored)
+					tprintf("%s%9.9s%s  %s  %3s  %s  %s\n",
+							NodeColors.indicatif,
+							ax25_ntoa(&wpu.address.srose_call), ResetColor,
+							addr,
+							(country) ? country : "", wpu.locator, wpu.city);
+				else
+					tprintf("%9.9s  %s  %3s  %s  %s\n",
+							ax25_ntoa(&wpu.address.srose_call), addr,
+							(country) ? country : "", wpu.locator, wpu.city);
 				*argv[i] = '\0';
 				ret = 0;
 			}
@@ -1847,10 +2408,15 @@ int do_rose(int argc, char **argv)
 				addr = fpac2asc(&wp[i].address.srose_addr);
 				country = dnic2des(addr);
 
-				tprintf("%9.9s  %s  %3s  %s  %s\n",
-					call,
-					addr,
-					(country) ? country : "", wp[i].locator, wp[i].city);
+				if (Colored)
+					tprintf("%s%9.9s%s  %s  %3s  %s  %s\n",
+							NodeColors.indicatif, call, ResetColor,
+							addr,
+							(country) ? country : "", wp[i].locator, wp[i].city);
+				else
+					tprintf("%9.9s  %s  %3s  %s  %s\n",
+							call, addr,
+							(country) ? country : "", wp[i].locator, wp[i].city);
 				ret = 0;
 			}
 		}
@@ -1869,13 +2435,12 @@ int do_netrom(int argc, char **argv)
 	struct proc_nr_nodes *p, *list;
 	struct proc_nr_neigh *np, *nlist;
 	int i = 0;
-	int a = 0;
+	char sort_order = 0;   /* 0 = qualité, 'a' = callsign, 'm' = alias mnemonic */
 	int first;
 	int fpac;
-
-	if ((argc > 2) && (*argv[1] == '?') && (strlen(argv[1]) == 1))
+	if ((argc > 1) && (*argv[1] == '?') && (strlen(argv[1]) == 1))
 	{
-		node_msg("usage : nodes [alias|callsign]");
+		node_msg("usage : ne (<a> call order <m> alias order)");
 		return (0);
 	}
 	
@@ -1888,26 +2453,71 @@ int do_netrom(int argc, char **argv)
 			node_msg("No node");
 		return 0;
 	}
-	/* F6BVP alphabetic call order option */
-	if ((argc == 2) && (*argv[1] == 'a'))
+	/* F6BVP sort order option : 'a' = callsign, 'm' = alias mnemonic */
+	if (argc == 2)
 	{
-		argc--;
-		a = 1;
+		if (*argv[1] == 'a' || *argv[1] == 'm')
+		{
+			sort_order = *argv[1];
+			argc--;
+		}
 	}
-	list = sort_proc_nr_nodes(list,a);
-
+	list = sort_proc_nr_nodes(list, sort_order);
 	/* "nodes" */
 	if (argc == 1)
 	{
 		if (fpac)
 			tprintf("\n");
 		node_msg("NetRom Nodes:");
-		node_msg(" Alias:Callsign Qual.   Alias:Callsign Qual.   Alias:Callsign Qual.");
+		if (Colored)
+			node_msg(" %sAlias:Callsign Qual.%s   %sAlias:Callsign Qual.%s   %sAlias:Callsign Qual.%s",
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor);
+		else
+			node_msg(" Alias:Callsign Qual.   Alias:Callsign Qual.   Alias:Callsign Qual.");
 		for (p = list; p != NULL; p = p->next)
 		{
-			tprintf("%-16.16s(%-3d) %c",
-					print_node(p->alias, p->call), p->qual1,
-					((i + 1) % 3) ? ' ' : '\n');
+			char sep = ((i + 1) % 3) ? ' ' : '\n';
+			if (Colored)
+			{
+				if (sort_order == 'a')
+				{
+					/* tri callsign : callsign en vert */
+					tprintf("%6s%c%s%-9s%s(%-3d) %c",
+							!strcmp(p->alias, "*") ? "" : p->alias,
+							!strcmp(p->alias, "*") ? ' ' : ':',
+							NodeColors.indicatif, p->call, ResetColor,
+							p->qual1, sep);
+				}
+				else if (sort_order == 'm')
+				{
+					/* tri alias : alias en vert */
+					if (!strcmp(p->alias, "*"))
+						tprintf("       %-9s(%-3d) %c",
+								p->call, p->qual1, sep);
+					else
+						tprintf("%s%6s%s:%-9s(%-3d) %c",
+								NodeColors.indicatif, p->alias, ResetColor,
+								p->call, p->qual1, sep);
+				}
+				else
+				{
+					/* tri qualité (défaut) : qualité selon seuil seulement */
+					const char *qcol = (p->qual1 == 0)  ? NodeColors.qualite_nulle
+					                 : (p->qual1 <= 50) ? NodeColors.qualite_moyenne
+					                 :                    NodeColors.qualite_bonne;
+					tprintf("%-16.16s(%s%-3d%s) %c",
+							print_node(p->alias, p->call),
+							qcol, p->qual1, ResetColor,
+							sep);
+				}
+			}
+			else
+			{
+				tprintf("%-16.16s(%-3d) %c",
+						print_node(p->alias, p->call), p->qual1, sep);
+			}
 			++i;
 		}
 		if ((i % 3) != 0)
@@ -1915,7 +2525,6 @@ int do_netrom(int argc, char **argv)
 		free_proc_nr_nodes(list);
 		return 0;
 	}
-
 	if ((nlist = read_proc_nr_neigh()) == NULL)
 	{
 		if (!fpac)
@@ -1923,53 +2532,97 @@ int do_netrom(int argc, char **argv)
 		free_proc_nr_nodes(list);
 		return 0;
 	}
-
 	/* "nodes *" */
 	if (*argv[1] == '*')
 	{
 		if (fpac)
 			tprintf("\n");
 		node_msg("NetRom Nodes:");
-		tprintf("Node              Quality Obsolescence Port   Neighbour\n");
+		if (Colored)
+			tprintf("%sNode             %s  %sQuality%s %sObsolescence%s %sPort  %s %sNeighbour%s\n",
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor);
+		else
+			tprintf("Node              Quality Obsolescence Port   Neighbour\n");
 		for (p = list; p != NULL; p = p->next)
 		{
-			tprintf("%-16.16s  ", print_node(p->alias, p->call));
-		
+			if (Colored)
+				tprintf("%s%-16.16s%s  ", NodeColors.indicatif,
+						print_node(p->alias, p->call), ResetColor);
+			else
+				tprintf("%-16.16s  ", print_node(p->alias, p->call));
+
 			if (p->n == 0)		/* local node */
-				tprintf("%-7d %-12d\n",
-						p->qual1, p->obs1);
-			else	
+			{
+				const char *qcol = Colored
+					? ((p->qual1 == 0)  ? NodeColors.qualite_nulle
+					 : (p->qual1 <= 50) ? NodeColors.qualite_moyenne
+					 :                    NodeColors.qualite_bonne)
+					: "";
+				tprintf("%s%-7d%s %-12d\n",
+						qcol, p->qual1, Colored ? ResetColor : "",
+						p->obs1);
+			}
+			else
 			if ((np = find_neigh(p->addr1, nlist)) != NULL)
 			{
-				tprintf("%-7d %-12d %-6s %s\n",
-						p->qual1, p->obs1,
-						ax25_config_get_name(np->dev), np->call);
+				const char *qcol = Colored
+					? ((p->qual1 == 0)  ? NodeColors.qualite_nulle
+					 : (p->qual1 <= 50) ? NodeColors.qualite_moyenne
+					 :                    NodeColors.qualite_bonne)
+					: "";
+				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
+						qcol, p->qual1, Colored ? ResetColor : "",
+						p->obs1,
+						ax25_config_get_name(np->dev),
+						Colored ? NodeColors.indicatif : "",
+						np->call,
+						Colored ? ResetColor : "");
 			}
 			if (p->n > 1 && (np = find_neigh(p->addr2, nlist)) != NULL)
 			{
+				const char *qcol = Colored
+					? ((p->qual2 == 0)  ? NodeColors.qualite_nulle
+					 : (p->qual2 <= 50) ? NodeColors.qualite_moyenne
+					 :                    NodeColors.qualite_bonne)
+					: "";
 				tprintf("                  ");
-				tprintf("%-7d %-12d %-6s %s\n",
-						p->qual2, p->obs2,
-						ax25_config_get_name(np->dev), np->call);
+				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
+						qcol, p->qual2, Colored ? ResetColor : "",
+						p->obs2,
+						ax25_config_get_name(np->dev),
+						Colored ? NodeColors.indicatif : "",
+						np->call,
+						Colored ? ResetColor : "");
 			}
 			if (p->n > 2 && (np = find_neigh(p->addr3, nlist)) != NULL)
 			{
+				const char *qcol = Colored
+					? ((p->qual3 == 0)  ? NodeColors.qualite_nulle
+					 : (p->qual3 <= 50) ? NodeColors.qualite_moyenne
+					 :                    NodeColors.qualite_bonne)
+					: "";
 				tprintf("                  ");
-				tprintf("%-7d %-12d %-6s %s\n",
-						p->qual3, p->obs3,
-						ax25_config_get_name(np->dev), np->call);
+				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
+						qcol, p->qual3, Colored ? ResetColor : "",
+						p->obs3,
+						ax25_config_get_name(np->dev),
+						Colored ? NodeColors.indicatif : "",
+						np->call,
+						Colored ? ResetColor : "");
 			}
 		}
 		free_proc_nr_nodes(list);
 		free_proc_nr_neigh(nlist);
 		return 0;
 	}
-
 	for (first = 1, i = 1; i < argc; i++)
 	{
 		if (*argv[i] == '\0')
 			continue;
-
 		/* "nodes <node>" */
 		p = find_node(argv[i], list);
 		if (p != NULL)
@@ -1981,7 +2634,6 @@ int do_netrom(int argc, char **argv)
 				tprintf("Routes to        Which Quality Obsolescence Port   Neighbour\n");
 				first = 0;
 			}
-
 			if ((np = find_neigh(p->addr1, nlist)) != NULL)
 			{
 				tprintf("%-16s %c     %-7d %-12d %-6s %s\n",
@@ -2009,7 +2661,6 @@ int do_netrom(int argc, char **argv)
 	}
 	free_proc_nr_nodes(list);
 	free_proc_nr_neigh(nlist);
-
 	first = 1;
 	for (i = 1; i < argc; i++)
 	{
@@ -2024,9 +2675,9 @@ int do_netrom(int argc, char **argv)
 			node_msg("No such node %s", argv[i]);
 		}
 	}
-
 	return 0;
 }
+
 
 /*
  * by Heikki Hannikainen <hessu@pspt.fi> 
@@ -2051,13 +2702,13 @@ int do_status(int argc, char **argv)
   	unsigned int value[MAX_ROW];		/* amount of memory   */
 	char *p;	
 	char kb[3];
-	int i, j, k, l;
+	int i, k, l;
 	struct proc_ax25 *axp, *axlist;
 	struct proc_rs_route *tp, *tlist;
 	struct proc_rs *rp, *rlist;
 	struct proc_rs_nodes *rsno, *rsnolist;
 	struct proc_rs_neigh *rsne, *rsnelist;
-	cfg_t cfg;
+	/* cfg_t cfg; -- supprimé : on utilise le cfg global déjà chargé au démarrage */
 
 	memtotal = memfree = buffers = cached = swaptotal = swapcached = swapfree = 0;
 
@@ -2067,10 +2718,7 @@ int do_status(int argc, char **argv)
 		return (0);
 	}
 
-	if (cfg_open(&cfg) != 0)
-	{
-		return (0);
-	}
+	/* cfg_open(&cfg) supprimé : évite double appel + corruption heap + putenv(buffer local) */
 
 	node_msg("Status:");
 	time(&t);
@@ -2079,22 +2727,22 @@ int do_status(int argc, char **argv)
 		tprintf("Cannot get system name\n");
 	else	{
 		if(Colored)	{
-		tprintf("Hostname         : %s%s%s\n", F_Yellow, name.nodename,ResetColor);
-		tprintf("L3 callsign      : %s%s%s\n", F_Yellow,cfg.callsign,ResetColor);
-		tprintf("L2 callsign      : %s%s%s\n",  F_Yellow,cfg.alt_callsign, ResetColor);
-		tprintf("Traceroute call  : %s%s%s\n",  F_Yellow, cfg.trt_callsign, ResetColor);
-		tprintf("DNIC, address    : %s%s,%s%s\n",  F_Green,cfg.dnic, cfg.address, ResetColor);
+		tprintf("Hostname         : %s%s%s\n", NodeColors.node, name.nodename, ResetColor);
+		tprintf("L3 callsign      : %s%s%s\n", NodeColors.indicatif,cfg.callsign,ResetColor);
+		tprintf("L2 callsign      : %s%s%s\n",  NodeColors.indicatif,cfg.alt_callsign, ResetColor);
+		tprintf("Traceroute call  : %s%s%s\n",  NodeColors.indicatif, cfg.trt_callsign, ResetColor);
+		tprintf("DNIC, address    : %s%s,%s%s\n",  NodeColors.adresse,cfg.dnic, cfg.address, ResetColor);
 			if (cfg.inetport != 0)
-				tprintf("UDP/TCP/IP port  : %s%d%s\n", F_Red,cfg.inetport, ResetColor);
+				tprintf("UDP/TCP/IP port  : %s%d%s\n", NodeColors.version,cfg.inetport, ResetColor);
 		tprintf("Default port     : %s\n", cfg.def_port);
 		tprintf("Inet address     : %s\n", cfg.def_addr);
 		tprintf("City             : %s\n", cfg.city);
 		tprintf("Zip - State      : %s\n", cfg.state);
 		tprintf("Country          : %s\n", cfg.country);
 		tprintf("Locator          : %s\n\n", cfg.locator);
-		tprintf("Operating system : %s%s %s (%s)%s\n", F_Green, name.sysname,
+		tprintf("Operating system : %s%s %s (%s)%s\n", NodeColors.adresse, name.sysname,
 				name.release, name.machine,ResetColor);
-		tprintf("FPAC version     : %s%s %s(built %s)%s\n", F_Red, VERSION, F_Yellow, __DATE__ , ResetColor);
+		tprintf("FPAC version     : %s%s %s(built %s)%s\n", NodeColors.version, VERSION, NodeColors.node, __DATE__ , ResetColor);
 		}
 		
 		else {
@@ -2137,8 +2785,7 @@ int do_status(int argc, char **argv)
 		tprintf("Cannot get memory information !\n");
 	else 
 	{
-		p = mem;				
-		j = 0;
+		p = mem;
 		for (i=0; i < MAX_ROW && *p; i++)	
 		{
 			value[i] = 0;
@@ -2149,10 +2796,10 @@ int do_status(int argc, char **argv)
 			{
 				l = sscanf(p, "%u%n", &value[i], &k);
 				p += k;					
-			    if (*p == '\n' || l < 1)		
-				break;
-				l = sscanf(p, "%s%n", kb, &k);
-				p += k;
+			    if (*p == '\n' || l < 1)
+					break;
+			    l = sscanf(p, "%s%n", kb, &k);
+			    p += k;
 			}
 	    	}	
 		for (i = 0; i < MAX_ROW; i++)
@@ -2274,7 +2921,7 @@ int do_status(int argc, char **argv)
 		n = 0;
 		for (rsno = rsnolist; rsno != NULL; rsno = rsno->next)
 		{
-			if (rsno->neigh1 == loopback)
+			if (rsno->neigh1 == (unsigned int)loopback)
 				continue;
 			++n;
 		}
@@ -2367,7 +3014,12 @@ int do_wp(int argc, char **argv)
 				break;
 
 			if (i == 0)
-				tprintf(" Callsign   Last update UTC   DNIC address  N/U\t Digi \t  Locator City\n");
+			{
+				if (Colored)
+					tprintf(" %sCallsign%s   %sLast update UTC%s   %sDNIC address%s  %sN/U\t Digi%s \t  %sLocator City%s\n", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+				else
+					tprintf(" Callsign   Last update UTC   DNIC address  N/U\t Digi \t  Locator City\n");
+			}
 
 // Display nodes and users with one line per digi
 			ndigis = wp[i].address.srose_ndigis;
@@ -2384,13 +3036,13 @@ int do_wp(int argc, char **argv)
 
 			my_date(buf, wp[i].date);
 			if (Colored)
-				tprintf("%s %-9s %s %s => %s%s %-7s %s", F_Green, call, ResetColor, buf, F_Green, dnic, add + 4, ResetColor);
+				tprintf("%s %-9s %s %s => %s %-7s ", NodeColors.indicatif, call, ResetColor, buf, dnic, add + 4);
 			else
 				tprintf("%-9s %s => %s %-7s ", call, buf, dnic, add + 4);
 
 			if (wp[i].is_node)
 				if (Colored)
-					tprintf("%s Node %s", F_Red, ResetColor);
+					tprintf("%s Node %s", NodeColors.qualite_nulle, ResetColor);
 				else
 					tprintf(" Node ");
 			else
@@ -2404,7 +3056,7 @@ int do_wp(int argc, char **argv)
 //				if (strstr(call,"-") == NULL)
 //					strcat(call,"-0");
 				if (Colored)
-					tprintf("%s%-9s%s",F_Green, call, ResetColor);
+					tprintf("%s%-9s%s",NodeColors.indicatif, call, ResetColor);
 				else
 					tprintf("%-9s", call);
 			}

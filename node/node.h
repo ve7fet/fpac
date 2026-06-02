@@ -40,7 +40,7 @@
 #define PERM_ROSE		128	/* ROSE gatewaying		*/
 #define PERM_NOESC		256	/* No escape character		*/
 
-#define PERM_TELNET (PERM_TELNET_LOCAL & PERM_TELNET_AMPR & PERM_TELNET_INET)
+#define PERM_TELNET (PERM_TELNET_LOCAL | PERM_TELNET_AMPR | PERM_TELNET_INET)
 
 
 /* Character Colors */
@@ -102,8 +102,8 @@ struct fpac_user
 	int		pid;
 	int		fd;
 	key_t		ipc_key;
-	long		logintime;
-	long		cmdtime;
+	time_t		logintime;
+	time_t		cmdtime;
 	unsigned char	state;
 	char		call[10];
 	unsigned short	ul_type;
@@ -189,6 +189,7 @@ extern int do_links(int argc, char **argv);
 extern int do_ports(int argc, char **argv);
 extern int do_ports(int argc, char **argv);
 extern int do_routes(int argc, char **argv);
+extern int do_manage_routes(int argc, char **argv);
 extern int do_netrom(int argc, char **argv);
 extern int do_status(int argc, char **argv);
 extern int do_users(int argc, char **argv);

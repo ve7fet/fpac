@@ -735,7 +735,7 @@ void load_config(void)
 	
 	fclose(fp);
 	
-	sprintf(my_loc, "=%s/%s", slat, slon);
+	snprintf(my_loc, sizeof(my_loc), "=%.8s/%.9s", slat, slon);
 	printf("%s\n%s\n", my_loc, beacon);
 }
 

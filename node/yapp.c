@@ -315,7 +315,7 @@ static void Send_CN(char *reason)
 static void Send_HD(char *filename, long length)
 {
 	char buffer[257];
-	char size_buffer[10];
+	char size_buffer[12];
 	int  len_filename;
 	int  len_size;
 	int  len;

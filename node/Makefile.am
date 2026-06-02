@@ -1,6 +1,6 @@
 LDADD = $(AX25_LIB) ../lib/libfpac.a
 sbin_PROGRAMS = fpacnode yapp fpacshell
-fpacnode_SOURCES = fpacnode.c fpaccmd.c nodesys.c command.c extcmd.c gateway.c user.c util.c io.c io.h sysinfo.c sysinfo.h node.h 
+fpacnode_SOURCES = fpacnode.c fpaccmd.c nodesys.c command.c extcmd.c gateway.c user.c util.c io.c io.h sysinfo.c sysinfo.h node.h colors.c colors.h
 yapp_SOURCES = yapp.c node.h 
 fpacshell_SOURCES = fpacshell.c
 

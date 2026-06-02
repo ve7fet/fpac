@@ -33,6 +33,12 @@ union sockaddr_ham
 
 #define BUFLEN 4096
 
+static inline void write_discard(int fd, const void *buf, size_t n)
+{
+	ssize_t r = write(fd, buf, n);
+	(void)r;
+}
+
 cfg_t cfg;
 
 void alarm_handler(int sig)
@@ -41,14 +47,14 @@ void alarm_handler(int sig)
 
 void err(char *message)
 {
-	write(STDOUT_FILENO, message, strlen(message));
+	write_discard(STDOUT_FILENO, message, strlen(message));
 	sleep(1);
 	exit(1);
 }
 
 static char *special_calls(char *ptr)
 {
-	static char str[256];
+	static char str[512];
 	char desti[256];
 	
 	/* If there is a digi, don't check ... */
@@ -58,7 +64,7 @@ static char *special_calls(char *ptr)
 	/* Node callsign */
 	if	(strcasecmp(desti, cfg.alt_callsign) == 0)
 	{
-		sprintf(str, "%s %s", desti, cfg.address);
+		snprintf(str, sizeof(str), "%s %s", desti, cfg.address);
 		return str;
 	}
 
@@ -80,7 +86,7 @@ static char *special_calls(char *ptr)
 		{
 			if	(strcasecmp(desti, p->call) == 0)
 			{
-				sprintf(str, "%s %s", desti, cfg.address);
+				snprintf(str, sizeof(str), "%s %s", desti, cfg.address);
 				return str;
 			}
 		}
@@ -92,7 +98,7 @@ static char *special_calls(char *ptr)
 		{
 			if	(strcasecmp(desti, p->call) == 0)
 			{
-				sprintf(str, "%s %s", desti, cfg.address);
+				snprintf(str, sizeof(str), "%s %s", desti, cfg.address);
 				return str;
 			}
 		}
@@ -116,8 +122,8 @@ static char *special_calls(char *ptr)
 			if (ok)
 			{
 				sprintf(str, "*** WP routing via %s\r", fpac2asc(&wpaddr.srose_addr));
-				write(STDOUT_FILENO, str, strlen(str));
-				sprintf(str, "%s %s", desti, rose_ntoa(&wpaddr.srose_addr));
+				write_discard(STDOUT_FILENO, str, strlen(str));
+				snprintf(str, sizeof(str), "%s %s", desti, rose_ntoa(&wpaddr.srose_addr));
 				return str;
 			}
 		}
@@ -320,8 +326,9 @@ int main(int argc, char **argv)
 	if (*sender == '.')
 		++sender;
 
+
 	sprintf(address, "*** Connecting %s\r", ptr);
-	write(STDOUT_FILENO, address, strlen(address));
+	write_discard(STDOUT_FILENO, address, strlen(address));
 
 	/*
 	 *
@@ -355,7 +362,7 @@ int main(int argc, char **argv)
 		axbind.axaddr.fsa_ax25.sax25_ndigis = 1;
 
 		if (ax25_aton_entry(sender, axbind.axaddr.fsa_ax25.sax25_call.ax25_call) == -1) {
-			sprintf(buffer, "ERROR: invalid callsign - %s\r", sender);
+			snprintf(buffer, sizeof(buffer), "ERROR: invalid callsign - %.9s\r", sender);
 			err(buffer);
 		}
 
@@ -393,7 +400,7 @@ int main(int argc, char **argv)
 		axbind.rsaddr.srose_ndigis = 0;
 
 		if (ax25_aton_entry(sender, axbind.rsaddr.srose_call.ax25_call) == -1) {
-			sprintf(buffer, "ERROR: invalid callsign - %s\r", sender);
+			snprintf(buffer, sizeof(buffer), "ERROR: invalid callsign - %.9s\r", sender);
 			err(buffer);
 		}
 
@@ -497,7 +504,7 @@ int main(int argc, char **argv)
 	alarm(0);
 
 	sprintf(buffer, "*** Connection done\r");
-	write(STDOUT_FILENO, buffer, strlen(buffer));
+	write_discard(STDOUT_FILENO, buffer, strlen(buffer));
 
 	/*
 	 * Loop until one end of the connection goes away.
@@ -543,7 +550,7 @@ int main(int argc, char **argv)
 					strcpy(address, "\r*** Disconnected\r");
 				err(address);
 			}
-			write(STDOUT_FILENO, buffer, n);
+			write_discard(STDOUT_FILENO, buffer, n);
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &read_fd)) 
@@ -581,7 +588,7 @@ int main(int argc, char **argv)
 					strcpy(address, "\r*** Disconnected\r");
 				err(address);
 			}
-			write(s, buffer, n);
+			write_discard(s, buffer, n);
 		}
 	}
 

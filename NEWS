@@ -1,4 +1,145 @@
-Version 4.00.00 is a release of the 3.27.19 working code. This code 
-incorporates a number of bug fixes and some new features, and as 
-such, may break compatibility with previous versions (<3.27.18).
+FPAC 4.1.5-rc14 — Build, packaging and documentation cleanup
+============================================================
 
+This release contains no functional change to the node itself; it fixes
+the source-packaging chain and tidies the documentation.
+
+  * Build: "make dist" and "make distcheck" now work.  The build-only
+    helper wp/make_tab (which generates crc_tab.h) was linked against
+    ../lib/libfpac.a through the directory-wide LDADD.  Because "make
+    dist" generates the BUILT_SOURCES before the libraries are built,
+    make_tab could not be linked and dist aborted.  make_tab now has an
+    empty per-target LDADD (it only uses stdio); the installed programs
+    keep linking against libfpac.a and libax25 exactly as before.
+
+  * Packaging: the top-level Makefile.am gained a "distclean-local" rule
+    that removes the autom4te.cache directory, which "make distclean"
+    used to leave behind.  Source tarballs are now clean without manual
+    intervention.
+
+  * Documentation: README typos fixed, the obsolete TODO entry about
+    libax25-0.0.9 compatibility removed, and the bug-report pointer
+    reworded (open a GitHub issue, it is not a mailing list).  README.svn
+    has been rewritten for git and renamed README.git.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Friday, may 29 2026
+
+Assisted by Claude Opus 4.8 (Anthropic) <noreply@anthropic.com>.
+
+FPAC 4.1.5-rc13 — mailbbs segfault fixes
+========================================
+
+Three bugs in tools/mailbbs.c have been corrected.  They all caused
+segmentation faults on nodes where linfbb or ROSE kernel support is not
+active:
+
+  * NULL pointer dereference: rs_get_addr() returns NULL when the ROSE
+    kernel module is not loaded (/proc/net/rose absent).  The result was
+    passed directly to rose_aton(), which dereferenced it.  A NULL check
+    with a diagnostic message is now performed before the call.
+
+  * NULL pointer dereference on local callsign lookup: if option -i is
+    not supplied and *_config_get_addr() returns NULL (port not
+    configured), ax25_aton_entry()/ax25_aton() was called with NULL.
+    Fixed in the AF_ROSE, AF_NETROM and AF_AX25 branches.
+
+  * Off-by-one buffer overflow in readbbs(): when a received line exactly
+    fills the buffer, the null terminator was written one byte past the
+    end of the caller's stack buffer.  Fixed by using pos (bytes actually
+    written) rather than nb (the raw byte count) for the null terminator,
+    and by passing sizeof(buf)-1 from main() to reserve one byte of
+    headroom.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Tuesday, may 26 2026
+
+FPAC 4.1.5-rc12 — Configurable display colours
+===============================================
+
+First of all : you can disable colors in fpacnode with command "col"
+
+fpacnode now reads an optional colour configuration file at startup:
+
+    /usr/local/etc/ax25/fpacnode.colors
+
+This file lets the sysop customise every colour used in the node's
+interactive display without recompiling.  If the file is absent, all
+colours fall back to the built-in defaults (identical to rc11).
+
+WHAT CAN BE CONFIGURED
+-----------------------
+
+  [banniere]   — connection banner: version number, node name, hello/info text
+  [tableaux]   — table elements: column headers, callsigns, ROSE/NET-ROM
+                 addresses, port names, timestamps
+  [ax25]       — AX.25 link states: Disconnected, Conn pending, Disc pending,
+                 Connected, Recovery, Unknown
+  [rose]       — ROSE circuit state: Connected / idle (-----)
+  [netrom]     — NET-ROM neighbour status: Connected / idle (-----)
+  [qualite]    — route quality: good (>50%), medium (1-50%), none (0%)
+  [indicateurs]— boolean flags: yes / no  (e.g. restart column)
+
+COLOUR NAMES
+------------
+
+Foreground (text) colours:
+  noir  rouge_fonce  vert_fonce  jaune_fonce  bleu_fonce  magenta_fonce
+  cyan_fonce  gris  gris_fonce  rouge  vert  jaune  bleu  magenta  cyan
+  blanc  defaut
+
+Background colours (prefix with "fond_"):
+  fond_noir  fond_rouge_fonce  fond_vert_fonce  fond_jaune_fonce
+  fond_bleu_fonce  fond_magenta_fonce  fond_cyan_fonce  fond_gris
+  fond_gris_fonce  fond_rouge  fond_vert  fond_jaune  fond_bleu
+  fond_magenta  fond_cyan  fond_blanc  fond_defaut
+
+SYNTAX
+------
+
+Each line has the form:
+
+    key = foreground_colour [+ background_colour]   # optional comment
+
+Examples:
+
+    version      = rouge
+    connected    = noir + fond_vert
+    disconnected = vert + fond_rouge
+
+Unknown colour names are silently ignored; the built-in default is kept.
+
+TOOLS
+-----
+
+Two Python utilities are provided in the source tree:
+
+  fpacnode_colors.py
+      Displays the full ANSI palette and a live preview of the current
+      colour assignments as they would appear in the node.
+      Run:  python3 fpacnode_colors.py
+
+  generate_colors_conf.py
+      Regenerates /usr/local/etc/ax25/fpacnode.colors.  Each line's
+      comment contains the colour name rendered in its own ANSI colour,
+      so a plain "cat" of the file is self-documenting.
+      Run:  sudo python3 generate_colors_conf.py
+
+      An alternative destination can be given as first argument:
+        python3 generate_colors_conf.py -          (stdout preview)
+        sudo python3 generate_colors_conf.py /path/to/file
+
+NOTES
+-----
+
+* The COlor command (minimum 2 letters) still toggles coloured output
+  ON/OFF at runtime; fpacnode.colors only changes which colours are used,
+  not whether they are enabled.
+
+* The file is read once at startup, immediately after fpac.conf.
+  A restart of fpacnode is required to apply changes.
+
+* Colour sequences in the comment field of fpacnode.colors are embedded
+  as real ANSI escape bytes; editors that interpret escape codes (less -R,
+  most terminal emulators) will render them.  Plain text editors simply
+  show the raw ESC sequences without harm.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Saturday, may 24 2026

@@ -31,6 +31,7 @@
 #include "ax25compat.h"
 #include "wp.h"
 #include "node.h"
+#include "colors.h"
 #include "io.h"
 
 char HostName[40];
@@ -177,6 +178,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	read_colors();  /* charge /usr/local/etc/ax25/fpacnode.colors */
+
 	if (ax25_config_load_ports() == 0) 
 	{
 		fpaclog(LOGLVL_ERROR, "No AX.25 port data configured");
@@ -308,7 +311,7 @@ int main(int argc, char **argv)
 	{
 		char str[80];
 		if (Colored)
-			tprintf("\nFPAC-Node %sv %s (built %s)%s %s%s\n\ncallsign: ", F_Red, VERSION, __DATE__, F_Yellow, HostName, ResetColor);
+			tprintf("\nFPAC-Node %sv %s (built %s)%s %s%s\n\ncallsign: ", NodeColors.version, VERSION, __DATE__, NodeColors.node, HostName, ResetColor);
 		else
 			tprintf("\nFPAC-Node v %s (built %s) %s\n\ncallsign: ", VERSION, __DATE__, HostName);
 
@@ -340,7 +343,7 @@ int main(int argc, char **argv)
 		logout("Invalid callsign");
 	}
 	if(Colored)	
-		node_msg ("User call : %s%s%s", F_Yellow, User.call, ResetColor);
+		node_msg ("User call : %s%s%s", NodeColors.indicatif, User.call, ResetColor);
 	else
 		node_msg ("User call : %s", User.call);
 	
@@ -348,7 +351,7 @@ int main(int argc, char **argv)
 	{
 		while (fgets (line, 256, fp) != NULL)
 			if (Colored) {
-				tprintf("%s",F_Blue);
+				tprintf("%s", NodeColors.hello);
 				tputs (line);
 				tprintf("%s",ResetColor);
 			}
@@ -359,7 +362,7 @@ int main(int argc, char **argv)
 	}
 
 	if (Colored)
-		node_msg("%s %sv %s (built %s)%s for LINUX (help = h)", "FPAC-Node", F_Red, VERSION, __DATE__, ResetColor);
+		node_msg("%s %sv %s (built %s)%s for LINUX (help = h)", "FPAC-Node", NodeColors.version, VERSION, __DATE__, ResetColor);
  	else
 		node_msg("%s v %s (built %s) for LINUX (help = h)", "FPAC-Node", VERSION, __DATE__);
 

@@ -2,6 +2,10 @@ LDADD = $(AX25_LIB) ../lib/libfpac.a
 noinst_PROGRAMS = make_tab
 sbin_PROGRAMS = fpacwpd wpedit wplist wpstress wpmaint wpserv wpcmp wpconvert
 make_tab_SOURCES = make_tab.c
+# make_tab is a standalone build helper (generates crc_tab.h); it must NOT link
+# against ../lib/libfpac.a, otherwise "make dist" fails building BUILT_SOURCES
+# before the library exists. Override the global LDADD for this target only.
+make_tab_LDADD =
 fpacwpd_SOURCES = fpacwpd.c daemon.c daemon.h db.c db.h db_list.c update.c update.h hash.c hash.h crc.c crc.h sockevent.c sockevent.h wpdefs.h
 wplist_SOURCES = wplist.c
 wpedit_SOURCES = wpedit.c

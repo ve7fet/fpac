@@ -14,8 +14,7 @@ etcfiles = \
 	fpac.conf \
 	ax25ipd.conf \
 	fpac.nodes \
-	fpac.routes \
-	ax25ipd.conf
+	fpac.routes
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(AX25_SYSCONFDIR)
@@ -64,5 +63,5 @@ EXTRA_DIST = \
 	fpac.conf.in \
 	fpac.nodes.in \
 	fpac.routes.in \
-	ax25ipd.conf
+	ax25ipd.conf.in
 
