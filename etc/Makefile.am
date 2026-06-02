@@ -13,6 +13,7 @@ etcfiles = \
 	flexd.routes \
 	fpac.conf \
 	ax25ipd.conf \
+	ax25udp.conf \
 	fpac.nodes \
 	fpac.routes
 
@@ -63,5 +64,6 @@ EXTRA_DIST = \
 	fpac.conf.in \
 	fpac.nodes.in \
 	fpac.routes.in \
-	ax25ipd.conf.in
+	ax25ipd.conf.in \
+	ax25udp.conf.in
 
