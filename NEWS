@@ -4,6 +4,10 @@ FPAC 4.1.5-rc14 — Build, packaging and documentation cleanup
 This release contains no functional change to the node itself; it fixes
 the source-packaging chain and tidies the documentation.
 
+  * Script fpac.sh is replaced by myfpac.sh. It is used to start, stop
+    or restart fpac series of applications. Il does not initialize nor
+    touch AX25 devices. AX25 layer is managed separately. See changeLog. 
+
   * Build: "make dist" and "make distcheck" now work.  The build-only
     helper wp/make_tab (which generates crc_tab.h) was linked against
     ../lib/libfpac.a through the directory-wide LDADD.  Because "make

@@ -2,7 +2,7 @@
 # Description: Start/Stop/Status FPAC node services (application daemons only).
 #
 # The AX.25 link layer (ax0, kissattach, ax25ipd, netromd, mheardd, beacon,
-# ax25d) is owned by ax25up/ax25stop and is deliberately NOT torn down here,
+# ax25d) is owned by ax25up/ax25stop and is deliberately NOT turned down here,
 # so FPAC can be cycled while the AX.25 stack keeps running.
 
 if [ "$(id -u)" != "0" ]; then
