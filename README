@@ -7,6 +7,29 @@ https://github.com/ve7fet/fpac
 There are even more updates and Release Candidates available from here  :
 http://f6bvp.org/ax25-libraries-utilities-applications/
 
+VERIFYING DOWNLOADS FROM f6bvp.org (minisign)
+=============================================
+
+The scripts and source tarballs served from f6bvp.org are signed with minisign.
+Before the first install on a new machine, install the public key once:
+
+    sudo apt install -y minisign
+    sudo mkdir -p /usr/local/etc/ax25
+    sudo wget -O /usr/local/etc/ax25/f6bvp-minisign.pub \
+         http://f6bvp.org/f6bvp-minisign.pub
+
+Then verify the key fingerprint against the value published HERE (this README,
+an independent channel) before trusting it:
+
+    sha256sum /usr/local/etc/ax25/f6bvp-minisign.pub
+
+    SHA-256: ebfcadbc7ca0f11e2bbf7db3bfc346b6f9149c5b228e056d0e6bb92f7a9a0491
+    minisign key id: A6D1608D77F1FF10
+
+The updAX25.sh / updfpac-rc.sh scripts then verify every download against this
+key and refuse to install anything that fails the signature check. The key is
+NEVER fetched automatically by the scripts: install it by hand, once per host.
+
 You may read Linux FPAC-HOWTO
 https://www.f6fbb.org/fpac/doc/FPAC-HOWTO.html
 
