@@ -618,7 +618,6 @@ void db_compute_vector(int dirty, vector_t * vector)
 	int dirty_cnt[WP_VECTOR_SIZE];
 	int record_cnt[WP_VECTOR_SIZE];
 	char atime[40];
-	int stop_dirty = 0;
 
 	memset(dirty_cnt, 0, sizeof(dirty_cnt));
 	memset(record_cnt, 0, sizeof(record_cnt));
@@ -695,17 +694,19 @@ void db_compute_vector(int dirty, vector_t * vector)
 		{
 			if (dirty >= 0 && vector->crc[vec_index] != crc)
 			{
+				int k;
+				/* F6BVP 2026-06-09: reconcile ALL divergent timeslots, not
+				 * only the first one. The old `stop_dirty` guard stopped at
+				 * the first divergent slot; slot 0 (fresh node info) diverges
+				 * permanently and monopolized every exchange, so older slots
+				 * never converged. set_vector_when_nodirty() only sets an
+				 * idempotent flag, so calling it per divergent slot is safe. */
 				dirty_cnt[vec_index] = record_cnt[vec_index];
-				if (!stop_dirty)
+				for (k = dirty_first; k < i; k++)
 				{
-					int k;
-					for (k = dirty_first; k < i; k++)
-					{
-						set_dirty_context(sorted_list[k], dirty);
-					}
-					set_vector_when_nodirty(dirty);
-					stop_dirty = 1;
+					set_dirty_context(sorted_list[k], dirty);
 				}
+				set_vector_when_nodirty(dirty);
 			}
 			dirty_first = i;
 			mycrc[vec_index] = crc;

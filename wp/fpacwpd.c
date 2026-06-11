@@ -181,6 +181,15 @@ static void rose_write_handler(int s)
 		memset(&pdu, 0, sizeof(wp_pdu));
 		pdu.type = wp_type_set;
 		pdu.data.wp = db_records[dirty];		
+
+		/* F6BVP 2026-06-09: a deleted record older than WP_OBSOLETE makes
+		 * wp_send_pdu() return -1; treating that as a link error
+		 * (close_client) used to abort the whole dirty batch and block
+		 * convergence. Skip such records (clear the dirty bit) instead. */
+		if (pdu.data.wp.is_deleted && ancien(&pdu)) {
+			clear_dirty_context(dirty, s);
+			return;
+		}
 		rc = wp_send_pdu(s, &pdu);
 		if (rc) {
 			if (verbose) syslog(LOG_INFO, "sending dirty record to adjacent FAILED ! rc %d", rc); 		 
@@ -217,15 +226,20 @@ static void rose_read_handler(int s)
 	  
 /*
  * reject WP record if it is deleted and callsign not in database
- * 
- */ 
-	if (pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &pdu.data.wp) != 0))
+ * F6BVP : use a scratch buffer for the existence test so that the
+ * incoming record (and its is_deleted flag) is NOT overwritten by
+ * db_get() - otherwise a (R)emove from wpedit is silently reverted.
+ */
+	{
+	wp_t chk_wp;
+	if (pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &chk_wp) != 0))
 		{
 		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s REJECTED",
 		ax25_ntoa(&pdu.data.wp.address.srose_call),
 		rose_ntoa(&context[s]->address.srose_addr));
 		close_client(s, 0);
 		return;
+		}
 	}
 
 	  again = (rc == 2);

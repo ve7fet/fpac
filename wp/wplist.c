@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 
 	if (wp_open("NODE") == 0) {
 
-	printf("Callsign  Last update UTC   DNIC address N/U  \tDigi \tLocator City\n");
+	printf("Callsign  Last update UTC   DNIC address N/U  \tDigi \tLocator City \tStatus\n");
 
 	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
 	{
@@ -122,13 +122,12 @@ int main(int argc, char **argv)
 				printf("\t%-9s ", call);				
 			}
 			
-			printf("\t%s \t%s\n", wp[i].locator, wp[i].city);
-/*
+			printf("\t%s \t%s", wp[i].locator, wp[i].city);
+
 			if (wp[i].is_deleted == 1)
 				printf("\tDELETED\n");
 			else
 				printf("\tOk\n");
-*/
 		}
 	}
 

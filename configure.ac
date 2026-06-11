@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([fpac],[4.1.5-rc14],[bernard.f6bvp@gmail.com])
+AC_INIT([fpac],[4.1.5-rc15],[bernard.f6bvp@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror dist-xz])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([pathnames.h.in])

@@ -84,6 +84,11 @@ static char pdu_r_cache[ROSE_MTU];
 static int  pdu_r_pos = 0;
 static int	pdu_r_len = 0;
 
+/* F6BVP : when set (by interactive clients like wpedit), wp_receive_pdu()
+ * polls once per second and prints a '.' so the operator sees that the
+ * request is being processed and nothing is frozen. Daemons leave it 0. */
+int wp_progress = 0;
+
 void wp_flush_pdu(void)
 {
 	int rc;
@@ -135,10 +140,6 @@ int ancien(wp_pdu *pdu)
 	
 	wp_age = temps - pdu->data.wp.date;
 	days_old = wp_age / 86400L;
-
-	if (days_old < 2) { 
-	return 1;	
-	}
 
 	if (days_old > date_limite) {
 		return (1);
@@ -353,12 +354,21 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 	memset(pdu, 0, sizeof(*pdu));
 	
 	if (pdu_r_pos >= pdu_r_len) {
-		FD_ZERO(&rfds);
-		FD_SET(s, &rfds);
-		timeout.tv_sec = WP_API_TIMEOUT;
-		timeout.tv_usec = 0;
-	
-		rc = select(s+1, &rfds, NULL, NULL, &timeout);
+		int waited = 0;
+		do {
+			FD_ZERO(&rfds);
+			FD_SET(s, &rfds);
+			/* short slices when showing progress, else one long wait */
+			timeout.tv_sec = wp_progress ? 1 : WP_API_TIMEOUT;
+			timeout.tv_usec = 0;
+
+			rc = select(s+1, &rfds, NULL, NULL, &timeout);
+			if (rc == 0 && wp_progress) {
+				putchar('.');
+				fflush(stdout);
+				waited++;
+			}
+		} while (rc == 0 && wp_progress && waited < WP_API_TIMEOUT);
 		if (rc <= 0) {
 			syslog(LOG_INFO, "wp_receive_pdu() WP API timeout\n");
 /*			fprintf(stderr, "WP API timeout\n");*/

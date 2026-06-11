@@ -76,7 +76,9 @@ int main(int ac, char **av)
 		perror("Cannot open WP service");
 		exit(1);
 	}
-		
+
+	wp_progress = 1;	/* F6BVP : show '.' while waiting for the WP server */
+
 	while ((p = getopt(ac, av, "vcl:")) != -1) 
 	{
 		switch (p)

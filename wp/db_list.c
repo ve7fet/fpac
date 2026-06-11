@@ -131,9 +131,10 @@ int db_list_get(list_req_t *req, wp_t **pwp, int *nb)
 		else
 			ofst = index;
 		
-		if (db_records[ofst].is_deleted)
-			continue;
-			
+		/* F6BVP : keep deleted records so wplist can display them */
+		/* if (db_records[ofst].is_deleted)
+			continue; */
+
 		full_call = ax25_ntoa(&db_records[ofst].address.srose_call);
 		if (*full_call == '\0')
 			continue;

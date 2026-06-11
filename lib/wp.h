@@ -107,6 +107,7 @@ typedef struct {
 
 /* Public fonctions provided by libwp.a */
 
+int ancien(wp_pdu *pdu);	/* F6BVP : record older than WP_OBSOLETE days */
 int strmatch(char *string, char *pattern);
 int wp_check_call(const char *callsign);
 int wp_get(ax25_address *call, wp_t *wp);
@@ -115,6 +116,7 @@ int wp_open(char *);
 int wp_is_open(void);
 int wp_open_remote(char *source_call, struct full_sockaddr_rose *remote, int non_block);
 int wp_receive_pdu(int s, wp_pdu *pdu);
+extern int wp_progress;		/* F6BVP : 1 = show '.' while waiting for server reply */
 int wp_search(ax25_address *call, struct full_sockaddr_rose *addr);
 int wp_send_pdu(int s, wp_pdu *pdu);
 int wp_set(wp_t *wp);

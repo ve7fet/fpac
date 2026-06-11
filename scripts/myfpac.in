@@ -59,7 +59,7 @@ stop_proc() {
 
 case "$1" in
 -restart|restart)
-	echo -n "Restartting FPAC  :" >> $LOG
+	echo -n "Restarting FPAC  :" >> $LOG
 	$0 -stop && $0 -start
 	sleep 3
 	$0 status
