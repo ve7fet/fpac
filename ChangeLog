@@ -45,6 +45,12 @@ fpac (4.1.5-rc15)
 	  wp_progress is set (wpedit sets it, daemons leave it 0), so a slow
 	  (R)emove that takes up to WP_API_TIMEOUT no longer looks frozen.
 
+	* lib/wp.h: guard the new "extern int wp_progress" with #ifndef extern.
+	  pad/fpad.c does "#define extern" before including the headers to
+	  allocate its globals in main; without the guard wp_progress was
+	  defined both in fpad.o and in libwp.a, and a full build failed under
+	  gcc 12 (-fno-common) with a multiple-definition link error in fpad.
+
 	* scripts/myfpac.in: fix the "Restartting" typo in the restart message.
 
 	* configure.ac: bump version from 4.1.5-rc14 to 4.1.5-rc15.
