@@ -22,6 +22,7 @@
 #include <signal.h>
 #include <syslog.h>
 #include <ctype.h>
+#include <dirent.h>
 
 #include <time.h>
 /*#include <sys/types.h>*/
@@ -45,6 +46,52 @@ int cr = 0;
 
 void now_date(char *buf);
 
+/* Tell whether the fpacwpd daemon is currently running.
+ * wpmaint rewrites the WP file directly while the daemon keeps it
+ * memory-mapped, so they must never run at the same time.
+ * Scan /proc for a process whose comm is "fpacwpd". */
+static int fpacwpd_running(void)
+{
+	DIR *dir;
+	struct dirent *ent;
+	FILE *f;
+	char path[64];
+	char name[64];
+	char *nl;
+	int found = 0;
+
+	dir = opendir("/proc");
+	if (dir == NULL)
+		return 0;		/* cannot tell : assume not running */
+
+	while ((ent = readdir(dir)) != NULL)
+	{
+		if (!isdigit((unsigned char)ent->d_name[0]))
+			continue;
+
+		snprintf(path, sizeof(path), "/proc/%s/comm", ent->d_name);
+		f = fopen(path, "r");
+		if (f == NULL)
+			continue;
+
+		if (fgets(name, sizeof(name), f) != NULL)
+		{
+			nl = strchr(name, '\n');
+			if (nl)
+				*nl = '\0';
+			if (strcmp(name, "fpacwpd") == 0)
+				found = 1;
+		}
+		fclose(f);
+
+		if (found)
+			break;
+	}
+
+	closedir(dir);
+	return found;
+}
+
 int usage(void)
 {
 		printf ("\n");
@@ -52,7 +99,8 @@ int usage(void)
 		printf ("Usage: wpmaint [-argument]\n");
 		printf ("argument :  -d = age delay (in days) for deleting old records\n");
 		printf ("            -e = age delay (in days) for erasing deleted records\n");
-//		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);       
+		printf ("WARNING : the fpacwpd daemon must be stopped before running wpmaint\n");
+//		printf ("defaults delays : %d days before deletion and %d days before erasing deleted records\n",d_temps, e_temps);
 		printf ("\n");
 }
 
@@ -88,6 +136,22 @@ int main(int argc, char **argv)
 /* Print the Current Date/time */
 	now_date(buf);
 	printf ("     WPmaint - %s",buf);
+
+/* wpmaint rewrites the WP file directly ; the running daemon keeps it
+ * memory-mapped, so any change would be lost and the file may be corrupted.
+ * Refuse to run while fpacwpd is active. */
+	if (fpacwpd_running())
+	{
+		printf("\n\n");
+		fflush(stdout);
+		fprintf(stderr, "WARNING : the fpacwpd daemon is currently RUNNING.\n");
+		fprintf(stderr, "wpmaint must only be run while the daemon is stopped,\n");
+		fprintf(stderr, "otherwise its changes will be lost (the daemon keeps the\n");
+		fprintf(stderr, "database memory-mapped) and the file may be corrupted.\n");
+		fprintf(stderr, "Please stop it first (e.g. 'killall fpacwpd'), run wpmaint,\n");
+		fprintf(stderr, "then restart the daemon.\n\n");
+		exit(1);
+	}
 
 	optind = 0;
 
