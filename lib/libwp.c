@@ -190,11 +190,12 @@ int wp_send_pdu(int s, wp_pdu *pdu)
 		/* State information */
 /*		p[L++] = pdu->data.wp.is_deleted;*/
 		
-/* Do not send deleted records older than WP_OBSOLETE days */
-		if ((p[L++] = pdu->data.wp.is_deleted)) {
-			if (ancien(pdu))
-				return -1;
-		}
+		/* State information. F6BVP 2026-06-12 (P2): the WP_OBSOLETE obsolescence
+		 * policy was moved OUT of the wire codec. Returning -1 here made the
+		 * caller treat an obsolete deleted record as a fatal link error
+		 * (close_client). The send-side skip lives in rose_write_handler
+		 * (fpacwpd.c); just encode the flag here. */
+		p[L++] = pdu->data.wp.is_deleted;
 		
 		/* Ascii data */
 		len = strlen(pdu->data.wp.name);
@@ -462,12 +463,12 @@ int wp_receive_pdu(int s, wp_pdu *pdu)
 		
 		/* State information */
 /*		pdu->data.wp.is_deleted = p[L++];*/
-		/* Do not accept deleted records older than WP_OBSOLETE days */
-		if ((pdu->data.wp.is_deleted = p[L++])) {
-			if (ancien(pdu)) {
-				return -1;
-			}
-		}
+		/* State information. F6BVP 2026-06-12 (P2): do NOT reject an obsolete
+		 * deleted record here - returning -1 made rose_read_handler tear down
+		 * the whole adjacent session (close_client). Decode the flag; the
+		 * daemon (rose_read_handler) now applies the obsolescence policy by
+		 * SKIPPING the record, keeping the session up. */
+		pdu->data.wp.is_deleted = p[L++];
 		
 		/* Ascii data */
 		len = p[L++];

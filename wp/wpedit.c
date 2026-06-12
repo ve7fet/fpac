@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <syslog.h>
 #include <ctype.h>
+#include <dirent.h>	/* P5 F6BVP: opendir() for fpacwpd_running() */
 
 #include <time.h>
 /*#include <sys/types.h>*/
@@ -47,6 +48,44 @@ static void readline(char *, int);
 
 #define CR() printf( (cr) ? "\r" : "\n");
  
+/* P5 F6BVP 2026-06-12: wpedit is a network CLIENT of the fpacwpd daemon
+ * (wp_open over ROSE) and never touches the WP file, so - unlike wpmaint -
+ * it REQUIRES the daemon to be running. Detect its presence to print a clear
+ * message when wp_open() fails. Same /proc scan as wpmaint.c. */
+static int fpacwpd_running(void)
+{
+	DIR *dir;
+	struct dirent *ent;
+	FILE *fp;
+	char path[64];
+	char name[64];
+	int found = 0;
+
+	dir = opendir("/proc");
+	if (dir == NULL)
+		return 0;		/* cannot tell : assume not running */
+
+	while ((ent = readdir(dir)) != NULL) {
+		if (!isdigit((unsigned char)ent->d_name[0]))
+			continue;
+		snprintf(path, sizeof(path), "/proc/%s/comm", ent->d_name);
+		fp = fopen(path, "r");
+		if (fp == NULL)
+			continue;
+		if (fgets(name, sizeof(name), fp) != NULL) {
+			/* comm = "fpacwpd" + trailing LF (or NUL) */
+			if (strncmp(name, "fpacwpd", 7) == 0 &&
+			    (name[7] == 10 || name[7] == 0))
+				found = 1;
+		}
+		fclose(fp);
+		if (found)
+			break;
+	}
+	closedir(dir);
+	return found;
+}
+
 void readline(char *buf, int len)
 {
 	int nb;
@@ -73,7 +112,12 @@ int main(int ac, char **av)
 	time_t present_time;
 
 	if (wp_open("WPEDIT-0")) {
-		perror("Cannot open WP service");
+		/* P5 F6BVP 2026-06-12: a wp_open failure almost always means the
+		 * fpacwpd daemon is not running - say so explicitly. */
+		if (!fpacwpd_running())
+			fprintf(stderr, "wpedit: the fpacwpd daemon is not running - please start it first.\n");
+		else
+			perror("Cannot open WP service");
 		exit(1);
 	}
 

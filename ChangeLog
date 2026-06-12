@@ -1,3 +1,51 @@
+fpac (4.1.5-rc16)
+
+	* wp/fpacwpd.c: let poll_adjacents() recover an adjacent connection
+	  that hangs while being established.  poll_adjacents() only retried
+	  adjacents in the DISCONNECTED state; a non-blocking ROSE connect
+	  that completed neither successfully (no write event) nor with an
+	  error stayed in WPA_CONNECTING forever, leaving the node isolated
+	  with no White Pages session until fpacwpd was restarted by hand.
+	  retry_connect_date, already armed to now+120 s by connect_adjacent(),
+	  is now honoured in the CONNECTING state as well: a connect still
+	  pending after that delay is closed, which returns the adjacent to
+	  DISCONNECTED and reschedules a retry, so the daemon heals itself.
+
+	* lib/libwp.c, wp/fpacwpd.c: stop an obsolete deleted record from
+	  tearing down a whole adjacent session.  The wire codec rejected a
+	  deleted record older than WP_OBSOLETE by returning -1, both when
+	  sending (wp_send_pdu) and when receiving (wp_receive_pdu); the
+	  daemon read that -1 as a fatal link error and called close_client(),
+	  so a single stale deletion crossing the link dropped the session and
+	  the nodes reconnected in a loop.  The obsolescence policy is moved
+	  out of the codec and into the daemon: wp_send_pdu() and
+	  wp_receive_pdu() now only encode and decode the is_deleted flag,
+	  while rose_read_handler() skips an obsolete deleted record (mirroring
+	  the existing send-side skip) and keeps the session up.  The policy
+	  itself is unchanged - such records are still not applied - only no
+	  longer fatal to the connection.
+
+	* wp/fpacwpd.c: do not drop the adjacent session when a deleted record
+	  is received for a callsign that is not in the local database.  There
+	  is nothing to delete, so the record is now ignored and the session
+	  kept instead of calling close_client().  The existence test is also
+	  restricted to wp_type_set PDUs, so it is no longer triggered by the
+	  union-aliased bytes of other PDU types.
+
+	* wp/wpedit.c: give a clear message when the daemon is not running.
+	  wpedit is a client of fpacwpd (it connects through wp_open() and
+	  never touches the White Pages file), so it cannot work while the
+	  daemon is stopped - the opposite of wpmaint.  When wp_open() fails it
+	  now checks whether fpacwpd is running (the same /proc scan used by
+	  wpmaint) and prints "the fpacwpd daemon is not running - please start
+	  it first" instead of the generic "Cannot open WP service".
+
+	* configure.ac: bump version from 4.1.5-rc15 to 4.1.5-rc16.
+
+ -- Bernard Pidoux <bernard.f6bvp@gmail.com>  Friday, june 12 2026
+
+	Assisted by Claude Opus 4.8 (Anthropic) <noreply@anthropic.com>.
+
 fpac (4.1.5-rc15)
 
 	* wp/wpmaint.c: refuse to run while the fpacwpd daemon is active.
