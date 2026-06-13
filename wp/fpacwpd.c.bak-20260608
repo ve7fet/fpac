@@ -95,14 +95,7 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 static void close_client(int client, int active)
 {
 	time_t temps;
-
-	/* P6 F6BVP 2026-06-13: close_client() must be idempotent. poll_adjacents()
-	 * (P1) and the cross-connection paths can call it on an fd already closed
-	 * (context[]==NULL) or on a reset adjacent (wpa->context==-1), which
-	 * crashed on context[client]->dirty_list (NULL+0x48) and inside libax25
-	 * (rose_ntoa on a NULL context). Guard against both. */
-	if (client < 0 || !context[client]) return;
-
+	
 	temps = time(NULL);
 
 	if (verbose) {
@@ -188,15 +181,6 @@ static void rose_write_handler(int s)
 		memset(&pdu, 0, sizeof(wp_pdu));
 		pdu.type = wp_type_set;
 		pdu.data.wp = db_records[dirty];		
-
-		/* F6BVP 2026-06-09: a deleted record older than WP_OBSOLETE makes
-		 * wp_send_pdu() return -1; treating that as a link error
-		 * (close_client) used to abort the whole dirty batch and block
-		 * convergence. Skip such records (clear the dirty bit) instead. */
-		if (pdu.data.wp.is_deleted && ancien(&pdu)) {
-			clear_dirty_context(dirty, s);
-			return;
-		}
 		rc = wp_send_pdu(s, &pdu);
 		if (rc) {
 			if (verbose) syslog(LOG_INFO, "sending dirty record to adjacent FAILED ! rc %d", rc); 		 
@@ -233,36 +217,21 @@ static void rose_read_handler(int s)
 	  
 /*
  * reject WP record if it is deleted and callsign not in database
- * F6BVP : use a scratch buffer for the existence test so that the
- * incoming record (and its is_deleted flag) is NOT overwritten by
- * db_get() - otherwise a (R)emove from wpedit is silently reverted.
- */
-	{
-	wp_t chk_wp;
-	if (pdu.type == wp_type_set && pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &chk_wp) != 0))
+ * 
+ */ 
+	if (pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &pdu.data.wp) != 0))
 		{
-		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s ignored (unknown callsign)",
+		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s REJECTED",
 		ax25_ntoa(&pdu.data.wp.address.srose_call),
 		rose_ntoa(&context[s]->address.srose_addr));
-		again = (rc == 2);   /* P3 F6BVP 2026-06-12: skip, keep session up */
-		continue;
-		}
+		close_client(s, 0);
+		return;
 	}
 
 	  again = (rc == 2);
 
 	  switch (pdu.type) {
 	  case wp_type_set:
-		/* P2 F6BVP 2026-06-12: obsolescence policy moved here from the wire
-		 * codec (libwp.c). Skip an obsolete deleted record WITHOUT closing the
-		 * session (the codec used to return -1 -> close_client). Mirrors the
-		 * send-side skip in rose_write_handler. */
-		if (pdu.data.wp.is_deleted && ancien(&pdu)) {
-			if (verbose) syslog(LOG_INFO, "Ignoring obsolete deleted record %s from %s",
-				ax25_ntoa(&pdu.data.wp.address.srose_call),
-				rose_ntoa(&context[s]->address.srose_addr));
-			break;
-		}
 		  /* For user client, check record validity */
 		  /* if (context[s]->type != WP_USER || wp_valid(&pdu.data.wp)) {	*/
 
@@ -656,16 +625,6 @@ static void poll_adjacents(void)
 			}			
 			break;
 		case WPA_CONNECTING:
-			/* P1 F6BVP 2026-06-12: time out a hung non-blocking ROSE connect.
-			 * poll_adjacents only retries DISCONNECTED, so a connect stuck in
-			 * WPA_CONNECTING (no WRITE_EVENT, no fd error - e.g. a ROSE call
-			 * request that never completes nor times out) would isolate the
-			 * node until a manual fpacwpd restart. retry_connect_date was
-			 * already armed (+120s) by connect_adjacent; close_client() then
-			 * resets the adjacent to WPA_DISCONNECTED and reschedules a retry,
-			 * so the daemon self-heals. */
-			if (mytime >= wpa->retry_connect_date)
-				close_client(wpa->context, 1);
 			break;
 		case WPA_DISCONNECTED:
 			if (!wpa->is_unknown && mytime >= wpa->retry_connect_date) {

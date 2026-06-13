@@ -95,14 +95,7 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 static void close_client(int client, int active)
 {
 	time_t temps;
-
-	/* P6 F6BVP 2026-06-13: close_client() must be idempotent. poll_adjacents()
-	 * (P1) and the cross-connection paths can call it on an fd already closed
-	 * (context[]==NULL) or on a reset adjacent (wpa->context==-1), which
-	 * crashed on context[client]->dirty_list (NULL+0x48) and inside libax25
-	 * (rose_ntoa on a NULL context). Guard against both. */
-	if (client < 0 || !context[client]) return;
-
+	
 	temps = time(NULL);
 
 	if (verbose) {
@@ -239,13 +232,13 @@ static void rose_read_handler(int s)
  */
 	{
 	wp_t chk_wp;
-	if (pdu.type == wp_type_set && pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &chk_wp) != 0))
+	if (pdu.data.wp.is_deleted && (db_get(&pdu.data.wp.address.srose_call, &chk_wp) != 0))
 		{
-		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s ignored (unknown callsign)",
+		if (verbose) syslog(LOG_INFO, "rose_read_handler() received deleted WP record '%s' from adjacent %s REJECTED",
 		ax25_ntoa(&pdu.data.wp.address.srose_call),
 		rose_ntoa(&context[s]->address.srose_addr));
-		again = (rc == 2);   /* P3 F6BVP 2026-06-12: skip, keep session up */
-		continue;
+		close_client(s, 0);
+		return;
 		}
 	}
 
@@ -253,16 +246,6 @@ static void rose_read_handler(int s)
 
 	  switch (pdu.type) {
 	  case wp_type_set:
-		/* P2 F6BVP 2026-06-12: obsolescence policy moved here from the wire
-		 * codec (libwp.c). Skip an obsolete deleted record WITHOUT closing the
-		 * session (the codec used to return -1 -> close_client). Mirrors the
-		 * send-side skip in rose_write_handler. */
-		if (pdu.data.wp.is_deleted && ancien(&pdu)) {
-			if (verbose) syslog(LOG_INFO, "Ignoring obsolete deleted record %s from %s",
-				ax25_ntoa(&pdu.data.wp.address.srose_call),
-				rose_ntoa(&context[s]->address.srose_addr));
-			break;
-		}
 		  /* For user client, check record validity */
 		  /* if (context[s]->type != WP_USER || wp_valid(&pdu.data.wp)) {	*/
 
