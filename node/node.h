@@ -157,6 +157,7 @@ extern int cmdparse(struct cmd *cmdp, char *cmdline);
 extern void node_msg(const char *fmt, ...);
 extern void node_perror(char *str, int err);
 extern char *print_node(const char *alias, const char *call);
+extern int nr_link_pending(const char *call, int *n2count, int *n2);
 extern void fpaclog(int, const char *, ...);
 
 /* in user.c */
@@ -175,10 +176,15 @@ extern int read_config(void);
 /* in command.c */
 extern int Colored;
 extern char *roseaddr(char *addr);
+extern struct proc_rs_nodes *read_proc_rs_nodes_ordered(void);
 extern void init_nodecmds(void);
 extern void logout(char *reason);
 extern int do_alias(int argc, char **argv);
 extern int do_application(int argc, char **argv);
+extern int do_lang(int argc, char **argv);
+extern void lang_init(void);
+extern const char *T(const char *en);
+extern int UserLang;
 extern int do_bye(int argc, char **argv);
 extern int do_color(int argc, char **argv);
 extern int do_mheard(int argc, char **argv);
@@ -201,6 +207,7 @@ extern int do_rose(int argc, char **argv);
 /* in gateway.c */
 extern char *rs_get_addr(char *dev);
 extern int do_connect(int argc, char **argv);
+extern int rose_predict_route(const char *addr10, char *entry, int *mask, char *call);
 extern int do_finger(int argc, char **argv);
 extern int do_ping(int argc, char **argv);
 

@@ -1539,7 +1539,10 @@ static int callcmp(char *call1, char *call2)
 	ptr = strchr(call1, '-');
 	if ((ptr) && (*(ptr+1) != '*'))
 	{
-		return strcasecmp(call1, call2);
+		/* F6BVP 2026-09-30: add_application() stores "CALL-0" but an
+		 * incoming ROSE call is read with ax25_ntoa(), which never
+		 * writes "-0": an application with SSID 0 was never found. */
+		return callsign_eq(call1, call2) ? 0 : 1;
 	}
 
 	ptr = strchr(call1, '-');

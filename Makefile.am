@@ -33,7 +33,7 @@ install-data-hook:
 distclean-local:
 	-rm -rf autom4te.cache
 
-EXTRA_DIST = pathnames.h.in fpac.spec
+EXTRA_DIST = pathnames.h.in fpac.spec ChangeLog.fr NOUVELLES
 
 ACLOCAL_AMFLAGS = -I m4
 

@@ -455,13 +455,13 @@ static int node(char *port, char *fm_call, char *to_call, count_t **fm, count_t 
 	
 	for (n = head ; n ; n = n->next)
 	{
-		if ((strcmp(n->call, fm_call) == 0) && (strcmp(cfg.callsign, to_call) == 0) && (strcmp(port, n->port) == 0))
+		if (callsign_eq(n->call, fm_call) && callsign_eq(cfg.callsign, to_call) && (strcmp(port, n->port) == 0))
 		{
 			*fm = &n->c_fm;
 			*to = &n->c_to;
 			return TRUE;
 		}
-		if ((strcmp(n->call, to_call) == 0) && (strcmp(cfg.callsign, fm_call) == 0) && (strcmp(port, n->port) == 0))
+		if (callsign_eq(n->call, to_call) && callsign_eq(cfg.callsign, fm_call) && (strcmp(port, n->port) == 0))
 		{
 			*fm = &n->c_to;
 			*to = &n->c_fm;

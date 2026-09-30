@@ -1,3 +1,93 @@
+FPAC 4.1.6-rc4 — indicatifs sans SSID et connexion NetRom exacte (version candidate)
+=====================================================================================
+
+  * Un indicatif sans SSID est maintenant partout le même que celui
+    avec le SSID 0 (F3KT = F3KT-0) : connexion aux stations entendues
+    au SSID 0, applications et alias déclarés sans SSID, bascule ROSE.
+
+  * « C INDICATIF » ne part plus vers un autre nœud NetRom dont
+    l'indicatif commence pareil (c f6bvp-1 allait vers F6BVP-12). Un
+    message indique les nœuds NetRom proches quand il n'y a pas de
+    correspondance exacte.
+
+FPAC 4.1.6-rc3 — routes utilisables dans la commande « r » (version candidate)
+===============================================================================
+
+  * La commande « r » affiche maintenant aussi les routes exactes vers
+    les nœuds adjacents, qui étaient cachées.
+
+  * « r <adresse> » indique la route réellement utilisée pour se
+    connecter à cette adresse, et plus seulement les routes générales.
+
+  * Le message « Relais via ... » de la connexion ROSE et la bascule
+    après un échec suivent maintenant l'ordre des routes du noyau : ils
+    nommaient parfois le voisin de la route générale du DNIC au lieu de
+    celui de la route précise réellement utilisée.
+
+  * « r » affiche dans une colonne « Connect » l'indicatif à utiliser
+    pour se connecter à chaque nœud adjacent, et « r <adresse> » indique
+    la commande de connexion. La commande « n » titre « Connect » ses
+    indicatifs.
+
+  * fpacwpd ne part plus en boucle à 100 % du processeur (White Pages
+    bloquées) quand un client se déconnecte au milieu d'une réponse, et
+    un voisin de synchronisation ne reste plus bloqué en « connection in
+    progress » (synchronisation des White Pages arrêtée avec ce nœud),
+    ni ne plante après la fermeture d'une connexion de synchronisation.
+
+  * La commande « w » affiche toutes les fiches des White Pages, les plus
+    récentes en premier, page par page (<Entrée> pour continuer, A pour
+    arrêter).
+
+  * White Pages : une fiche de nœud n'est plus déplacée par les
+    connexions faites sous le même indicatif (fiche F6BVP-0 qui changeait
+    d'adresse selon le nœud de connexion).
+
+FPAC 4.1.6-rc2 — indicatifs des ports dans la commande « Ports » (version candidate)
+=====================================================================================
+
+  * La commande « Ports » de fpacnode affiche une nouvelle colonne
+    « Callsign » : l'indicatif de chaque port AX.25 et NetRom, et
+    l'adresse ROSE du port rose0. Les colonnes restent alignées avec
+    leurs titres quel que soit le terminal.
+
+  * La commande « u » affiche maintenant le vrai port de chaque
+    liaison : netnod pour les liaisons NetRom, rose0 pour les liaisons
+    ROSE, et non plus axudp pour toutes.
+
+FPAC 4.1.6-rc1 — corrections de la connexion ROSE (version candidate)
+======================================================================
+
+  * Le message « Relais via ... » de la commande de connexion nomme
+    maintenant le voisin réellement utilisé par le noyau : d'abord un
+    voisin « Opened » (liaison ROSE établie), et un voisin « Closed »
+    seulement en dernier recours. La bascule automatique retire aussi
+    la route du bon voisin après un échec.
+
+  * Connexion NetRom : le message de connexion indique maintenant le
+    voisin réellement utilisé (« Relais NetRom via ... » ou « direct »),
+    avec la qualité et le numéro de la route, et signale quand ce qui a
+    été tapé désigne un autre nœud que prévu.
+
+  * Liste des nœuds NetRom : la couleur indique si le nœud est
+    réellement joignable (vert : qualité supérieure à 200 et voisin sans
+    échec ; jaune : le reste ; rouge : qualité 0 ou 120, route active
+    invalide, voisin en échec ou liaison AX.25 en attente de connexion), dans les trois ordres de tri et dans
+    « ne * ». Une connexion vers un nœud dont la route active est
+    invalide affiche maintenant un avertissement au lieu de rester sans
+    réponse.
+
+  * Langue des messages : l'invite de commande et les messages de connexion
+    et de routage s'affichent en anglais ou en français, selon la langue du système
+    (ou la ligne « Language = en | fr | auto » de fpac.conf). La commande
+    « LAng 1 » (anglais) ou « LAng 2 » (français) change la langue de la
+    session en cours.
+
+  * wpedit : messages de confirmation visibles tout de suite ; supprimer
+    une fiche déjà supprimée (ou restaurer une fiche non supprimée)
+    n'interrompt plus la session.
+
+
 FPAC 4.1.5 — White Pages fiables, connexions plus claires
 ============================================================
 

@@ -276,9 +276,10 @@ if (verbose) syslog(LOG_INFO, "retour wp_set() : %d", ret);
 
 				if (ret == 0)
 					fprintf(stdout, "WP record '%s' updated", call);
-				else	
-					fprintf(stderr, "*** Error in address setting"); 
+				else
+					fprintf(stderr, "*** Error in address setting");
 				CR(); CR();
+				fflush(stdout);
 
 if (verbose) syslog(LOG_INFO, "calling wp_get()");
 
@@ -339,6 +340,7 @@ if (verbose) syslog(LOG_INFO, "retour wp_get()");
 					else
 						printf("*** Error in list of digis");
 				       	CR(); CR();
+					fflush(stdout);
 					wp_get(&wp.address.srose_call, &wp);
 				}
 			}
@@ -355,23 +357,48 @@ if (verbose) syslog(LOG_INFO, "retour wp_get()");
 			ret = wp_set(&wp);
 			if (ret == 0)
 				printf("Node '%s' attribute updated", call);
-			else 
+			else
 				printf("record '%s' not updated - error %d", call, ret);
 			CR(); CR();
+			fflush(stdout);
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'R':
-			if (!wp.is_deleted)
-				wp_set_del_date(&wp, time(NULL));
+			/* F6BVP 2026-09-17: skip the round-trip entirely if the
+			 * record is already deleted -- sending an unchanged
+			 * record makes the server reject it (WP_SET_ERROR,
+			 * "identical record"), and that rejection was observed
+			 * to leave the wpedit session in a bad state (closes
+			 * unexpectedly instead of returning to the menu). Bernard
+			 * hit this retrying (R)emove on a record he had already
+			 * deleted moments earlier. */
+			if (wp.is_deleted)
+			{
+				printf("WP record '%s' already deleted", call);
+				CR(); CR();
+				fflush(stdout);
+				break;
+			}
+			wp_set_del_date(&wp, time(NULL));
 			wp.is_deleted = 1;
 			if (wp_set(&wp) == 0)
 				printf("WP record '%s' deleted", call);
 			else
 				printf("record '%s' not updated", call);
 			CR(); CR();
+			fflush(stdout);
 			wp_get(&wp.address.srose_call, &wp);
 			break;
 		case 'U':
+			/* F6BVP 2026-09-17: same no-op short-circuit as (R)emove
+			 * above, for the same reason. */
+			if (!wp.is_deleted)
+			{
+				printf("WP record '%s' not deleted", call);
+				CR(); CR();
+				fflush(stdout);
+				break;
+			}
 			wp.is_deleted = 0;
 			wp_set_del_date(&wp, 0);
 if (verbose) syslog(LOG_INFO,"calling wp_set()");
@@ -381,6 +408,7 @@ if (verbose) syslog(LOG_INFO,"calling wp_set()");
 				printf("record '%s' not updated", call);
 if (verbose) syslog(LOG_INFO, "retour wp_set()");
 			CR(); CR();
+			fflush(stdout);
 if (verbose) syslog(LOG_INFO,"calling wp_get()");
 			wp_get(&wp.address.srose_call, &wp);
 if (verbose) syslog(LOG_INFO, "retour wp_get()");

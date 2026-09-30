@@ -84,6 +84,9 @@ int count_dirty_context(int client)
 	int i, count = 0;;
 	unsigned char k;
 
+	/* F6BVP 2026-09-30: an adjacent may still refer to a closed client
+	 * (see close_client in fpacwpd.c); never dereference a freed context. */
+	if (client < 0 || !context[client]) return 0;
 	if (!context[client]->dirty_size) return 0;
 	
 	for (i=0; i<context[client]->dirty_size; i++) {

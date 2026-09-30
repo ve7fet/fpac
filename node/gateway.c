@@ -183,7 +183,7 @@ char *get_address(int fd, char *address)
 			for (nroute=0; nroute < f->ndigi; nroute++)
 				{
 				strtok(n->call, " \t,;");
-				if (strcasecmp(f->node[nroute], n->call) == 0)
+				if (callsign_eq(f->node[nroute], n->call))
 				{
 		/* Only return address of a connected neighbour */
 				if (node_is_connected(n->call))
@@ -311,35 +311,48 @@ DESCRIPTION
 
 /*
  * Cherche, parmi les entrees /proc/net/rose_nodes dont le prefixe
- * correspond a addr10, un voisin candidat pas encore present dans
- * tried[]. Reproduit la logique de selection de rose_get_neigh() : le
- * noyau trie deja rose_node_list par masque decroissant (le match le
- * plus specifique en tete), donc un simple parcours dans l'ordre
- * suffit a retrouver le meme candidat que celui que le noyau vient de
- * choisir, puis a passer au suivant une fois celui-ci retire de la
- * table.
+ * correspond a addr10, le voisin que le noyau va (ou va maintenant)
+ * essayer, en excluant ceux deja presents dans tried[].
  *
- * N'exige PAS ng->restart == "yes" : le noyau accepte de tenter un
- * voisin dont le lien AX.25 n'est pas encore etabli (il l'etablit a la
- * demande via SABM pendant la tentative ROSE), donc exclure ces
- * voisins ici desynchronise notre liste de candidats de celle
- * reellement utilisee par le noyau (observe le 11/09/2026 : un voisin
- * declare en 3eme position, restart=no, etait bien tente par le noyau
- * mais jamais nomme dans le message affiche a l'utilisateur).
+ * Reproduit EXACTEMENT rose_get_neigh() (net/rose/rose_route.c). Le noyau
+ * trie deja rose_node_list par masque decroissant (le match le plus
+ * specifique en tete) et parcourt les voisins dans l'ordre du tableau
+ * (neigh1, neigh2, neigh3 de /proc/net/rose_nodes), en DEUX passages :
+ *
+ *   1) le premier voisin "restarted" (colonne restart == "yes" de
+ *      /proc/net/rose_neigh, affiche "Opened" par la commande ro) ;
+ *   2) seulement s'il n'y en a aucun, le premier voisin dont le
+ *      temporisateur d'echec ftimer n'est pas en marche (colonne tf == 0).
+ *      Un voisin "Closed" n'est donc tente qu'en dernier recours : le
+ *      noyau etablit alors son lien AX.25 a la demande (SABM).
+ *
+ * Avant la 4.1.6-rc1 ce parcours prenait simplement le premier voisin
+ * de la liste, sans regarder restart : le message "Relais via" nommait
+ * alors un voisin "Closed" en tete de liste (ex. F6KKR-9) alors que le
+ * noyau utilisait en realite un voisin "Opened" plus loin (F3KT-11 ou
+ * F6BVP-9), et la bascule retirait la route du mauvais voisin.
+ *
+ * multi_only != 0 : ne considere que les entrees a plusieurs voisins
+ * (le repli generique DNIC=0 declarant plusieurs candidats). C'est le
+ * perimetre de la bascule, qui retire des routes (SIOCDELRT) : elle ne
+ * doit jamais toucher a une route specifique a un seul voisin.
+ * multi_only == 0 : lecture seule, toutes les entrees (prediction du
+ * voisin reellement utilise par le noyau, pour le message a l'utilisateur).
  *
  * Retourne 0 et remplit *out si un candidat est trouve, -1 sinon
  * (plus aucun candidat non essaye pour cette adresse).
  */
 static int rose_pick_failover(const char *addr10,
 			       char tried[][10], int ntried,
-			       struct rose_route_struct *out)
+			       struct rose_route_struct *out, int multi_only)
 {
 	struct proc_rs_nodes *nodes, *n;
 	struct proc_rs_neigh *neighs, *ng;
 	unsigned int cand[3];
-	int ncand, i, j, skip;
+	int ncand, i, j, skip, pass;
 
-	if ((nodes = read_proc_rs_nodes()) == NULL)
+	/* kernel order (most specific first), see read_proc_rs_nodes_ordered() */
+	if ((nodes = read_proc_rs_nodes_ordered()) == NULL)
 		return -1;
 
 	if ((neighs = read_proc_rs_neigh()) == NULL)
@@ -348,44 +361,54 @@ static int rose_pick_failover(const char *addr10,
 		return -1;
 	}
 
-	for (n = nodes; n; n = n->next)
+	for (pass = 0; pass < 2; pass++)
 	{
-		if (n->n < 2)
-			continue;	/* pas un repli a plusieurs candidats */
-		if (strncmp(n->address, addr10, n->mask) != 0)
-			continue;
-
-		ncand = 0;
-		if (n->neigh1) cand[ncand++] = n->neigh1;
-		if (n->neigh2) cand[ncand++] = n->neigh2;
-		if (n->neigh3) cand[ncand++] = n->neigh3;
-
-		for (i = 0; i < ncand; i++)
+		for (n = nodes; n; n = n->next)
 		{
-			for (ng = neighs; ng; ng = ng->next)
+			if (multi_only && n->n < 2)
+				continue;	/* pas un repli a plusieurs candidats */
+			if (strncmp(n->address, addr10, n->mask) != 0)
+				continue;
+
+			ncand = 0;
+			if (n->neigh1) cand[ncand++] = n->neigh1;
+			if (n->neigh2) cand[ncand++] = n->neigh2;
+			if (n->neigh3) cand[ncand++] = n->neigh3;
+
+			for (i = 0; i < ncand; i++)
 			{
-				if ((unsigned int) ng->addr != cand[i])
-					continue;
+				for (ng = neighs; ng; ng = ng->next)
+				{
+					if ((unsigned int) ng->addr != cand[i])
+						continue;
 
-				skip = 0;
-				for (j = 0; j < ntried; j++)
-					if (strcasecmp(tried[j], ng->call) == 0)
-					{
-						skip = 1;
-						break;
-					}
-				if (skip)
-					continue;
+					skip = 0;
+					for (j = 0; j < ntried; j++)
+						if (callsign_eq(tried[j], ng->call))
+						{
+							skip = 1;
+							break;
+						}
+					if (skip)
+						continue;
 
-				memset(out, 0, sizeof(*out));
-				rose_aton(n->address, out->address.rose_addr);
-				out->mask = n->mask;
-				strcpy(out->device, ng->dev);
-				ax25_aton_entry(ng->call, out->neighbour.ax25_call);
+					/* passage 1 : voisin "restarted" seulement ;
+					 * passage 2 : ftimer arrete seulement */
+					if (pass == 0 && strcmp(ng->restart, "yes") != 0)
+						continue;
+					if (pass == 1 && ng->tf != 0)
+						continue;
 
-				free_proc_rs_neigh(neighs);
-				free_proc_rs_nodes(nodes);
-				return 0;
+					memset(out, 0, sizeof(*out));
+					rose_aton(n->address, out->address.rose_addr);
+					out->mask = n->mask;
+					strcpy(out->device, ng->dev);
+					ax25_aton_entry(ng->call, out->neighbour.ax25_call);
+
+					free_proc_rs_neigh(neighs);
+					free_proc_rs_nodes(nodes);
+					return 0;
+				}
 			}
 		}
 	}
@@ -393,6 +416,24 @@ static int rose_pick_failover(const char *addr10,
 	free_proc_rs_neigh(neighs);
 	free_proc_rs_nodes(nodes);
 	return -1;
+}
+
+/*
+ * Read-only prediction for the "routes <address>" command: the route
+ * entry and the neighbour the kernel will use to reach addr10, with
+ * the same rule as rose_get_neigh(). Returns 0 and fills entry (10
+ * digits), *mask and call, or -1 when no neighbour can be used.
+ */
+int rose_predict_route(const char *addr10, char *entry, int *mask, char *call)
+{
+	struct rose_route_struct r;
+
+	if (rose_pick_failover(addr10, NULL, 0, &r, 0) != 0)
+		return -1;
+	strcpy(entry, rose_ntoa(&r.address));
+	*mask = r.mask;
+	strcpy(call, ax25_ntoa(&r.neighbour));
+	return 0;
 }
 
 /*
@@ -443,7 +484,7 @@ static int rose_try_failover(int cause, const char *addr10,
 		return 0;
 	if (*ntried >= ROSE_FAILOVER_MAX)
 		return 0;
-	if (rose_pick_failover(addr10, tried, *ntried, &cand) != 0)
+	if (rose_pick_failover(addr10, tried, *ntried, &cand, 1) != 0)
 		return 0;
 
 	if ((rs = socket(AF_ROSE, SOCK_SEQPACKET, 0)) < 0)
@@ -464,12 +505,81 @@ static int rose_try_failover(int cause, const char *addr10,
 	 * "un autre voisin"). Chaine vide si aucun candidat restant. */
 	if (next_call)
 	{
-		if (rose_pick_failover(addr10, tried, *ntried, &next_cand) == 0)
+		if (rose_pick_failover(addr10, tried, *ntried, &next_cand, 0) == 0)
 			strcpy(next_call, ax25_ntoa(&next_cand.neighbour));
 		else
 			*next_call = '\0';
 	}
 	return 1;
+}
+
+/*
+ * F6BVP 2026-09-19: informational only -- name the neighbour the kernel
+ * will really use for a NetRom connection, as done for ROSE
+ * ("*** Relais via ..."). Without it a connection to a NetRom node
+ * (typed by callsign or by alias) gives no clue which route carries it,
+ * so a failure cannot be told from a success through another route.
+ *
+ * Reproduces nr_route_frame() (net/netrom/nr_route.c): the frame goes to
+ * nr_node->routes[nr_node->which].neighbour. /proc/net/nr_nodes prints
+ * which + 1 in column "w" and the (up to 3) routes as quality/obs/neigh
+ * triplets; /proc/net/nr_neigh maps the neighbour number to its callsign.
+ * Read-only: nothing is modified.
+ */
+static void netrom_show_relay(const char *nodecall)
+{
+	struct proc_nr_nodes *nodes, *n;
+	struct proc_nr_neigh *neighs, *ng;
+	int addr, qual, obs;
+
+	if ((nodes = read_proc_nr_nodes()) == NULL)
+		return;
+
+	for (n = nodes; n; n = n->next)
+		if (callsign_eq(n->call, nodecall))
+			break;
+
+	if (n && n->n > 0 && (n->w < 1 || n->w > n->n))
+	{
+		/* "which" out of range: nr_route_frame() returns 0 and drops
+		 * everything, so the connection will hang with no frame sent. */
+		node_msg(T("*** Invalid NetRom route (active route %d of %d): the kernel will not forward anything to %s"),
+			 n->w, n->n, n->call);
+	}
+	else if (n && n->n > 0 && n->w >= 1 && n->w <= n->n && n->w <= 3)
+	{
+		addr = (n->w == 1) ? n->addr1 : (n->w == 2) ? n->addr2 : n->addr3;
+		qual = (n->w == 1) ? n->qual1 : (n->w == 2) ? n->qual2 : n->qual3;
+		obs  = (n->w == 1) ? n->obs1  : (n->w == 2) ? n->obs2  : n->obs3;
+
+		if ((neighs = read_proc_nr_neigh()) != NULL)
+		{
+			for (ng = neighs; ng; ng = ng->next)
+				if (ng->addr == addr)
+					break;
+
+			if (ng)
+			{
+				if (callsign_eq(ng->call, n->call))
+					node_msg(T("*** NetRom direct (neighbour %s, route %d/%d, quality %d, obs %d)..."),
+						 ng->call, n->w, n->n, qual, obs);
+				else
+					node_msg(T("*** NetRom relaying via %s (route %d/%d, quality %d, obs %d)..."),
+						 ng->call, n->w, n->n, qual, obs);
+				{
+					int rn2c = 0, rn2m = 0;
+
+					/* SABM sent, no answer yet: the connection cannot
+					 * succeed until the neighbour answers. */
+					if (nr_link_pending(ng->call, &rn2c, &rn2m))
+						node_msg(T("*** Warning: AX.25 link to %s awaiting connection (attempt %d/%d, no answer)"),
+							 ng->call, rn2c, rn2m);
+				}
+			}
+			free_proc_nr_neigh(neighs);
+		}
+	}
+	free_proc_nr_nodes(nodes);
 }
 
 static int connect_to(char *address[], int family, int escape, char *source,
@@ -514,9 +624,9 @@ static int connect_to(char *address[], int family, int escape, char *source,
 	switch (family)
 	{
 	case AF_ROSE:
-		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
+		if (callsign_eq(address[0], cfg.alt_callsign))
 		{
-			node_msg("already connected to %s", cfg.alt_callsign);
+			node_msg(T("already connected to %s"), cfg.alt_callsign);
 			return -1;
 		}
 
@@ -572,11 +682,11 @@ static int connect_to(char *address[], int family, int escape, char *source,
 			addrlen = strlen(address[pos]);
 		}
 // DEBUG F6BVP
-//		node_msg("ROSE address DNIC : %s , %s - %d digits", path, address[pos], addrlen);
+//		node_msg(T("ROSE address DNIC : %s , %s - %d digits"), path, address[pos], addrlen);
 
 		if ((addrlen != 6) && (addrlen != 10))
 		{
-			node_msg("Invalid ROSE address DNIC : %s , %s - %d digits", path, address[pos], addrlen);
+			node_msg(T("Invalid ROSE address DNIC : %s , %s - %d digits"), path, address[pos], addrlen);
 			return (-1);
 		}
 
@@ -599,7 +709,7 @@ static int connect_to(char *address[], int family, int escape, char *source,
 		 * the wrong network.
 		 */
 		if (!explicit_dnic && addrlen == 6)
-			node_msg("*** Pas de DNIC indique, DNIC local suppose : %s @ %s -- indiquez l'adresse complete si le correspondant est sur un autre reseau", strupr(address[0]), roseaddr(path));
+			node_msg(T("*** No DNIC given, assuming the local DNIC : %s @ %s -- give the full address if the correspondent is on another network"), strupr(address[0]), roseaddr(path));
 
 		sprintf(User.dl_name, "%s @ %s", strupr(address[0]), roseaddr(path));
 
@@ -643,7 +753,7 @@ static int connect_to(char *address[], int family, int escape, char *source,
 		addrlen = sizeof(struct full_sockaddr_rose);
 		
 // DEBUG F6BVP
-//		node_msg("ROSE address : %s via : %s", path, address[pos]);
+//		node_msg(T("ROSE address : %s via : %s"), path, address[pos]);
 //		node_msg("Connnect_to() digi %s", ax25_ntoa(&sockaddr.rose.srose_digis[0].ax25_call));
 //				
 		paclen = rs_config_get_paclen(NULL); 
@@ -651,9 +761,9 @@ static int connect_to(char *address[], int family, int escape, char *source,
 		break;
 
 	case AF_NETROM:
-		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
+		if (callsign_eq(address[0], cfg.alt_callsign))
 		{
-			node_msg("already connected to %s", cfg.alt_callsign);
+			node_msg(T("already connected to %s"), cfg.alt_callsign);
 			return -1;
 		}
 
@@ -676,7 +786,7 @@ static int connect_to(char *address[], int family, int escape, char *source,
 		}
 		if ((np = find_node(address[0], NULL)) == NULL)
 		{
-			node_msg("No such node");
+			node_msg(T("No such node"));
 			return -1;
 		}
 		strcpy(User.dl_name, print_node(np->alias, np->call));
@@ -702,13 +812,13 @@ static int connect_to(char *address[], int family, int escape, char *source,
             address[0]=ax25_config_get_name(address[0]);
 FSA*/
                 if ((dest = ax25_config_get_addr(address[0])) == NULL) {
-                    node_msg("Port AX.25 invalide : %s", address[0]);
+                    node_msg(T("Invalid AX.25 port : %s"), address[0]);
                     return -1;
                 }
 
-		if (strcasecmp(address[0], cfg.alt_callsign) == 0)
+		if (callsign_eq(address[0], cfg.alt_callsign))
 		{
-			node_msg("already connected to %s", call);
+			node_msg(T("already connected to %s"), call);
 			return -1;
 		}
 
@@ -777,7 +887,7 @@ FSA*/
 		}
 		if ((hp = gethostbyname(address[0])) == NULL)
 		{
-			node_msg("Unknown host %s", address[0]);
+			node_msg(T("Unknown host %s"), address[0]);
 			close(fd);
 			return -1;
 		}
@@ -801,7 +911,7 @@ FSA*/
 		}
 		else
 		{
-			node_msg("Unknown service %s", address[1]);
+			node_msg(T("Unknown service %s"), address[1]);
 			close(fd);
 			return -1;
 		}
@@ -815,11 +925,11 @@ FSA*/
 		eol = INET_EOL;
 		break;
 	default:
-		node_msg("Unsupported address family");
+		node_msg(T("Unsupported address family"));
 		return -1;
 	}
 	if (family == AF_FLEXNET)
-		node_msg("Trying %s%s...", (source) ? source : "", User.dl_name);
+		node_msg(T("Trying %s%s..."), (source) ? source : "", User.dl_name);
 	else if (family == AF_AX25)
 	{
 		/* F6BVP 2026-09-16: name the port (User.dl_port, set a few
@@ -828,14 +938,14 @@ FSA*/
 		 * actually being tried. Bernard 2026-09-16: put it inside the
 		 * existing "(user port)" parenthesis rather than after it. */
 		if (source && strcmp(source, "(user port) ") == 0)
-			node_msg("Trying (user port %s) %s... Type <RETURN> to abort", User.dl_port, User.dl_name);
+			node_msg(T("Trying (user port %s) %s... Type <RETURN> to abort"), User.dl_port, User.dl_name);
 		else if (source && strcmp(source, "(heard) ") == 0)
-			node_msg("Trying (heard on port %s) %s... Type <RETURN> to abort", User.dl_port, User.dl_name);
+			node_msg(T("Trying (heard on port %s) %s... Type <RETURN> to abort"), User.dl_port, User.dl_name);
 		else
-			node_msg("Trying %s%s %s... Type <RETURN> to abort", (source) ? source : "", User.dl_port, User.dl_name);
+			node_msg(T("Trying %s%s %s... Type <RETURN> to abort"), (source) ? source : "", User.dl_port, User.dl_name);
 	}
 	else
-		node_msg("Trying %s%s... Type <RETURN> to abort", (source) ? source : "", User.dl_name);
+		node_msg(T("Trying %s%s... Type <RETURN> to abort"), (source) ? source : "", User.dl_name);
 	usflush(User.fd);
 	/*
 	 * Ok. Now set up a non-blocking connect...
@@ -872,14 +982,14 @@ FSA*/
 				rose_cause.diagnostic = 0;
 				break;
 			}
-			node_msg("*** Failure with %s", User.dl_name);
+			node_msg(T("*** Failure with %s"), User.dl_name);
 			node_msg("*** %s", reason(rose_cause.cause));
 			if (out_cause)
 				*out_cause = rose_cause;
 		}
 		else
 		{
-			node_msg("*** Failure with %s", User.dl_name);
+			node_msg(T("*** Failure with %s"), User.dl_name);
 			node_msg("*** %s", strerror(errno));
 		}
 		close(fd);
@@ -920,7 +1030,7 @@ FSA*/
 				{
 					cp = strdup(strerror(ret));
 					strlwr(cp);
-					node_msg("*** Failure with %s", User.dl_name);
+					node_msg(T("*** Failure with %s"), User.dl_name);
 					node_msg("*** %s", cp);
 					fpaclog(LOGLVL_GW, "Failure with %s: %s", User.dl_name, cp);
 					free(cp);
@@ -947,7 +1057,7 @@ FSA*/
 					}
 					else
 	/*				node_msg("facilities error %d %s\n", errno, strerror(errno));*/
-					node_msg("*** Failure with %s%s", User.dl_name, origin);
+					node_msg(T("*** Failure with %s%s"), User.dl_name, origin);
 					node_msg("*** %s", cp);
 					free(cp);
 					if (out_cause)
@@ -964,7 +1074,7 @@ FSA*/
 		{
 			if (readline(User.fd) != NULL)
 			{
-				node_msg("*** Aborted");
+				node_msg(T("*** Aborted"));
 				close(fd);
 				return -1;
 			}
@@ -986,14 +1096,14 @@ FSA*/
 	{
 		if (family == AF_FLEXNET)
 			{
-			node_msg("link setup...");
+			node_msg(T("link setup..."));
 			}
 		else
 			{
 			if (escape == -1)
-				node_msg("*** Connected to %s", User.dl_name);
+				node_msg(T("*** Connected to %s"), User.dl_name);
 			else
-				node_msg("*** Connected to %s (Escape: ~. )", User.dl_name);
+				node_msg(T("*** Connected to %s (Escape: ~. )"), User.dl_name);
 			}
 		usflush(User.fd);
 		fpaclog(LOGLVL_GW, "Connected to %s", User.dl_name);
@@ -1033,7 +1143,7 @@ int is_alias(char *callsign, alias_t * alias)
 
 	for (a = cfg.alias; (a != NULL); a = a->next)
 	{
-		if (strcasecmp(callsign, a->alias) == 0)
+		if (callsign_eq(callsign, a->alias))	/* F3KT == F3KT-0 */
 		{
 			*alias = *a;
 			return (1);
@@ -1046,15 +1156,23 @@ static int is_netrom(char *call, char *netrom_call)
 {
 	struct proc_nr_nodes *p, *list;
 	char *ptr = NULL;
+	char near[160];
+	size_t base;
 	int ret = 0;
 
 	if ((list = read_proc_nr_nodes()) == NULL)
 		return ret;
 
+	/*
+	 * F6BVP 2026-09-30: exact match only, on the callsign (F6BVP is
+	 * F6BVP-0) or on the alias. The callsign used to be matched on its
+	 * PREFIX: "c f6bvp-1" (the BBS, found in the White Pages) connected
+	 * to the NetRom node F6BVP-12 instead, since NetRom is tried before
+	 * the White Pages.
+	 */
 	for (p = list; p != NULL; p = p->next)
 	{
-		if ((strncasecmp(p->call, call, strlen(call)) == 0)
-			|| (strcasecmp(p->alias, call) == 0))
+		if (callsign_eq(p->call, call) || (strcasecmp(p->alias, call) == 0))
 		{
 			ptr = p->call;
 			break;
@@ -1065,6 +1183,25 @@ static int is_netrom(char *call, char *netrom_call)
 	{
 		strcpy(netrom_call, ptr);
 		ret = 1;
+	}
+	else
+	{
+		/* Help: NetRom nodes with the same base callsign, other SSID */
+		near[0] = '\0';
+		base = strcspn(call, "-");
+		for (p = list; p != NULL; p = p->next)
+		{
+			if (strcspn(p->call, "-") == base &&
+			    strncasecmp(p->call, call, base) == 0 &&
+			    strlen(near) + strlen(p->call) + 2 < sizeof(near))
+			{
+				if (near[0])
+					strcat(near, " ");
+				strcat(near, p->call);
+			}
+		}
+		if (near[0])
+			node_msg(T("*** No NetRom node %s (NetRom nodes with this callsign: %s)"), call, near);
 	}
 
 	free_proc_nr_nodes(list);
@@ -1208,14 +1345,14 @@ int do_connect(int argc, char **argv)
 		/* Check if its is a known port */
 		if (ax25_config_get_addr(argv[1]))
 		{
-			if (strcasecmp(argv[1], cfg.alt_callsign) == 0)
+			if (callsign_eq(argv[1], cfg.alt_callsign))
 			{
-				node_msg("already connected to %s", cfg.alt_callsign);
+				node_msg(T("already connected to %s"), cfg.alt_callsign);
 				goto done;
 			}
  			if (argc < 3)
  			{
-				node_msg("Connect %s. Usage : Connect port callsign",argv[1]);
+				node_msg(T("Connect %s. Usage : Connect port callsign"),argv[1]);
 				goto done;
 			}
 			family = AF_AX25;
@@ -1225,6 +1362,10 @@ int do_connect(int argc, char **argv)
 		/* Check if known NetRom node */
 		else if ((eff_argc == 2) && (is_netrom(argv[1], netromcall)))
 		{
+			/* F6BVP 2026-09-19: say so when an alias resolved to a node
+			 * callsign (exact match since 4.1.6-rc4). */
+			if (!callsign_eq(argv[1], netromcall))
+				node_msg("*** NetRom %s -> %s", argv[1], netromcall);
 			argv[1] = netromcall;
 			family = AF_NETROM;
 			source = "(netrom node) ";
@@ -1267,7 +1408,7 @@ int do_connect(int argc, char **argv)
 			{
 				if (ax25_aton_entry(argv[2], ax25.ax25_call) == -1)
 				{
-					node_msg("invalid AX.25 port callsign - %s", argv[2]);
+					node_msg(T("invalid AX.25 port callsign - %s"), argv[2]);
 					goto done;
 				}
 
@@ -1295,7 +1436,7 @@ int do_connect(int argc, char **argv)
 			flgt = find_gateway(flx->addr, NULL);
 			if (flgt == NULL)
 			{
-				node_msg ("Error: No gateway for destination %s", netromcall);
+				node_msg (T("Error: No gateway for destination %s"), netromcall);
 				goto done;
 			}
 
@@ -1408,9 +1549,12 @@ int do_connect(int argc, char **argv)
 		/* Indicatif du voisin par lequel le noyau va relayer le tout
 		 * premier essai (avant tout echec/bascule) : simple lecture,
 		 * rose_pick_failover() ne modifie pas la table de routage. */
-		if (rose_pick_failover(rose_addr10, rose_tried, rose_ntried, &first_cand) == 0)
-			node_msg("*** Relais via %s...", ax25_ntoa(&first_cand.neighbour));
+		if (rose_pick_failover(rose_addr10, rose_tried, rose_ntried, &first_cand, 0) == 0 &&
+		    strncmp(ax25_ntoa(&first_cand.neighbour), "RSLOOP", 6) != 0)
+			node_msg(T("*** Relaying via %s..."), ax25_ntoa(&first_cand.neighbour));
 	}
+	else if (family == AF_NETROM)
+		netrom_show_relay(argv[0]);
 
 rose_retry:
 	memset(&conn_cause, 0, sizeof(conn_cause));
@@ -1426,9 +1570,9 @@ rose_retry:
 					rose_removed, &rose_nremoved, rose_next_call))
 			{
 				if (*rose_next_call)
-					node_msg("*** Route indisponible, nouvel essai via %s...", rose_next_call);
+					node_msg(T("*** Route unavailable, retrying via %s..."), rose_next_call);
 				else
-					node_msg("*** Route indisponible, nouvel essai via un autre voisin...");
+					node_msg(T("*** Route unavailable, retrying via another neighbour..."));
 				goto rose_retry;
 			}
 			rose_restore_failover(rose_removed, rose_nremoved);
@@ -1447,9 +1591,9 @@ rose_retry:
 					rose_removed, &rose_nremoved, rose_next_call))
 			{
 				if (*rose_next_call)
-					node_msg("*** Route indisponible, nouvel essai via %s...", rose_next_call);
+					node_msg(T("*** Route unavailable, retrying via %s..."), rose_next_call);
 				else
-					node_msg("*** Route indisponible, nouvel essai via un autre voisin...");
+					node_msg(T("*** Route unavailable, retrying via another neighbour..."));
 				goto rose_retry;
 			}
 			rose_restore_failover(rose_removed, rose_nremoved);
@@ -1479,7 +1623,7 @@ rose_retry:
 				wpt2.is_deleted = 0;
 				wp_set_del_date(&wpt2, 0);
 				if (wp_set(&wpt2) == 0)
-					node_msg("*** White Pages entry for %s restored", explicit_rose_call);
+					node_msg(T("*** White Pages entry for %s restored"), explicit_rose_call);
 			}
 			wp_close();
 		}
@@ -1576,7 +1720,7 @@ rose_retry:
 		else
 
 		if (*origin)
-			node_msg("*** Disconnected%s", origin);
+			node_msg(T("*** Disconnected%s"), origin);
 
 		if (rose_wp_failover && rose_try_failover(rose_cause.cause,
 				rose_addr10, rose_tried, &rose_ntried,
@@ -1584,9 +1728,9 @@ rose_retry:
 		{
 			close(fd);
 			if (*rose_next_call)
-				node_msg("*** Route indisponible, nouvel essai via %s...", rose_next_call);
+				node_msg(T("*** Route unavailable, retrying via %s..."), rose_next_call);
 			else
-				node_msg("*** Route indisponible, nouvel essai via un autre voisin...");
+				node_msg(T("*** Route unavailable, retrying via another neighbour..."));
 			goto rose_retry;
 		}
 
@@ -1605,7 +1749,7 @@ rose_retry:
 		set_eolmode(User.fd, EOLMODE_TEXT);
 		if (fcntl(User.fd, F_SETFL, 0) == -1)
 			node_perror("do_connect: fcntl - stdin", errno);
-		node_msg("*** Reconnected to %s", NodeId);
+		node_msg(T("*** Reconnected to %s"), NodeId);
 	}
 	else
 		logout("No reconnect");
@@ -1677,7 +1821,7 @@ int do_finger(int argc, char **argv)
 			usputc(c, User.fd);
 		end_io(fd);
 		close(fd);
-		node_msg("*** Reconnected to %s", NodeId);
+		node_msg(T("*** Reconnected to %s"), NodeId);
 	}
 	set_eolmode(User.fd, EOLMODE_TEXT);
 	if (fcntl(User.fd, F_SETFL, 0) == -1)
@@ -1784,7 +1928,7 @@ int do_ping(int argc, char **argv)
 	}
 	if ((hp = gethostbyname(argv[1])) == NULL)
 	{
-		node_msg("Unknown host %s", argv[1]);
+		node_msg(T("Unknown host %s"), argv[1]);
 		return 0;
 	}
 	memset(&to, 0, sizeof(to));
@@ -1884,7 +2028,7 @@ int do_ping(int argc, char **argv)
 		{
 			if (readline(User.fd) != NULL)
 			{
-				node_msg("Aborted");
+				node_msg(T("Aborted"));
 				break;
 			}
 			else if (errno != EAGAIN)

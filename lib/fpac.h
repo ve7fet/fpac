@@ -124,6 +124,7 @@ typedef struct
 	char	def_port[20];	/* Default port */
 	char	password[256];	/* Password */
 	char	option[20];		/* Champ option */
+	char	language[8];		/* Language of the user messages: en, fr or auto */
 	node_t	*node;			/* Head of the adjacent nodes list */
 	alias_t	*alias;			/* Head of the alias callsigns list */
 	luser_t	*luser;			/* Head of users list */
@@ -148,6 +149,7 @@ extern char *fpac2asc(rose_address *);
 extern int cfg_open(cfg_t *);
 extern int open_cfg(cfg_t *cfg, FILE *fptr, int);
 extern int is_heard(char **);
+extern int callsign_eq(const char *a, const char *b);
 
 
 extern void fpac_nr_config_load_ports(void);

@@ -58,6 +58,7 @@ enum conf_kw
 	OPTION,
 	NOWP,
 	INETADDR,
+	LANGUAGE,
 	END
 };
 
@@ -96,6 +97,7 @@ kw_t kw[] =
 	{ "option", OPTION },
 	{ "nowp", NOWP },
 	{ "inetaddr", INETADDR },
+	{ "language", LANGUAGE },
 	{ "end", END },
 	{ "", -1}	/* End of the table */
 };
@@ -640,6 +642,9 @@ int open_cfg(cfg_t *cfg, FILE *fptr, int first)
 				break;
 			case PASSWORD:
 				strcpy_n(cfg->password, value, sizeof(cfg->password));
+				break;
+			case LANGUAGE:	/* F6BVP 2026-09-19: en | fr | auto */
+				strcpy_n(cfg->language, value, sizeof(cfg->language));
 				break;
 			case CALLSIGN: /* this is the L3call of the node */
 				strcpy_n(cfg->callsign, value, sizeof(cfg->callsign));

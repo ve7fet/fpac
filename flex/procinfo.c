@@ -358,6 +358,17 @@ struct flex_gt *find_gateway(int addr, struct flex_gt *list)
   return p;
 }
 
+/* Same as callsign_eq() of lib/procutils.c (flexd does not link libfpac):
+ * a callsign without SSID is the callsign with SSID 0. */
+static int flex_callsign_eq(const char *a, const char *b)
+{
+  size_t la = strcspn(a, "-"), lb = strcspn(b, "-");
+  const char *sa = a[la] ? a + la + 1 : "0";
+  const char *sb = b[lb] ? b + lb + 1 : "0";
+
+  return la == lb && strncasecmp(a, b, la) == 0 && atoi(sa) == atoi(sb);
+}
+
 struct ax_routes *find_mheard(char *dest_call)
 {
   FILE *fp;
@@ -373,11 +384,11 @@ struct ax_routes *find_mheard(char *dest_call)
   }
   
   safe_strncpy(call,dest_call,9);
-  cp=strchr(call, '-');
-  if (cp==NULL) strcat(call,"-0");
+  (void)cp;
 
   while (fread(&mh, sizeof(struct mheard_struct), 1, fp) == 1) {
-    if (strcasecmp(call, ax25_ntoa(&mh.from_call))==0) {
+    /* ax25_ntoa() never writes "-0": appending it made SSID 0 unfindable */
+    if (flex_callsign_eq(call, ax25_ntoa(&mh.from_call))) {
       fclose(fp);
       safe_strncpy(a.dest_call, ax25_ntoa(&mh.from_call), 9);
       safe_strncpy(a.dev, mh.portname, 13);

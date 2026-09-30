@@ -98,6 +98,31 @@ char *rs_get_addr(char *dev)
 	return (add);
 }
 
+/*
+ * F6BVP 2026-09-30: compare two callsigns as AX.25 does. By convention a
+ * callsign written without SSID IS the callsign with SSID 0, and the
+ * strings do not agree on that: the kernel (/proc/net/...) always writes
+ * "-0", ax25_ntoa() never does, fpac.conf and user input may do either.
+ * Comparing them as plain strings made "F3KT" and "F3KT-0" different.
+ * Case-insensitive. Returns 1 when a and b are the same callsign.
+ */
+int callsign_eq(const char *a, const char *b)
+{
+	size_t la, lb;
+	const char *sa, *sb;
+
+	if (a == NULL || b == NULL)
+		return 0;
+	la = strcspn(a, "-");
+	lb = strcspn(b, "-");
+	if (la != lb || strncasecmp(a, b, la) != 0)
+		return 0;
+	sa = a[la] ? a + la + 1 : "0";
+	sb = b[lb] ? b + lb + 1 : "0";
+	return atoi(sa) == atoi(sb) && strspn(sa, "0123456789") == strlen(sa)
+		&& strspn(sb, "0123456789") == strlen(sb);
+}
+
 /* is_heard : from awznode */
 int is_heard(char **av)
 {
@@ -116,13 +141,13 @@ int is_heard(char **av)
 	}
 
 	safe_strncpy(call, av[0], 9);
-	cp = strchr(call, '-');
-	if (cp == NULL)
-		strcat(call, "-0");
+	(void)cp;
 
 	while (fread(&mh, sizeof(struct mheard_struct), 1, fp) == 1)
 	{
-		if (strcasecmp(call, ax25_ntoa(&mh.from_call)) == 0)
+		/* ax25_ntoa() never writes "-0": "F4JQC" typed as "F4JQC" or
+		 * "F4JQC-0" must match (it never did, see callsign_eq()) */
+		if (callsign_eq(call, ax25_ntoa(&mh.from_call)))
 		{
 			fclose(fp);
 

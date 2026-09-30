@@ -69,7 +69,7 @@ static void quit_handler(int sig)
 
 static void prompt(void)
 {
-	tprintf("%s (Commands = ?) : ", cfg.alt_callsign);
+	tprintf(T("%s (Commands = ?) : "), cfg.alt_callsign);
 }
 
 int check_rose(void)
@@ -179,6 +179,8 @@ int main(int argc, char **argv)
 	}
 
 	read_colors();  /* charge /usr/local/etc/ax25/fpacnode.colors */
+
+	lang_init();   /* language of the messages: fpac.conf, then the system */
 
 	if (ax25_config_load_ports() == 0) 
 	{

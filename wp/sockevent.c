@@ -14,6 +14,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <syslog.h>
 
 #include "ax25compat.h"
 #include "sockevent.h"
@@ -46,6 +49,22 @@ int WaitEvent(int MilliSecTimeout)
 /* DEBUG F6BVP
 	if (rc == -1) perror("WaitEvent : select");
 	if (rc == 0) wp_flush_pdu();*/
+	if (rc < 0 && errno == EBADF) {
+		/*
+		 * F6BVP 2026-09-29: a registered fd was closed without being
+		 * unregistered. Drop it from the sets instead of spinning on
+		 * select() forever at 100% CPU.
+		 */
+		for (fd = 0; fd < FD_SETSIZE; fd++) {
+			if ((FD_ISSET(fd, &ActiveSet[0]) || FD_ISSET(fd, &ActiveSet[1]) ||
+			     FD_ISSET(fd, &ActiveSet[2])) &&
+			    fcntl(fd, F_GETFD) == -1 && errno == EBADF) {
+				syslog(LOG_WARNING, "WaitEvent: dropping closed fd %d from select set", fd);
+				for (i = 0; i < 3; i++)
+					FD_CLR(fd, &ActiveSet[i]);
+			}
+		}
+	}
 	if (rc <= 0) return rc-1;
 
 	for (fd=0; fd<FD_SETSIZE; fd++) {

@@ -12,6 +12,11 @@ Trcall    = F1TVE-10
 DNIC      = 2080
 Address   = 192502
 Coverage  = 192102 192402
+#
+# Language of the messages shown to the users of the node: en, fr or auto.
+# auto (default) = system language (LANG...). A user can change it for the
+# current session with the LAng command (LAng 1 = English, LAng 2 = French).
+#Language  = auto
 InetPort  = 10093
 InetAddr  = 44.151.75.1
 Password  = your_fpac_password_here

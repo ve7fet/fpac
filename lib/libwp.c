@@ -99,10 +99,16 @@ void wp_flush_pdu(void)
 	rc = send(pdu_s, pdu_s_cache, pdu_s_len, 0);
 	pdu_s_len = 0;
 
-	if (rc <= 0)	{
-/*		syslog(LOG_INFO, "wp_flush_pdu() WRITE ERROR - closing wp socket");*/
-		close(pdu_s);
-	}
+	/*
+	 * F6BVP 2026-09-29: do NOT close the socket here on a write error
+	 * (peer gone). The socket belongs to the caller: fpacwpd keeps it in
+	 * its select() set and in context[], so closing it behind its back
+	 * made select() fail with EBADF in a busy loop (100% CPU, White Pages
+	 * frozen), and close_client() could later close an unrelated socket
+	 * that reused the same fd number. The owner sees the error on its
+	 * next read or write and closes the socket itself.
+	 */
+	(void)rc;
 }
 
 static int wp_write_pdu(int s, char *buf, int lg)
@@ -855,6 +861,23 @@ int wp_update_addr(struct full_sockaddr_rose *addr)
 	if (wp_get(&addr->srose_call, &wp) != 0) {
 		syslog(LOG_INFO, "wp_update_addr() callsign '%s' not found\n", ptr);
 	/*	return -1; */
+	}
+
+	/*
+	 * F6BVP 2026-09-29: a node record is owned by the node itself (its
+	 * fpacwpd announces its own address). A connection seen under the
+	 * same callsign (a sysop using his base callsign, a stale record...)
+	 * must not move it: it gave a "node" whose address changed with each
+	 * connection and differed from one node to another (F6BVP-0).
+	 * A deleted node record revived by a connection becomes a plain user
+	 * record.
+	 */
+	if (wp.is_node) {
+		if (!wp.is_deleted) {
+			syslog(LOG_INFO, "wp_update_addr() '%s' is a node record, address not changed\n", ptr);
+			return 0;
+		}
+		memset(&wp, 0, sizeof(wp_t));	/* as for an unknown callsign */
 	}
 	wp.is_deleted = 0;
 	wp.address = *addr;

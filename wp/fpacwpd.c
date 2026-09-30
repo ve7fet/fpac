@@ -70,8 +70,25 @@ static void vector_request(struct wp_adjacent *wpa);
 
 static int init_client(int client, struct full_sockaddr_rose *address)
 {
-	assert(context[client] == 0);
+	assert(context[client] == 0);	/* not checked: NDEBUG is defined */
 	if (verbose) syslog(LOG_INFO, "Client handler init_client() %d", client);
+
+	/* F6BVP 2026-09-29: a context still attached to this fd number means
+	 * the previous socket was closed without close_client() (old libwp).
+	 * Detach it from its adjacent and free it instead of overwriting it,
+	 * otherwise the adjacent keeps pointing to a socket that is no longer
+	 * its own. */
+	if (context[client]) {
+		syslog(LOG_WARNING, "init_client: fd %d reused, dropping stale context", client);
+		if (context[client]->adjacent && context[client]->adjacent->context == client) {
+			context[client]->adjacent->state = WPA_DISCONNECTED;
+			context[client]->adjacent->context = -1;
+			context[client]->adjacent->retry_connect_date = time(NULL) + WPA_RETRY_CONNECT;
+		}
+		if (context[client]->dirty_list) free(context[client]->dirty_list);
+		free(context[client]);
+		context[client] = NULL;
+	}
 
 	context[client] = calloc(1, sizeof(*context[client]));
 	if (!context[client]) {
@@ -117,7 +134,14 @@ static void close_client(int client, int active)
 	close(client);
 	UnRegisterEventAwaited(client, READ_EVENT);
 	UnRegisterEventAwaited(client, WRITE_EVENT);
-	if (context[client]->type == WP_SERVER && context[client]->adjacent) {
+	/* F6BVP 2026-09-30: detach the adjacent whatever the client type.
+	 * The type is WP_SERVER only when the peer callsign reads "WP-0", but
+	 * ax25_ntoa() never prints a -0 SSID, so every WP peer connection is
+	 * typed WP_USER. The adjacent then kept pointing to this freed
+	 * context: stuck "connection in progress" forever, and fpacwpd crashed
+	 * in count_dirty_context() (NULL+0x48) when that context was used
+	 * again (debug dump, F3KT 2026-09-30 08:36). */
+	if (context[client]->adjacent && context[client]->adjacent->context == client) {
 		struct wp_adjacent *wpa = context[client]->adjacent;
 		wpa->state = WPA_DISCONNECTED;
 		wpa->context = -1;
@@ -696,8 +720,24 @@ static void poll_adjacents(void)
 			 * already armed (+120s) by connect_adjacent; close_client() then
 			 * resets the adjacent to WPA_DISCONNECTED and reschedules a retry,
 			 * so the daemon self-heals. */
-			if (mytime >= wpa->retry_connect_date)
-				close_client(wpa->context, 1);
+			if (mytime >= wpa->retry_connect_date) {
+				/* F6BVP 2026-09-29: close_client() only resets the
+				 * adjacent when its context still belongs to it. If the
+				 * fd was closed behind our back (old libwp) and its
+				 * number reused by another client, the adjacent stayed
+				 * in "connection in progress" forever and WP sync with
+				 * that node never resumed (seen on F3KT for 6 of its 7
+				 * adjacents). Reset it here in that case. */
+				if (wpa->context >= 0 && context[wpa->context] &&
+				    context[wpa->context]->adjacent == wpa)
+					close_client(wpa->context, 1);
+				else {
+					syslog(LOG_WARNING, "poll_adjacents: resetting stale connection to adjacent %s", wpa->node ? wpa->node->name : "?");
+					wpa->state = WPA_DISCONNECTED;
+					wpa->context = -1;
+					wpa->retry_connect_date = mytime + WPA_RETRY_CONNECT;
+				}
+			}
 			break;
 		case WPA_DISCONNECTED:
 			if (!wpa->is_unknown && mytime >= wpa->retry_connect_date) {

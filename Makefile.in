@@ -345,7 +345,7 @@ edit = sed \
 
 CLEANFILES = $(pathheader)
 SUBDIRS = lib cfg man monitor node flex pad tcp wp tools stats doc help scripts etc
-EXTRA_DIST = pathnames.h.in fpac.spec
+EXTRA_DIST = pathnames.h.in fpac.spec ChangeLog.fr NOUVELLES
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"

@@ -1,6 +1,207 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc4)
+
+	* Indicatifs sans SSID : par convention AX.25, un indicatif écrit
+	  sans SSID est l'indicatif avec le SSID 0 (F3KT = F3KT-0). FPAC les
+	  comparait comme de simples textes, alors que le noyau écrit
+	  toujours « -0 » (/proc/net/...), que la bibliothèque libax25 ne
+	  l'écrit jamais, et que fpac.conf ou l'utilisateur peuvent faire
+	  l'un ou l'autre : « F3KT » et « F3KT-0 » étaient alors différents.
+	  Une fonction commune (callsign_eq) compare maintenant les
+	  indicatifs selon la convention. Conséquences corrigées :
+	  - « C INDICATIF » vers une station entendue directement (fichier
+	    mheard) ne trouvait jamais une station au SSID 0, qu'on tape
+	    F4JQC ou F4JQC-0 (fpacnode et flexd) ;
+	  - fpad n'aiguillait jamais un appel ROSE entrant vers une
+	    application déclarée sans SSID, et en AX.25 il fallait taper
+	    « -0 » ;
+	  - alias de fpac.conf : « F3KT » et « F3KT-0 » désignent le même
+	    alias (il n'est plus nécessaire de déclarer les deux) ;
+	  - reconnaissance de l'indicatif du nœud lui-même, exclusion du
+	    voisin en échec lors de la bascule ROSE, commande de gestion des
+	    routes, filtres des commandes de liste et statistiques fpacstat.
+	* Connexion NetRom : l'indicatif tapé était comparé par préfixe aux
+	  nœuds NetRom, et NetRom est essayé avant les White Pages : « c
+	  f6bvp-1 » (la BBS, présente dans les White Pages) partait vers le
+	  nœud NetRom F6BVP-12, et « c f3kt » vers le premier nœud F3KT-x de
+	  la table. La correspondance est maintenant exacte (indicatif, avec
+	  F6BVP = F6BVP-0, ou alias). Quand aucun nœud ne correspond
+	  exactement, un message d'aide liste les nœuds NetRom qui ont le
+	  même indicatif avec un autre SSID, sans s'y connecter, et la
+	  recherche continue (White Pages, stations entendues...).
+
+fpac (4.1.6-rc3)
+
+	* Commande « r » (Routes) de fpacnode : les routes exactes à dix
+	  chiffres, c'est-à-dire les routes vers les nœuds adjacents (par
+	  exemple 2080,817501 via F5ZHO-9 sur F3KT), n'étaient affichées
+	  nulle part : la commande les sautait volontairement. Elles sont
+	  maintenant listées avec les autres routes, dans l'ordre du noyau
+	  (la plus précise en premier).
+	* « r <adresse> » affichait seulement les routes générales qui
+	  couvrent l'adresse, par exemple la route 2080 via F6BVP-9, alors
+	  que le noyau utilise la route exacte vers F5ZHO-9. La commande
+	  liste maintenant toutes les routes qui couvrent l'adresse et
+	  indique en dernière ligne la route réellement utilisée pour s'y
+	  connecter (« Route utilisée vers ... via ... »), avec la même
+	  règle que le noyau et que le message « Relais via » de la
+	  connexion. « r <DNIC> » liste toutes les routes de ce DNIC, y
+	  compris les routes exactes.
+	* Connexion ROSE : le message « Relais via ... » et la bascule
+	  automatique après un échec parcouraient les routes ROSE dans
+	  l'ordre inverse de celui du noyau. La bibliothèque libax25 lit
+	  /proc/net/rose_nodes en ajoutant chaque ligne en tête de liste,
+	  alors que le noyau range les routes de la plus précise à la plus
+	  générale et prend la première qui convient. Quand une route précise
+	  existait (par exemple 2080,175 via F6BVP-9) à côté de la route
+	  générale du DNIC (2080 via F6BVP-11), FPAC annonçait le voisin de la
+	  route générale alors que le noyau utilisait celui de la route
+	  précise, et la bascule pouvait retirer la route du mauvais voisin.
+	  Les routes sont maintenant lues dans l'ordre du noyau.
+	* Commande « r » : nouvelle colonne « Connect » avec l'indicatif à
+	  utiliser pour se connecter au nœud (son L2call, par exemple
+	  F6BVP-8), pour chaque route exacte vers un nœud adjacent. Les
+	  colonnes de routage n'affichent que les indicatifs de niveau 3 des
+	  voisins (par exemple F6BVP-9), qui servent au routage mais pas à la
+	  connexion d'un utilisateur. L'indicatif est cherché par adresse
+	  dans les White Pages ; « ? » s'il n'y figure pas. « r <adresse> »
+	  ajoute la ligne « Pour se connecter : C <indicatif> ».
+	* Commande « n » (Nodes) : le titre « Callsign » devient « Connect »,
+	  puisque ce sont les indicatifs de connexion des nœuds.
+	* fpacwpd : si un client des White Pages disparaissait pendant une
+	  réponse (session fpacnode coupée, par exemple), la bibliothèque
+	  libwp fermait le socket à l'insu de fpacwpd. Celui-ci le gardait
+	  dans sa liste d'attente et select() échouait en boucle : 100 % du
+	  processeur et White Pages bloquées jusqu'au redémarrage de FPAC. La
+	  bibliothèque ne ferme plus le socket de l'appelant, et fpacwpd
+	  retire de sa liste tout descripteur déjà fermé au lieu de boucler.
+	* White Pages : une connexion sous un indicatif qui a une fiche de
+	  nœud déplaçait l'adresse de cette fiche vers le nœud où la
+	  connexion avait lieu (wp_update_addr). On obtenait un « nœud » dont
+	  l'adresse changeait à chaque connexion et différait d'un nœud à
+	  l'autre (fiche F6BVP-0, affichée par « n » et par la colonne
+	  Connect). Une fiche de nœud n'est plus modifiée par les
+	  connexions : seul le nœud lui-même annonce son adresse. Une fiche
+	  de nœud supprimée qui revit par une connexion devient une fiche
+	  d'utilisateur.
+	* fpacwpd : un voisin de synchronisation des White Pages pouvait
+	  rester indéfiniment en « connection in progress » (vu sur F3KT
+	  pour 6 de ses 7 voisins, dont F5ZHO) : quand le socket avait été
+	  fermé par libwp à son insu et que son numéro était réattribué à un
+	  autre client, le délai de garde de la connexion ne remettait plus
+	  le voisin à zéro, et la synchronisation avec ce nœud ne reprenait
+	  jamais sans redémarrer fpacwpd. Le voisin est maintenant remis à
+	  zéro dans ce cas, et un numéro de socket réutilisé libère d'abord
+	  l'ancien contexte.
+	* fpacwpd : plantage (erreur de segmentation dans
+	  count_dirty_context) et voisins de synchronisation bloqués en
+	  « connection in progress ». fpacwpd ne reconnaît un pair de
+	  synchronisation que si son indicatif s'écrit « WP-0 », mais la
+	  bibliothèque AX.25 n'écrit jamais le suffixe -0 : toute connexion de
+	  synchronisation était traitée comme un simple client, et sa
+	  fermeture ne détachait pas le voisin, qui gardait une référence vers
+	  un contexte libéré. La fermeture détache maintenant toujours le
+	  voisin concerné, et le comptage des fiches à transmettre ignore un
+	  contexte libéré.
+	* Commande « w » (White Pages) de fpacnode : elle ne demandait que 20
+	  fiches, triées par adresse, et paraissait donc incomplète et dans le
+	  désordre. Elle affiche maintenant toutes les fiches (200 au plus),
+	  de la plus récente à la plus ancienne, par pages de 20 lignes :
+	  <Entrée> pour continuer, A pour arrêter. Les options -a (adresse),
+	  -c (indicatif), -r (ordre inverse) et -l (nombre) restent
+	  disponibles. La connexion aux White Pages est fermée avant
+	  l'affichage, pour qu'une pause à l'invite ne la garde pas ouverte.
+
+fpac (4.1.6-rc2)
+
+	* Commande « Ports » de fpacnode : nouvelle colonne « Callsign »
+	  entre « Port » et « Dev ». Elle affiche l'indicatif de chaque port
+	  AX.25 (axports) et NetRom (nrports), et l'adresse ROSE complète du
+	  port rose0 (rsports), qui n'a pas d'indicatif. Jusqu'ici aucune
+	  commande de fpacnode ne permettait de connaître l'indicatif des
+	  ports du nœud. Les colonnes sont maintenant alignées avec des
+	  espaces au lieu de tabulations, pour que les titres restent en face
+	  des valeurs quel que soit le terminal ou le client packet, et les
+	  espaces en tête des descriptions ne décalent plus l'affichage.
+	* Commande « u » (Users) de fpacnode : la colonne « Port » des
+	  sessions AX.25 de niveau 2 affichait toujours le port AX.25
+	  (axudp), parce que toutes ces sessions passent par la même
+	  interface ax0. Les liaisons NetRom, qui utilisent l'indicatif d'un
+	  port NetRom (par exemple F6BVP-4), affichent maintenant ce port
+	  (netnod), et les liaisons ROSE, qui utilisent le L3call du nœud,
+	  affichent le port ROSE (rose0). Seules les vraies connexions AX.25
+	  restent sur le port AX.25.
+	* Archive des sources : les notes de version en français (NOUVELLES
+	  et ChangeLog.fr) sont maintenant incluses dans le tarball ; elles
+	  en étaient absentes jusqu'à la 4.1.6-rc1.
+
+fpac (4.1.6-rc1)
+
+	* Connexion ROSE : le message « Relais via ... » affiché avant la
+	  connexion indiquait parfois un voisin qui n'était pas celui
+	  réellement utilisé. Le noyau choisit en premier un voisin dont la
+	  liaison ROSE est déjà établie (affiché « Opened » par la commande
+	  de routes), et ne se rabat sur un voisin « Closed » que s'il n'y
+	  en a aucun ; FPAC nommait simplement le premier voisin de la liste,
+	  même « Closed ». Le message suit maintenant exactement la règle du
+	  noyau et nomme le voisin réellement essayé. Un voisin « Closed »
+	  reste utilisable en dernier recours : il n'est pas exclu.
+	* Bascule ROSE automatique : le voisin retiré après un échec est
+	  maintenant choisi avec la même règle que le noyau. Auparavant, si
+	  le voisin en échec n'était pas le premier de la liste, FPAC pouvait
+	  retirer la route d'un autre voisin et faire réessayer le même
+	  voisin en échec jusqu'à épuisement des essais. L'annonce du voisin
+	  du prochain essai est elle aussi corrigée. Aucun message « Relais
+	  via » n'est affiché pour une connexion vers le nœud lui-même
+	  (voisin interne de bouclage).
+	* Liste des nœuds NetRom : la couleur de la qualité indique
+	  maintenant si le nœud est réellement joignable, et pas seulement sa
+	  qualité annoncée, dans les trois ordres de tri (par indicatif, par
+	  alias, par qualité) et dans « ne * ». Rouge : qualité 0, qualité
+	  exactement 120 (valeur figée de rc.netrom, jamais rafraîchie), route
+	  active invalide, ou voisin de la route dont les échecs de liaison ont
+	  atteint la limite du noyau (link_fails_count), ou dont la liaison AX.25
+	  est bloquée en attente de connexion (SABM sans réponse ; le noyau
+	  ne compte l'échec qu'après les dix essais). Vert : qualité
+	  supérieure à 200 et voisin sans échec. Jaune : le reste. Le noyau
+	  abandonne en silence tout paquet vers un nœud dont la route active
+	  est hors limites (colonne « w » supérieure à « n » de
+	  /proc/net/nr_nodes), ce qui arrive après des échecs de liaison quand
+	  le nœud n'a qu'une seule route : le tableau affiche alors 247 à 255
+	  mais rien n'est émis.
+	* Connexion NetRom vers un tel nœud : le message « *** Route NetRom
+	  invalide (route active 2 sur 1) : le noyau ne transmettra rien vers
+	  ... » est affiché au lieu de laisser la connexion attendre sans
+	  explication ; un avertissement signale aussi une liaison AX.25 vers le
+	  voisin bloquée en attente de connexion (« essai 6/10, aucune
+	  réponse ») ; « ne <nœud> » signale la route active invalide.
+	* Langue des messages : fpacnode affiche maintenant ses messages de
+	  connexion et de routage en anglais ou en français, environ
+	  quarante messages pour l'instant (invite « Commands = ? », connexion, échec, relais ROSE et
+	  NetRom, essais de bascule, avertissements de route ou de liaison) ;
+	  les autres messages restent en anglais. La langue par défaut est
+	  celle du système, lue dans LC_ALL, LC_MESSAGES, LANGUAGE ou LANG
+	  puis dans /etc/default/locale et /etc/locale.conf (les démons lancés
+	  au démarrage n'ont souvent aucune variable de langue), ou celle de
+	  la ligne « Language = en | fr | auto » de fpac.conf. La commande
+	  « LAng 1 » (anglais) ou « LAng 2 » (français) change la langue de la
+	  session en cours ; le choix n'est pas mémorisé. Les messages
+	  ajoutés en français dans les versions précédentes (« Relais via »,
+	  « Route indisponible »...) sont désormais en anglais par défaut et
+	  traduits pour les sessions en français.
+	* wpedit : les messages de confirmation (fiche mise à jour,
+	  supprimée, restaurée) s'affichent maintenant immédiatement au lieu
+	  de rester invisibles en mémoire tampon. Demander de supprimer une
+	  fiche déjà supprimée, ou de restaurer une fiche qui n'est pas
+	  supprimée, affiche maintenant un simple message et revient au menu ;
+	  auparavant le refus du serveur pouvait fermer la session wpedit.
+
+-- Bernard Pidoux <bernard.f6bvp@gmail.com>  Saturday, september 19 2026
+
+Assisted by Claude Sonnet 5 (Anthropic) <noreply@anthropic.com>.
+
 fpac (4.1.5)
 
 	* White Pages (annuaire du réseau) : plusieurs défauts qui

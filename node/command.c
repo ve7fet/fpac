@@ -94,6 +94,7 @@ void init_nodecmds(void)
 	add_internal_cmd(&Nodecmds, "Help", 1, 1, do_help);
 	add_internal_cmd(&Nodecmds, "HOst", 2, 1, do_host);
 	add_internal_cmd(&Nodecmds, "Info", 1, 1, do_help);
+add_internal_cmd(&Nodecmds, "LAng", 2, 1, do_lang);
 	add_internal_cmd(&Nodecmds, "Links", 1, 1, do_links);
 	add_internal_cmd(&Nodecmds, "HRD", 3, 1, do_hrd);
 	add_internal_cmd(&Nodecmds, "Mheard", 1, 1, do_mheard);
@@ -136,6 +137,50 @@ int callmatch(char *call, char *ref)
 	if (isalnum(*call) || isalnum(*ref))
 		return 0;
 	return 1;
+}
+
+/*
+ * read_proc_rs_nodes() of libax25 builds its list by prepending each
+ * line, i.e. in the REVERSE order of /proc/net/rose_nodes. The kernel
+ * keeps rose_node_list sorted by decreasing mask and rose_get_neigh()
+ * takes the first matching entry, so the order matters: this returns
+ * the routes in kernel order (most specific first).
+ */
+struct proc_rs_nodes *read_proc_rs_nodes_ordered(void)
+{
+	struct proc_rs_nodes *list, *next, *prev = NULL;
+
+	for (list = read_proc_rs_nodes(); list != NULL; list = next)
+	{
+		next = list->next;
+		list->next = prev;
+		prev = list;
+	}
+	return prev;
+}
+
+/*
+ * Connect callsign (L2call, the one a user types to reach the node)
+ * of the FPAC node owning a 10 digit ROSE address, looked up in the
+ * White Pages node list. The routing tables only know the L3 callsigns
+ * of the neighbours. Returns NULL when the node is not in the WP.
+ */
+static char *wp_connect_call(wp_t *wpn, int nwp, const char *addr10)
+{
+	static char call[10];
+	int i;
+
+	for (i = 0; i < nwp; i++)
+	{
+		if (wpn[i].is_deleted)
+			continue;
+		if (strncmp(rose_ntoa(&wpn[i].address.srose_addr), addr10, 10) == 0)
+		{
+			strcpy(call, ax25_ntoa(&wpn[i].address.srose_call));
+			return call;
+		}
+	}
+	return NULL;
 }
 
 char *roseaddr(char *addr)
@@ -196,6 +241,24 @@ static int callcmp(char *ref, char *call)
 		call = str;
 	}
 	return (strcasecmp(ref, call));
+}
+
+
+/*
+ * NetRom links run over an AX.25 device (ax0), with the callsign of the
+ * NetRom port as local callsign. Return that NetRom port, or NULL.
+ */
+static char *nr_port_by_call(const char *call)
+{
+	char *port = NULL, *addr;
+
+	while ((port = nr_config_get_next(port)) != NULL)
+	{
+		addr = nr_config_get_addr(port);
+		if (addr != NULL && callsign_eq(addr, call))
+			return port;
+	}
+	return NULL;
 }
 
 int netrom_node_is_connected(char *call)
@@ -1115,6 +1178,14 @@ int do_host(int argc, char **argv)
 	return 0;
 }
 
+/* Port descriptions read from axports/rsports/nrports may start with blanks */
+static char *skip_blanks(char *s)
+{
+	while (s != NULL && isspace((unsigned char)*s))
+		s++;
+	return s;
+}
+
 int do_ports(int argc, char **argv)
 {
 	char *cp = NULL;
@@ -1128,22 +1199,24 @@ int do_ports(int argc, char **argv)
 		return (0);
 	}
 
+	/* Callsign column: AX.25 and NetRom port callsign, ROSE port address */
+	/* Fixed widths with spaces (not tabs) so that headers and rows line up */
 	if (Colored)
-		node_msg("Ports:\n%sPort%s\t%sDev%s\t %sDescription%s", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+		node_msg("Ports:\n%s%-7s%s %s%-10s%s %s%-6s%s %sDescription%s", NodeColors.en_tete, "Port", ResetColor, NodeColors.en_tete, "Callsign", ResetColor, NodeColors.en_tete, "Dev", ResetColor, NodeColors.en_tete, ResetColor);
 	else
-		node_msg("Ports:\nPort\tDev\t Description");
+		node_msg("Ports:\n%-7s %-10s %-6s Description", "Port", "Callsign", "Dev");
 
 	while ((cp = ax25_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s\t%-6s\t %s\n", cp, ax25_config_get_dev(cp), ax25_config_get_desc(cp));
+		tprintf("%-7s %-10s %-6s %s\n", cp, ax25_config_get_addr(cp), ax25_config_get_dev(cp), skip_blanks(ax25_config_get_desc(cp)));
 	}
 	while ((cp = rs_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s\t%-6s\t%s\n", cp, rs_config_get_dev(cp), rs_config_get_desc(cp));
+		tprintf("%-7s %-10s %-6s %s\n", cp, rs_config_get_addr(cp), rs_config_get_dev(cp), skip_blanks(rs_config_get_desc(cp)));
 	}
 	while ((cp = nr_config_get_next(cp)) != NULL)
 	{
-		tprintf("%-6s\t%-6s\t %s\n", cp, nr_config_get_dev(cp), nr_config_get_desc(cp));
+		tprintf("%-7s %-10s %-6s %s\n", cp, nr_config_get_addr(cp), nr_config_get_dev(cp), skip_blanks(nr_config_get_desc(cp)));
 	}
 
 
@@ -1226,6 +1299,17 @@ int do_users(int argc, char **argv)
 		cp = ax25_config_get_name(p->dev);
 		if (cp != NULL)
 		{
+			/*
+			 * NetRom and ROSE links run over the AX.25 device too: show
+			 * the NetRom port, or the ROSE port for the L3call of the
+			 * node, instead of the AX.25 device port.
+			 */
+			char *lp = nr_port_by_call(p->src_addr);
+
+			if (lp == NULL && *cfg.callsign && callsign_eq(p->src_addr, cfg.callsign))
+				lp = rs_config_get_next(NULL);
+			if (lp != NULL)
+				cp = lp;
 	/*		if (cp == NULL)
 				cp = "All";*/
 	// Print Port, src call, dest call
@@ -1383,8 +1467,8 @@ int do_users(int argc, char **argv)
 		char neigh[20];
 
 		if (argc > 1 && strcasecmp(argv[1], "*")
-			&& strcasecmp(rp->dest_call, argv[1])
-			&& strcasecmp(rp->src_call, argv[1]))
+			&& !callsign_eq(rp->dest_call, argv[1])
+			&& !callsign_eq(rp->src_call, argv[1]))
 			continue;
 		if ((argc < 2) && !strcmp(rp->dest_addr, "*"))
 			continue;
@@ -1512,8 +1596,8 @@ int do_users(int argc, char **argv)
 		char nei1[20], nei2[20];
 
 		if (argc > 1 && strcasecmp(argv[1], "*")
-			&& strcasecmp(tp->call1, argv[1])
-			&& strcasecmp(tp->call2, argv[1]))
+			&& !callsign_eq(tp->call1, argv[1])
+			&& !callsign_eq(tp->call2, argv[1]))
 			continue;
 
 		/* Do not display no-peers */
@@ -1709,6 +1793,9 @@ int do_routes(int argc, char **argv)
 	int loopback = -1;
 	char stradd[11];
 	char *addr = NULL;
+	wp_t *wpn = NULL;
+	int nwp = 0;
+	char *ccall;
 /*	int len;
 	cover_t *cl;
 	addrp_t *al;*/
@@ -1792,11 +1879,25 @@ int do_routes(int argc, char **argv)
 		tprintf("\n");
 	}
 
+	/* White Pages node list, for the Connect column (L2 callsigns).
+	 * nwp is an input of wp_get_list(): the maximum number of records
+	 * (same value as the Nodes command), and the number read on return. */
+	nwp = 100;
+	if (wp_open("NODE") == 0)
+	{
+		if (wp_get_list(&wpn, &nwp, WP_NODE_FLAG, "*") == -1)
+			nwp = 0;
+		wp_close();
+	}
+	else
+		nwp = 0;
+
 	/* Routes */
 	if ((listv = read_proc_rs_neigh()) == NULL)
 	{
 		if (errno)
 			node_perror("do_routes: read_proc_rs_neigh", errno);
+		wp_free_list(&wpn);
 		return 0;
 	}
 
@@ -1808,10 +1909,12 @@ int do_routes(int argc, char **argv)
 			break;
 		}
 
-	if ((listn = read_proc_rs_nodes()) == NULL)
+	if ((listn = read_proc_rs_nodes_ordered()) == NULL)
 	{
 		if (errno)
 			node_perror("do_routes: read_proc_rs_nodes", errno);
+		free_proc_rs_neigh(listv);
+		wp_free_list(&wpn);
 		return 0;
 	}
 /*
@@ -1829,7 +1932,10 @@ int do_routes(int argc, char **argv)
 		if (pn->neigh1 == (unsigned int)loopback)
 			continue;
 
-		if ((addr) && (strncmp(addr, pn->address, pn->mask) != 0))
+		/* routes <dnic>: every route inside this DNIC; routes <address>:
+		 * every route covering this address */
+		if ((addr) && (strncmp(addr, pn->address,
+				       (strlen(addr) < (size_t)pn->mask) ? strlen(addr) : (size_t)pn->mask) != 0))
 			continue;
 
 		if (pn->address[0] == '*')
@@ -1838,24 +1944,28 @@ int do_routes(int argc, char **argv)
 		if (first)
 		{
 			if (Colored)
-				node_msg("ROSE routes :\n%sDNIC Address%s %sPrimary   Route%s  | %s1st Alt   Route%s  | %s2nd Alt   Route%s  |", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+				node_msg("ROSE routes :\n%sDNIC Address%s %sConnect  %s %sPrimary   Route%s  | %s1st Alt   Route%s  | %s2nd Alt   Route%s  |", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
 			else
-				node_msg("ROSE routes :\nDNIC Address Primary   Route  | 1st Alt   Route  | 2nd Alt   Route  |");
+				node_msg("ROSE routes :\nDNIC Address Connect   Primary   Route  | 1st Alt   Route  | 2nd Alt   Route  |");
 			first = 0;
 		}
 
-		if (pn->mask != 10) {
-
-/*		if ((pn->mask == 10) &&  (first_node))
+		/*
+		 * All kernel routes are listed, in kernel order (most specific
+		 * first), including the exact 10 digit routes to adjacent nodes
+		 * which were hidden before 4.1.6-rc3.
+		 */
 		{
-			node_msg("Adjacent ROSE nodes routes :\nDNIC Address           Route");
-			first_node = 0;
-		}
-*/
 		for (i = pn->mask; i < 10; i++)
 			pn->address[i] = '.';
 
+		/* Connect callsign: only an exact route designates one node */
+		ccall = (pn->mask == 10) ? wp_connect_call(wpn, nwp, pn->address) : NULL;
 		tprintf("%s ", roseaddr(pn->address));
+		if (Colored)
+			tprintf("%s%-9s%s ", NodeColors.indicatif, ccall ? ccall : (pn->mask == 10 ? "?" : ""), ResetColor);
+		else
+			tprintf("%-9s ", ccall ? ccall : (pn->mask == 10 ? "?" : ""));
 		for (pv = listv; pv != NULL; pv = pv->next)
 		{
 			if (pn->neigh1 == (unsigned int)pv->addr)
@@ -1937,6 +2047,33 @@ int do_routes(int argc, char **argv)
 
 	if (addr && first)
 		node_msg("No route to %s", roseaddr(addr));
+	else if (addr && strlen(addr) == 10)
+	{
+		/* Route the kernel will really use to connect to this address */
+		char entry[11], call[10];
+		int mask;
+
+		if (rose_predict_route(addr, entry, &mask, call) != 0)
+			node_msg(T("No usable neighbour to %s"), roseaddr(addr));
+		else if (strncmp(call, "RSLOOP", 6) == 0)
+			node_msg(T("%s is this node"), roseaddr(addr));
+		else
+		{
+			char dest[12];
+
+			for (i = mask; i < 10; i++)
+				entry[i] = '.';
+			/* roseaddr() returns a static buffer: copy the first one */
+			strcpy(dest, roseaddr(addr));
+			node_msg(T("Route used to %s : %s via %s"), dest, roseaddr(entry), call);
+			/* The callsign a user must type to reach this node */
+			if ((ccall = wp_connect_call(wpn, nwp, addr)) != NULL)
+				node_msg(T("To connect : C %s"), ccall);
+			else
+				node_msg(T("Connect callsign of %s unknown (not in the White Pages)"), dest);
+		}
+	}
+	wp_free_list(&wpn);
 
 	return 0;
 }
@@ -1999,7 +2136,7 @@ int do_manage_links(int argc, char **argv)
 	}
 
 	for (pv = listv; pv != NULL; pv = pv->next)
-		if (strcasecmp(argv[3], pv->call) == 0)
+		if (callsign_eq(argv[3], pv->call))
 			break;
 
 	free_proc_rs_neigh(listv);
@@ -2292,12 +2429,12 @@ int do_rose(int argc, char **argv)
 	{
 		node_msg("FPAC Nodes:");
 		if (Colored)
-			node_msg("%sCallsign%s  %sDNIC addr%s    %sCallsign%s  %sDNIC addr%s    %sCallsign%s  %sDNIC addr%s",
+			node_msg("%sConnect%s   %sDNIC addr%s    %sConnect%s   %sDNIC addr%s    %sConnect%s   %sDNIC addr%s",
 					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
 					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
 					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
 		else
-			tprintf ("Callsign  DNIC addr    Callsign  DNIC addr    Callsign  DNIC addr\n");
+			tprintf ("Connect   DNIC addr    Connect   DNIC addr    Connect   DNIC addr\n");
 		if (wp_get_list(&wp, &nb, WP_NODE_FLAG, "*") != -1)
 		{
 			for (i = 0; i < nb; i++)
@@ -2430,6 +2567,107 @@ int do_rose(int argc, char **argv)
 	return ret;
 }
 
+/*
+ * F6BVP 2026-09-19: colour of a NetRom quality according to whether the node
+ * can really be reached, not only to the advertised quality.
+ *
+ * The kernel (nr_route_frame(), net/netrom/nr_route.c) silently drops every
+ * frame for a node whose active route index "which" is not below its number
+ * of routes -- /proc/net/nr_nodes prints which + 1 in column "w". That is
+ * what nr_link_failed() leaves behind after link_fails_count link failures
+ * for a node having a single route: the table still shows quality 247-255
+ * but nothing is ever transmitted.
+ *
+ *   red    : quality 0, or 120 (static rc.netrom value never refreshed), or
+ *            invalid active route (w > n), or neighbour of the route with
+ *            "failed" >= link_fails_count, or whose AX.25 link is stuck
+ *            awaiting connection (unanswered SABM)
+ *   green  : quality > 200 and the neighbour has no recorded failure
+ *   yellow : anything else (quality 1-200, or 1 failure below the limit)
+ */
+struct nr_failed { int addr; int failed; };
+
+static int nr_failed_load(struct nr_failed **out)
+{
+	FILE *fp;
+	char line[256], call[16], dev[16];
+	int addr, qual, lock, cnt, failed;
+	int n = 0, cap = 64;
+	struct nr_failed *a = malloc(cap * sizeof(*a));
+
+	*out = a;
+	if (a == NULL)
+		return 0;
+	if ((fp = fopen("/proc/net/nr_neigh", "r")) == NULL)
+		return 0;
+	if (fgets(line, sizeof(line), fp) == NULL)	/* header */
+	{
+		fclose(fp);
+		return 0;
+	}
+	while (fgets(line, sizeof(line), fp) != NULL)
+	{
+		if (sscanf(line, "%d %15s %15s %d %d %d %d",
+			   &addr, call, dev, &qual, &lock, &cnt, &failed) != 7)
+			continue;
+		if (n == cap)
+		{
+			struct nr_failed *b = realloc(a, 2 * cap * sizeof(*a));
+			if (b == NULL)
+				break;
+			a = b;
+			*out = a;
+			cap *= 2;
+		}
+		a[n].addr = addr;
+		/* a link stuck awaiting connection counts as a failure: the
+		 * kernel only raises "failed" once all N2 retries are used */
+		a[n].failed = nr_link_pending(call, NULL, NULL) ? 999 : failed;
+		n++;
+	}
+	fclose(fp);
+	return n;
+}
+
+static int nr_failed_of(const struct nr_failed *a, int n, int addr)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+		if (a[i].addr == addr)
+			return a[i].failed;
+	return 0;
+}
+
+static int nr_fails_limit(void)
+{
+	FILE *fp = fopen("/proc/sys/net/netrom/link_fails_count", "r");
+	int v = 2;
+
+	if (fp != NULL)
+	{
+		if (fscanf(fp, "%d", &v) != 1)
+			v = 2;
+		fclose(fp);
+	}
+	return (v > 0) ? v : 2;
+}
+
+static const char *nr_qcolor(int qual, int failed, int limit, int invalid)
+{
+	if (invalid || qual == 0 || qual == 120 || failed >= limit)
+		return NodeColors.qualite_nulle;
+	if (qual > 200 && failed == 0)
+		return NodeColors.qualite_bonne;
+	return NodeColors.qualite_moyenne;
+}
+
+/* Neighbour number of the route the kernel currently uses (0 if none). */
+static int nr_active_addr(const struct proc_nr_nodes *p)
+{
+	return (p->w == 1) ? p->addr1 : (p->w == 2) ? p->addr2 : (p->w == 3) ? p->addr3 : 0;
+}
+
 int do_netrom(int argc, char **argv)
 {
 	struct proc_nr_nodes *p, *list;
@@ -2438,6 +2676,8 @@ int do_netrom(int argc, char **argv)
 	char sort_order = 0;   /* 0 = qualité, 'a' = callsign, 'm' = alias mnemonic */
 	int first;
 	int fpac;
+	struct nr_failed *nfa = NULL;
+	int nfn = 0, nr_lim = 2;
 	if ((argc > 1) && (*argv[1] == '?') && (strlen(argv[1]) == 1))
 	{
 		node_msg("usage : ne (<a> call order <m> alias order)");
@@ -2476,44 +2716,43 @@ int do_netrom(int argc, char **argv)
 					NodeColors.en_tete, ResetColor);
 		else
 			node_msg(" Alias:Callsign Qual.   Alias:Callsign Qual.   Alias:Callsign Qual.");
+		nfn = nr_failed_load(&nfa);
+		nr_lim = nr_fails_limit();
 		for (p = list; p != NULL; p = p->next)
 		{
 			char sep = ((i + 1) % 3) ? ' ' : '\n';
 			if (Colored)
 			{
+				/* F6BVP 2026-09-19: colour follows reachability, see
+				 * nr_qcolor() -- same rule in the three sort orders and
+				 * in "ne *". Neighbour of the ACTIVE route (column w). */
+				int inv = (p->n > 0) && (p->w < 1 || p->w > p->n);
+				const char *qcol = nr_qcolor(p->qual1,
+						(p->n > 0 && !inv) ? nr_failed_of(nfa, nfn, nr_active_addr(p)) : 0,
+						nr_lim, inv);
 				if (sort_order == 'a')
 				{
 					/* tri callsign : callsign en vert */
-					tprintf("%6s%c%s%-9s%s(%-3d) %c",
+					tprintf("%6s%c%s%-9s%s(%s%-3d%s) %c",
 							!strcmp(p->alias, "*") ? "" : p->alias,
 							!strcmp(p->alias, "*") ? ' ' : ':',
 							NodeColors.indicatif, p->call, ResetColor,
-							p->qual1, sep);
+							qcol, p->qual1, ResetColor, sep);
 				}
 				else if (sort_order == 'm')
 				{
 					/* tri alias : alias en vert */
 					if (!strcmp(p->alias, "*"))
-						tprintf("       %-9s(%-3d) %c",
-								p->call, p->qual1, sep);
+						tprintf("       %-9s(%s%-3d%s) %c",
+								p->call, qcol, p->qual1, ResetColor, sep);
 					else
-						tprintf("%s%6s%s:%-9s(%-3d) %c",
+						tprintf("%s%6s%s:%-9s(%s%-3d%s) %c",
 								NodeColors.indicatif, p->alias, ResetColor,
-								p->call, p->qual1, sep);
+								p->call, qcol, p->qual1, ResetColor, sep);
 				}
 				else
 				{
-					/* tri qualité (défaut) : qualité selon seuil seulement.
-					 * F6BVP 2026-09-16: 120 est la valeur figee a la
-					 * declaration statique dans rc.netrom (nrparms
-					 * -nodes ... 120 ...) -- si elle vaut encore
-					 * exactement 120, la fiche n'a jamais ete rafraichie
-					 * par une vraie annonce dynamique et reste donc
-					 * suspecte, meme si numeriquement > 50. */
-					const char *qcol = (p->qual1 == 0)   ? NodeColors.qualite_nulle
-					                 : (p->qual1 <= 50)  ? NodeColors.qualite_moyenne
-					                 : (p->qual1 == 120) ? NodeColors.qualite_nulle
-					                 :                     NodeColors.qualite_bonne;
+					/* tri qualité (défaut) : qualité selon seuil seulement */
 					tprintf("%-16.16s(%s%-3d%s) %c",
 							print_node(p->alias, p->call),
 							qcol, p->qual1, ResetColor,
@@ -2529,6 +2768,7 @@ int do_netrom(int argc, char **argv)
 		}
 		if ((i % 3) != 0)
 			tprintf("\n");
+		free(nfa);
 		free_proc_nr_nodes(list);
 		return 0;
 	}
@@ -2554,8 +2794,11 @@ int do_netrom(int argc, char **argv)
 					NodeColors.en_tete, ResetColor);
 		else
 			tprintf("Node              Quality Obsolescence Port   Neighbour\n");
+		nfn = nr_failed_load(&nfa);
+		nr_lim = nr_fails_limit();
 		for (p = list; p != NULL; p = p->next)
 		{
+			int inv = (p->n > 0) && (p->w < 1 || p->w > p->n);
 			if (Colored)
 				tprintf("%s%-16.16s%s  ", NodeColors.indicatif,
 						print_node(p->alias, p->call), ResetColor);
@@ -2565,10 +2808,7 @@ int do_netrom(int argc, char **argv)
 			if (p->n == 0)		/* local node */
 			{
 				const char *qcol = Colored
-					? ((p->qual1 == 0)   ? NodeColors.qualite_nulle
-					 : (p->qual1 <= 50)  ? NodeColors.qualite_moyenne
-					 : (p->qual1 == 120) ? NodeColors.qualite_nulle
-					 :                     NodeColors.qualite_bonne)
+					? nr_qcolor(p->qual1, 0, nr_lim, 0)
 					: "";
 				tprintf("%s%-7d%s %-12d\n",
 						qcol, p->qual1, Colored ? ResetColor : "",
@@ -2578,10 +2818,7 @@ int do_netrom(int argc, char **argv)
 			if ((np = find_neigh(p->addr1, nlist)) != NULL)
 			{
 				const char *qcol = Colored
-					? ((p->qual1 == 0)   ? NodeColors.qualite_nulle
-					 : (p->qual1 <= 50)  ? NodeColors.qualite_moyenne
-					 : (p->qual1 == 120) ? NodeColors.qualite_nulle
-					 :                     NodeColors.qualite_bonne)
+					? nr_qcolor(p->qual1, nr_failed_of(nfa, nfn, p->addr1), nr_lim, inv)
 					: "";
 				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
 						qcol, p->qual1, Colored ? ResetColor : "",
@@ -2594,10 +2831,7 @@ int do_netrom(int argc, char **argv)
 			if (p->n > 1 && (np = find_neigh(p->addr2, nlist)) != NULL)
 			{
 				const char *qcol = Colored
-					? ((p->qual2 == 0)   ? NodeColors.qualite_nulle
-					 : (p->qual2 <= 50)  ? NodeColors.qualite_moyenne
-					 : (p->qual2 == 120) ? NodeColors.qualite_nulle
-					 :                     NodeColors.qualite_bonne)
+					? nr_qcolor(p->qual2, nr_failed_of(nfa, nfn, p->addr2), nr_lim, inv)
 					: "";
 				tprintf("                  ");
 				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
@@ -2611,10 +2845,7 @@ int do_netrom(int argc, char **argv)
 			if (p->n > 2 && (np = find_neigh(p->addr3, nlist)) != NULL)
 			{
 				const char *qcol = Colored
-					? ((p->qual3 == 0)   ? NodeColors.qualite_nulle
-					 : (p->qual3 <= 50)  ? NodeColors.qualite_moyenne
-					 : (p->qual3 == 120) ? NodeColors.qualite_nulle
-					 :                     NodeColors.qualite_bonne)
+					? nr_qcolor(p->qual3, nr_failed_of(nfa, nfn, p->addr3), nr_lim, inv)
 					: "";
 				tprintf("                  ");
 				tprintf("%s%-7d%s %-12d %-6s %s%s%s\n",
@@ -2626,6 +2857,7 @@ int do_netrom(int argc, char **argv)
 						Colored ? ResetColor : "");
 			}
 		}
+		free(nfa);
 		free_proc_nr_nodes(list);
 		free_proc_nr_neigh(nlist);
 		return 0;
@@ -2653,20 +2885,28 @@ int do_netrom(int argc, char **argv)
 						p->qual1, p->obs1,
 						ax25_config_get_name(np->dev), np->call);
 			}
+			/* F6BVP 2026-09-19: the 2nd and 3rd route lines were printed
+			 * without the 16-character node column, so they came out
+			 * shifted to the left under the wrong headings; and the 3rd
+			 * route was looked up for any node with more than one route
+			 * (p->n > 1 instead of p->n > 2). */
 			if (p->n > 1 && (np = find_neigh(p->addr2, nlist)) != NULL)
 			{
-				tprintf("%c     %-7d %-12d %-6s %s\n",
+				tprintf("%-16s %c     %-7d %-12d %-6s %s\n", "",
 						p->w == 2 ? '>' : ' ',
 						p->qual2, p->obs2,
 						ax25_config_get_name(np->dev), np->call);
 			}
-			if (p->n > 1 && (np = find_neigh(p->addr3, nlist)) != NULL)
+			if (p->n > 2 && (np = find_neigh(p->addr3, nlist)) != NULL)
 			{
-				tprintf("%c     %-7d %-12d %-6s %s\n",
+				tprintf("%-16s %c     %-7d %-12d %-6s %s\n", "",
 						p->w == 3 ? '>' : ' ',
 						p->qual3, p->obs3,
 						ax25_config_get_name(np->dev), np->call);
 			}
+			if (p->n > 0 && (p->w < 1 || p->w > p->n))
+				tprintf(T("%-16s   Invalid active route (%d of %d): the kernel forwards nothing\n"),
+						"", p->w, p->n);
 			*argv[i] = '\0';
 		}
 	}
@@ -2965,10 +3205,18 @@ int do_status(int argc, char **argv)
 	return 0;
 }
 
+/* Lines per page of the WP command, then "<Return> more, A abort" */
+#define WP_PAGE_LINES	20
+
 int do_wp(int argc, char **argv)
 {
-	int nb = 20;
-	unsigned int flags = WP_ADDRSORT_FLAG ;
+	/* F6BVP 2026-09-30: all records (server limit 200), most recent
+	 * first, shown page by page. It used to ask for 20 records only,
+	 * sorted by address, which looked incomplete and unordered. */
+	int nb = 200;
+	unsigned int flags = WP_DATESORT_FLAG;
+	int nbrec, lines = 0, stop = 0;
+	char *answer;
 //	unsigned int flags = 0;
 	int p;
 	int i, j;
@@ -3017,7 +3265,7 @@ int do_wp(int argc, char **argv)
 		default :
 			node_msg ("Usage: wp [-acdnrl nb] callsign");
 			node_msg ("options :\n  -n = nodes only\n  -l nb max number of answers");       
-			node_msg ("sort by :\n  -a address\n  -c callsign (default)\n  -d date\n  -r reverse");
+			node_msg ("sort by :\n  -a address\n  -c callsign\n  -d date, most recent first (default)\n  -r reverse");
 			node_msg ("");
 			return(1);
 			break;
@@ -3037,9 +3285,17 @@ int do_wp(int argc, char **argv)
 
 //	tprintf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
 
-	if (wp_get_list(&wp, &nb, flags, argv[optind]) != -1)
+	wp = NULL;
+	if (wp_get_list(&wp, &nb, flags, argv[optind]) == -1)
+		nb = 0;
+	/* Everything is read: close the WP connection before displaying, so
+	 * that waiting at the page prompt keeps no connection to fpacwpd. */
+	nbrec = wp_nb_records();
+	wp_close();
+
+	if (nb > 0)
 	{
-		for (i = 0; i < nb; i++)
+		for (i = 0; i < nb && !stop; i++)
 		{
 			if (wp[i].date == 0L)
 				break;
@@ -3092,6 +3348,24 @@ int do_wp(int argc, char **argv)
 					tprintf("%-9s", call);
 			}
 			tprintf("\t  %s  %s\n", wp[i].locator, wp[i].city);
+
+			if (++lines % WP_PAGE_LINES == 0 && (i + 1 < nb || j > 0))
+			{
+				tprintf("%s", T("-- <Return> more, A abort -- "));
+				usflush(STDIN_FILENO);	/* tprintf() writes to STDIN_FILENO (io.c) */
+				while ((answer = readline(User.fd)) == NULL)
+				{
+					if (errno == EINTR)
+						continue;
+					wp_free_list(&wp);
+					logout("User disconnected");
+				}
+				if (toupper((unsigned char)*answer) == 'A')
+				{
+					stop = 1;
+					break;
+				}
+			}
 			}
 			}
 		}
@@ -3100,6 +3374,7 @@ int do_wp(int argc, char **argv)
 
 	if (nb == 0)
 	{
+		wp_free_list(&wp);
 		node_msg("No WP matching \"%s\" !", argv[optind]);
 		return (1);
 	}
@@ -3107,10 +3382,9 @@ int do_wp(int argc, char **argv)
 	tprintf("\n");
 	
 
-	tprintf("FPAC White Pages database : %d callsigns\n", wp_nb_records());
+	tprintf("FPAC White Pages database : %d callsigns\n", nbrec);
 
 	wp_free_list(&wp);
-	wp_close();
 	}
 	else {
 		node_msg("Cannot open WP \n");

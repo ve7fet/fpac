@@ -89,3 +89,45 @@ void fpaclog(int loglevel, const char *fmt, ...)
 	syslog(pri, "%s\n", buf);
 	va_end(args);
 }
+
+
+/*
+ * F6BVP 2026-09-19: is an AX.25 link to <call> stuck in state 1 (awaiting
+ * connection) after at least one unanswered SABM?  /proc/net/ax25 rows are
+ *   ptr dev src dest st vs vr va t1timer t1 t2timer t2 t3timer t3 idle idlemax n2count n2 ...
+ * Returns 1 and fills *n2count / *n2 (retries done / allowed) if so. The
+ * kernel only counts a NetRom neighbour failure once all retries are used,
+ * so nr_neigh "failed" stays 0 for the whole first cycle (about ten
+ * minutes with the linear T1 back-off).
+ */
+int nr_link_pending(const char *call, int *n2count, int *n2)
+{
+	FILE *fp;
+	char line[512], ptr[24], dev[16], src[16], dst[16];
+	int st, v[13];
+	int found = 0;
+
+	/* v[] = vs vr va t1timer t1 t2timer t2 t3timer t3 idle idlemax
+	 *       n2count n2 */
+	if ((fp = fopen("/proc/net/ax25", "r")) == NULL)
+		return 0;
+	while (fgets(line, sizeof(line), fp) != NULL)
+	{
+		if (sscanf(line, "%23s %15s %15s %15s %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+			   ptr, dev, src, dst, &st,
+			   &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6],
+			   &v[7], &v[8], &v[9], &v[10], &v[11], &v[12]) != 18)
+			continue;
+		if (strcasecmp(dst, call) == 0 && st == 1 && v[11] >= 1)
+		{
+			if (n2count)
+				*n2count = v[11];
+			if (n2)
+				*n2 = v[12];
+			found = 1;
+			break;
+		}
+	}
+	fclose(fp);
+	return found;
+}

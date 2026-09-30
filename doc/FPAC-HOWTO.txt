@@ -283,7 +283,8 @@
 
 
 
-  P command gives the list and description of available ports.
+  P command gives the list of available ports with their callsign (ROSE
+  address for the ROSE port), device and description.
 
 
        F6FBB-10 (Commands = ?) : P

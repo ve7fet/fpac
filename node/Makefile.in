@@ -108,8 +108,8 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am_fpacnode_OBJECTS = fpacnode.$(OBJEXT) fpaccmd.$(OBJEXT) \
 	nodesys.$(OBJEXT) command.$(OBJEXT) extcmd.$(OBJEXT) \
-	gateway.$(OBJEXT) user.$(OBJEXT) util.$(OBJEXT) io.$(OBJEXT) \
-	sysinfo.$(OBJEXT) colors.$(OBJEXT)
+	gateway.$(OBJEXT) lang.$(OBJEXT) user.$(OBJEXT) util.$(OBJEXT) \
+	io.$(OBJEXT) sysinfo.$(OBJEXT) colors.$(OBJEXT)
 fpacnode_OBJECTS = $(am_fpacnode_OBJECTS)
 fpacnode_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -144,7 +144,7 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/colors.Po ./$(DEPDIR)/command.Po \
 	./$(DEPDIR)/extcmd.Po ./$(DEPDIR)/fpaccmd.Po \
 	./$(DEPDIR)/fpacnode.Po ./$(DEPDIR)/fpacshell.Po \
-	./$(DEPDIR)/gateway.Po ./$(DEPDIR)/io.Po \
+	./$(DEPDIR)/gateway.Po ./$(DEPDIR)/io.Po ./$(DEPDIR)/lang.Po \
 	./$(DEPDIR)/nodesys.Po ./$(DEPDIR)/sysinfo.Po \
 	./$(DEPDIR)/user.Po ./$(DEPDIR)/util.Po ./$(DEPDIR)/yapp.Po
 am__mv = mv -f
@@ -322,7 +322,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 LDADD = $(AX25_LIB) ../lib/libfpac.a
-fpacnode_SOURCES = fpacnode.c fpaccmd.c nodesys.c command.c extcmd.c gateway.c user.c util.c io.c io.h sysinfo.c sysinfo.h node.h colors.c colors.h
+fpacnode_SOURCES = fpacnode.c fpaccmd.c nodesys.c command.c extcmd.c gateway.c lang.c user.c util.c io.c io.h sysinfo.c sysinfo.h node.h colors.c colors.h
 yapp_SOURCES = yapp.c node.h 
 fpacshell_SOURCES = fpacshell.c
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
@@ -435,6 +435,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fpacshell.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gateway.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lang.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nodesys.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
@@ -610,6 +611,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/fpacshell.Po
 	-rm -f ./$(DEPDIR)/gateway.Po
 	-rm -f ./$(DEPDIR)/io.Po
+	-rm -f ./$(DEPDIR)/lang.Po
 	-rm -f ./$(DEPDIR)/nodesys.Po
 	-rm -f ./$(DEPDIR)/sysinfo.Po
 	-rm -f ./$(DEPDIR)/user.Po
@@ -668,6 +670,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/fpacshell.Po
 	-rm -f ./$(DEPDIR)/gateway.Po
 	-rm -f ./$(DEPDIR)/io.Po
+	-rm -f ./$(DEPDIR)/lang.Po
 	-rm -f ./$(DEPDIR)/nodesys.Po
 	-rm -f ./$(DEPDIR)/sysinfo.Po
 	-rm -f ./$(DEPDIR)/user.Po
