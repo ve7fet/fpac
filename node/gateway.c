@@ -1155,9 +1155,6 @@ int is_alias(char *callsign, alias_t * alias)
 static int is_netrom(char *call, char *netrom_call)
 {
 	struct proc_nr_nodes *p, *list;
-	char *ptr = NULL;
-	char near[160];
-	size_t base;
 	int ret = 0;
 
 	if ((list = read_proc_nr_nodes()) == NULL)
@@ -1174,39 +1171,49 @@ static int is_netrom(char *call, char *netrom_call)
 	{
 		if (callsign_eq(p->call, call) || (strcasecmp(p->alias, call) == 0))
 		{
-			ptr = p->call;
+			strcpy(netrom_call, p->call);
+			ret = 1;
 			break;
 		}
-	}
-
-	if (ptr)
-	{
-		strcpy(netrom_call, ptr);
-		ret = 1;
-	}
-	else
-	{
-		/* Help: NetRom nodes with the same base callsign, other SSID */
-		near[0] = '\0';
-		base = strcspn(call, "-");
-		for (p = list; p != NULL; p = p->next)
-		{
-			if (strcspn(p->call, "-") == base &&
-			    strncasecmp(p->call, call, base) == 0 &&
-			    strlen(near) + strlen(p->call) + 2 < sizeof(near))
-			{
-				if (near[0])
-					strcat(near, " ");
-				strcat(near, p->call);
-			}
-		}
-		if (near[0])
-			node_msg(T("*** No NetRom node %s (NetRom nodes with this callsign: %s)"), call, near);
 	}
 
 	free_proc_nr_nodes(list);
 
 	return ret;
+}
+
+/*
+ * Help: list the NetRom nodes with the same base callsign and another SSID.
+ * F6BVP 2026-10-02: only shown when the callsign was found nowhere (it used
+ * to be printed before a successful White Pages / ROSE connection, which
+ * read as a failed NetRom attempt).
+ */
+static void netrom_near_help(char *call)
+{
+	struct proc_nr_nodes *p, *list;
+	char near[160];
+	size_t base;
+
+	if ((list = read_proc_nr_nodes()) == NULL)
+		return;
+
+	near[0] = '\0';
+	base = strcspn(call, "-");
+	for (p = list; p != NULL; p = p->next)
+	{
+		if (strcspn(p->call, "-") == base &&
+		    strncasecmp(p->call, call, base) == 0 &&
+		    strlen(near) + strlen(p->call) + 2 < sizeof(near))
+		{
+			if (near[0])
+				strcat(near, " ");
+			strcat(near, p->call);
+		}
+	}
+	if (near[0])
+		node_msg(T("*** No NetRom node %s (NetRom nodes with this callsign: %s)"), call, near);
+
+	free_proc_nr_nodes(list);
 }
 
 int is_wp(char *callsign, struct full_sockaddr_rose *wpaddr)
@@ -1225,6 +1232,23 @@ int is_wp(char *callsign, struct full_sockaddr_rose *wpaddr)
 		return (1);
 	}
 	return (0);
+}
+
+/* Same, but only for a node record: a FPAC node is reached by ROSE */
+static int is_wp_node(char *callsign, struct full_sockaddr_rose *wpaddr)
+{
+	ax25_address addr;
+	wp_t wp;
+
+	if (ax25_aton_entry(callsign, addr.ax25_call) == -1)
+		return 0;
+
+	if (wp_get(&addr, &wp) == 0 && wp.is_deleted == 0 && wp.is_node)
+	{
+		*wpaddr = wp.address;
+		return 1;
+	}
+	return 0;
 }
 
 /* Initiate a connexion to destination 
@@ -1359,6 +1383,29 @@ int do_connect(int argc, char **argv)
 			source = "(user port) ";
 		}
 
+		/*
+		 * F6BVP 2026-10-02: a FPAC node known in the White Pages is
+		 * reached by ROSE, even when a NetRom node has the same
+		 * callsign ("c f6bvp-12" went NetRom because the node uses
+		 * its own callsign for NetRom). The NetRom alias and the
+		 * nodes absent from the White Pages still go NetRom.
+		 */
+		else if ((eff_argc == 2) && (is_wp_node(argv[1], &wpaddr)))
+		{
+			strcpy(roseroute, rose_ntoa(&wpaddr.srose_addr));
+
+			argv[2] = roseroute;
+			argc = 3;
+			for (n = wpaddr.srose_ndigis - 1; n >= 0; n--)
+			{
+				strcpy(rosedigi[n], ax25_ntoa(&wpaddr.srose_digis[n]));
+				argv[argc++] = rosedigi[n];
+			}
+			argv[argc] = NULL;
+			family = AF_ROSE;
+			source = "(fpac wp) ";
+		}
+
 		/* Check if known NetRom node */
 		else if ((eff_argc == 2) && (is_netrom(argv[1], netromcall)))
 		{
@@ -1479,6 +1526,8 @@ int do_connect(int argc, char **argv)
 		else
 		{
 			/* Fallback : connexion via le port par défaut de la configuration */
+			if (eff_argc == 2)
+				netrom_near_help(argv[1]);
 			strcpy(argvp[0], argv[0]);
 			strcpy(argvp[1], cfg.def_port);
 			strcpy(argvp[2], argv[1]);

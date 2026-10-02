@@ -31,6 +31,7 @@
 /*#include <sys/types.h>*/
 /*#include <sys/socket.h>*/
 #include <unistd.h>
+#include <poll.h>
 
 #include "io.h"
 
@@ -74,6 +75,9 @@ struct io {
 
 	struct io *next;
 };
+
+/* seconds usflush() waits for a full link before dropping the block */
+#define FLUSH_WAIT_MAX	120
 
 static struct io *Iolist = NULL;
 
@@ -180,17 +184,40 @@ void end_io(int fd)
 int usflush(int fd)
 {
 	struct io *iop;
-	int ret;
-	
+	struct pollfd pfd;
+	int ret, tries;
+	int saved_errno = errno;
+
 	if ((iop = itop(fd)) == NULL)
 		return -1;
 	if (iop->opointer == 0)
 		return 0;
-	ret = write(iop->fd, iop->obuf, iop->opointer);
-	if (ret < 0) {
-		iop->opointer = 0;	/* reset so next rsendchar doesn't overflow */
-		return -1;
+	/*
+	 * F6BVP 2026-10-02: the gateway relays on non-blocking sockets. When
+	 * the link towards the user is full, write() fails with EAGAIN; the
+	 * block used to be thrown away here, silently, so a long output seen
+	 * through two nodes came out with holes, or without its final prompt
+	 * ("frozen" display). Wait for the link to drain and try again; give
+	 * up only on a real error or after FLUSH_WAIT_MAX seconds.
+	 */
+	for (tries = 0; ; tries++) {
+		ret = write(iop->fd, iop->obuf, iop->opointer);
+		if (ret >= 0)
+			break;
+		if ((errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) ||
+		    tries >= FLUSH_WAIT_MAX) {
+			iop->opointer = 0;	/* reset so next rsendchar doesn't overflow */
+			return -1;
+		}
+		pfd.fd = iop->fd;
+		pfd.events = POLLOUT;
+		pfd.revents = 0;
+		if (poll(&pfd, 1, 1000) > 0 && (pfd.revents & (POLLERR | POLLHUP | POLLNVAL))) {
+			iop->opointer = 0;
+			return -1;
+		}
 	}
+	errno = saved_errno;
 	if (ret < iop->opointer) {
 		memmove(iop->obuf, &iop->obuf[ret], iop->opointer - ret);
 		iop->opointer = iop->opointer - ret;	/* remaining bytes, not bytes written */

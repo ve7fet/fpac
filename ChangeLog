@@ -1,3 +1,24 @@
+fpac (4.1.6-rc5)
+
+	* fpacnode en passerelle : une longue sortie vue à travers deux
+	  nœuds (par exemple « u » sur un nœud distant) arrivait avec des
+	  trous, ou sans son invite finale, ce qui donnait un affichage
+	  « bloqué ». Quand la liaison vers l'utilisateur était pleine,
+	  l'écriture était refusée (EAGAIN) et usflush() (node/io.c) jetait
+	  le bloc en cours, jusqu'à 251 caractères, sans rien signaler.
+	  usflush() attend maintenant que la liaison se libère et réessaie ;
+	  il n'abandonne que sur une vraie erreur ou après 120 secondes.
+	* « C INDICATIF » : un nœud FPAC connu des White Pages est joint
+	  en ROSE, même si un nœud NetRom porte le même indicatif (« c
+	  f6bvp-12 » partait en NetRom quand le nœud utilise son propre
+	  indicatif pour NetRom). L'alias NetRom et les nœuds absents des
+	  White Pages partent toujours en NetRom (node/gateway.c,
+	  is_wp_node).
+	* Le message « Pas de nœud NetRom ... (nœuds NetRom avec cet
+	  indicatif : ...) » n'est plus affiché avant une connexion ROSE
+	  réussie, où il se lisait comme un essai NetRom raté : il ne
+	  s'affiche que si l'indicatif n'a été trouvé nulle part.
+
 fpac (4.1.6-rc4)
 
 	* Indicatifs sans SSID : par convention AX.25, un indicatif écrit

@@ -1,3 +1,18 @@
+FPAC 4.1.6-rc5 — affichage complet à travers deux nœuds, ROSE avant NetRom (version candidate)
+===============================================================================================
+
+  * Une longue sortie vue à travers deux nœuds (par exemple « u » sur
+    un nœud distant) n'arrive plus tronquée ni sans son invite :
+    fpacnode en passerelle perdait des blocs quand la liaison vers
+    l'utilisateur était pleine.
+
+  * « C INDICATIF » vers un nœud FPAC connu des White Pages part en
+    ROSE, même si un nœud NetRom porte le même indicatif. L'alias
+    NetRom reste la façon de demander NetRom.
+
+  * Le message sur les nœuds NetRom proches ne s'affiche plus avant
+    une connexion ROSE réussie.
+
 FPAC 4.1.6-rc4 — indicatifs sans SSID et connexion NetRom exacte (version candidate)
 =====================================================================================
 
