@@ -1,199 +1,191 @@
-FPAC 4.1.6-rc6 — plus d'indicatif illisible à l'arrêt de fpad (version candidate)
-=================================================================================
+FPAC 4.1.6-rc6 — no more unreadable callsign when fpad stops (release candidate)
+================================================================================
 
-  * À l'arrêt ou à la relance de FPAC, le nœud n'émet plus de trames
-    avec un indicatif source illisible (« )0=|U}-10 », « * ») et
-    n'ouvre plus de liaisons AX.25 fantômes vers ses voisins : fpad
-    écrasait l'indicatif ROSE du noyau au lieu de le lire.
+  * When FPAC is stopped or restarted, the node no longer sends frames
+    with an unreadable source callsign (")0=|U}-10", "*") and no longer
+    opens ghost AX.25 links to its neighbours: fpad was overwriting the
+    kernel's ROSE callsign instead of reading it.
 
-FPAC 4.1.6-rc5 — affichage complet à travers deux nœuds, ROSE avant NetRom (version candidate)
-===============================================================================================
+FPAC 4.1.6-rc5 — complete output through two nodes, ROSE before NetRom (release candidate)
+==========================================================================================
 
-  * Une longue sortie vue à travers deux nœuds (par exemple « u » sur
-    un nœud distant) n'arrive plus tronquée ni sans son invite :
-    fpacnode en passerelle perdait des blocs quand la liaison vers
-    l'utilisateur était pleine.
+  * A long output seen through two nodes (for example "u" on a remote
+    node) no longer arrives truncated or without its prompt: fpacnode
+    acting as a gateway was dropping blocks when the link to the user
+    was full.
 
-  * « C INDICATIF » vers un nœud FPAC connu des White Pages part en
-    ROSE, même si un nœud NetRom porte le même indicatif. L'alias
-    NetRom reste la façon de demander NetRom.
+  * "C CALLSIGN" to an FPAC node known to the White Pages goes out over
+    ROSE, even if a NetRom node has the same callsign. The NetRom alias
+    remains the way to ask for NetRom.
 
-  * Le message sur les nœuds NetRom proches ne s'affiche plus avant
-    une connexion ROSE réussie.
+  * The message about nearby NetRom nodes is no longer displayed before
+    a successful ROSE connection.
 
-FPAC 4.1.6-rc4 — indicatifs sans SSID et connexion NetRom exacte (version candidate)
-=====================================================================================
+FPAC 4.1.6-rc4 — callsigns without SSID and exact NetRom connection (release candidate)
+=======================================================================================
 
-  * Un indicatif sans SSID est maintenant partout le même que celui
-    avec le SSID 0 (F3KT = F3KT-0) : connexion aux stations entendues
-    au SSID 0, applications et alias déclarés sans SSID, bascule ROSE.
+  * A callsign without an SSID is now everywhere the same as the one
+    with SSID 0 (F3KT = F3KT-0): connection to heard stations with
+    SSID 0, applications and aliases declared without an SSID, ROSE
+    failover.
 
-  * « C INDICATIF » ne part plus vers un autre nœud NetRom dont
-    l'indicatif commence pareil (c f6bvp-1 allait vers F6BVP-12). Un
-    message indique les nœuds NetRom proches quand il n'y a pas de
-    correspondance exacte.
+  * "C CALLSIGN" no longer goes to another NetRom node whose callsign
+    starts the same way (c f6bvp-1 went to F6BVP-12). A message lists
+    the nearby NetRom nodes when there is no exact match.
 
-FPAC 4.1.6-rc3 — routes utilisables dans la commande « r » (version candidate)
-===============================================================================
+FPAC 4.1.6-rc3 — usable routes in the "r" command (release candidate)
+=====================================================================
 
-  * La commande « r » affiche maintenant aussi les routes exactes vers
-    les nœuds adjacents, qui étaient cachées.
+  * The "r" command now also displays the exact routes to adjacent
+    nodes, which were hidden.
 
-  * « r <adresse> » indique la route réellement utilisée pour se
-    connecter à cette adresse, et plus seulement les routes générales.
+  * "r <address>" shows the route actually used to connect to that
+    address, and no longer only the general routes.
 
-  * Le message « Relais via ... » de la connexion ROSE et la bascule
-    après un échec suivent maintenant l'ordre des routes du noyau : ils
-    nommaient parfois le voisin de la route générale du DNIC au lieu de
-    celui de la route précise réellement utilisée.
+  * The "Relaying via ..." message of the ROSE connection and the
+    failover after a failure now follow the kernel's route order: they
+    sometimes named the neighbour of the general DNIC route instead of
+    the neighbour of the specific route actually used.
 
-  * « r » affiche dans une colonne « Connect » l'indicatif à utiliser
-    pour se connecter à chaque nœud adjacent, et « r <adresse> » indique
-    la commande de connexion. La commande « n » titre « Connect » ses
-    indicatifs.
+  * "r" displays, in a "Connect" column, the callsign to use to connect
+    to each adjacent node, and "r <address>" shows the connect command.
+    The "n" command now titles its callsigns "Connect".
 
-  * fpacwpd ne part plus en boucle à 100 % du processeur (White Pages
-    bloquées) quand un client se déconnecte au milieu d'une réponse, et
-    un voisin de synchronisation ne reste plus bloqué en « connection in
-    progress » (synchronisation des White Pages arrêtée avec ce nœud),
-    ni ne plante après la fermeture d'une connexion de synchronisation.
+  * fpacwpd no longer spins at 100 % CPU (White Pages blocked) when a
+    client disconnects in the middle of a reply, and a synchronisation
+    neighbour no longer stays stuck in "connection in progress" (White
+    Pages synchronisation stopped with that node), nor does fpacwpd
+    crash after a synchronisation connection is closed.
 
-  * La commande « w » affiche toutes les fiches des White Pages, les plus
-    récentes en premier, page par page (<Entrée> pour continuer, A pour
-    arrêter).
+  * The "w" command displays all the White Pages records, most recent
+    first, page by page (<Return> to continue, A to abort).
 
-  * White Pages : une fiche de nœud n'est plus déplacée par les
-    connexions faites sous le même indicatif (fiche F6BVP-0 qui changeait
-    d'adresse selon le nœud de connexion).
+  * White Pages: a node record is no longer moved by connections made
+    under the same callsign (the F6BVP-0 record changed address
+    depending on the node where the connection took place).
 
-FPAC 4.1.6-rc2 — indicatifs des ports dans la commande « Ports » (version candidate)
-=====================================================================================
+FPAC 4.1.6-rc2 — port callsigns in the "Ports" command (release candidate)
+==========================================================================
 
-  * La commande « Ports » de fpacnode affiche une nouvelle colonne
-    « Callsign » : l'indicatif de chaque port AX.25 et NetRom, et
-    l'adresse ROSE du port rose0. Les colonnes restent alignées avec
-    leurs titres quel que soit le terminal.
+  * The fpacnode "Ports" command displays a new "Callsign" column: the
+    callsign of each AX.25 and NetRom port, and the ROSE address of the
+    rose0 port. The columns stay aligned with their titles whatever the
+    terminal.
 
-  * La commande « u » affiche maintenant le vrai port de chaque
-    liaison : netnod pour les liaisons NetRom, rose0 pour les liaisons
-    ROSE, et non plus axudp pour toutes.
+  * The "u" command now displays the real port of each link: netnod
+    for NetRom links, rose0 for ROSE links, and no longer axudp for all
+    of them.
 
-FPAC 4.1.6-rc1 — corrections de la connexion ROSE (version candidate)
-======================================================================
+FPAC 4.1.6-rc1 — ROSE connection fixes (release candidate)
+==========================================================
 
-  * Le message « Relais via ... » de la commande de connexion nomme
-    maintenant le voisin réellement utilisé par le noyau : d'abord un
-    voisin « Opened » (liaison ROSE établie), et un voisin « Closed »
-    seulement en dernier recours. La bascule automatique retire aussi
-    la route du bon voisin après un échec.
+  * The "Relaying via ..." message of the connect command now names the
+    neighbour actually used by the kernel: first an "Opened" neighbour
+    (ROSE link established), and a "Closed" neighbour only as a last
+    resort. The automatic failover also removes the route of the right
+    neighbour after a failure.
 
-  * Connexion NetRom : le message de connexion indique maintenant le
-    voisin réellement utilisé (« Relais NetRom via ... » ou « direct »),
-    avec la qualité et le numéro de la route, et signale quand ce qui a
-    été tapé désigne un autre nœud que prévu.
+  * NetRom connection: the connection message now shows the neighbour
+    actually used ("NetRom relaying via ..." or "direct"), with the
+    quality and the number of the route, and reports when what was
+    typed designates a different node than expected.
 
-  * Liste des nœuds NetRom : la couleur indique si le nœud est
-    réellement joignable (vert : qualité supérieure à 200 et voisin sans
-    échec ; jaune : le reste ; rouge : qualité 0 ou 120, route active
-    invalide, voisin en échec ou liaison AX.25 en attente de connexion), dans les trois ordres de tri et dans
-    « ne * ». Une connexion vers un nœud dont la route active est
-    invalide affiche maintenant un avertissement au lieu de rester sans
-    réponse.
+  * NetRom node list: the colour shows whether the node is really
+    reachable (green: quality above 200 and neighbour without failure;
+    yellow: the rest; red: quality 0 or 120, invalid active route,
+    failed neighbour or AX.25 link awaiting connection), in all three
+    sort orders and in "ne *". A connection to a node whose active
+    route is invalid now displays a warning instead of staying without
+    an answer.
 
-  * Langue des messages : l'invite de commande et les messages de connexion
-    et de routage s'affichent en anglais ou en français, selon la langue du système
-    (ou la ligne « Language = en | fr | auto » de fpac.conf). La commande
-    « LAng 1 » (anglais) ou « LAng 2 » (français) change la langue de la
-    session en cours.
+  * Message language: the command prompt and the connection and routing
+    messages are displayed in English or in French, according to the
+    system language (or the "Language = en | fr | auto" line of
+    fpac.conf). The "LAng 1" (English) or "LAng 2" (French) command
+    changes the language of the current session.
 
-  * wpedit : messages de confirmation visibles tout de suite ; supprimer
-    une fiche déjà supprimée (ou restaurer une fiche non supprimée)
-    n'interrompt plus la session.
+  * wpedit: confirmation messages are visible immediately; deleting a
+    record that is already deleted (or restoring a record that is not
+    deleted) no longer ends the session.
 
 
-FPAC 4.1.5 — White Pages fiables, connexions plus claires
-============================================================
+FPAC 4.1.5 — reliable White Pages, clearer connections
+======================================================
 
-Cette version rassemble tout le travail accumulé depuis la 4.1.4,
-autour de trois grands axes : la fiabilité des White Pages, la clarté
-des messages de connexion, et quelques améliorations d'affichage.
+This release gathers all the work accumulated since 4.1.4, around
+three main themes: the reliability of the White Pages, the clarity of
+the connection messages, and a few display improvements.
 
-WHITE PAGES (annuaire du réseau)
+WHITE PAGES (network directory)
 
-  * Une fiche marquée "supprimée" par le nettoyage nocturne ne reste
-    plus bloquée : elle peut de nouveau se réparer toute seule dès que
-    le nœud d'origine réannonce son adresse, sans intervention manuelle.
+  * A record marked "deleted" by the nightly cleanup no longer stays
+    stuck: it can again repair itself as soon as the originating node
+    re-announces its address, without manual intervention.
 
-  * Chaque nœud réannonce désormais sa propre fiche tous les 7 jours,
-    même sans redémarrage, pour ne jamais paraître périmé aux yeux des
-    autres nœuds du réseau.
+  * Each node now re-announces its own record every 7 days, even
+    without a restart, so that it never looks stale to the other nodes
+    of the network.
 
-  * Le délai avant effacement définitif d'une fiche supprimée est
-    maintenant respecté correctement (il ne s'effondrait plus à
-    quasiment un jour).
+  * The delay before a deleted record is permanently erased is now
+    correctly respected (it used to collapse to about one day).
 
-  * Une fiche marquée "supprimée" n'apparaît plus dans la commande
-    utilisateur Wp (elle reste visible pour le sysop via wplist), ce
-    qui évitait de tenter des connexions vers des adresses obsolètes.
+  * A record marked "deleted" no longer appears in the user Wp command
+    (it remains visible to the sysop through wplist), which avoids
+    attempting connections to obsolete addresses.
 
-  * Une connexion ROSE explicite réussie vers un indicatif dont la
-    fiche était marquée "supprimée" la restaure désormais
-    automatiquement.
+  * A successful explicit ROSE connection to a callsign whose record
+    was marked "deleted" now restores it automatically.
 
-  * La bascule ROSE en cas d'échec (failover) est plus robuste : elle
-    considère aussi un voisin dont la liaison n'est pas encore montée,
-    et les messages affichés nomment maintenant le voisin réellement
-    tenté au lieu de rester vagues.
+  * The ROSE failover is more robust: it also considers a neighbour
+    whose link is not up yet, and the messages displayed now name the
+    neighbour actually tried instead of staying vague.
 
-CONNEXIONS PLUS CLAIRES
+CLEARER CONNECTIONS
 
-  * Le message "Trying (user port) INDICATIF..." indique maintenant
-    le nom du port utilisé, directement dans la parenthèse (ex.
-    "Trying (user port AXUDP) INDICATIF...") — pratique pour savoir
-    par où part une connexion, y compris quand elle est résolue via
-    l'historique des stations entendues (mheard).
+  * The "Trying (user port) CALLSIGN..." message now gives the name of
+    the port used, directly inside the parentheses (e.g. "Trying (user
+    port AXUDP) CALLSIGN...") — handy to know which way a connection
+    goes out, including when it is resolved through the list of heard
+    stations (mheard).
 
-  * Une adresse ROSE courte tapée sans indiquer le DNIC se complétait
-    silencieusement avec le DNIC du nœud local au lieu de celui du
-    correspondant, ce qui pouvait envoyer la connexion vers le mauvais
-    réseau sans que rien ne le signale. Un avertissement est
-    désormais affiché immédiatement.
+  * A short ROSE address typed without the DNIC was silently completed
+    with the DNIC of the local node instead of the correspondent's,
+    which could send the connection to the wrong network without any
+    notice. A warning is now displayed immediately.
 
-  * "Connect INDICATIF via DIGIPEATER" (sans indiquer de port)
-    n'était plus interprété correctement et échouait ou perdait le
-    digipeater demandé. Corrigé.
+  * "Connect CALLSIGN via DIGIPEATER" (without giving a port) was no
+    longer interpreted correctly and failed or lost the requested
+    digipeater. Fixed.
 
-  * La connexion à un alias affiche maintenant ce à quoi il correspond
-    réellement, et un message indique quel relais ROSE est tenté,
-    même pour une adresse tapée explicitement.
+  * Connecting to an alias now displays what it really corresponds to,
+    and a message says which ROSE relay is being tried, even for an
+    address typed explicitly.
 
-AFFICHAGE
+DISPLAY
 
-  * Correction d'un décalage dans la colonne d'état AX.25 de la liste
-    des utilisateurs (commande "u"), et de l'affichage de l'état
-    "Disc pending".
+  * Fixed a misalignment in the AX.25 state column of the users list
+    ("u" command), and the display of the "Disc pending" state.
 
-  * Dans la liste des nœuds NetRom (commande "ne"), une qualité restée
-    figée à sa valeur de démarrage (120) s'affiche maintenant en rouge
-    au lieu de vert, pour repérer d'un coup d'œil les fiches jamais
-    réellement confirmées par le réseau.
+  * In the NetRom node list ("ne" command), a quality still frozen at
+    its startup value (120) is now displayed in red instead of green,
+    to spot at a glance the entries never really confirmed by the
+    network.
 
-  * L'état d'un nœud ("s") distingue clairement le port utilisateur
-    déclaré du port réellement utilisé par la session en cours, et
-    affiche l'heure exacte de compilation.
+  * The node status ("s") clearly distinguishes the declared user port
+    from the port actually used by the current session, and displays
+    the exact build time.
 
-  * Les couleurs d'affichage de fpacnode sont personnalisables sans
-    recompilation via /usr/local/etc/ax25/fpacnode.colors (voir le
-    fichier pour le détail des réglages disponibles).
+  * The fpacnode display colours can be customised without recompiling
+    through /usr/local/etc/ax25/fpacnode.colors (see that file for the
+    details of the available settings).
 
-CHANGELOG.fr ET NOUVELLES
+CHANGELOG.fr AND NOUVELLES
 
-  * Le ChangeLog et ce fichier NEWS sont désormais aussi disponibles
-    en français (ChangeLog.fr et NOUVELLES).
+  * The ChangeLog and this NEWS file are now also available in French
+    (ChangeLog.fr and NOUVELLES).
 
-Cette version corrige aussi plusieurs plantages et erreurs de
-compilation hérités des versions précédentes (voir ChangeLog pour
-l'historique complet).
+This release also fixes several crashes and build errors inherited
+from previous versions (see ChangeLog for the full history).
 
 -- Bernard Pidoux <bernard.f6bvp@gmail.com>  Wednesday, september 16 2026
 
