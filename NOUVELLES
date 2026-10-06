@@ -1,3 +1,11 @@
+FPAC 4.1.6-rc6 — plus d'indicatif illisible à l'arrêt de fpad (version candidate)
+=================================================================================
+
+  * À l'arrêt ou à la relance de FPAC, le nœud n'émet plus de trames
+    avec un indicatif source illisible (« )0=|U}-10 », « * ») et
+    n'ouvre plus de liaisons AX.25 fantômes vers ses voisins : fpad
+    écrasait l'indicatif ROSE du noyau au lieu de le lire.
+
 FPAC 4.1.6-rc5 — affichage complet à travers deux nœuds, ROSE avant NetRom (version candidate)
 ===============================================================================================
 

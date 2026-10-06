@@ -105,9 +105,13 @@ void clear_nodes()
 		exit(1);
 	}
 		
-	/* Obtain the Node Callsign */
-	
-	if (ioctl(s, SIOCRSSL2CALL, &rose_call) < 0) {
+	/*
+	 * Obtain the Node Callsign: read it (SIOCRSGL2CALL). This used to be
+	 * SIOCRSSL2CALL, which SETS the kernel ROSE level 2 callsign, here
+	 * from an uninitialised variable: each time fpad stopped, ROSE frames
+	 * left with a garbage source callsign until the next start.
+	 */
+	if (ioctl(s, SIOCRSGL2CALL, &rose_call) < 0) {
 		close(s);
 		exit(1);
 	}

@@ -1,6 +1,18 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc6)
+
+	* fpad : à chaque arrêt de fpad (arrêt ou relance de FPAC), le
+	  noyau recevait un indicatif ROSE de niveau 2 quelconque. Tant que
+	  fpad n'était pas reparti, les trames ROSE du nœud sortaient avec
+	  cet indicatif comme source et ouvraient vers les voisins des
+	  liaisons AX.25 fantômes, visibles dans la commande « u » avec un
+	  indicatif illisible (par exemple « )0=|U}-10 ») ou « * ». Dans
+	  clear_nodes() (pad/fpad.c), l'appel censé LIRE l'indicatif du
+	  nœud utilisait SIOCRSSL2CALL, qui l'ÉCRIT, avec une variable non
+	  initialisée. Il utilise maintenant SIOCRSGL2CALL.
+
 fpac (4.1.6-rc5)
 
 	* fpacnode en passerelle : une longue sortie vue à travers deux
