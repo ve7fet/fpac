@@ -55,7 +55,6 @@ calibrate	sends a sequence of UI frames to a port
 call_tcp	(ax25d/node) Calls a remote BBS via TCP
 calld		Receives calls from a remote BBS via TCP
 flexd		Download and handle Flexnet destinations database
-fpac.sh		Shell script to start/stop fpac 
 fpaccfg		dumps the configuration of fpac
 fpacnode	The FPAC node client
 fpacroute	daemon for traceroute
@@ -67,6 +66,7 @@ fpad		The FPAC pad. Access from/to AX25/NetRom/ROSE
 mailbbs		Simple mailer to send Fpac's services messages to a BBS
 mon_tcp		Sends/receive monitoring frames to a remote BBS via TCP/IP
 monitor		Simple monitoring tool
+myfpac.sh	Shell script to start/stop/restart fpac
 remote		** Obsolete
 wpcmp		WP utility
 wpedit		WP editor (to edit WP node parameters or delete a node)
@@ -94,7 +94,7 @@ STARTING FPAC
 Before starting fpac some configuration are needed for /etc/ax25/fpac.conf, fpac.nodes, fpac.routes and ax25ipd.conf
 Pre configured nodes and ROSE routes are provided that should work and can be used as configuration examples.
 
-To start fpac, use the fpac.sh script
+To start fpac, use the myfpac.sh script (myfpac.sh start|stop|restart|status)
 Fpac daemon will run in background.
 
 Then you may run FPAC client fpacnode
