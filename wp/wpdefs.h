@@ -44,6 +44,8 @@ struct wp_adjacent {
 	time_t	vector_date;
 	int	vector_when_nodirty;	/* Do a new vector request when no more dirty records */
 	int	end_no_dirty;	/* client has sent all its dirty records */
+	time_t	round_start;	/* Start of the current vector rounds window */
+	int	round_count;	/* Vector rounds chained in this window */
 	struct wp_adjacent *next;
 };
 
@@ -53,6 +55,7 @@ struct wp_adjacent {
 
 #define WPA_RETRY_CONNECT	(30*60)	/* Retry adjacent connection delay */
 #define WPA_VECTOR_PERIOD	(3600)	/* Process a vector exchange every hour */
+#define WPA_VECTOR_MAX_ROUNDS	3	/* Chained vector rounds allowed per period */
 
 /* F6BVP 2026-09-15: refresh our own node's wp.date periodically, well under
  * wpmaint's deletion delay (30 days by default), so a stable node record

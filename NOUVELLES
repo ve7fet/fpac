@@ -1,3 +1,38 @@
+FPAC 4.1.6-rc7 — fiches de nœuds de nouveau mises à jour entre nœuds (version candidate)
+========================================================================================
+
+  * La fiche White Pages d'un nœud est de nouveau mise à jour par ses
+    voisins. fpacwpd ne reconnaissait pas les autres nœuds comme
+    serveurs WP et refusait leurs mises à jour de fiches de nœuds ;
+    une fiche non rafraîchie finissait marquée supprimée, et
+    « C INDICATIF » vers ce nœud échouait faute de fiche White Pages.
+
+  * Une fiche modifiée est relayée aussitôt vers les autres voisins,
+    et une seule session White Pages est gardée avec chaque voisin.
+
+  * Les échanges White Pages entre deux nœuds sont bornés : au plus
+    trois tours de vecteurs à la suite par heure avec un voisin, et
+    deux versions d'une fiche portant la même date ne peuvent plus se
+    remplacer sans fin entre les nœuds.
+
+  * Le bénéfice est complet quand les deux bouts d'une liaison ont
+    cette version : un nœud resté sur une version antérieure continue
+    de refuser les mises à jour de fiches de nœuds de ses voisins.
+
+  * La commande « Routes » affiche les routes ROSE par adresse
+    croissante : chaque DNIC commence par sa route de DNIC entier,
+    suivie de ses adresses par ordre croissant.
+
+  * Les en-têtes des commandes « Nodes » et « Users » disent
+    maintenant ce qui est affiché : les indicatifs de connexion pour
+    « Nodes » ; les liaisons AX.25 (utilisateurs et liaisons entre
+    nœuds), puis les circuits ROSE, pour « Users ». Leurs textes
+    d'aide sont réécrits.
+
+  * Nouvelle commande « DNic » (DN) : les pays des DNIC pour
+    lesquels le nœud a des routes ; « DN 5050 » nomme le pays de
+    n'importe quel DNIC.
+
 FPAC 4.1.6-rc6 — plus d'indicatif illisible à l'arrêt de fpad (version candidate)
 =================================================================================
 

@@ -32,7 +32,7 @@ The key is NEVER fetched automatically by the scripts: install it by hand, once
 per host.
 
     updfpac.sh     installs the current stable release   (4.1.5)
-    updfpac-rc.sh  installs the current release candidate (4.1.6-rc6)
+    updfpac-rc.sh  installs the current release candidate (4.1.6-rc7)
 
 You may read Linux FPAC-HOWTO
 https://www.f6fbb.org/fpac/doc/FPAC-HOWTO.html

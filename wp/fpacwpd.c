@@ -46,12 +46,44 @@ int verbose = FALSE;
 int wp_trace_flag = 0;
 static int is_daemon = 1;
 static int wp_passive = 0;
-static int WPEDIT_CLIENT = 0;
 
 /* WP contexts are indexed by socket handle */
 
+/* Callsign of a peer WP server, printed with or without a -0 SSID */
+static int is_wp_server_call(const char *call)
+{
+	return (strcmp(call, "WP") == 0 || strcmp(call, "WP-0") == 0);
+}
+
 struct wp_context *context[NB_MAX_HANDLES];
 struct wp_adjacent *wp_adjacent_list = NULL;
+
+/* F6BVP 2026-10-09: a vector exchange is chained to the previous one as
+ * long as the vectors differ (end_transaction from the master, then a new
+ * vector request from the other side). When the difference cannot be
+ * resolved - e.g. the peer refuses our node records - the rounds followed
+ * each other without any pause and flooded the links (several hundred
+ * frames per second on 2026-10-09). Allow WPA_VECTOR_MAX_ROUNDS chained
+ * rounds per WPA_VECTOR_PERIOD, then wait for the periodic exchange. */
+static int vector_round_allowed(struct wp_adjacent *wpa)
+{
+	time_t now = time(NULL);
+
+	if (now - wpa->round_start >= WPA_VECTOR_PERIOD) {
+		wpa->round_start = now;
+		wpa->round_count = 0;
+	}
+	if (wpa->round_count < WPA_VECTOR_MAX_ROUNDS) {
+		wpa->round_count++;
+		return 1;
+	}
+	if (wpa->round_count == WPA_VECTOR_MAX_ROUNDS) {
+		wpa->round_count++;	/* Log once per window */
+		syslog(LOG_WARNING, "Vectors still differ with adjacent %s after %d rounds, waiting for the next periodic exchange",
+		       wpa->node ? wpa->node->name : "?", WPA_VECTOR_MAX_ROUNDS);
+	}
+	return 0;
+}
 
 /************************************************************************************
 * Prototypes
@@ -97,7 +129,12 @@ static int init_client(int client, struct full_sockaddr_rose *address)
 	}
 	context[client]->address = *address;
 	
-	if (strcmp("WP-0", ax25_ntoa(&address->srose_call)) == 0) {
+	/* F6BVP 2026-10-08: ax25_ntoa() does not print a -0 SSID, so the peer
+	 * WP server reads "WP", not "WP-0". Comparing with "WP-0" only typed
+	 * every adjacent as WP_USER: node records were then never updated by
+	 * an adjacent (db_set() without force) and broadcast_dirty() never
+	 * relayed anything. Accept both spellings. */
+	if (is_wp_server_call(ax25_ntoa(&address->srose_call))) {
 		context[client]->type = WP_SERVER;
 	}
 	else {
@@ -187,12 +224,15 @@ static void rose_write_handler(int s)
 
 	        memset (&pdu, 0, sizeof(wp_pdu));
 		    /* If remote is master, client notifies the end of its wp updates */
-			if (verbose) syslog(LOG_INFO, "Sending end_transaction adjacent %s", rose_ntoa(&context[s]->address.srose_addr));
 			wpa->end_no_dirty = 0;
-			pdu.type = wp_type_end_transaction;
-			rc = wp_send_pdu(s, &pdu);
-			if (rc) {
-				close_client(s, 1);
+			if (vector_round_allowed(wpa)) {
+				if (verbose) syslog(LOG_INFO, "Sending end_transaction adjacent %s", rose_ntoa(&context[s]->address.srose_addr));
+				pdu.type = wp_type_end_transaction;
+				rc = wp_send_pdu(s, &pdu);
+				if (rc) {
+					close_client(s, 1);
+					return;
+				}
 			}
 		}
 		/*
@@ -291,8 +331,11 @@ static void rose_read_handler(int s)
 		  /* if (context[s]->type != WP_USER || wp_valid(&pdu.data.wp)) {	*/
 
 	  /* if client is WPEDIT-0 force = 1 */
-		if (WPEDIT_CLIENT == 1) 
-                  	rc = db_set(&pdu.data.wp, 1);
+		/* F6BVP 2026-10-08: tested on this client only. The former global
+		 * flag, set by the first WPEDIT connection and never cleared, gave
+		 * force = 1 to every client until fpacwpd was restarted. */
+		if (strncmp(ax25_ntoa(&context[s]->address.srose_call), "WPEDIT", 6) == 0)
+			rc = db_set(&pdu.data.wp, 2);	/* sysop edit: always applied */
 		else
 			rc = db_set(&pdu.data.wp, context[s]->type != WP_USER);
 
@@ -409,7 +452,8 @@ static void rose_read_handler(int s)
 		  if (wpa && wpa->vector_when_nodirty) {
 			  if (verbose) syslog(LOG_INFO, "Receiving end_transaction adjacent %s", rose_ntoa(&context[s]->address.srose_addr));
 			  wpa->vector_when_nodirty = 0;
-			  vector_request(wpa);
+			  if (vector_round_allowed(wpa))
+				  vector_request(wpa);
 		  }
 		  break;
 	  default:
@@ -446,9 +490,6 @@ static void listening_handler(int s)
 	temps = time(NULL);
 
 	new_client = accept(s, (struct sockaddr *)&address, &addrlen);
-
-	if (strncmp(ax25_ntoa(&address.srose_call),"WPEDIT", 6) == 0)
-		WPEDIT_CLIENT = 1;
 
 	if (new_client < 0) return;
 	if (verbose) syslog(LOG_INFO, "New client %s @ %s", ax25_ntoa(&address.srose_call), rose_ntoa(&address.srose_addr));

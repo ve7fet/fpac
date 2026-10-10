@@ -1,0 +1,12 @@
+
+USAGE
+        DNic [dnic]
+
+DESCRIPTION
+        Lists the DNIC of this node and the DNICs it has routes for,
+        with the name of the country of each one.
+        With a DNIC as argument, gives the country of that DNIC.
+
+EXAMPLE
+        DN
+        DN 5050

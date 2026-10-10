@@ -1,6 +1,73 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc7)
+
+	* fpacwpd : la fiche White Pages d'un nœud n'était jamais mise à
+	  jour par un voisin une fois créée. init_client() (wp/fpacwpd.c)
+	  ne reconnaissait une session comme celle d'un serveur WP voisin
+	  que si l'indicatif distant s'écrivait « WP-0 », alors que
+	  ax25_ntoa() n'écrit pas le SSID -0 et rend « WP ». Toute session
+	  entre deux nœuds était donc traitée comme celle d'un simple
+	  utilisateur : db_set() était appelé sans force et refusait de
+	  mettre à jour une fiche de nœud, et broadcast_dirty() ne relayait
+	  jamais une fiche modifiée vers les autres voisins. La fiche
+	  vieillissait jusqu'à ce que wpmaint la marque supprimée, et le
+	  nœud ne pouvait plus être joint par « C INDICATIF ». Les deux
+	  écritures sont maintenant acceptées (is_wp_server_call).
+	* fpacwpd : le voisin étant maintenant reconnu, une seule session
+	  est gardée avec chaque voisin (il y en avait deux, une dans
+	  chaque sens), et une fiche reçue d'un voisin ne reçoit plus la
+	  réponse wp_type_response destinée aux clients utilisateurs.
+	* fpacwpd : le droit de forcer une fiche, prévu pour wpedit, était
+	  tenu par un drapeau global levé à la première connexion de
+	  WPEDIT et jamais baissé ; tous les clients le gardaient jusqu'à
+	  la relance de fpacwpd. Il est maintenant testé sur la session
+	  qui envoie la fiche.
+	* fpacwpd : un échange de vecteurs est enchaîné au précédent tant
+	  que les vecteurs diffèrent (end_transaction du côté appelé, puis
+	  nouvelle demande de vecteur de l'appelant). Rien ne bornait ces
+	  tours : quand l'écart ne peut pas se résorber, par exemple avec
+	  un voisin resté sur une version antérieure qui refuse les fiches
+	  de nœuds, ils pouvaient se suivre sans pause. Trois tours
+	  enchaînés au plus sont maintenant permis par heure avec un
+	  voisin, puis fpacwpd attend l'échange horaire et écrit au journal
+	  « Vectors still differ with adjacent » (vector_round_allowed,
+	  WPA_VECTOR_MAX_ROUNDS).
+	* fpacwpd : une fiche reçue d'un voisin avec la même date que la
+	  fiche locale mais un contenu différent la remplaçait et était
+	  rediffusée, si bien que deux versions d'une fiche pouvaient se
+	  remplacer sans fin autour d'un anneau de serveurs WP. À date
+	  égale, seule la version la plus haute est maintenant retenue,
+	  comparée sur les champs transmis par le protocole et de la même
+	  façon sur tous les nœuds ; une fiche supprimée l'emporte sur une
+	  fiche valide. Une fiche modifiée par wpedit reste toujours
+	  appliquée. La date locale de suppression d'une fiche reçue de
+	  nouveau à l'identique n'est plus effacée (wp/db.c, wp_wire_cmp,
+	  db_set).
+	* fpacnode, commande « Routes » : les routes ROSE sont affichées
+	  par adresse croissante, au lieu de l'ordre du noyau (masque
+	  décroissant) qui dispersait les routes d'un même DNIC dans la
+	  liste. Chaque DNIC commence maintenant par sa route de DNIC
+	  entier, suivie de ses adresses par ordre croissant. Seul
+	  l'affichage est trié : le noyau essaie toujours la route la
+	  plus précise en premier (node/command.c, sort_rs_nodes).
+	* fpacnode, commandes « Nodes » et « Users » : les en-têtes
+	  annonçaient autre chose que ce qui est affiché. « Nodes » donne
+	  l'indicatif auquel les utilisateurs se connectent, pas celui
+	  qu'un nœud emploie sur ses liaisons : son en-tête devient
+	  « FPAC Nodes - callsigns to connect to ». « Users » donne toutes
+	  les liaisons AX.25 du nœud, pour la plupart des liaisons avec
+	  les autres nœuds, puis les circuits ROSE : ses trois en-têtes
+	  deviennent « AX.25 Level 2 sessions - users and links between
+	  nodes », « ROSE Level 3 sessions » et « ROSE Level 3 transits ».
+	  Seuls les en-têtes changent ; help/Nodes.hlp, qui décrivait
+	  encore des nœuds NET/ROM, et help/Users.hlp sont réécrits.
+	* fpacnode : nouvelle commande « DNic » (DN). Elle affiche le
+	  DNIC du nœud et les DNIC présents dans fpac.routes avec le nom
+	  de leur pays, lu dans itu.dnic ; « DN 5050 » donne le pays de
+	  n'importe quel DNIC (node/command.c, do_dnic ; help/DNic.hlp).
+
 fpac (4.1.6-rc6)
 
 	* fpad : à chaque arrêt de fpad (arrêt ou relance de FPAC), le

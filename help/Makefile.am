@@ -13,6 +13,7 @@ doc_DATA = Alias.hlp \
 	BBs.hlp \
 	CLuster.hlp \
 	Destinations.hlp \
+	DNic.hlp \
 	Help.hlp \
 	Info.hlp \
 	NEtrom.hlp \

@@ -1,3 +1,36 @@
+FPAC 4.1.6-rc7 — node records updated again between nodes (release candidate)
+=============================================================================
+
+  * The White Pages record of a node is updated again by its
+    neighbours. fpacwpd did not recognise the other nodes as WP
+    servers and refused their updates of node records; an unrefreshed
+    record ended up marked deleted, and "C CALLSIGN" to that node
+    failed for lack of a White Pages entry.
+
+  * A changed record is relayed at once to the other neighbours, and
+    only one White Pages session is kept with each neighbour.
+
+  * White Pages exchanges between two nodes are bounded: at most
+    three vector rounds in a row per hour with a neighbour, and two
+    versions of a record bearing the same date can no longer replace
+    each other endlessly between nodes.
+
+  * The benefit is complete once both ends of a link run this
+    version: a node still on an older version keeps refusing node
+    record updates from its neighbours.
+
+  * The "Routes" command lists the ROSE routes by increasing address:
+    each DNIC starts with its DNIC-wide route, followed by its
+    addresses in increasing order.
+
+  * The headings of the "Nodes" and "Users" commands now say what is
+    listed: the callsigns to connect to for "Nodes"; the AX.25 links
+    (users and links between nodes), then the ROSE circuits, for
+    "Users". Their help texts are rewritten.
+
+  * New "DNic" command (DN): the countries of the DNICs this node
+    has routes for; "DN 5050" names the country of any DNIC.
+
 FPAC 4.1.6-rc6 — no more unreadable callsign when fpad stops (release candidate)
 ================================================================================
 

@@ -1,3 +1,65 @@
+fpac (4.1.6-rc7)
+
+	* fpacwpd: the White Pages record of a node was never updated by
+	  a neighbour once it existed. init_client() (wp/fpacwpd.c) typed a
+	  session as a peer WP server only when the remote callsign read
+	  "WP-0", but ax25_ntoa() does not print a -0 SSID and returns
+	  "WP". Every session between two nodes was therefore handled as
+	  an ordinary user: db_set() was called without force and refused
+	  to update a node record, and broadcast_dirty() never relayed a
+	  changed record to the other neighbours. The stale record then
+	  aged until wpmaint marked it deleted, and the node could no
+	  longer be reached by "C CALLSIGN". Both spellings are now
+	  accepted (is_wp_server_call).
+	* fpacwpd: as a peer is now recognised, only one session is kept
+	  with each neighbour (there were two, one in each direction), and
+	  a record received from a neighbour is no longer answered with a
+	  wp_type_response meant for user clients.
+	* fpacwpd: the right to force a record, meant for wpedit, was held
+	  in a global flag set by the first WPEDIT connection and never
+	  cleared; every client then kept it until fpacwpd was restarted.
+	  It is now tested on the session that sends the record.
+	* fpacwpd: a vector exchange is chained to the previous one as long
+	  as the vectors differ (end_transaction from the called side, then
+	  a new vector request from the caller). Nothing bounded these
+	  rounds: when the difference cannot be resolved, for instance with
+	  a neighbour on an older version that refuses node records, they
+	  could follow each other without a pause. At most three chained
+	  rounds are now allowed per hour with a neighbour, then fpacwpd
+	  waits for the hourly exchange and logs "Vectors still differ with
+	  adjacent" (vector_round_allowed, WPA_VECTOR_MAX_ROUNDS).
+	* fpacwpd: a record received from a neighbour with the same date
+	  as the local one but a different content replaced it and was
+	  broadcast again, so two versions of a record could replace each
+	  other endlessly around a ring of WP servers. At equal dates only
+	  the higher version is now taken, compared on the fields carried
+	  by the protocol and in the same way on every node; a deleted
+	  record ranks above a valid one. A record edited with wpedit is
+	  still always applied. The local deletion date of a record
+	  received again unchanged is no longer cleared (wp/db.c,
+	  wp_wire_cmp, db_set).
+	* fpacnode, "Routes" command: the ROSE routes are listed by
+	  increasing address instead of kernel order (decreasing mask),
+	  which scattered the routes of one DNIC across the list. Each
+	  DNIC now starts with its DNIC-wide route, followed by its
+	  addresses in increasing order. Only the listing is sorted: the
+	  kernel still tries the most specific route first
+	  (node/command.c, sort_rs_nodes).
+	* fpacnode, "Nodes" and "Users" commands: the headings said
+	  something else than what is listed. "Nodes" lists the callsign
+	  users connect to, not the callsign a node uses on its links: its
+	  heading is now "FPAC Nodes - callsigns to connect to". "Users"
+	  lists every AX.25 link of the node, most of them links with the
+	  other nodes, then the ROSE circuits: its three headings are now
+	  "AX.25 Level 2 sessions - users and links between nodes", "ROSE
+	  Level 3 sessions" and "ROSE Level 3 transits". Only the headings
+	  change; help/Nodes.hlp, which still described NET/ROM nodes, and
+	  help/Users.hlp are rewritten.
+	* fpacnode: new "DNic" command (DN). It lists the DNIC of the
+	  node and the DNICs found in fpac.routes with the name of their
+	  country, read from itu.dnic; "DN 5050" gives the country of
+	  any DNIC (node/command.c, do_dnic; help/DNic.hlp).
+
 fpac (4.1.6-rc6)
 
 	* fpad: every time fpad stopped (FPAC stopped or restarted), the

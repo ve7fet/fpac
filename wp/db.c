@@ -525,6 +525,41 @@ static int db_find(ax25_address * call)
 	return 0;
 }
 
+/* F6BVP 2026-10-09: order two records on the fields carried by the WP
+ * protocol only (del_date and free[] are local), byte by byte so that
+ * every node, whatever its architecture, gets the same answer. A deleted
+ * record ranks above a valid one. */
+static int wp_wire_cmp(const wp_t * a, const wp_t * b)
+{
+	int rc, i, na, nb;
+
+	if (a->is_deleted != b->is_deleted)
+		return a->is_deleted ? 1 : -1;
+	if (a->is_node != b->is_node)
+		return a->is_node ? 1 : -1;
+	if ((rc = memcmp(&a->address.srose_addr, &b->address.srose_addr, 5)) != 0)
+		return rc;
+	if ((rc = memcmp(&a->address.srose_call, &b->address.srose_call, 7)) != 0)
+		return rc;
+	na = a->address.srose_ndigis > 6 ? 6 : a->address.srose_ndigis;
+	nb = b->address.srose_ndigis > 6 ? 6 : b->address.srose_ndigis;
+	if (na != nb)
+		return na > nb ? 1 : -1;
+	for (i = 0; i < na; i++)
+	{
+		rc = memcmp(&a->address.srose_digis[i], &b->address.srose_digis[i], 7);
+		if (rc != 0)
+			return rc;
+	}
+	if ((rc = strncmp(a->name, b->name, sizeof(a->name))) != 0)
+		return rc;
+	if ((rc = strncmp(a->city, b->city, sizeof(a->city))) != 0)
+		return rc;
+	return strncmp(a->locator, b->locator, sizeof(a->locator));
+}
+
+/* force: 0 = user client, 1 = adjacent WP server or this node itself,
+ * 2 = sysop edit (wpedit), applied whatever the date tie-break says. */
 int db_set(wp_t * wp, int force)
 {
 	int index;
@@ -553,6 +588,15 @@ int db_set(wp_t * wp, int force)
 		if (db_records[index].date > wp->date)
 			return -1;			/* I have newer record */
 		if (memcmp(&db_records[index], wp, sizeof(*wp)) == 0)
+			return -1;
+		/* F6BVP 2026-10-09: same date, different content. Taking whatever
+		 * comes in let two versions of a record replace each other, each
+		 * one being broadcast again, endlessly around a ring of WP
+		 * servers. Only the higher version wins, on every node alike, so
+		 * the network settles on it. This also keeps the local del_date
+		 * of a record received again unchanged. */
+		if (force == 1 && db_records[index].date == wp->date
+			&& wp_wire_cmp(wp, &db_records[index]) <= 0)
 			return -1;
 		if (db_records[index].is_node)
 		{

@@ -6,6 +6,7 @@
 #define FPACNODES       	"@ax25sysconfdir@fpac.nodes"
 #define FPACROUTES      	"@ax25sysconfdir@fpac.routes"
 #define FPACDNIC        	"@ax25sysconfdir@fpac.dnic"
+#define ITUDNIC         	"@ax25sysconfdir@itu.dnic"
 #define FPAC_INFO_FILE  	"@ax25sysconfdir@fpac.info"
 #define FPAC_HELLO_FILE 	"@ax25sysconfdir@fpac.hello"
 #define FPAC_HELP_DIR   	"@ax25localstatedir@fpac/help/"

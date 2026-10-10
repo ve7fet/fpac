@@ -80,6 +80,7 @@ int do_rs_nodes(int argc, char **argv);
 int do_rose_ckt(int argc, char **argv);
 int do_stat_heure(int argc, char **argv);
 int do_stat_jour(int argc, char **argv);
+int do_dnic(int argc, char **argv);
 
 void init_nodecmds(void)
 {
@@ -90,6 +91,7 @@ void init_nodecmds(void)
 	add_internal_cmd(&Nodecmds, "COLor", 3, 1, do_color);
 	add_internal_cmd(&Nodecmds, "Connect", 1, 1, do_connect);
 	add_internal_cmd(&Nodecmds, "Dest", 1, 1, do_dest);
+	add_internal_cmd(&Nodecmds, "DNic", 2, 1, do_dnic);
 	add_internal_cmd(&Nodecmds, "Finger", 1, 1, do_finger);
 	add_internal_cmd(&Nodecmds, "Help", 1, 1, do_help);
 	add_internal_cmd(&Nodecmds, "HOst", 2, 1, do_host);
@@ -157,6 +159,39 @@ struct proc_rs_nodes *read_proc_rs_nodes_ordered(void)
 		prev = list;
 	}
 	return prev;
+}
+
+/*
+ * Display order of the Routes command: by increasing address, only the
+ * significant digits (the mask) being compared. A shorter route comes
+ * before the longer routes it covers, so each DNIC starts with its
+ * DNIC-wide route, followed by its addresses in increasing order. Only
+ * the listing is sorted, never the list used for routing: the kernel
+ * still tries the most specific route first.
+ */
+static int rs_node_cmp(const struct proc_rs_nodes *a, const struct proc_rs_nodes *b)
+{
+	int la = (a->mask > 10) ? 10 : a->mask;
+	int lb = (b->mask > 10) ? 10 : b->mask;
+	int rc = strncmp(a->address, b->address, (la < lb) ? la : lb);
+
+	return rc ? rc : la - lb;
+}
+
+static struct proc_rs_nodes *sort_rs_nodes(struct proc_rs_nodes *list)
+{
+	struct proc_rs_nodes *sorted = NULL, *next, **pp;
+
+	for (; list != NULL; list = next)
+	{
+		next = list->next;
+		for (pp = &sorted; *pp != NULL; pp = &(*pp)->next)
+			if (rs_node_cmp(*pp, list) > 0)
+				break;
+		list->next = *pp;
+		*pp = list;
+	}
+	return sorted;
 }
 
 /*
@@ -522,6 +557,109 @@ int do_rs_neigh(int argc, char **argv)
 			tprintf("%s\n", line);
 	}
 	fclose(fp);
+	return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* do_dnic : countries of the DNICs this node has routes for          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Country of a DNIC, read from the ITU list (itu.dnic: "2080 France",
+ * one DNIC per line). The hyphens the file uses inside a name are
+ * shown as spaces. Returns 0 when the DNIC is not in the list.
+ */
+static int itu_dnic_country(const char *dnic, char *country, size_t len)
+{
+	FILE *fp;
+	char line[256];
+	char code[16], name[128];
+	char *p;
+	int found = 0;
+
+	if ((fp = fopen(ITUDNIC, "r")) == NULL)
+		return 0;
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		if (*line == '#')
+			continue;
+		if (sscanf(line, "%15s %127s", code, name) != 2)
+			continue;
+		if (strcmp(code, dnic) != 0)
+			continue;
+		for (p = name; *p; p++)
+			if (*p == '-')
+				*p = ' ';
+		snprintf(country, len, "%s", name);
+		found = 1;
+		break;
+	}
+	fclose(fp);
+	return found;
+}
+
+static int dnic_cmp(const void *a, const void *b)
+{
+	return strcmp((const char *)a, (const char *)b);
+}
+
+int do_dnic(int argc, char **argv)
+{
+	char list[64][5];
+	char country[128];
+	int nb = 0;
+	int i;
+	route_t *r;
+
+	if ((argc > 1) && (*argv[1] == '?'))
+	{
+		node_msg("usage : dnic [dnic]");
+		return 0;
+	}
+
+	/* dnic <dnic>: country of any DNIC of the ITU list */
+	if (argc > 1)
+	{
+		if ((strlen(argv[1]) != 4) || (strspn(argv[1], "0123456789") != 4))
+		{
+			node_msg("dnic : a DNIC is 4 digits");
+			return 0;
+		}
+		if (itu_dnic_country(argv[1], country, sizeof(country)))
+			tprintf("%s %s\n", argv[1], country);
+		else
+			tprintf("%s ?\n", argv[1]);
+		return 0;
+	}
+
+	/* DNIC of the node, then the DNICs of the routes of fpac.routes */
+	snprintf(list[nb++], 5, "%s", cfg.dnic);
+	for (r = cfg.route; r != NULL; r = r->next)
+	{
+		if ((strlen(r->addr) < 4) || (strspn(r->addr, "0123456789") < 4))
+			continue;
+		for (i = 0; i < nb; i++)
+			if (strncmp(list[i], r->addr, 4) == 0)
+				break;
+		if ((i == nb) && (nb < 64))
+			snprintf(list[nb++], 5, "%.4s", r->addr);
+	}
+	qsort(list, nb, sizeof(list[0]), dnic_cmp);
+
+	if (Colored)
+		tprintf("%sDNIC Country%s\n", NodeColors.en_tete, ResetColor);
+	else
+		tprintf("DNIC Country\n");
+	for (i = 0; i < nb; i++)
+	{
+		if (!itu_dnic_country(list[i], country, sizeof(country)))
+			strcpy(country, "?");
+		if (Colored)
+			tprintf("%s%s%s %s\n", NodeColors.adresse, list[i], ResetColor, country);
+		else
+			tprintf("%s %s\n", list[i], country);
+	}
 	return 0;
 }
 
@@ -1275,7 +1413,7 @@ int do_users(int argc, char **argv)
 		if (first)
 		{
 			first = 0;
-			node_msg("Users - AX.25 Level 2 sessions :");
+			node_msg("AX.25 Level 2 sessions - users and links between nodes :");
 			if (Colored)	
 				tprintf("%sPort%s   %sCallsign%s     %sCallsign%s  %sDigi 1%s   %sDigi 2%s   %sAX.25 state%s  %sROSE state%s  %sNetRom status%s", 
 				NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
@@ -1485,7 +1623,7 @@ int do_users(int argc, char **argv)
 		{
 			first = 0;
 			tprintf("\n");
-			node_msg("Users - AX.25 Level 3 sessions :");
+			node_msg("ROSE Level 3 sessions :");
 			if (Colored)	
 				tprintf("%sCallsign%s  %sDNIC addr%s   <-> %sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s    %sAX.25 state%s", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
 			else
@@ -1609,7 +1747,7 @@ int do_users(int argc, char **argv)
 		{
 			first = 0;
 			tprintf("\n");
-			node_msg("Users - AX.25 Level 3 transits :");
+			node_msg("ROSE Level 3 transits :");
 			if (Colored)	
 				tprintf("%sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s   <-> %sCallsign%s  %sDNIC addr%s   %sLCI Adjacent%s\n", NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
 			else
@@ -1917,6 +2055,7 @@ int do_routes(int argc, char **argv)
 		wp_free_list(&wpn);
 		return 0;
 	}
+	listn = sort_rs_nodes(listn);
 /*
 	if ((list = read_proc_ax25()) == NULL) 
 	{
@@ -1951,9 +2090,9 @@ int do_routes(int argc, char **argv)
 		}
 
 		/*
-		 * All kernel routes are listed, in kernel order (most specific
-		 * first), including the exact 10 digit routes to adjacent nodes
-		 * which were hidden before 4.1.6-rc3.
+		 * All kernel routes are listed, by increasing address (see
+		 * sort_rs_nodes()), including the exact 10 digit routes to
+		 * adjacent nodes which were hidden before 4.1.6-rc3.
 		 */
 		{
 		for (i = pn->mask; i < 10; i++)
@@ -2427,7 +2566,7 @@ int do_rose(int argc, char **argv)
 
 	if (argc == 1)
 	{
-		node_msg("FPAC Nodes:");
+		node_msg("FPAC Nodes - callsigns to connect to:");
 		if (Colored)
 			node_msg("%sConnect%s   %sDNIC addr%s    %sConnect%s   %sDNIC addr%s    %sConnect%s   %sDNIC addr%s",
 					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
@@ -2461,7 +2600,7 @@ int do_rose(int argc, char **argv)
 	}
 	else if (strpbrk(argv[1], "*?&=#@"))
 	{
-		node_msg("FPAC Nodes:");
+		node_msg("FPAC Nodes - callsigns to connect to:");
 		if (wp_get_list(&wp, &nb, WP_NODE_FLAG, "*") != -1)
 		{
 			for (i = 0; i < nb; i++)
@@ -2509,7 +2648,7 @@ int do_rose(int argc, char **argv)
 					continue;
 				if (first)
 				{
-					node_msg("FPAC Nodes:");
+					node_msg("FPAC Nodes - callsigns to connect to:");
 					first = 0;
 				}
 
@@ -2530,7 +2669,7 @@ int do_rose(int argc, char **argv)
 	}
 	else
 	{
-		node_msg("FPAC Nodes:");
+		node_msg("FPAC Nodes - callsigns to connect to:");
 		if (wp_get_list(&wp, &nb, WP_NODE_FLAG, "*") != -1)
 		{
 			for (i = 0; i < nb; i++)
