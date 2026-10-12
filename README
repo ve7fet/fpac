@@ -43,38 +43,56 @@ http://rose.fpac.free.fr/MINI-HOWTO/
 Linux FPAC mini-HOWTO n'est malheureusement plus à jour...
 http://rose.fpac.free.fr/MINI-HOWTO-FR/
 
-Here is a list of applications dedicated to FPAC X25 node.
+Here is the list of the applications of the FPAC X25 node. They use the
+ROSE/X25 L3 layer of the Linux kernel. All are installed in the sbin
+directory by "make install".
 
-They are using the ROSE/X25 L3 layer of the linux kernel.
+The documentation is in the doc directory, the HTML doc in doc/html, and
+each application has a manual page (man fpad, man wpmaint...).
 
-The documentation is in doc directory. HTML doc in doc/html.
+Daemons, started and stopped by myfpac.sh. Only one copy of each may run
+on a node: never start one by hand on a node in service.
 
-aprslist	lists APRS frames heard
-ax25parms	list the ax25 parameters currently set in /proc
-calibrate	sends a sequence of UI frames to a port
-call_tcp	(ax25d/node) Calls a remote BBS via TCP
-calld		Receives calls from a remote BBS via TCP
-flexd		Download and handle Flexnet destinations database
-fpaccfg		dumps the configuration of fpac
-fpacnode	The FPAC node client
-fpacroute	daemon for traceroute
-fpacshell	(node) Runs a shell with MD5 protection
-fpacstat	computes the traffic statistics of the trunks
-fpacwdog	simple watchdog that sends a character to a serial port
-fpacwpd		The white pages database server daemon
 fpad		The FPAC pad. Access from/to AX25/NetRom/ROSE
-mailbbs		Simple mailer to send Fpac's services messages to a BBS
-mon_tcp		Sends/receive monitoring frames to a remote BBS via TCP/IP
-monitor		Simple monitoring tool
-myfpac.sh	Shell script to start/stop/restart fpac
-remote		** Obsolete
-wpcmp		WP utility
-wpedit		WP editor (to edit WP node parameters or delete a node)
-wplist		list WP data base records in local Node memory image
-wpmaint		White Pages maintenance utility
-wpserv		WP application
-wpstress	** Obsolete - WP utility
-yapp		To remotely download or upload files to your node with YAPP transfer protocol.
+fpacwpd		The white pages database server daemon
+fpacstat	computes the traffic statistics of the trunks
+fpacroute	daemon for the Trace (traceroute) command of the node
+flexd		Downloads and handles the Flexnet destinations database
+
+Node and user access
+
+fpacnode	The FPAC node client
+fpacshell	(node) Runs a shell with MD5 protection (SYSop command)
+yapp		(node) Uploads or downloads files with the YAPP protocol
+call_tcp	(node) Links a user of the node to the telnet port of a BBS
+
+White Pages (WP) database
+
+wplist		lists the WP records held in the memory of the local node
+wpserv		lists the WP records matching a callsign mask
+wpedit		WP editor (edits the parameters of a WP record or deletes it)
+wpmaint		WP maintenance utility (removes outdated records)
+wpcmp		compares two WP database files
+wpconvert	converts an old wpdb2 database to the wpdb3 format (nearly obsolete)
+wpstress	test tool: fills the WP database with random callsigns
+
+Administration and tools
+
+myfpac.sh	Shell script to start/stop/restart fpac and show its status
+fpaccfg		dumps the configuration of fpac
+ax25parms	lists the ax25 parameters currently set in /proc
+versions	lists the versions of the installed AX.25 applications and tools
+monitor		Simple monitoring tool (AX.25, NetRom, ROSE, IP frames)
+aprslist	lists the APRS stations heard and sends APRS beacons
+calibrate	sends a sequence of UI frames to a port (transmitter test)
+mailbbs		Simple mailer to send Fpac's service messages to a BBS
+
+Seldom used
+
+calld		Receives calls from a remote BBS via TCP
+mon_tcp		Sends/receives monitoring frames to/from a remote host
+fpacwdog	sends a character to a serial port at a fixed interval
+		(to feed an external hardware watchdog)
 
 See INSTALL for configuration and installation instructions.
 
