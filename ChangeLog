@@ -1,3 +1,13 @@
+fpac (4.1.6-rc9)
+
+	* fpacnode: "Connect <word>" no longer calls on the default port a
+	  word that was found nowhere and cannot be a callsign (no letter
+	  or no digit before the SSID): it is most likely a mistyped NetRom
+	  alias. The node answers "unknown NetRom alias" and lists the
+	  known aliases that begin with the same three characters (node/gateway.c,
+	  looks_like_callsign(), netrom_unknown_alias()). "c pktrpt" for
+	  PKTXRP used to send SABM frames to PKTRPT on the user port.
+
 fpac (4.1.6-rc8)
 
 	* fpad, fpacwpd, fpacstat, fpacroute: each daemon refuses to start

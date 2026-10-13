@@ -1216,6 +1216,55 @@ static void netrom_near_help(char *call)
 	free_proc_nr_nodes(list);
 }
 
+/*
+ * F6BVP 2026-10-13: an amateur callsign always holds a letter and a digit
+ * before its SSID. A word without both, found nowhere, is most likely a
+ * mistyped NetRom alias ("c pktrpt" for PKTXRP): it used to be called as a
+ * callsign on the default port.
+ */
+static int looks_like_callsign(const char *word)
+{
+	size_t i, base = strcspn(word, "-");
+	int letter = 0, digit = 0;
+
+	for (i = 0; i < base; i++)
+	{
+		if (isalpha((unsigned char)word[i]))
+			letter = 1;
+		else if (isdigit((unsigned char)word[i]))
+			digit = 1;
+	}
+	return (letter && digit);
+}
+
+/* Say so, with the NetRom aliases that begin like the word typed */
+static void netrom_unknown_alias(char *word)
+{
+	struct proc_nr_nodes *p, *list;
+	char near[160];
+
+	near[0] = '\0';
+	if ((list = read_proc_nr_nodes()) != NULL)
+	{
+		for (p = list; p != NULL; p = p->next)
+		{
+			if (strcmp(p->alias, "*") != 0 && strlen(word) >= 3 &&
+			    strncasecmp(p->alias, word, 3) == 0 &&
+			    strlen(near) + strlen(p->alias) + 2 < sizeof(near))
+			{
+				if (near[0])
+					strcat(near, " ");
+				strcat(near, p->alias);
+			}
+		}
+		free_proc_nr_nodes(list);
+	}
+	if (near[0])
+		node_msg(T("*** %s: unknown NetRom alias (close aliases: %s)"), word, near);
+	else
+		node_msg(T("*** %s: unknown NetRom alias"), word);
+}
+
 int is_wp(char *callsign, struct full_sockaddr_rose *wpaddr)
 {
 	ax25_address addr;
@@ -1525,6 +1574,13 @@ int do_connect(int argc, char **argv)
 		}
 		else
 		{
+			/* F6BVP 2026-10-13: a word found nowhere that cannot be a
+			 * callsign is not called on the default port */
+			if (eff_argc == 2 && !via_used && !looks_like_callsign(argv[1]))
+			{
+				netrom_unknown_alias(argv[1]);
+				goto done;
+			}
 			/* Fallback : connexion via le port par défaut de la configuration */
 			if (eff_argc == 2)
 				netrom_near_help(argv[1]);

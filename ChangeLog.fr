@@ -1,6 +1,17 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc9)
+
+	* fpacnode : « Connect <mot> » n'appelle plus sur le port par
+	  défaut un mot trouvé nulle part et qui ne peut pas être un
+	  indicatif (pas de lettre ou pas de chiffre avant le SSID) : c'est
+	  très probablement un alias NetRom mal tapé. Le nœud répond
+	  « alias NetRom inconnu » et donne les alias connus qui commencent par les mêmes
+	  trois caractères (node/gateway.c, looks_like_callsign(),
+	  netrom_unknown_alias()). « c pktrpt » pour PKTXRP envoyait des
+	  trames SABM vers PKTRPT sur le port utilisateur.
+
 fpac (4.1.6-rc8)
 
 	* fpad, fpacwpd, fpacstat, fpacroute : chaque démon refuse de
