@@ -28,7 +28,8 @@
 
 static void Usage(void)
 {
-	fprintf(stderr, "Usage : calibrate [-t seconds] port\n");
+	fprintf(stderr, "Usage : calibrate [-t seconds] port\n"
+			"-t : time between two frames, decimals allowed (default 1, minimum 0.01)\n");
 	exit(1);
 }
 
@@ -48,10 +49,16 @@ int main(int argc, char *argv[])
 	while ((s = getopt(argc, argv, "t:")) != -1) {
 		switch (s) {
 			case 't':
-				tempo = atoi(optarg);
+				/* -t is in seconds, as the manual always said: it used
+				 * to be read as milliseconds */
+				tempo = (int)(atof(optarg) * 1000.0 + 0.5);
+				if (tempo < 10) {
+					fprintf(stderr, "calibrate: -t needs a time in seconds, 0.01 or more\n");
+					return 1;
+				}
 				break;
 			case ':':
-				fprintf(stderr, "calibrate: option -t needs a duration in s\n");
+				fprintf(stderr, "calibrate: option -t needs a time in seconds\n");
 				return 1;
 			case '?':
 				Usage();

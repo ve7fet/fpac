@@ -1,0 +1,174 @@
+call_tcp - from the node to the telnet port of a BBS
+call_tcp - du nœud vers le port telnet d'un BBS
+====================================================================
+
+English text first, French text below.
+Le texte anglais vient d'abord, le texte français ensuite.
+
+--------------------------------------------------------------------
+ENGLISH
+--------------------------------------------------------------------
+
+1. Purpose
+
+call_tcp lets a user of the node reach a BBS that is on the IP
+network and not on AX.25 or ROSE. It opens a TCP connection to the
+telnet port of the BBS, gives the callsign of the user at the login
+prompt, then carries the data both ways until one side closes.
+
+Use it when the BBS can only be reached by telnet. When the BBS has
+an AX.25 or ROSE access, "connect" in fpac.conf is simpler:
+
+    BBs = connect f6bvp-1 2080175520
+
+2. Usage
+
+    call_tcp host [port]
+
+    host    name or IP address of the BBS.
+    port    TCP port number or service name. Default: telnet (23).
+    -h, -?  show a short help and exit.
+
+call_tcp is not a daemon. It is run once for each call:
+
+- by fpad, for a Command or an Application of fpac.conf;
+- by ax25d, for a callsign of ax25d.conf;
+- from a terminal, for a test: it then asks for the callsign.
+
+3. Which callsign is given to the BBS
+
+- AX.25, NET/ROM or ROSE user: the callsign of the station
+  connected. For AX.25 and ROSE the user is also recorded in the
+  White Pages of the node.
+- User who came into the node by telnet: the callsign he gave to
+  the node, passed in the environment variable CALL_TCP.
+- Terminal: the callsign typed.
+
+The callsign is sent as soon as the BBS output contains "callsign"
+or "login", in upper or lower case. Except from a terminal it is
+preceded by a dot, as LinFBB expects from a program.
+
+What the BBS sends before that prompt is not shown to the user.
+What follows is: if the BBS asks for a password, the user sees the
+question and answers it himself.
+
+4. Examples
+
+A command of the node, in fpac.conf:
+
+    Command
+        BBs = /usr/local/sbin/call_tcp mybbs.ampr.org 6300
+    End
+
+A callsign of its own for the BBS, in fpac.conf:
+
+    Application
+        F6XYZ-1 = /usr/local/sbin/call_tcp 44.168.19.18 6300
+    End
+
+A test from a terminal of the node:
+
+    /usr/local/sbin/call_tcp 44.168.19.18 6300
+
+5. Things to know
+
+- The BBS believes the callsign it is given. Its telnet port should
+  accept connections from the node only.
+- If the BBS never sends a line with "callsign" or "login", nothing
+  is shown and the session stays silent: check the port.
+- There is no time limit: the session lasts until the user or the
+  BBS disconnects.
+- Until 4.1.6-rc7 the port was compulsory although the example of
+  fpac.conf gave none; a prompt arriving in two pieces could be
+  missed; a callsign typed at a terminal was cut at 7 characters;
+  and an AX.25 call through more than 6 digipeaters overwrote
+  memory.
+
+See also: call_tcp(1), fpac.conf(5).
+
+--------------------------------------------------------------------
+FRANÇAIS
+--------------------------------------------------------------------
+
+1. But
+
+call_tcp permet à un utilisateur du nœud de joindre un BBS qui est
+sur le réseau IP et non sur AX.25 ou ROSE. Il ouvre une connexion
+TCP vers le port telnet du BBS, donne l'indicatif de l'utilisateur
+au prompt de connexion, puis transporte les données dans les deux
+sens jusqu'à ce qu'un des deux côtés ferme.
+
+À utiliser quand le BBS n'est joignable que par telnet. Quand le
+BBS a un accès AX.25 ou ROSE, « connect » dans fpac.conf est plus
+simple :
+
+    BBs = connect f6bvp-1 2080175520
+
+2. Mode d'emploi
+
+    call_tcp hôte [port]
+
+    hôte    nom ou adresse IP du BBS.
+    port    numéro de port TCP ou nom de service. Par défaut :
+            telnet (23).
+    -h, -?  affiche une aide courte et sort.
+
+call_tcp n'est pas un démon. Il est lancé une fois par appel :
+
+- par fpad, pour une commande (Command) ou une application
+  (Application) de fpac.conf ;
+- par ax25d, pour un indicatif de ax25d.conf ;
+- depuis un terminal, pour un essai : il demande alors l'indicatif.
+
+3. Quel indicatif est donné au BBS
+
+- Utilisateur AX.25, NET/ROM ou ROSE : l'indicatif de la station
+  connectée. Pour AX.25 et ROSE, l'utilisateur est aussi inscrit
+  dans les White Pages du nœud.
+- Utilisateur entré dans le nœud par telnet : l'indicatif qu'il a
+  donné au nœud, transmis par la variable d'environnement CALL_TCP.
+- Terminal : l'indicatif tapé.
+
+L'indicatif est envoyé dès que la sortie du BBS contient
+« callsign » ou « login », en majuscules ou en minuscules. Sauf
+depuis un terminal, il est précédé d'un point, comme LinFBB
+l'attend d'un programme.
+
+Ce que le BBS envoie avant ce prompt n'est pas montré à
+l'utilisateur. Ce qui suit l'est : si le BBS demande un mot de
+passe, l'utilisateur voit la question et y répond lui-même.
+
+4. Exemples
+
+Une commande du nœud, dans fpac.conf :
+
+    Command
+        BBs = /usr/local/sbin/call_tcp monbbs.ampr.org 6300
+    End
+
+Un indicatif propre au BBS, dans fpac.conf :
+
+    Application
+        F6XYZ-1 = /usr/local/sbin/call_tcp 44.168.19.18 6300
+    End
+
+Un essai depuis un terminal du nœud :
+
+    /usr/local/sbin/call_tcp 44.168.19.18 6300
+
+5. À savoir
+
+- Le BBS croit l'indicatif qu'on lui donne. Son port telnet ne
+  devrait accepter que les connexions venant du nœud.
+- Si le BBS n'envoie jamais de ligne contenant « callsign » ou
+  « login », rien ne s'affiche et la session reste muette :
+  vérifier le port.
+- Il n'y a pas de limite de temps : la session dure jusqu'à ce que
+  l'utilisateur ou le BBS se déconnecte.
+- Jusqu'à la 4.1.6-rc7, le port était obligatoire alors que
+  l'exemple de fpac.conf n'en donnait pas ; un prompt arrivant en
+  deux morceaux pouvait être manqué ; un indicatif tapé au
+  terminal était coupé à 7 caractères ; et un appel AX.25 passant
+  par plus de 6 répéteurs écrasait de la mémoire.
+
+Voir aussi : call_tcp(1), fpac.conf(5).

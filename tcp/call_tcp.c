@@ -23,6 +23,28 @@
 #include "fpac.h"
 
 #define BUFLEN 4096
+#define HEADLEN 1024	/* what is kept of the BBS output while waiting for its prompt */
+
+static void usage(FILE *f)
+{
+	fprintf(f, "Usage: call_tcp host [port]\n"
+		"Links the calling user to the telnet port of a BBS and gives his\n"
+		"callsign at the login prompt. It is run by fpad or ax25d, for a\n"
+		"Command or an Application of fpac.conf.\n"
+		"host : name or IP address of the BBS\n"
+		"port : TCP port or service name (default: telnet)\n");
+}
+
+/* Case independent search of a word in a text */
+static int has_word(const char *text, const char *word)
+{
+	size_t n = strlen(word);
+
+	for (; *text; text++)
+		if (strncasecmp(text, word, n) == 0)
+			return 1;
+	return 0;
+}
 
 static inline void write_discard(int fd, const void *buf, size_t n)
 {
@@ -68,6 +90,9 @@ int main(int argc, char **argv)
 	char *ptr;
 	char buf[4096];
 	char caller[120];
+	char head[HEADLEN + 1];
+	int headlen = 0;
+	const char *service;
 	struct full_sockaddr_rose wp;
 	cfg_t cfg;
 	char address[11];
@@ -79,17 +104,18 @@ int main(int argc, char **argv)
 	unsigned int slen = sizeof(saddr);
 
 
-	if (argc < 2)
+	if ((argc == 2) && ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "-?") == 0) || (strcmp(argv[1], "?") == 0)))
 	{
-		printf("IP address missing - Usage call_tcp [IP address] [port]\n");
+		usage(stdout);
+		return 0;
+	}
+	if (argc < 2 || argc > 3 || argv[1][0] == '-')
+	{
+		usage(stderr);
 		return 1;
 	}
-	if (argc < 3)
-	{
-		printf("Port missing - Usage call_tcp [IP address] [port]\n");
-		return 1;
-	}
-
+	/* The port is optional, as the example of fpac.conf always showed */
+	service = (argc == 3) ? argv[2] : "telnet";
 
 	if (cfg_open(&cfg) != 0)
 		return(1);
@@ -119,8 +145,10 @@ int main(int argc, char **argv)
 		wp.srose_family = AF_ROSE;
 		wp.srose_call   = saddr.sax.fsa_ax25.sax25_call;
 		wp.srose_ndigis = saddr.sax.fsa_ax25.sax25_ndigis;
-		if (wp.srose_ndigis > ROSE_MTU)
-			wp.srose_ndigis = ROSE_MTU;
+		/* The ROSE address holds 6 digipeaters, an AX.25 one up to 8: the
+		 * limit used to be ROSE_MTU (251) and the copy below overflowed */
+		if (wp.srose_ndigis > ROSE_MAX_DIGIS)
+			wp.srose_ndigis = ROSE_MAX_DIGIS;
 		for (n = 0 ; n < wp.srose_ndigis ; n++)
 			wp.srose_digis[n]   = saddr.sax.fsa_digipeater[n];
 		rose_aton(address, wp.srose_addr.rose_addr); 
@@ -145,7 +173,7 @@ int main(int argc, char **argv)
 		ptr = getenv("CALL_TCP");
 		if (ptr)
 		{
-			strcpy(caller+1, ptr);
+			snprintf(caller+1, sizeof(caller) - 2, "%s", ptr);
 		}
 		else
 		{
@@ -155,9 +183,13 @@ int main(int argc, char **argv)
 		break;
 	case AF_UNSPEC:
 		printf("Enter your callsign :");
+		fflush(stdout);
 		if (fgets(caller, sizeof(caller)-1, stdin) == NULL)
 			caller[0] = '\0';
-		caller[7] = '\0';
+		/* A callsign with its SSID is up to 9 characters: it used to be
+		 * cut at 7, so that F6BVP-10 became F6BVP-1 */
+		caller[strcspn(caller, " \t\r\n")] = '\0';
+		caller[9] = '\0';
 		break;
 	default:
 		printf("Unsupported address family %d\n", type);
@@ -184,24 +216,22 @@ int main(int argc, char **argv)
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
 
-	sp = NULL;
-	if (argc < 3)
-		sp = getservbyname("telnet", "tcp");
-	if (sp == NULL)
-		sp = getservbyname(argv[2], "tcp");
-	if (sp == NULL)
-		sp = getservbyport(htons(atoi(argv[2])), "tcp");
-	if (sp != NULL) 
+	/* A number is a port; anything else is a service name */
+	if (atoi(service) > 0 && atoi(service) < 65536)
+	{
+		addr.sin_port = htons(atoi(service));
+	}
+	else if ((sp = getservbyname(service, "tcp")) != NULL)
 	{
 		addr.sin_port = sp->s_port;
 	}
-	else if (atoi(argv[2]) != 0) 
+	else if (strcmp(service, "telnet") == 0)
 	{
-		addr.sin_port = htons(atoi(argv[2]));
-	} 
+		addr.sin_port = htons(23);
+	}
 	else 
 	{
-		printf("Unknown service %s\n", argv[2]);
+		printf("Unknown service %s\n", service);
 		close(fd);
 		return 4;
 	}
@@ -252,10 +282,23 @@ int main(int argc, char **argv)
 			if (len <= 0)
 				break;
 
-			/* Wait for the login prompt */
+			/* Wait for the login prompt. What the BBS sends is kept in
+			 * head until the prompt is seen: the buffer read is not a
+			 * string, and the prompt may come in several pieces. */
 			if (first)
 			{
-				if (strstr(buf, "allsig") || strstr(buf, "login"))
+				if (headlen + len > HEADLEN)
+					headlen = 0;	/* too much without a prompt: start again */
+				if (len > HEADLEN)
+					len = HEADLEN;
+				memcpy(head + headlen, buf, len);
+				headlen += len;
+				for (n = 0 ; n < headlen ; n++)
+					if (head[n] == '\0')
+						head[n] = ' ';
+				head[headlen] = '\0';
+
+				if (has_word(head, "allsig") || has_word(head, "login"))
 				{
 					strcat(caller, "\r");
 					write_discard(fd, caller, strlen(caller));

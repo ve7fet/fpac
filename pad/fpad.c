@@ -14,6 +14,7 @@
  *
  ******************************************************/
  
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -27,6 +28,7 @@
 #include <time.h>
 /*#include <sys/types.h>*/
 /*#include <sys/fcntl.h>*/
+#include <fcntl.h>
 #include <sys/file.h>
 /*#include <sys/stat.h>*/
 #include <sys/ioctl.h>
@@ -297,6 +299,17 @@ static void free_user(user_t *u)
 	free(u);
 }
 
+static void usage(FILE *f)
+{
+	fprintf(f, "fpad %s - FPAC ROSE PAD daemon\n"
+		"usage: fpad            start as a daemon\n"
+		"       fpad -d         stay in the foreground (debug)\n"
+		"       fpad -h | -?    show this help and exit\n"
+		"       fpad -V         show the version and exit\n"
+		"Only one fpad may run at a time. Use myfpac.sh to start or stop the node.\n",
+		VERSION);
+}
+
 int main(int argc, char **argv)
 {
 	unsigned int addrlen;
@@ -343,12 +356,39 @@ int main(int argc, char **argv)
 	memset(&facilities, 0x00, sizeof(struct rose_facilities_struct));
 	memset(&rose_cause, 0x00, sizeof(struct rose_cause_struct));
 
-	openlog("fpad", LOG_DAEMON, LOG_INFO); /*LOG_PID, LOG_DAEMON);*/
-
-	syslog(LOG_INFO, "starting FPAD");
-
+	/* Arguments are checked before anything is touched: an unknown one
+	 * must never start a node */
 	if ((argc == 2) && (strcmp(argv[1], "-d") == 0))
 		daemon = 0;
+	else if ((argc == 2) && ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "-?") == 0) ||
+		(strcmp(argv[1], "?") == 0) || (strcmp(argv[1], "--help") == 0)))
+	{
+		usage(stdout);
+		return(0);
+	}
+	else if ((argc == 2) && ((strcmp(argv[1], "-V") == 0) || (strcmp(argv[1], "--version") == 0)))
+	{
+		printf("fpad %s\n", VERSION);
+		return(0);
+	}
+	else if (argc > 1)
+	{
+		fprintf(stderr, "fpad: unknown argument '%s'\n", argv[1]);
+		usage(stderr);
+		return(1);
+	}
+
+	openlog("fpad", LOG_DAEMON, LOG_INFO); /*LOG_PID, LOG_DAEMON);*/
+
+	/* Only one fpad may run: a second one would clear and rebuild the
+	 * ROSE routes of the running node */
+	if (fpac_single_instance("fpad") != 0)
+	{
+		closelog();
+		return(1);
+	}
+
+	syslog(LOG_INFO, "starting FPAD");
 
 	/* Signals */ 
 	act.sa_handler = SignalHUP;
@@ -501,6 +541,8 @@ int main(int argc, char **argv)
 		closelog();
 		return(1);
 	}
+
+	fpac_single_instance_pid("fpad");
 
 	if (daemon) {
 		fprintf(stdout, "FPAD becomes a daemon\n");

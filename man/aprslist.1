@@ -2,7 +2,7 @@
 .SH NAME 
 aprslist \- Lists APRS stations heard and sends APRS beacons.
 .SH SYNOPSIS
-.B aprslist [-l] [-s] [-d] [-v] [-?]
+.B aprslist [-d] [-l] [-s] [-v]
 .SH DESCRIPTION
 .LP
 .B aprslist
@@ -18,10 +18,10 @@ readable form.
 .SH OPTIONS
 .TP 20
 .BI \-l
-Write to log file
+Write "starting" and the errors to the system log
 .TP 20
 .BI \-s
-Display on local console
+Display the stations recorded in aprs.dat and exit; nothing is sent
 .TP 20
 .BI \-d
 Run in foreground
@@ -33,7 +33,8 @@ print version and exit
 Display usage: aprslist [-l] [-s] [-d] [-v]
 .SH FILES
 .IP  "/etc/ax25/aprslist.conf  /var/ax25/aprs.dat"
+(under the prefix FPAC was built with, /usr/local by default)
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
 .SH SEE ALSO
-aprslist.conf(5)
+aprslist.conf(5), /usr/local/share/doc/fpac/aprslist.txt

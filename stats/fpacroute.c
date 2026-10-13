@@ -20,6 +20,7 @@
  *
  */
 
+#include "config.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -709,6 +710,35 @@ int main(int argc, char **argv)
 	struct timeval tv;
 	fd_set fdread;
 	struct sigaction act, oact;
+
+	/* fpacroute takes no argument: anything unknown must never start a
+	 * second daemon */
+	if (argc > 1)
+	{
+		const char *help = "fpacroute %s - FPAC trace route daemon\n"
+			"Usage: fpacroute [-h] [-V]\n"
+			"-h : display this message (also -?)\n"
+			"-V : display the version\n"
+			"Only one fpacroute may run at a time.\n";
+
+		if ((argc == 2) && ((strcmp(argv[1], "-V") == 0) || (strcmp(argv[1], "--version") == 0)))
+		{
+			printf("fpacroute %s\n", VERSION);
+			return 0;
+		}
+		if ((argc == 2) && ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "-?") == 0) ||
+			(strcmp(argv[1], "?") == 0) || (strcmp(argv[1], "--help") == 0)))
+		{
+			printf(help, VERSION);
+			return 0;
+		}
+		fprintf(stderr, "fpacroute: unknown argument '%s'\n", argv[1]);
+		fprintf(stderr, help, VERSION);
+		return 1;
+	}
+
+	if (fpac_single_instance("fpacroute") != 0)
+		return 1;
 	
 	if (ax25_config_load_ports() == 0) {
 		fprintf(stderr, "FPAC fpacroute ERROR: problem with axports file\n");
@@ -767,6 +797,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "FPAC fpacroute : cannot become a daemon\n");
 		return 1;
 	}
+	fpac_single_instance_pid("fpacroute");
 
 	for (;;)
 	{
@@ -813,6 +844,8 @@ int main(int argc, char **argv)
 
 			if (fork() == 0)
 			{
+				/* the session must not hold the lock of the daemon */
+				fpac_single_instance_close();
 				/* child */
 				route_menu(new);
 				exit(0);
@@ -833,6 +866,8 @@ int main(int argc, char **argv)
 
 			if (fork() == 0)
 			{
+				/* the session must not hold the lock of the daemon */
+				fpac_single_instance_close();
 				/* child */
 				route_menu(new);
 				exit(0);
@@ -873,6 +908,8 @@ int main(int argc, char **argv)
 			
 			if (fork() == 0)
 			{
+				/* the session must not hold the lock of the daemon */
+				fpac_single_instance_close();
 				/* child */
 				addrlen = sizeof(struct full_sockaddr_ax25);
 				getsockname(new, (struct sockaddr *)&axdest, &addrlen);
@@ -903,6 +940,8 @@ int main(int argc, char **argv)
 
 			if (fork() == 0)
 			{
+				/* the session must not hold the lock of the daemon */
+				fpac_single_instance_close();
 				/* child */
 				sprintf(txt, "%-9s %9s/%s,%s %s %s\r",
 					cfg.alt_callsign, cfg.callsign, cfg.dnic, cfg.address, cfg.locator, cfg.city);

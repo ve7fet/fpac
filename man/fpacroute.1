@@ -3,6 +3,7 @@
 fpacroute \- Trace route daemon for the FPAC Trace command.
 .SH SYNOPSIS
 .B fpacroute
+[\-h | \-V]
 .SH DESCRIPTION
 .LP
 .B fpacroute
@@ -18,6 +19,20 @@ It then tests the route to the call/address given as input to the prompt.
 The route test consists of a block of alpha characters followed the ROSE 
 address of the destination. Three tests are run and the latency time is 
 measured.
+.SH OPTIONS
+.TP
+.B \-h, \-?
+show a short help and exit.
+.TP
+.B \-V
+show the version and exit.
+.P
+Any unknown option or stray argument is an error: nothing is started.
+.P
+Only one
+.B fpacroute
+may run on a node. A second one refuses to start while the first holds the lock file
+.I /var/ax25/fpac/fpacroute.lock
 .SH Example
 .BI "Enter address or callsign to check :" w4bgh-8
 

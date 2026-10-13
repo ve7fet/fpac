@@ -82,6 +82,7 @@
 #define	ALEN		6
 #define	AXLEN		7
 #define	BEACON_TEXT_BUFFER	123
+#define	DEFAULT_PERIOD		30	/* minutes between beacons when not set */
 
 #define n_cpy(a, b, c) strncpy(a, b, c)
 
@@ -316,12 +317,12 @@ void display_aprs(aprsl *aprs)
 	minutes   = get_val(ptr, 2, 2);
 	seconds   = get_val(ptr, 5, 2);
 	lattitude += minutes / 60.0;
-	lattitude += seconds / 3600.0;
+	lattitude += seconds / 6000.0;	/* hundredths of a minute */
 	longitude = get_val(ptr, 9, 3);
 	minutes   = get_val(ptr, 12, 2);
 	seconds   = get_val(ptr, 15, 2);
 	longitude += minutes / 60.0;
-	longitude += seconds / 3600.0;
+	longitude += seconds / 6000.0;	/* hundredths of a minute */
 	if (ptr[7] == 'S')
 		lattitude = -lattitude;
 	if (ptr[17] == 'E')
@@ -351,9 +352,14 @@ void read_aprs(void)
 		if (ptr == NULL)
 			return;
 
-		sscanf(buf, "%s %s %ld %ld\n",
-			ptr->call, ptr->loc, &ptr->date, &ptr->last);
-		display_aprs(ptr);
+		/* The caller displays the list: printing here too showed every
+		 * station twice with -s */
+		if (sscanf(buf, "%9s %19s %ld %ld\n",
+			ptr->call, ptr->loc, &ptr->date, &ptr->last) != 4)
+		{
+			free(ptr);
+			continue;
+		}
 		
 		if (head)
 		{
@@ -414,13 +420,13 @@ int set_position(char *data)
 	minutes   = get_val(data, 2, 2);
 	seconds   = get_val(data, 5, 2);
 	my_l += minutes / 60.0;
-	my_l += seconds / 3600.0;
+	my_l += seconds / 6000.0;	/* hundredths of a minute */
 	
 	my_w = get_val(data, 9, 3);
 	minutes   = get_val(data, 12, 2);
 	seconds   = get_val(data, 15, 2);
 	my_w += minutes / 60.0;
-	my_w += seconds / 3600.0;
+	my_w += seconds / 6000.0;	/* hundredths of a minute */
 	if (data[7] == 'S')
 		my_l = -my_l;
 	if (data[17] == 'E')
@@ -631,6 +637,35 @@ char *prepare_cmdline(char *buf)
 	return buf;
 }
 
+/*
+ * Reads "degrees minutes hundredths hemisphere" from a longitude or latitude
+ * line. Returns 0 when a value is missing or out of range: these lines used
+ * to crash the program (atof of a missing argument).
+ */
+static int get_position(char **p, int maxdeg, const char *hemi,
+			double *deg, double *min, double *hun, char *geo)
+{
+	char *a, *b, *c, *d;
+
+	a = get_next_arg(p);
+	b = get_next_arg(p);
+	c = get_next_arg(p);
+	d = get_next_arg(p);
+	if (a == NULL || b == NULL || c == NULL || d == NULL)
+		return 0;
+
+	*deg = atof(a);
+	*min = atof(b);
+	*hun = atof(c);
+	*geo = toupper(*d);
+
+	if (*deg < 0 || *deg > maxdeg || *min < 0 || *min >= 60 || *hun < 0 || *hun >= 100)
+		return 0;
+	if (*geo == '\0' || strchr(hemi, *geo) == NULL)
+		return 0;
+	return 1;
+}
+
 void load_config(void)
 {
 	FILE *fp;
@@ -639,6 +674,7 @@ void load_config(void)
 	double minutes;
 	double seconds;
 	char geo;
+	int has_lon = 0, has_lat = 0;
 	sport *ps = NULL;
 
 
@@ -662,31 +698,35 @@ void load_config(void)
 
 		if (!strncmp(cmd, "lon", 3))
 		{
-			my_w = atof(get_next_arg(&p));
-			minutes = atof(get_next_arg(&p));
-			seconds = atof(get_next_arg(&p));
-			geo = toupper(*get_next_arg(&p));
+			if (!get_position(&p, 180, "EW", &my_w, &minutes, &seconds, &geo))
+			{
+				fprintf(stderr, "aprslist: bad longitude in %s: expected \"longitude DDD MM HH E|W\" (degrees, minutes, hundredths of a minute)\n", CONF_APRSLIST_FILE);
+				exit(1);
+			}
 			
 			sprintf(slon, "%03g%02g.%02g%c", my_w, minutes, seconds, geo);
 			slon[9] = '\0';
+			has_lon = 1;
 
 			my_w += minutes / 60.0;
-			my_w += seconds / 3600.0;
+			my_w += seconds / 6000.0;	/* hundredths of a minute */
 			if (geo == 'E')
 				my_w = -my_w;
 		}
 		else if (!strncmp(cmd, "lat", 3))
 		{
-			my_l = atof(get_next_arg(&p));
-			minutes = atof(get_next_arg(&p));
-			seconds = atof(get_next_arg(&p));
-			geo = toupper(*get_next_arg(&p));
+			if (!get_position(&p, 90, "NS", &my_l, &minutes, &seconds, &geo))
+			{
+				fprintf(stderr, "aprslist: bad latitude in %s: expected \"latitude DD MM HH N|S\" (degrees, minutes, hundredths of a minute)\n", CONF_APRSLIST_FILE);
+				exit(1);
+			}
 			
 			sprintf(slat, "%02g%02g.%02g%c", my_l, minutes, seconds, geo);
 			slat[8] = '\0';
+			has_lat = 1;
 
 			my_l += minutes / 60.0;
-			my_l += seconds / 3600.0;
+			my_l += seconds / 6000.0;	/* hundredths of a minute */
 			if (geo == 'S')
 				my_l = -my_l;
 		}
@@ -703,30 +743,42 @@ void load_config(void)
 			*p = '\0';
 		
 			ps = (sport *)calloc(sizeof(sport), 1);
-			strcpy(ps->name, cmd);
+			n_cpy(ps->name, cmd, sizeof(ps->name) - 1);
 			strcpy(ps->to, "aprs");
 			strcpy(ps->from, "nocall");
+			/* Without a period line the beacon used to go out every
+			 * second */
+			ps->period = DEFAULT_PERIOD * 60;
 			ps->next = phead;
 			phead = ps;
 		}
 		else if (ps && !strncmp(cmd, "fro", 3))
 		{
 			arg = get_next_arg(&p);
-			n_cpy(ps->from, arg, 9);
+			if (arg == NULL)
+				fprintf(stderr, "aprslist: \"from\" without a callsign for port %s, ignored\n", ps->name);
+			else
+				n_cpy(ps->from, arg, 9);
 		}
 		else if (ps && !strncmp(cmd, "to", 2))
 		{
-			n_cpy(ps->to, p, 79);
+			if (p == NULL || *p == '\0')
+				fprintf(stderr, "aprslist: \"to\" without a destination for port %s, ignored\n", ps->name);
+			else
+				n_cpy(ps->to, p, 79);
 		}
 		else if (ps && !strncmp(cmd, "per", 3))
 		{
 			arg = get_next_arg(&p);
-			ps->period = atoi(arg) * 60;
+			if (arg == NULL || atoi(arg) < 1)
+				fprintf(stderr, "aprslist: bad \"period\" for port %s, %d minutes used\n", ps->name, DEFAULT_PERIOD);
+			else
+				ps->period = atoi(arg) * 60;
 		}
 		else if (ps && !strncmp(cmd, "bea", 3))
 		{ 
 
-			snprintf(beacon,BEACON_TEXT_BUFFER, "%s", p);
+			snprintf(beacon,BEACON_TEXT_BUFFER, "%s", p ? p : "");
 //			strncpy( beacon, p, BEACON_TEXT_BUFFER);
 //			beacon[BEACON_TEXT_BUFFER] = '\0';
 		}
@@ -734,6 +786,12 @@ void load_config(void)
 	}
 	
 	fclose(fp);
+
+	if (!has_lon || !has_lat)
+	{
+		fprintf(stderr, "aprslist: longitude and latitude are both needed in %s\n", CONF_APRSLIST_FILE);
+		exit(1);
+	}
 	
 	snprintf(my_loc, sizeof(my_loc), "=%.8s/%.9s", slat, slon);
 	printf("%s\n%s\n", my_loc, beacon);

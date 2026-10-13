@@ -1,0 +1,130 @@
+calibrate - test frames for adjusting a transmitter
+calibrate - trames d'essai pour régler un émetteur
+====================================================================
+
+English text first, French text below.
+Le texte anglais vient d'abord, le texte français ensuite.
+
+--------------------------------------------------------------------
+ENGLISH
+--------------------------------------------------------------------
+
+1. Purpose
+
+calibrate sends a series of identical frames on one AX.25 port, so
+that the deviation of the transmitter, the TX delay or the audio
+level of a TNC can be adjusted while watching a deviation meter or
+listening on another receiver.
+
+It is a radio adjustment tool. It has nothing to do with the node
+itself: FPAC works the same without it, and it must not be left
+running.
+
+2. Usage
+
+    calibrate [-t seconds] port
+
+    port        name of an AX.25 port of /etc/ax25/axports. The port
+                must be up (kissattach, etc.).
+    -t seconds  time between two frames. Default 1. Decimals are
+                allowed, down to 0.01.
+
+calibrate sends 100 UI frames, then stops by itself. Press Return to
+stop it earlier.
+
+Each frame is addressed from the callsign of the port to the
+callsign TEST and carries 128 bytes: a three digit frame number
+(000 to 099) followed by the letter U (binary 01010101), which
+gives an alternating bit pattern on the air.
+
+With the default interval the test lasts about 100 seconds. With
+-t 0.2 it lasts about 20 seconds, with -t 3 about 5 minutes.
+
+3. Examples
+
+Adjust the deviation on the port named vhf, one frame per second:
+
+    calibrate vhf
+
+Almost continuous transmission, five frames per second:
+
+    calibrate -t 0.2 vhf
+
+4. Things to know
+
+- It transmits. Use it on a radio port only, on a clear frequency,
+  never on an AXUDP or AXIP link towards other nodes.
+- The frames are 128 bytes long: the paclen of the port in axports
+  must be at least 128, otherwise each frame is refused with an
+  error message.
+- It must be run by root or by a user allowed to bind the callsign
+  of the port.
+- Until 4.1.6-rc7 the program read -t in milliseconds, although
+  its manual page and its usage line said seconds: "-t 5" sent the
+  100 frames in half a second. Since 4.1.6-rc8 -t is in seconds.
+  If a script of yours gives milliseconds, divide by 1000.
+
+See also: calibrate(1), axports(5).
+
+--------------------------------------------------------------------
+FRANÇAIS
+--------------------------------------------------------------------
+
+1. But
+
+calibrate envoie une série de trames identiques sur un port AX.25,
+pour régler la déviation de l'émetteur, le délai d'émission
+(TX delay) ou le niveau audio d'un TNC, en observant un
+déviamètre ou en écoutant sur un autre récepteur.
+
+C'est un outil de réglage radio. Il n'a aucun rôle dans le nœud
+lui-même : FPAC fonctionne de la même façon sans lui, et il ne doit
+pas rester en marche.
+
+2. Mode d'emploi
+
+    calibrate [-t secondes] port
+
+    port         nom d'un port AX.25 de /etc/ax25/axports. Le port
+                 doit être en service (kissattach, etc.).
+    -t secondes  temps entre deux trames. Par défaut 1. Les
+                 décimales sont admises, jusqu'à 0.01.
+
+calibrate envoie 100 trames UI puis s'arrête seul. La touche Entrée
+l'arrête plus tôt.
+
+Chaque trame part de l'indicatif du port vers l'indicatif TEST et
+porte 128 octets : un numéro de trame sur trois chiffres (000 à
+099) suivi de lettres U (01010101 en binaire), ce qui donne une
+suite de bits alternés à l'antenne.
+
+Avec l'intervalle par défaut l'essai dure environ 100 secondes.
+Avec -t 0.2 il dure environ 20 secondes, avec -t 3 environ
+5 minutes.
+
+3. Exemples
+
+Régler la déviation sur le port nommé vhf, une trame par seconde :
+
+    calibrate vhf
+
+Émission presque continue, cinq trames par seconde :
+
+    calibrate -t 0.2 vhf
+
+4. À savoir
+
+- Il émet. À n'utiliser que sur un port radio, sur une fréquence
+  libre, jamais sur une liaison AXUDP ou AXIP vers d'autres nœuds.
+- Les trames font 128 octets : le paclen du port dans axports doit
+  valoir au moins 128, sinon chaque trame est refusée avec un
+  message d'erreur.
+- Il doit être lancé par root ou par un utilisateur autorisé à
+  utiliser l'indicatif du port.
+- Jusqu'à la 4.1.6-rc7, le programme lisait -t en millisecondes,
+  alors que sa page de manuel et sa ligne d'usage disaient
+  secondes : « -t 5 » envoyait les 100 trames en une demi-seconde.
+  Depuis la 4.1.6-rc8, -t est en secondes. Si un de vos scripts
+  donne des millisecondes, divisez par 1000.
+
+Voir aussi : calibrate(1), axports(5).

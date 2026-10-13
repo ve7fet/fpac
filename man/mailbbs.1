@@ -1,27 +1,71 @@
-.TH MAILBBS 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.TH MAILBBS 1 "12 October 2026" Linux "FPAC Operator's Manual"
 .SH NAME 
-mailbbs \- sends messages to a BBS
+mailbbs \- leaves a personal message on a BBS
 .SH SYNOPSIS
-.B mailbbs [-d <call@bbs>] [-f <filename>] [-i <sender>] [-t <title>] [-v <port bbscall via digi...>]
+.B mailbbs \-d callsign[@bbs] [\-f filename] [\-i sender] [\-t title] [\-v] port bbs-callsign [[via] digis...]
 .SH DESCRIPTION
 .LP
-Sends messages to a BBS.
-This command is be used to send packet messages to a local or network BBS. The text of the message is taken from a text file. This text could be statistics, alerts, or a change in status of the FPAC node. The mailbbs command is incorporated into the fpac.sh script.
+.B mailbbs
+connects to a BBS in AX.25, NET/ROM or ROSE, according to the kind of
+.I port,
+leaves one personal message (SP) and disconnects. The text is taken from a
+file or from the standard input. It can be used from a script to send
+statistics, an alert or a change of status of the node to its sysop.
+.P
+It is not a daemon and no FPAC program needs it. Since 4.1.6-rc8
+.B myfpac.sh
+no longer runs it at each start of the node.
+.P
+For a ROSE port the arguments are: port, callsign of the BBS, ROSE address,
+then optionally "via" and one digipeater.
 .SH OPTIONS
 .TP 13
-.BI \-d
-Destination call @ BBS
+.BI "\-d " callsign[@bbs]
+Recipient of the message. Needed.
 .TP 13
-.BI \-f " filename
-Name of file from which text is to be sent.
+.BI "\-f " filename
+File holding the text. Without \-f the standard input is sent, unless it is a
+terminal: the message then has a title and no text.
 .TP 13
 .BI "\-i " sender
-Call of the originating station.
+Callsign the connection is made from. Default: the callsign of the port.
 .TP 13
-.BI \-t " title
-Subject of the message.
-.TP 32
-.BI \-v " port bbs-call " via " digi
-Port & Path to the BBS.
+.BI "\-t " title
+Subject of the message. Default: "message fm mailbbs".
+.TP 13
+.BI \-v
+Show the dialogue with the BBS.
+.TP 13
+.BI \-V
+Show the version and exit.
+.TP 13
+.BI "\-h, \-?"
+Show a short help and exit.
+.SH EXIT STATUS
+.TP 5
+0
+the BBS took the message.
+.TP 5
+1
+bad arguments, unknown port or file that cannot be read.
+.TP 5
+2
+the BBS could not be connected (120 seconds at most).
+.TP 5
+3
+no answer for 60 seconds, dialogue longer than 5 minutes, unexpected
+disconnection or message refused by the BBS. The reason is written on the
+standard error output.
+.SH EXAMPLES
+.EX
+date | mailbbs \-d SYSOP \-t "Node restarted" rose0 F6BVP-1 2080175520
+mailbbs \-d F6BVP@F6BVP \-t "Statistics" \-f /usr/local/var/ax25/fpac/fpacstat.day axudp F6BVP-1
+.EE
+.SH NOTES
+mailbbs presents itself to the BBS with a banner, [MAIL-version-$], as a
+forwarding program does. The BBS must accept such a connection from the
+callsign used.
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+/usr/local/share/doc/fpac/mailbbs.txt

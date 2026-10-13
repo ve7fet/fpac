@@ -1,3 +1,126 @@
+fpac (4.1.6-rc8)
+
+	* fpad, fpacwpd, fpacstat, fpacroute: each daemon refuses to start
+	  when another copy is already running on the node (lock held on
+	  fpac/<name>.lock for the whole life of the process, new functions
+	  fpac_single_instance*() in lib/procutils.c). A second fpad used
+	  to clear and rebuild the ROSE routes of the running node, and all
+	  four listened twice on the same addresses.
+	  A lock file that cannot be written (file system full or
+	  read-only) is opened read-only; when it cannot be opened at all,
+	  the daemon logs a warning and starts without the protection.
+	* fpad, fpacwpd, fpacstat, fpacroute: the arguments are checked
+	  before anything is touched. -h and -? show a short help, -V the
+	  version (fpacstat keeps -v as well; fpacwpd -v is still the
+	  verbose mode); an unknown option or a stray argument is an error
+	  and nothing is started. fpad and fpacroute used to ignore every
+	  argument and start.
+	* fpacwpd: a WP server calling in from a node that is not declared
+	  in fpac.nodes was named "???" in the log. It is now named by its
+	  ROSE address, and the "Vectors still differ" message adds
+	  "(not in fpac.nodes)".
+	* fpacwpd.1: the passive mode is -p, as the code has always read
+	  it; the page said -b.
+	* myfpac.sh: the message sent to the sysop's BBS by mailbbs at each
+	  start is disabled (line commented out). CONNECT is not set by
+	  default, so mailbbs only wrote its usage line in the log at every
+	  start; and when the dialogue with the BBS goes wrong it never
+	  times out and stays connected. mailbbs is still installed.
+	* fpacwdog set aside: tools/fpacwdog.c and its manual page move to
+	  the new attic/ directory, which is neither built nor installed
+	  (see attic/README). The program only sent a CR to a serial port
+	  for an external hardware watchdog; it did not watch FPAC and no
+	  known node used it. myfpac.sh no longer has WDOG_PORT and no
+	  longer starts it; it still stops a fpacwdog left running by an
+	  older script. A fpacwdog installed by an earlier version is not
+	  removed.
+	* myfpac.sh -status no longer lists fpacwdog and mailbbs, which
+	  are not daemons of the node and always showed "is not running".
+	* doc: new files calibrate.txt and aprslist.txt, user guides in
+	  English and French for these two programs, written from their
+	  manual pages and checked against the code.
+	* calibrate: -t is now a time in seconds between two frames, as
+	  its manual page and usage line always said; it was read as
+	  milliseconds, so "-t 5" sent the 100 frames in half a second.
+	  Decimals are accepted (minimum 0.01). A script that gave
+	  milliseconds must divide by 1000.
+	* calibrate.1: the page was titled MONITOR(1); frames are 128
+	  bytes, not 256; the 100 frames and the TEST destination are
+	  described.
+	* aprslist: a port without a "period" line sent its beacon every
+	  second; the default is now 30 minutes (DEFAULT_PERIOD).
+	* aprslist: an incomplete longitude, latitude, from, to or period
+	  line crashed the program at start (atof() or strncpy() of a
+	  missing argument). Positions are now checked (new function
+	  get_position): a bad or missing one stops the program with a
+	  message; an incomplete from, to or period line is reported and
+	  ignored. Starting without both longitude and latitude, which
+	  sent an undefined position, is refused.
+	* aprslist -s printed every station twice (read_aprs() displayed
+	  each record and the caller displayed the list again). Records of
+	  aprs.dat are now read with bounded fields.
+	* aprslist: the third number of a position is hundredths of a
+	  minute, as sent in the beacon, but distances and bearings were
+	  computed as if it were seconds (/3600 instead of /6000).
+	* aprslist.1, aprslist.conf.5: -s shows aprs.dat and exits, -l logs
+	  to the system log; the third number of longitude and latitude is
+	  hundredths of a minute, not seconds; default period.
+	* doc/aprslist (start script example) wrote in /temp, a directory
+	  that does not exist; it now writes /var/log/aprslist.log.
+	* calld and mon_tcp set aside: tcp/calld.c, man/calld.1 and
+	  tcp/mon_tcp.c move to attic/ and are no longer built or
+	  installed. No known node used them. calld crashed on a line
+	  without "^", bound its socket with the address length of the
+	  destination (bindlen was computed and never used) and checked
+	  neither who ordered a call nor the callsign borrowed. mon_tcp
+	  copied every frame heard into a 255 byte buffer, parsed the
+	  datagrams received without any bound and transmitted them as UI
+	  frames whatever their source. See attic/README.
+	* call_tcp: the login prompt of the BBS was searched with strstr()
+	  in a buffer that is not a string, and was missed when it came
+	  in two reads; the output is now kept until the prompt is seen
+	  and the search ignores case.
+	* call_tcp: the digipeaters of an AX.25 caller were limited to
+	  ROSE_MTU (251) instead of ROSE_MAX_DIGIS (6) before being copied
+	  into a ROSE address: 7 or 8 digipeaters overwrote the stack.
+	* call_tcp: a callsign typed at a terminal was cut at 7 characters
+	  (F6BVP-10 became F6BVP-1); the CALL_TCP variable was copied
+	  without a bound.
+	* call_tcp: the port is optional again (default telnet), as the
+	  example of fpac.conf always showed; -h and -? show a help.
+	* New manual page call_tcp.1 and user guide doc/call_tcp.txt
+	  (English and French).
+	* debian/fpac.manpages no longer lists fpacwdog.1 and calld.1.
+	* README: the list of applications follows what "make install"
+	  installs (versions and wpconvert added, remote removed),
+	  grouped by purpose, with descriptions taken from the manual
+	  pages.
+	* man/remote.1 moves to attic/ and is no longer installed: the
+	  program was removed in 2022, only its manual page was left.
+	* Makefile.am: the message at the end of "make install" names
+	  myfpac.sh instead of fpac.sh.
+	* fpac.spec.in and debian/fpac.manpages: myfpac.sh instead of
+	  fpac.sh, remote removed.
+	* mailbbs: the time limit of readbbs() was ignored (select()
+	  returning 0 looped again), so that mailbbs stayed connected to
+	  the BBS for ever when the dialogue went wrong. It now gives up
+	  after 60 seconds without a line, 5 minutes in all, and 120
+	  seconds without a connection (alarm around connect()).
+	  readbbs() is rewritten: a long line without CR could overflow
+	  the caller's buffer, and a LF after a CR broke the next line.
+	* mailbbs: the standard input is sent as the text when -f is not
+	  given and it is not a terminal, as the header of the source
+	  always said; it never was. The file of -f is opened before the
+	  BBS is called. The text always ends with a CR before Ctrl-Z.
+	* mailbbs: every failure is reported on stderr (no banner, no
+	  prompt, message refused with the answer of the BBS, connection
+	  lost) with an exit code: 1 arguments, 2 connection, 3 dialogue.
+	  Writes to the BBS are checked and completed. Verbose mode no
+	  longer writes one byte past its buffer. New -h, -? and -V; the
+	  -p option, accepted and ignored, is removed.
+	* mailbbs.1 rewritten (the synopsis put the port under -v); new
+	  user guide doc/mailbbs.txt (English and French).
+
 fpac (4.1.6-rc7)
 
 	* fpacwpd: the White Pages record of a node was never updated by

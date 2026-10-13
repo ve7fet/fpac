@@ -21,10 +21,6 @@ echo "MYFPAC.SH : " >> $LOG
 /bin/date >> $LOG
 #rm -f $LOG
 
-# serial port for watchdog
-# WDOG_PORT="/dev/ttyS4"
-WDOG_PORT=""
-
 # callsign of the sysop
 SYSOP="SYSOP"
 # Node Callsign
@@ -96,7 +92,7 @@ case "$1" in
 	echo " "
         echo -e "\nStatus of FPAC :"
 
-	for PROC_NAME in fpacwdog fpad fpacwpd fpacstat fpacroute flexd mailbbs ax25ipd netromd kissattach
+	for PROC_NAME in fpad fpacwpd fpacstat fpacroute flexd ax25ipd netromd kissattach
 	do
 	        PID=`/bin/pidof -x $DIR/$PROC_NAME`
 		if [ -n "$PID" ]; then
@@ -129,10 +125,6 @@ fpacwpd)
 	echo " "
 	echo -n "Starting FPAC : " >> $LOG
 	echo -n "Starting FPAC : "
-	if [ "_$WDOG_PORT" != "_" ] ; then
-		echo -n " [wdog] "
-		$DIR/fpacwdog -p 2 $WDOG_PORT >> $LOG 2>&1
-	fi
 #	echo -n " [ax25d] "
 #	$DIR/ax25d >> $LOG 2>&1
 #	sleep 2
@@ -156,7 +148,11 @@ fpacwpd)
 	echo -n " [flexd] "
 	$DIR/flexd >> $LOG 2>&1
 	sleep 2
-	(sleep 10 ; /bin/date | $DIR/mailbbs -d $SYSOP -t "FPAC node $NODECALL started" $CONNECT) &
+	# Message to the sysop's BBS at each start: disabled. Without CONNECT
+	# mailbbs only printed its usage line, and it can stay connected to the
+	# BBS for ever when the dialogue goes wrong. Set CONNECT above and
+	# uncomment to use it.
+#	(sleep 10 ; /bin/date | $DIR/mailbbs -d $SYSOP -t "FPAC node $NODECALL started" $CONNECT) &
 	sleep 2
 	echo " ok "
 	;;

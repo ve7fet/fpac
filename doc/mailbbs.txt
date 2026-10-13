@@ -1,0 +1,227 @@
+mailbbs - leave a message on a BBS from a script
+mailbbs - déposer un message sur un BBS depuis un script
+====================================================================
+
+English text first, French text below.
+Le texte anglais vient d'abord, le texte français ensuite.
+
+--------------------------------------------------------------------
+ENGLISH
+--------------------------------------------------------------------
+
+1. Purpose
+
+mailbbs connects to a BBS as a station would, leaves one personal
+message there and disconnects. It is meant for scripts: a report,
+an alert or a "node restarted" notice sent to the sysop.
+
+It is not a daemon, and no FPAC program needs it. Until 4.1.6-rc7
+myfpac.sh ran it at each start of the node; that line is now
+commented out (see 6).
+
+2. Usage
+
+    mailbbs -d callsign[@bbs] [-f file] [-i sender] [-t title] [-v]
+            port bbs-callsign [[via] digis...]
+
+    -d callsign[@bbs]  recipient of the message. Needed.
+    -f file            text of the message. Without -f, the standard
+                       input is sent, unless it is a terminal: the
+                       message then has a title and no text.
+    -i sender          callsign the connection is made from.
+                       Default: the callsign of the port.
+    -t title           subject. Default: "message fm mailbbs".
+    -v                 show the dialogue with the BBS.
+    -V                 show the version and exit.
+    -h, -?             show a short help and exit.
+
+    port               a port of axports (AX.25), nrports (NET/ROM)
+                       or rsports (ROSE). Its kind decides how the
+                       BBS is called.
+    bbs-callsign       callsign of the BBS, followed by digipeaters
+                       for AX.25.
+
+For a ROSE port, the ROSE address follows the callsign:
+
+    port bbs-callsign rose-address [[via] digipeater]
+
+3. What it does
+
+It connects, waits for the banner of the BBS (a line between square
+brackets) and for its prompt (a line ending with ">"), sends its
+own banner [MAIL-version-$], then "SP recipient". When the BBS
+answers OK it sends the title, the text and Ctrl-Z, waits for the
+last prompt and disconnects.
+
+4. Exit code and time limits
+
+    0   the BBS took the message.
+    1   bad arguments, unknown port, file that cannot be read.
+    2   the BBS could not be connected.
+    3   no answer, unexpected disconnection or message refused.
+
+The reason is written on the standard error output, for example:
+
+    mailbbs: the BBS refused the message for F1ABC: NO - Unknown user
+    mailbbs: no answer from the BBS while waiting for the first
+             prompt: message not sent
+
+mailbbs never stays connected for ever: it gives up after 120
+seconds without a connection, 60 seconds without a line from the
+BBS, or 5 minutes in all.
+
+5. Examples
+
+The date as text, sent through ROSE to the BBS F6BVP-1:
+
+    date | mailbbs -d SYSOP -t "Node restarted" \
+           rose0 F6BVP-1 2080175520
+
+A file, sent in AX.25 on the port named axudp:
+
+    mailbbs -d F6BVP@F6BVP -t "Statistics" \
+            -f /usr/local/var/ax25/fpac/fpacstat.day axudp F6BVP-1
+
+In a script, with the result checked:
+
+    if ! mailbbs -d SYSOP -t "Alert" -f /tmp/alert.txt axudp F6BVP-1
+    then
+        logger "mailbbs: message not sent"
+    fi
+
+6. Start notice of the node
+
+In myfpac.sh the line that sent "FPAC node ... started" to the
+sysop is commented out. To use it, set CONNECT near the top of the
+script to the port and callsign of your BBS, for example
+
+    CONNECT="rose0 F6BVP-1 2080175520"
+
+and remove the "#" in front of the mailbbs line.
+
+7. Things to know
+
+- mailbbs presents itself with a banner, as a forwarding program
+  does, under the callsign of the port (or the one given by -i).
+  The BBS must accept such a connection from that callsign. Check
+  with one message by hand, with -v, before using it in a script.
+- A line of the text holding only "/EX" or a Ctrl-Z ends the
+  message early.
+- Until 4.1.6-rc7: the standard input was never sent (the text
+  came only from -f); the time limit was ignored, so that mailbbs
+  could stay connected to the BBS for ever; and it gave up without
+  any message.
+
+See also: mailbbs(1), axports(5).
+
+--------------------------------------------------------------------
+FRANÇAIS
+--------------------------------------------------------------------
+
+1. But
+
+mailbbs se connecte à un BBS comme le ferait une station, y dépose
+un message personnel et se déconnecte. Il est fait pour les
+scripts : un compte rendu, une alerte ou un avis « nœud démarré »
+envoyé au sysop.
+
+Ce n'est pas un démon, et aucun programme de FPAC n'en a besoin.
+Jusqu'à la 4.1.6-rc7, myfpac.sh le lançait à chaque démarrage du
+nœud ; cette ligne est maintenant commentée (voir 6).
+
+2. Mode d'emploi
+
+    mailbbs -d indicatif[@bbs] [-f fichier] [-i expéditeur]
+            [-t titre] [-v] port indicatif-bbs [[via] répéteurs...]
+
+    -d indicatif[@bbs]  destinataire du message. Obligatoire.
+    -f fichier          texte du message. Sans -f, l'entrée
+                        standard est envoyée, sauf si c'est un
+                        terminal : le message a alors un titre et
+                        pas de texte.
+    -i expéditeur       indicatif sous lequel se fait la connexion.
+                        Par défaut : celui du port.
+    -t titre            sujet. Par défaut : « message fm mailbbs ».
+    -v                  montre le dialogue avec le BBS.
+    -V                  affiche la version et sort.
+    -h, -?              affiche une aide courte et sort.
+
+    port                un port de axports (AX.25), nrports
+                        (NET/ROM) ou rsports (ROSE). Son type
+                        décide de la façon d'appeler le BBS.
+    indicatif-bbs       indicatif du BBS, suivi des répéteurs en
+                        AX.25.
+
+Pour un port ROSE, l'adresse ROSE suit l'indicatif :
+
+    port indicatif-bbs adresse-rose [[via] répéteur]
+
+3. Ce qu'il fait
+
+Il se connecte, attend la bannière du BBS (une ligne entre
+crochets) et son prompt (une ligne finissant par « > »), envoie sa
+propre bannière [MAIL-version-$], puis « SP destinataire ». Quand
+le BBS répond OK, il envoie le titre, le texte et Ctrl-Z, attend le
+dernier prompt et se déconnecte.
+
+4. Code de sortie et délais
+
+    0   le BBS a pris le message.
+    1   arguments faux, port inconnu, fichier illisible.
+    2   le BBS n'a pas pu être connecté.
+    3   pas de réponse, déconnexion inattendue ou message refusé.
+
+La raison est écrite sur la sortie d'erreur, par exemple :
+
+    mailbbs: the BBS refused the message for F1ABC: NO - Unknown user
+    mailbbs: no answer from the BBS while waiting for the first
+             prompt: message not sent
+
+mailbbs ne reste jamais connecté indéfiniment : il abandonne après
+120 secondes sans connexion, 60 secondes sans ligne du BBS, ou
+5 minutes en tout.
+
+5. Exemples
+
+La date comme texte, envoyée par ROSE au BBS F6BVP-1 :
+
+    date | mailbbs -d SYSOP -t "Node restarted" \
+           rose0 F6BVP-1 2080175520
+
+Un fichier, envoyé en AX.25 sur le port nommé axudp :
+
+    mailbbs -d F6BVP@F6BVP -t "Statistiques" \
+            -f /usr/local/var/ax25/fpac/fpacstat.day axudp F6BVP-1
+
+Dans un script, en contrôlant le résultat :
+
+    if ! mailbbs -d SYSOP -t "Alerte" -f /tmp/alerte.txt axudp F6BVP-1
+    then
+        logger "mailbbs : message non envoyé"
+    fi
+
+6. Avis de démarrage du nœud
+
+Dans myfpac.sh, la ligne qui envoyait « FPAC node ... started » au
+sysop est commentée. Pour s'en servir, donner à CONNECT, en tête du
+script, le port et l'indicatif de votre BBS, par exemple
+
+    CONNECT="rose0 F6BVP-1 2080175520"
+
+et retirer le « # » devant la ligne mailbbs.
+
+7. À savoir
+
+- mailbbs se présente avec une bannière, comme un programme de
+  forward, sous l'indicatif du port (ou celui donné par -i). Le
+  BBS doit accepter une telle connexion de cet indicatif. Vérifier
+  avec un message à la main, avec -v, avant de l'utiliser dans un
+  script.
+- Une ligne du texte ne contenant que « /EX » ou un Ctrl-Z termine
+  le message plus tôt.
+- Jusqu'à la 4.1.6-rc7 : l'entrée standard n'était jamais envoyée
+  (le texte ne venait que de -f) ; le délai était ignoré, si bien
+  que mailbbs pouvait rester connecté au BBS indéfiniment ; et il
+  abandonnait sans aucun message.
+
+Voir aussi : mailbbs(1), axports(5).

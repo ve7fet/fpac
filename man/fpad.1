@@ -3,6 +3,7 @@
 fpad \- White Page element of the FPAC node."
 .SH SYNOPSIS
 .B fpad
+[\-d | \-h | \-V]
 .SH DESCRIPTION
 .LP
 .B fpad
@@ -40,6 +41,23 @@ lists what adjacent node to send traffic to for a certain ROSE address, range of
 lists the (adjacent) nodes that this node is directly connected with, and the associated port (found in 
 .I axports
 )
+.SH OPTIONS
+.TP
+.B \-d
+stay in the foreground (debug).
+.TP
+.B \-h, \-?, \-\-help
+show a short help and exit.
+.TP
+.B \-V, \-\-version
+show the version and exit.
+.P
+Any other argument is an error: nothing is started.
+.P
+Only one
+.B fpad
+may run on a node. A second one refuses to start while the first holds the lock file
+.I /var/ax25/fpac/fpad.lock
 .SH FILES
 .I /etc/ax25/fpac.conf
 .I /etc/ax25/fpac.hello 
@@ -49,6 +67,7 @@ lists the (adjacent) nodes that this node is directly connected with, and the as
 .I /etc/ax25/fpac.nodes
 .I /etc/ax25/axports
 .I /var/ax25/rsports
+.I /var/ax25/fpac/fpad.lock
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
 .SH SEE ALSO

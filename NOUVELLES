@@ -1,3 +1,69 @@
+FPAC 4.1.6-rc8 — une seule copie de chaque démon (version candidate)
+====================================================================
+
+  * fpad, fpacwpd, fpacstat et fpacroute refusent de démarrer si une
+    autre copie tourne déjà sur le nœud : « another fpad is already
+    running (pid N): not started ». Jusqu'ici un second fpad vidait
+    et recréait les routes ROSE du nœud en service.
+
+  * Ces quatre démons contrôlent leurs arguments avant toute action :
+    -h ou -? affiche une aide courte, -V la version, et une option
+    inconnue est une erreur. « fpad -V » était ignoré et démarrait un
+    second démon. Attention : « fpacwpd -v » reste le mode verbeux.
+
+  * Au journal, un serveur White Pages appelant depuis un nœud non
+    déclaré dans fpac.nodes est nommé par son adresse ROSE au lieu
+    de « ??? ».
+
+  * myfpac.sh ne lance plus mailbbs à chaque démarrage : la ligne est
+    commentée. Sauf si CONNECT avait été défini, elle n'écrivait
+    qu'une ligne « usage: mailbbs » au journal. mailbbs reste
+    installé.
+
+  * fpacwdog est mis de côté : il n'est plus compilé ni installé, et
+    son source passe dans le répertoire attic/. « myfpac.sh -status »
+    ne liste plus fpacwdog ni mailbbs. Si votre nœud alimente un
+    chien de garde matériel par WDOG_PORT, gardez votre propre ligne
+    de lancement : myfpac.sh ne le fait plus.
+
+  * Nouveaux modes d'emploi dans le répertoire doc, en anglais et en
+    français : calibrate.txt et aprslist.txt. Les pages de manuel de
+    calibrate et d'aprslist sont corrigées.
+
+  * calibrate : -t est maintenant réellement en secondes entre deux
+    trames, comme le disait le manuel (il était lu en millisecondes).
+    Les décimales sont admises : « calibrate -t 0.2 vhf ».
+
+  * aprslist : un port sans ligne « period » n'émet plus sa balise
+    toutes les secondes (30 minutes par défaut) ; une ligne de
+    configuration incomplète ne le fait plus planter ; « aprslist
+    -s » n'affiche plus chaque station deux fois ; les distances sont
+    calculées en centièmes de minute.
+
+  * calld et mon_tcp sont mis de côté dans le répertoire attic/,
+    comme fpacwdog : ils ne sont plus compilés ni installés. Tous
+    deux avaient des défauts sérieux et laissaient quiconque
+    atteignait leur port réseau émettre sous n'importe quel
+    indicatif. Voir attic/README.
+
+  * call_tcp est corrigé (prompt de connexion manqué, indicatif
+    coupé à 7 caractères, plus de 6 répéteurs) et documenté : page
+    de manuel call_tcp.1 et doc/call_tcp.txt. Son argument port
+    redevient facultatif (telnet par défaut).
+
+  * mailbbs ne reste plus connecté au BBS indéfiniment quand le
+    dialogue se passe mal : il abandonne après 60 secondes sans
+    réponse et dit pourquoi. Il envoie maintenant son entrée
+    standard comme texte du message (« date | mailbbs ... ») et rend
+    un code de sortie qu'un script peut tester. Voir mailbbs.1 et
+    doc/mailbbs.txt.
+
+  * Le README donne la liste des applications réellement installées,
+    classées par usage. La page de manuel de « remote », programme
+    sorti du paquet depuis longtemps, n'est plus installée (gardée
+    dans attic/). Le message affiché à la fin de « make install »
+    nomme myfpac.sh au lieu de fpac.sh.
+
 FPAC 4.1.6-rc7 — fiches de nœuds de nouveau mises à jour entre nœuds (version candidate)
 ========================================================================================
 

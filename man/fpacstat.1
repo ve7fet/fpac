@@ -3,12 +3,33 @@
 fpacstat \- Statistics element of the FPAC node."
 .SH SYNOPSIS
 .B fpacstat
+[\-c] [\-l] [\-h | \-V]
 .SH DESCRIPTION
 .LP
 .B fpacstat
 runs as one of the FPAC node elements. 
 .B fpacstat 
 computes the traffic statistics of the links to neighboring nodes.
+.SH OPTIONS
+.TP
+.B \-h, \-?
+show a short help and exit.
+.TP
+.B \-V
+show the version and exit.
+.TP
+.B \-c
+end the lines of the statistics files with CR.
+.TP
+.B \-l
+log to the system log.
+.P
+Any unknown option or stray argument is an error: nothing is started.
+.P
+Only one
+.B fpacstat
+may run on a node. A second one refuses to start while the first holds the lock file
+.I /var/ax25/fpac/fpacstat.lock
 .SH FILES
 .I /var/ax25/fpac/fpacstat.dat
 .I /var/ax25/fpac/fpacstat.day

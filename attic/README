@@ -1,0 +1,39 @@
+attic - programs set aside, neither built nor installed
+=======================================================
+
+The files here are kept for reference only. "make" does not compile
+them and "make install" does not install them.
+
+fpacwdog.c, fpacwdog.1  (set aside in 4.1.6-rc8)
+    Sends a CR to a serial port at a fixed interval, to feed an external
+    hardware watchdog wired to that port. It was started by myfpac.sh
+    when WDOG_PORT was set, which no known node did. It does not watch
+    FPAC itself: it keeps running when fpad has died, and myfpac.sh
+    stopped it at each restart of the node. The hardware watchdog of
+    the board, driven by Linux (/dev/watchdog, or RuntimeWatchdogSec in
+    systemd), does the job better.
+    To build it by hand:  gcc -o fpacwdog attic/fpacwdog.c
+
+calld.c, calld.1  (set aside in 4.1.6-rc8)
+    Outgoing calls ordered by a BBS over TCP: it read a line
+    "caller^destination [digis]" on its standard input and connected in
+    AX.25 or ROSE under the caller's callsign. Not used by any known
+    node. It crashes on a line without "^", binds its socket with the
+    wrong address length, overflows two buffers, and above all checks
+    neither who gives the order nor the callsign that is borrowed:
+    whoever reaches its TCP port can call on the air under any
+    callsign. Do not run it as it is.
+
+mon_tcp.c  (set aside in 4.1.6-rc8)
+    Sent the AX.25 frames heard to a host as UDP datagrams (in spite of
+    its name) and transmitted as UI frames the datagrams it received.
+    Not used by any known node. A frame heard with more than about 150
+    bytes of data overflows a 255 byte buffer; a received datagram is
+    parsed without any bound; and any datagram is transmitted on the
+    radio port under the callsign it names, wherever it comes from.
+    Do not run it as it is.
+
+remote.1  (set aside in 4.1.6-rc8)
+    Manual page of "remote", which set or cleared the output bits of
+    the parallel port. The program itself left the package in 2022
+    (see ChangeLog); only this page was still installed.

@@ -90,8 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-sbin_PROGRAMS = calibrate$(EXEEXT) aprslist$(EXEEXT) mailbbs$(EXEEXT) \
-	fpacwdog$(EXEEXT)
+sbin_PROGRAMS = calibrate$(EXEEXT) aprslist$(EXEEXT) mailbbs$(EXEEXT)
 subdir = tools
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -122,11 +121,6 @@ calibrate_OBJECTS = $(am_calibrate_OBJECTS)
 calibrate_LDADD = $(LDADD)
 calibrate_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	../lib/libfpac.a
-am_fpacwdog_OBJECTS = fpacwdog.$(OBJEXT)
-fpacwdog_OBJECTS = $(am_fpacwdog_OBJECTS)
-fpacwdog_LDADD = $(LDADD)
-fpacwdog_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	../lib/libfpac.a
 am_mailbbs_OBJECTS = mailbbs.$(OBJEXT)
 mailbbs_OBJECTS = $(am_mailbbs_OBJECTS)
 mailbbs_LDADD = $(LDADD)
@@ -148,7 +142,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/aprslist.Po ./$(DEPDIR)/calibrate.Po \
-	./$(DEPDIR)/fpacwdog.Po ./$(DEPDIR)/mailbbs.Po
+	./$(DEPDIR)/mailbbs.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -168,10 +162,9 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(aprslist_SOURCES) $(calibrate_SOURCES) $(fpacwdog_SOURCES) \
-	$(mailbbs_SOURCES)
+SOURCES = $(aprslist_SOURCES) $(calibrate_SOURCES) $(mailbbs_SOURCES)
 DIST_SOURCES = $(aprslist_SOURCES) $(calibrate_SOURCES) \
-	$(fpacwdog_SOURCES) $(mailbbs_SOURCES)
+	$(mailbbs_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -328,7 +321,6 @@ LDADD = $(AX25_LIB) $(MATH_LIB) ../lib/libfpac.a
 calibrate_SOURCES = calibrate.c
 aprslist_SOURCES = aprslist.c
 mailbbs_SOURCES = mailbbs.c
-fpacwdog_SOURCES = fpacwdog.c
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \
 	      -I$(srcdir)/../lib 
@@ -421,10 +413,6 @@ calibrate$(EXEEXT): $(calibrate_OBJECTS) $(calibrate_DEPENDENCIES) $(EXTRA_calib
 	@rm -f calibrate$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(calibrate_OBJECTS) $(calibrate_LDADD) $(LIBS)
 
-fpacwdog$(EXEEXT): $(fpacwdog_OBJECTS) $(fpacwdog_DEPENDENCIES) $(EXTRA_fpacwdog_DEPENDENCIES) 
-	@rm -f fpacwdog$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(fpacwdog_OBJECTS) $(fpacwdog_LDADD) $(LIBS)
-
 mailbbs$(EXEEXT): $(mailbbs_OBJECTS) $(mailbbs_DEPENDENCIES) $(EXTRA_mailbbs_DEPENDENCIES) 
 	@rm -f mailbbs$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mailbbs_OBJECTS) $(mailbbs_LDADD) $(LIBS)
@@ -437,7 +425,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aprslist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calibrate.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fpacwdog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mailbbs.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -603,7 +590,6 @@ clean-am: clean-generic clean-libtool clean-sbinPROGRAMS \
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/aprslist.Po
 	-rm -f ./$(DEPDIR)/calibrate.Po
-	-rm -f ./$(DEPDIR)/fpacwdog.Po
 	-rm -f ./$(DEPDIR)/mailbbs.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -652,7 +638,6 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/aprslist.Po
 	-rm -f ./$(DEPDIR)/calibrate.Po
-	-rm -f ./$(DEPDIR)/fpacwdog.Po
 	-rm -f ./$(DEPDIR)/mailbbs.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

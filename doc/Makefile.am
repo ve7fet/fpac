@@ -3,6 +3,10 @@ doc_DATA = 	FPAC-HOWTO.man \
 		FPAC-HOWTO.sgml \
 		FPAC-HOWTO.txt \
 		aprslist \
+		aprslist.txt \
+		call_tcp.txt \
+		mailbbs.txt \
+		calibrate.txt \
 		ax25 \
 		ax25-up \
 		ax25-down \

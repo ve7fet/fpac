@@ -1,0 +1,52 @@
+.TH CALL_TCP 1 "12 October 2026" Linux "FPAC Operator's Manual"
+.SH NAME
+call_tcp \- links a user of the node to the telnet port of a BBS
+.SH SYNOPSIS
+.B call_tcp host [port]
+.SH DESCRIPTION
+.LP
+.B call_tcp
+opens a TCP connection to
+.I host
+and gives the callsign of the calling user at the login prompt of the BBS,
+then relays the data both ways until one side closes.
+.P
+It is not a daemon: it is run for each call, by
+.B fpad
+for a Command or an Application of
+.I fpac.conf,
+or by
+.B ax25d.
+The callsign is the one of the AX.25, NET/ROM or ROSE station connected to
+its standard output; for a user who came in by telnet it is read from the
+environment variable CALL_TCP set by the node. Run from a terminal, it asks
+for the callsign.
+.P
+The callsign is sent when the BBS output contains "callsign" or "login",
+preceded by a dot except when run from a terminal. What the BBS sends
+before that prompt is not shown; what follows (a password prompt, if any) is
+relayed to the user.
+.SH OPTIONS
+.TP 10
+.BI host
+name or IP address of the BBS.
+.TP 10
+.BI port
+TCP port number or service name. Default: telnet (23).
+.TP 10
+.BI "\-h, \-?"
+show a short help and exit.
+.SH EXAMPLE
+In fpac.conf:
+.EX
+Command
+	BBs = /usr/local/sbin/call_tcp mybbs.ampr.org 6300
+End
+.EE
+.SH NOTES
+The BBS believes the callsign it is given: its telnet port should accept
+connections from the node only.
+.SH AUTHOR
+Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
+.SH SEE ALSO
+fpac.conf(5), fpad(1), /usr/local/share/doc/fpac/call_tcp.txt

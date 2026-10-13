@@ -288,7 +288,7 @@ man_MANS = \
 	aprslist.conf.5 \
 	ax25parms.1 \
 	calibrate.1 \
-	calld.1 \
+	call_tcp.1 \
 	flexd.1 \
 	flexd.conf.5 \
 	flexd.routes.5 \
@@ -304,12 +304,10 @@ man_MANS = \
 	fpacroute.1 \
 	fpacshell.1 \
 	fpacstat.1 \
-	fpacwdog.1 \
 	fpacwpd.1 \
 	fpad.1 \
 	mailbbs.1 \
 	monitor.1 \
-	remote.1 \
 	versions.1 \
 	wpcmp.1 \
 	wpconvert.1 \

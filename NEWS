@@ -1,3 +1,65 @@
+FPAC 4.1.6-rc8 — only one copy of each daemon (release candidate)
+=================================================================
+
+  * fpad, fpacwpd, fpacstat and fpacroute refuse to start when
+    another copy is already running on the node: "another fpad is
+    already running (pid N): not started". Until now a second fpad
+    cleared and rebuilt the ROSE routes of the running node.
+
+  * These four daemons check their arguments before doing anything:
+    -h or -? shows a short help, -V the version, and an unknown
+    option is an error. "fpad -V" used to be ignored and to start a
+    second daemon. Beware: "fpacwpd -v" is still the verbose mode.
+
+  * In the log, a White Pages server calling in from a node that is
+    not declared in fpac.nodes is named by its ROSE address instead
+    of "???".
+
+  * myfpac.sh no longer runs mailbbs at each start: the line is
+    commented out. Unless CONNECT had been set, it only wrote a
+    "usage: mailbbs" line in the log. mailbbs is still installed.
+
+  * fpacwdog is set aside: it is no longer built or installed, and
+    its source moves to the attic/ directory. "myfpac.sh -status" no
+    longer lists fpacwdog and mailbbs. If your node feeds a hardware
+    watchdog through WDOG_PORT, keep your own start line: myfpac.sh
+    no longer does it.
+
+  * New user guides in the doc directory, in English and French:
+    calibrate.txt and aprslist.txt. The manual pages of calibrate and
+    aprslist are corrected.
+
+  * calibrate: -t is now really in seconds between two frames, as the
+    manual said (it was read as milliseconds). Decimals are accepted:
+    "calibrate -t 0.2 vhf".
+
+  * aprslist: a port without a "period" line no longer beacons every
+    second (default 30 minutes); an incomplete configuration line no
+    longer crashes it; "aprslist -s" no longer lists every station
+    twice; distances are computed from hundredths of a minute.
+
+  * calld and mon_tcp are set aside in the attic/ directory, like
+    fpacwdog: they are no longer built or installed. Both had
+    serious defects and let anyone reaching their network port
+    transmit under any callsign. See attic/README.
+
+  * call_tcp is fixed (login prompt missed, callsign cut at 7
+    characters, more than 6 digipeaters) and documented: manual page
+    call_tcp.1 and doc/call_tcp.txt. Its port argument is optional
+    again (default telnet).
+
+  * mailbbs no longer stays connected to the BBS for ever when the
+    dialogue goes wrong: it gives up after 60 seconds without an
+    answer and says why. It now sends its standard input as the text
+    of the message ("date | mailbbs ..."), and returns an exit code
+    a script can test. See mailbbs.1 and doc/mailbbs.txt.
+
+  * The README lists the applications that are really installed, by
+    purpose. The manual page of "remote", a program that left the
+    package long ago, is no longer installed (kept in attic/). The
+    message shown at the end of "make install" names myfpac.sh
+    instead of fpac.sh.
+
 FPAC 4.1.6-rc7 — node records updated again between nodes (release candidate)
 =============================================================================
 

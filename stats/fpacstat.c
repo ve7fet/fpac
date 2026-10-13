@@ -672,6 +672,17 @@ void getax25(int s)
 	*/
 }
 
+static void usage(FILE *f)
+{
+	fprintf(f, "fpacstat %s - FPAC statistics daemon\n"
+		"Usage: fpacstat [-c] [-l] [-h] [-v]\n"
+		"-c : end the lines of the statistics files with CR\n"
+		"-l : log to the system log\n"
+		"-h : display this message (also -?)\n"
+		"-v : display the version (also -V)\n"
+		"Only one fpacstat may run at a time.\n", VERSION);
+}
+
 int main(int argc, char **argv)
 {
 	int s;
@@ -683,9 +694,13 @@ int main(int argc, char **argv)
 	FILE *fptr;
 	struct sigaction act, oact;
 	
-	while ((s = getopt(argc, argv, "lvc")) != -1) 
+	opterr = 0;	/* the messages are ours */
+	while ((s = getopt(argc, argv, "lvcVh")) != -1)
 	{
 		switch (s) {
+			case 'h':
+				usage(stdout);
+				return 0;
 			case 'c':
 				cr = TRUE;
 				break;
@@ -693,16 +708,40 @@ int main(int argc, char **argv)
 				logging = TRUE;
 				break;
 			case 'v':
+			case 'V':
 				printf("fpacstat: %s\n", VERSION);
 				return 0;
 			case ':':
 				fprintf(stderr, "fpacstat: option needs an argument\n");
 				return 1;
 			case '?':
-				fprintf(stderr, "Usage: fpacstat [-l] [-a address] [-m port_mon] [-o I|U|S] [-p port] [-v]\n");
+				/* "-?" asks for help, anything else is an error */
+				if ((optind > 1) && (strcmp(argv[optind - 1], "-?") == 0))
+				{
+					usage(stdout);
+					return 0;
+				}
+				fprintf(stderr, "fpacstat: unknown option '%s'\n", argv[optind - 1]);
+				usage(stderr);
 				return 1;
 		}
 	}
+
+	/* An argument that is not an option must never start a daemon */
+	if (optind < argc)
+	{
+		if (strcmp(argv[optind], "?") == 0)
+		{
+			usage(stdout);
+			return 0;
+		}
+		fprintf(stderr, "fpacstat: unknown argument '%s'\n", argv[optind]);
+		usage(stderr);
+		return 1;
+	}
+
+	if (fpac_single_instance("fpacstat") != 0)
+		return 1;
 
 	if (ax25_config_load_ports() == 0) 
 	{
@@ -733,6 +772,7 @@ int main(int argc, char **argv)
 		syslog(LOG_ERR, "fpacstat: cannot become a daemon");
 		return 1;
 	}
+	fpac_single_instance_pid("fpacstat");
 
 	/* initialize signal handlers */ 
 	act.sa_handler = SignalHUP;

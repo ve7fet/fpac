@@ -90,7 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-sbin_PROGRAMS = call_tcp$(EXEEXT) calld$(EXEEXT) mon_tcp$(EXEEXT)
+sbin_PROGRAMS = call_tcp$(EXEEXT)
 subdir = tcp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -115,14 +115,6 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_calld_OBJECTS = calld.$(OBJEXT)
-calld_OBJECTS = $(am_calld_OBJECTS)
-calld_LDADD = $(LDADD)
-calld_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
-am_mon_tcp_OBJECTS = mon_tcp.$(OBJEXT)
-mon_tcp_OBJECTS = $(am_mon_tcp_OBJECTS)
-mon_tcp_LDADD = $(LDADD)
-mon_tcp_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -138,8 +130,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/call_tcp.Po ./$(DEPDIR)/calld.Po \
-	./$(DEPDIR)/mon_tcp.Po
+am__depfiles_remade = ./$(DEPDIR)/call_tcp.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -159,8 +150,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(call_tcp_SOURCES) $(calld_SOURCES) $(mon_tcp_SOURCES)
-DIST_SOURCES = $(call_tcp_SOURCES) $(calld_SOURCES) $(mon_tcp_SOURCES)
+SOURCES = $(call_tcp_SOURCES)
+DIST_SOURCES = $(call_tcp_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -315,8 +306,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 LDADD = $(AX25_LIB) ../lib/libfpac.a
 call_tcp_SOURCES = call_tcp.c
-calld_SOURCES = calld.c
-mon_tcp_SOURCES = mon_tcp.c
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \
 	      -I$(srcdir)/../lib 
@@ -405,14 +394,6 @@ call_tcp$(EXEEXT): $(call_tcp_OBJECTS) $(call_tcp_DEPENDENCIES) $(EXTRA_call_tcp
 	@rm -f call_tcp$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(call_tcp_OBJECTS) $(call_tcp_LDADD) $(LIBS)
 
-calld$(EXEEXT): $(calld_OBJECTS) $(calld_DEPENDENCIES) $(EXTRA_calld_DEPENDENCIES) 
-	@rm -f calld$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(calld_OBJECTS) $(calld_LDADD) $(LIBS)
-
-mon_tcp$(EXEEXT): $(mon_tcp_OBJECTS) $(mon_tcp_DEPENDENCIES) $(EXTRA_mon_tcp_DEPENDENCIES) 
-	@rm -f mon_tcp$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mon_tcp_OBJECTS) $(mon_tcp_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -420,8 +401,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call_tcp.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calld.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mon_tcp.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -585,8 +564,6 @@ clean-am: clean-generic clean-libtool clean-sbinPROGRAMS \
 
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/call_tcp.Po
-	-rm -f ./$(DEPDIR)/calld.Po
-	-rm -f ./$(DEPDIR)/mon_tcp.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -633,8 +610,6 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/call_tcp.Po
-	-rm -f ./$(DEPDIR)/calld.Po
-	-rm -f ./$(DEPDIR)/mon_tcp.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

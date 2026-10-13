@@ -1,0 +1,300 @@
+aprslist - APRS beacons and list of the APRS stations heard
+aprslist - balises APRS et liste des stations APRS entendues
+====================================================================
+
+English text first, French text below.
+Le texte anglais vient d'abord, le texte français ensuite.
+
+--------------------------------------------------------------------
+ENGLISH
+--------------------------------------------------------------------
+
+1. Purpose
+
+aprslist does two things on the AX.25 ports of the machine:
+
+- it sends an APRS position beacon of your station at a regular
+  interval on each port named in its configuration file;
+- it listens to all the AX.25 ports, keeps the APRS position
+  reports it hears and writes the list of these stations, with
+  their distance and bearing from your station, in the file
+  aprs.dat.
+
+It is optional. No FPAC daemon needs it and myfpac.sh does not
+start it.
+
+2. Usage
+
+    aprslist [-d] [-l] [-s] [-v]
+
+    (none)  start as a daemon: send the beacons and listen.
+    -d      stay in the foreground instead of becoming a daemon.
+    -l      write "starting" and the errors to the system log.
+    -s      show the stations recorded in aprs.dat, then exit.
+            Nothing is sent.
+    -v      print the version and exit.
+
+Any other option prints the usage line and nothing is started.
+
+aprslist must be run by root (it opens a raw packet socket). It
+reads its configuration once, at start: restart it after a change.
+Stop it with "killall aprslist".
+
+Each time a position report is heard, the whole list is printed on
+the standard output, even in daemon mode. Redirect the output to a
+file, or to /dev/null, when you start it from a script.
+
+3. Configuration file
+
+/usr/local/etc/ax25/aprslist.conf (or /etc/ax25/aprslist.conf,
+according to the prefix FPAC was built with). A commented example
+is installed with FPAC. The file must exist, even for -s.
+
+    longitude DDD MM HH E|W
+    latitude   DD MM HH N|S
+
+        Position of your station: degrees, minutes, and HUNDREDTHS
+        OF A MINUTE (00 to 99), then the hemisphere. The three
+        numbers are copied as they are into the beacon, in the APRS
+        form DDMM.HH. (The manual page calls the third number
+        "sec"; it is not seconds.)
+
+    [port]
+
+        Starts the block of a port: the name is the one of
+        /etc/ax25/axports. One block per port to beacon on. The
+        lines below belong to this port.
+
+    from CALLSIGN
+
+        Callsign the beacon is sent from. Default "nocall": always
+        set it.
+
+    to DESTINATION
+
+        Destination of the beacon, APRS by default. Digipeaters may
+        follow, for example: to APRS via WIDE1-1
+
+    period MINUTES
+
+        Time between two beacons on this port. Default 30. (Until
+        4.1.6-rc7 a port without a period line sent its beacon
+        every second.)
+
+    beacon TEXT
+
+        Free text added to the beacon. It must be written inside a
+        port block, but there is only one text: it is sent on every
+        port, and the last beacon line wins.
+
+A line starting with # is a comment. Only the first letters of the
+keywords are read (lon, lat, fro, to, per, bea).
+
+4. What is sent
+
+One UI frame per port and per period, of the form
+
+    =4853.08N/00218.80E#TEXT
+
+that is an APRS position without timestamp, primary symbol table,
+symbol "#" (digipeater), followed by the beacon text.
+
+5. What is recorded
+
+Only the plain APRS position reports are kept, those starting with
+"!" or "=" (no timestamp, not compressed, no Mic-E). For each
+station aprs.dat holds one line: callsign, position, date first
+heard, date last heard. The file is rewritten at each report heard.
+
+It is /usr/local/var/ax25/aprs.dat (or /var/ax25/aprs.dat,
+according to the prefix).
+
+"aprslist -s" prints, for each station:
+
+    callsign : latitude longitude km:distance az:bearing last heard
+
+6. Example
+
+/usr/local/etc/ax25/aprslist.conf:
+
+    # Geographical coordinates of the station
+    longitude  2 18 80 E
+    latitude  48 53 08 N
+    # Beacon on the port named vhf, every 30 minutes
+    [vhf]
+    from F6BVP
+    to APRS
+    period 30
+    beacon JN18DV 145.275 1200b 433.775 9600b http://f6bvp.org
+
+Start it (see also the file "aprslist" in this directory):
+
+    /usr/local/sbin/aprslist -l > /var/log/aprslist.log 2>&1
+
+List the stations heard:
+
+    /usr/local/sbin/aprslist -s
+
+7. Things to know
+
+- It transmits on the ports named in its configuration. Name radio
+  ports only, not the AXUDP or AXIP links between nodes.
+- A longitude or latitude line that is incomplete or out of range
+  stops it at start with a message naming the line expected. Both
+  lines are needed. An incomplete from, to or period line is
+  reported and ignored. (Until 4.1.6-rc7 such lines made it crash.)
+- Distances are computed from the position as written, hundredths
+  of a minute included. (Until 4.1.6-rc7 the hundredths were taken
+  for seconds, an error of less than one kilometre.)
+- A port name that is not in axports stops it at the first beacon.
+
+See also: aprslist(1), aprslist.conf(5), axports(5).
+
+--------------------------------------------------------------------
+FRANÇAIS
+--------------------------------------------------------------------
+
+1. But
+
+aprslist fait deux choses sur les ports AX.25 de la machine :
+
+- il envoie une balise APRS de position de votre station, à
+  intervalle régulier, sur chaque port nommé dans son fichier de
+  configuration ;
+- il écoute tous les ports AX.25, retient les positions APRS qu'il
+  entend et écrit la liste de ces stations, avec leur distance et
+  leur azimut depuis votre station, dans le fichier aprs.dat.
+
+Il est facultatif. Aucun démon de FPAC n'en a besoin et myfpac.sh
+ne le lance pas.
+
+2. Mode d'emploi
+
+    aprslist [-d] [-l] [-s] [-v]
+
+    (rien)  démarre en démon : envoie les balises et écoute.
+    -d      reste au premier plan au lieu de devenir un démon.
+    -l      écrit "starting" et les erreurs au journal système.
+    -s      affiche les stations enregistrées dans aprs.dat, puis
+            sort. Rien n'est émis.
+    -v      affiche la version et sort.
+
+Toute autre option affiche la ligne d'usage et rien n'est démarré.
+
+aprslist doit être lancé par root (il ouvre un socket de capture).
+Il lit sa configuration une seule fois, au démarrage : le relancer
+après une modification. L'arrêter par "killall aprslist".
+
+À chaque position entendue, la liste complète est écrite sur la
+sortie standard, même en mode démon. Rediriger la sortie vers un
+fichier, ou vers /dev/null, quand on le lance depuis un script.
+
+3. Fichier de configuration
+
+/usr/local/etc/ax25/aprslist.conf (ou /etc/ax25/aprslist.conf,
+selon le préfixe avec lequel FPAC a été compilé). Un exemple
+commenté est installé avec FPAC. Le fichier doit exister, même
+pour -s.
+
+    longitude DDD MM CC E|W
+    latitude   DD MM CC N|S
+
+        Position de votre station : degrés, minutes et CENTIÈMES DE
+        MINUTE (00 à 99), puis l'hémisphère. Les trois nombres sont
+        recopiés tels quels dans la balise, sous la forme APRS
+        DDMM.CC. (La page de manuel appelle le troisième nombre
+        "sec" ; ce ne sont pas des secondes.)
+
+    [port]
+
+        Ouvre le bloc d'un port : le nom est celui de
+        /etc/ax25/axports. Un bloc par port sur lequel émettre. Les
+        lignes qui suivent concernent ce port.
+
+    from INDICATIF
+
+        Indicatif d'origine de la balise. Par défaut "nocall" :
+        toujours le renseigner.
+
+    to DESTINATION
+
+        Destination de la balise, APRS par défaut. Des répéteurs
+        peuvent suivre, par exemple : to APRS via WIDE1-1
+
+    period MINUTES
+
+        Temps entre deux balises sur ce port. Par défaut 30.
+        (Jusqu'à la 4.1.6-rc7, un port sans ligne period émettait
+        sa balise toutes les secondes.)
+
+    beacon TEXTE
+
+        Texte libre ajouté à la balise. Il doit être écrit dans un
+        bloc de port, mais il n'y a qu'un seul texte : il part sur
+        tous les ports, et la dernière ligne beacon l'emporte.
+
+Une ligne commençant par # est un commentaire. Seules les premières
+lettres des mots-clés sont lues (lon, lat, fro, to, per, bea).
+
+4. Ce qui est émis
+
+Une trame UI par port et par période, de la forme
+
+    =4853.08N/00218.80E#TEXTE
+
+soit une position APRS sans horodatage, table de symboles
+principale, symbole "#" (répéteur), suivie du texte de la balise.
+
+5. Ce qui est enregistré
+
+Seules les positions APRS simples sont retenues, celles qui
+commencent par "!" ou "=" (sans horodatage, non compressées, pas de
+Mic-E). Pour chaque station, aprs.dat contient une ligne :
+indicatif, position, date de première écoute, date de dernière
+écoute. Le fichier est réécrit à chaque position entendue.
+
+C'est /usr/local/var/ax25/aprs.dat (ou /var/ax25/aprs.dat, selon le
+préfixe).
+
+"aprslist -s" affiche, pour chaque station :
+
+    indicatif : latitude longitude km:distance az:azimut dernière écoute
+
+6. Exemple
+
+/usr/local/etc/ax25/aprslist.conf :
+
+    # Position géographique de la station
+    longitude  2 18 80 E
+    latitude  48 53 08 N
+    # Balise sur le port nommé vhf, toutes les 30 minutes
+    [vhf]
+    from F6BVP
+    to APRS
+    period 30
+    beacon JN18DV 145.275 1200b 433.775 9600b http://f6bvp.org
+
+Le lancer (voir aussi le fichier "aprslist" de ce répertoire) :
+
+    /usr/local/sbin/aprslist -l > /var/log/aprslist.log 2>&1
+
+Lister les stations entendues :
+
+    /usr/local/sbin/aprslist -s
+
+7. À savoir
+
+- Il émet sur les ports nommés dans sa configuration. N'y mettre
+  que des ports radio, pas les liaisons AXUDP ou AXIP entre nœuds.
+- Une ligne longitude ou latitude incomplète ou hors limites
+  l'arrête au démarrage avec un message donnant la ligne attendue.
+  Les deux lignes sont nécessaires. Une ligne from, to ou period
+  incomplète est signalée et ignorée. (Jusqu'à la 4.1.6-rc7, ces
+  lignes le faisaient planter.)
+- Les distances sont calculées d'après la position telle qu'elle
+  est écrite, centièmes de minute compris. (Jusqu'à la 4.1.6-rc7,
+  les centièmes étaient pris pour des secondes, soit une erreur
+  de moins d'un kilomètre.)
+- Un nom de port absent de axports l'arrête à la première balise.
+
+Voir aussi : aprslist(1), aprslist.conf(5), axports(5).

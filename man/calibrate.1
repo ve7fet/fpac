@@ -1,26 +1,32 @@
-.TH MONITOR 1 "23 September 2011" Linux "FPAC Operator's Manual"
+.TH CALIBRATE 1 "12 October 2026" Linux "FPAC Operator's Manual"
 .SH NAME
 calibrate \- transmitter test pattern generator.
 .SH SYNOPSIS
-.B Calibrate [-t time] port
+.B calibrate [-t seconds] port
 .SH DESCRIPTION
 .LP
-.B Calibrate
-sends full frames of data to an ax.25 port to test a TNC/Radio. The data 
-portion of the test is a series of ASCII U (1010101) characters.
+.B calibrate
+sends 100 UI frames of 128 bytes to an AX.25 port, from the callsign of the
+port to the callsign TEST, to test a TNC/Radio. Each frame carries a three
+digit frame number followed by ASCII U (01010101) characters. It stops by
+itself after the last frame.
 .P
 The port must be configured (ie with kissattach) before it can be used. 
 .SH OPTIONS
 .TP 13
-.BI "\-t  time "
-Specifies time in Seconds for transmit test.
+.BI "\-t  seconds "
+Time between two frames, in seconds. Default 1 (the whole test then lasts
+about 100 seconds). Decimals are allowed, down to 0.01.
 .SH COMMANDS
 .TP 13
 .BI CR
 Stop transmitting.
-.SH	
-.B BUGS 	
-.TP 13
-If axports parms PacLen is set to less than 256 you will get an error message.
+.SH BUGS
+.P
+If the paclen of the port in axports is less than 128 you will get an error
+message for each frame. Until 4.1.6-rc7 the program read \-t in milliseconds,
+although this page said seconds.
+.SH SEE ALSO
+/usr/local/share/doc/fpac/calibrate.txt
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>

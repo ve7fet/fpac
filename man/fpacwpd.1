@@ -2,7 +2,7 @@
 .SH NAME 
 fpacwpd \- White Page element of the FPAC node."
 .SH SYNOPSIS
-.B fpacwpd [-d] [-v] [-x] [-b] [-f <filename>]
+.B fpacwpd [-d] [-v] [-x] [-p] [-f <filename>] [-h | -V]
 .SH DESCRIPTION
 .LP
 .B fpacwpd
@@ -27,11 +27,24 @@ verbose mode, print status to syslog
 .BI \-x
 debug mode, print more data to syslog
 .TP 20
-.BI \-b
+.BI \-p
 passive mode
 .TP 20
 .BI "\-f <filename>"
 use an alternate white pages database file
+.TP 20
+.BI \-h ", " \-?
+show a short help and exit
+.TP 20
+.BI \-V
+show the version and exit
+.P
+Any unknown option or stray argument is an error: nothing is started.
+.P
+Only one
+.B fpacwpd
+may run on a node. A second one refuses to start while the first holds the lock file
+.I /var/ax25/fpac/fpacwpd.lock
 .SH FILES
 .I /var/ax25/fpac/fpacwp3.dat
 .SH AUTHOR

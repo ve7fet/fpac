@@ -1,9 +1,8 @@
 LDADD = $(AX25_LIB) $(MATH_LIB) ../lib/libfpac.a 
-sbin_PROGRAMS = calibrate aprslist mailbbs fpacwdog
+sbin_PROGRAMS = calibrate aprslist mailbbs
 calibrate_SOURCES = calibrate.c
 aprslist_SOURCES = aprslist.c
 mailbbs_SOURCES = mailbbs.c
-fpacwdog_SOURCES = fpacwdog.c
 
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \

@@ -1,6 +1,147 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc8)
+
+	* fpad, fpacwpd, fpacstat, fpacroute : chaque démon refuse de
+	  démarrer si une autre copie tourne déjà sur le nœud (verrou tenu
+	  sur fpac/<nom>.lock pendant toute la vie du processus, nouvelles
+	  fonctions fpac_single_instance*() dans lib/procutils.c). Un
+	  second fpad vidait et recréait les routes ROSE du nœud en
+	  service, et les quatre écoutaient en double sur les mêmes
+	  adresses.
+	  Un fichier verrou qui ne peut pas être écrit (disque plein ou
+	  en lecture seule) est ouvert en lecture seule ; s'il ne peut pas
+	  être ouvert du tout, le démon l'écrit au journal et démarre sans
+	  cette protection.
+	* fpad, fpacwpd, fpacstat, fpacroute : les arguments sont
+	  contrôlés avant toute action. -h et -? affichent une aide courte,
+	  -V la version (fpacstat garde aussi -v ; fpacwpd -v reste le mode
+	  verbeux) ; une option inconnue ou un argument isolé est une
+	  erreur et rien n'est démarré. fpad et fpacroute ignoraient tout
+	  argument et démarraient.
+	* fpacwpd : un serveur WP appelant depuis un nœud non déclaré dans
+	  fpac.nodes était nommé « ??? » au journal. Il est maintenant
+	  nommé par son adresse ROSE, et le message « Vectors still
+	  differ » ajoute « (not in fpac.nodes) ».
+	* fpacwpd.1 : le mode passif est -p, comme le code l'a toujours
+	  lu ; la page disait -b.
+	* myfpac.sh : le message envoyé par mailbbs au BBS du sysop à
+	  chaque démarrage est désactivé (ligne commentée). CONNECT n'est
+	  pas défini par défaut : mailbbs n'écrivait donc que sa ligne
+	  d'usage au journal à chaque démarrage ; et quand le dialogue avec
+	  le BBS se passe mal, il n'a pas de délai de garde et reste
+	  connecté. mailbbs reste installé.
+	* fpacwdog mis de côté : tools/fpacwdog.c et sa page de manuel
+	  passent dans le nouveau répertoire attic/, qui n'est ni compilé
+	  ni installé (voir attic/README). Le programme envoyait seulement
+	  un CR sur un port série pour un chien de garde matériel externe ;
+	  il ne surveillait pas FPAC et aucun nœud connu ne s'en servait.
+	  myfpac.sh n'a plus WDOG_PORT et ne le lance plus ; il arrête
+	  encore un fpacwdog laissé en marche par un ancien script. Un
+	  fpacwdog installé par une version précédente n'est pas retiré.
+	* myfpac.sh -status ne liste plus fpacwdog ni mailbbs, qui ne sont
+	  pas des démons du nœud et s'affichaient toujours « is not
+	  running ».
+	* doc : nouveaux fichiers calibrate.txt et aprslist.txt, modes
+	  d'emploi en anglais et en français de ces deux programmes,
+	  écrits d'après leurs pages de manuel et contrôlés sur le code.
+	* calibrate : -t est maintenant un temps en secondes entre deux
+	  trames, comme sa page de manuel et sa ligne d'usage l'ont
+	  toujours dit ; il était lu en millisecondes, si bien que
+	  « -t 5 » envoyait les 100 trames en une demi-seconde. Les
+	  décimales sont admises (minimum 0.01). Un script qui donnait des
+	  millisecondes doit diviser par 1000.
+	* calibrate.1 : la page était titrée MONITOR(1) ; les trames font
+	  128 octets et non 256 ; les 100 trames et la destination TEST
+	  sont décrites.
+	* aprslist : un port sans ligne « period » émettait sa balise
+	  toutes les secondes ; la valeur par défaut est maintenant de
+	  30 minutes (DEFAULT_PERIOD).
+	* aprslist : une ligne longitude, latitude, from, to ou period
+	  incomplète faisait planter le programme au démarrage (atof() ou
+	  strncpy() d'un argument absent). Les positions sont maintenant
+	  contrôlées (nouvelle fonction get_position) : une position
+	  fausse ou absente arrête le programme avec un message ; une
+	  ligne from, to ou period incomplète est signalée et ignorée. Le
+	  démarrage sans longitude et latitude, qui émettait une position
+	  indéfinie, est refusé.
+	* aprslist -s affichait chaque station deux fois (read_aprs()
+	  affichait chaque fiche et l'appelant affichait de nouveau la
+	  liste). Les fiches de aprs.dat sont lues avec des champs bornés.
+	* aprslist : le troisième nombre d'une position est en centièmes
+	  de minute, comme dans la balise émise, mais distances et azimuts
+	  étaient calculés comme s'il s'agissait de secondes (/3600 au
+	  lieu de /6000).
+	* aprslist.1, aprslist.conf.5 : -s affiche aprs.dat et sort, -l
+	  écrit au journal système ; le troisième nombre de longitude et
+	  de latitude est en centièmes de minute, pas en secondes ;
+	  période par défaut.
+	* doc/aprslist (exemple de script de lancement) écrivait dans
+	  /temp, un répertoire qui n'existe pas ; il écrit maintenant
+	  /var/log/aprslist.log.
+	* calld et mon_tcp mis de côté : tcp/calld.c, man/calld.1 et
+	  tcp/mon_tcp.c passent dans attic/ et ne sont plus compilés ni
+	  installés. Aucun nœud connu ne s'en servait. calld plantait sur
+	  une ligne sans « ^ », liait son socket avec la longueur
+	  d'adresse de la destination (bindlen était calculé et jamais
+	  utilisé) et ne contrôlait ni qui commandait un appel ni
+	  l'indicatif emprunté. mon_tcp recopiait chaque trame entendue
+	  dans un tampon de 255 octets, analysait sans aucune borne les
+	  datagrammes reçus et les émettait en trames UI quelle que soit
+	  leur origine. Voir attic/README.
+	* call_tcp : le prompt de connexion du BBS était cherché par
+	  strstr() dans un tampon qui n'est pas une chaîne, et manqué
+	  quand il arrivait en deux lectures ; la sortie est maintenant
+	  gardée jusqu'à ce que le prompt soit vu, et la recherche ignore
+	  la casse.
+	* call_tcp : les répéteurs d'un appelant AX.25 étaient limités à
+	  ROSE_MTU (251) au lieu de ROSE_MAX_DIGIS (6) avant d'être
+	  recopiés dans une adresse ROSE : 7 ou 8 répéteurs écrasaient la
+	  pile.
+	* call_tcp : un indicatif tapé au terminal était coupé à 7
+	  caractères (F6BVP-10 devenait F6BVP-1) ; la variable CALL_TCP
+	  était recopiée sans borne.
+	* call_tcp : le port redevient facultatif (telnet par défaut),
+	  comme l'exemple de fpac.conf l'a toujours montré ; -h et -?
+	  affichent une aide.
+	* Nouvelle page de manuel call_tcp.1 et mode d'emploi
+	  doc/call_tcp.txt (anglais et français).
+	* debian/fpac.manpages ne liste plus fpacwdog.1 ni calld.1.
+	* README : la liste des applications suit ce que « make install »
+	  installe (versions et wpconvert ajoutés, remote retiré),
+	  classée par usage, avec des descriptions tirées des pages de
+	  manuel.
+	* man/remote.1 passe dans attic/ et n'est plus installée : le
+	  programme a été retiré en 2022, il ne restait que sa page de
+	  manuel.
+	* Makefile.am : le message de fin de « make install » nomme
+	  myfpac.sh au lieu de fpac.sh.
+	* fpac.spec.in et debian/fpac.manpages : myfpac.sh au lieu de
+	  fpac.sh, remote retiré.
+	* mailbbs : le délai de readbbs() était ignoré (quand select()
+	  rendait 0, la boucle repartait), si bien que mailbbs restait
+	  connecté au BBS indéfiniment quand le dialogue se passait mal.
+	  Il abandonne maintenant après 60 secondes sans ligne, 5 minutes
+	  en tout, et 120 secondes sans connexion (alarm autour de
+	  connect()). readbbs() est réécrite : une longue ligne sans CR
+	  pouvait déborder le tampon de l'appelant, et un LF après un CR
+	  cassait la ligne suivante.
+	* mailbbs : l'entrée standard est envoyée comme texte quand -f
+	  n'est pas donné et que ce n'est pas un terminal, comme l'en-tête
+	  du source l'a toujours dit ; elle ne l'était jamais. Le fichier
+	  de -f est ouvert avant d'appeler le BBS. Le texte finit toujours
+	  par un CR avant Ctrl-Z.
+	* mailbbs : chaque échec est signalé sur stderr (pas de bannière,
+	  pas de prompt, message refusé avec la réponse du BBS, connexion
+	  perdue) avec un code de sortie : 1 arguments, 2 connexion,
+	  3 dialogue. Les écritures vers le BBS sont contrôlées et
+	  complétées. Le mode verbeux n'écrit plus un octet après son
+	  tampon. Nouveaux -h, -? et -V ; l'option -p, acceptée et
+	  ignorée, est retirée.
+	* mailbbs.1 réécrite (le synopsis rangeait le port sous -v) ;
+	  nouveau mode d'emploi doc/mailbbs.txt (anglais et français).
+
 fpac (4.1.6-rc7)
 
 	* fpacwpd : la fiche White Pages d'un nœud n'était jamais mise à

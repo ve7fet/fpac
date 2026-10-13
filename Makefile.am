@@ -26,14 +26,16 @@ install-data-hook:
 	@echo " ***    echo \"fpad 10093/udp # FPAC\" >> /etc/services"
 	@echo " ***  If this is a new installation to add the required ports"
 	@echo " ***  "
-	@echo " ***  Be sure to edit \`SYSOP=' and \`CONNECT=' in fpac.sh"
+	@echo " ***  Be sure to edit \`SYSOP=' and \`CONNECT=' in myfpac.sh"
 	@echo " ***  according to your own BBS callsign and sysop name."
 	@echo
 
 distclean-local:
 	-rm -rf autom4te.cache
 
-EXTRA_DIST = pathnames.h.in fpac.spec ChangeLog.fr NOUVELLES
+EXTRA_DIST = pathnames.h.in fpac.spec ChangeLog.fr NOUVELLES \
+	attic/README attic/fpacwdog.c attic/fpacwdog.1 \
+	attic/calld.c attic/calld.1 attic/mon_tcp.c attic/remote.1
 
 ACLOCAL_AMFLAGS = -I m4
 

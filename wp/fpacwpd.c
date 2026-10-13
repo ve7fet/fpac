@@ -79,8 +79,9 @@ static int vector_round_allowed(struct wp_adjacent *wpa)
 	}
 	if (wpa->round_count == WPA_VECTOR_MAX_ROUNDS) {
 		wpa->round_count++;	/* Log once per window */
-		syslog(LOG_WARNING, "Vectors still differ with adjacent %s after %d rounds, waiting for the next periodic exchange",
-		       wpa->node ? wpa->node->name : "?", WPA_VECTOR_MAX_ROUNDS);
+		syslog(LOG_WARNING, "Vectors still differ with adjacent %s%s after %d rounds, waiting for the next periodic exchange",
+		       wpa->node ? wpa->node->name : "?",
+		       wpa->is_unknown ? " (not in fpac.nodes)" : "", WPA_VECTOR_MAX_ROUNDS);
 	}
 	return 0;
 }
@@ -561,7 +562,10 @@ static void listening_handler(int s)
 
 				node->addr[6] = 0;
 
-				strcpy(node->name, "???");
+				/* F6BVP 2026-10-11: name a WP server that is not one of
+				 * our fpac.nodes neighbours by its ROSE address. It used
+				 * to be "???", which told nothing in the log. */
+				snprintf(node->name, sizeof(node->name), "%s", fulladdr);
 				strcpy(node->call, "???");
 // DEBUG F6BVP
 				if (verbose) syslog(LOG_INFO, "listening_handler New client fulladdr %s node %s %s", fulladdr, node->dnic, node->addr);
@@ -963,29 +967,42 @@ static void do_cmd(int s, char *cmd)
 * Main entry point 
 ************************************************************************************/
 
-static void Usage(void)
+static void Usage(int rc)
 {
-	fprintf(stderr, "Usage : fpacwpd [-h] [-d] [-x] [-v] [-f wpfile]\n");
-	fprintf(stderr, "-h : display this message\n");
+	fprintf(stderr, "fpacwpd %s - FPAC White Pages daemon\n", VERSION);
+	fprintf(stderr, "Usage : fpacwpd [-h] [-V] [-d] [-x] [-v] [-p] [-f wpfile]\n");
+	fprintf(stderr, "-h : display this message (also -?)\n");
+	fprintf(stderr, "-V : display the version\n");
 	fprintf(stderr, "-d : start in foreground mode\n");
 	fprintf(stderr, "-x : turn on debug mode\n");
 	fprintf(stderr, "-v : turn on debug verbose mode\n");
 	fprintf(stderr, "-p : turn on passive mode\n");
 	fprintf(stderr, "-f wpfile : specify another wp file (default %s)\n", wp_file); 
-	exit(1);
+	fprintf(stderr, "Only one fpacwpd may run at a time.\n");
+	exit(rc);
 }
 
 static void process_options(int argc, char *argv[])
 {
 	int c;
 	
+	opterr = 0;	/* the messages are ours */
 	do {
-		c = getopt(argc, argv, "hdvxpf:");
+		c = getopt(argc, argv, "hVdvxpf:");
 		switch (c) {
 		case 'h':
-		case '?':
-			Usage();
+			Usage(0);
 			break;
+		case '?':
+			/* "-?" asks for help, anything else is an error */
+			if ((optind > 1) && (strcmp(argv[optind - 1], "-?") == 0))
+				Usage(0);
+			fprintf(stderr, "fpacwpd: unknown option or missing value '%s'\n", argv[optind - 1]);
+			Usage(1);
+			break;
+		case 'V':
+			printf("fpacwpd %s\n", VERSION);
+			exit(0);
 		case 'd':
 			fprintf(stderr, "Foreground mode\n");
 			is_daemon = 0;
@@ -1009,6 +1026,14 @@ static void process_options(int argc, char *argv[])
 			break;
 		}
 	} while (c != EOF);
+
+	/* An argument that is not an option must never start a daemon */
+	if (optind < argc) {
+		if (strcmp(argv[optind], "?") == 0)
+			Usage(0);
+		fprintf(stderr, "fpacwpd: unknown argument '%s'\n", argv[optind]);
+		Usage(1);
+	}
 }
 
 int main(int argc, char *argv[]) 
@@ -1019,6 +1044,10 @@ int main(int argc, char *argv[])
 	time_t temps;	
 	
 	process_options(argc, argv);
+
+	/* Before openlog: with LOG_PERROR the message would come out twice */
+	if (fpac_single_instance("fpacwpd") != 0)
+		exit(1);
 	
 	openlog("fpacwpd", LOG_PERROR | LOG_PID, LOG_USER);	
 	syslog(LOG_WARNING, "Starting version %s (built %s-%s) vector version %x Hex (%d dec) - file signature %s",
@@ -1070,6 +1099,7 @@ int main(int argc, char *argv[])
 		syslog(LOG_ERR, "fpacwpd cannot become daemon");
 		exit(1);
 	}
+	fpac_single_instance_pid("fpacwpd");
 		
 	while (1) {
 /*		fd = WaitEvent(1000);*/

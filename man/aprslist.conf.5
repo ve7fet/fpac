@@ -4,9 +4,11 @@ aprslist.conf \- Configuration file for aprslist
 .SH DESCRIPTION
 The Geographical coordinates of your station are listed with the longitude and latitude statements.
 .TP 10
-.BI "longitude " "deg min sec E/W"
+.BI "longitude " "deg min hundredths E/W"
 .TP 10 
-.BI "latitude " "deg min sec N/S"
+.BI "latitude " "deg min hundredths N/S"
+.TP 1
+The third number is hundredths of a minute (00 to 99), not seconds: the three numbers are copied as they are into the beacon, in the APRS form DDMM.HH.
 .TP 1
 That is followed by beacon information for each port. 
 .P
@@ -16,7 +18,7 @@ The individual port's information begins with with a bracketed port name.
 The port name used in /etc/ax25/axports
 .TP 19
 .BI period " minutes
-The time in minutes for sending coordinates and beacon information.
+The time in minutes for sending coordinates and beacon information. Default 30.
 .TP 19
 .BI from " call_sign
 Originating Station

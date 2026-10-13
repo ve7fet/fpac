@@ -32,7 +32,7 @@ The key is NEVER fetched automatically by the scripts: install it by hand, once
 per host.
 
     updfpac.sh     installs the current stable release   (4.1.5)
-    updfpac-rc.sh  installs the current release candidate (4.1.6-rc7)
+    updfpac-rc.sh  installs the current release candidate (4.1.6-rc8)
 
 You may read Linux FPAC-HOWTO
 https://www.f6fbb.org/fpac/doc/FPAC-HOWTO.html
@@ -87,12 +87,10 @@ aprslist	lists the APRS stations heard and sends APRS beacons
 calibrate	sends a sequence of UI frames to a port (transmitter test)
 mailbbs		Simple mailer to send Fpac's service messages to a BBS
 
-Seldom used
-
-calld		Receives calls from a remote BBS via TCP
-mon_tcp		Sends/receives monitoring frames to/from a remote host
-fpacwdog	sends a character to a serial port at a fixed interval
-		(to feed an external hardware watchdog)
+Set aside: fpacwdog, calld and mon_tcp are no longer built nor installed
+since 4.1.6-rc8, and the manual page of "remote", a program that left
+the package long ago, is no longer installed. They are kept in the
+attic directory, see attic/README for the reasons.
 
 See INSTALL for configuration and installation instructions.
 

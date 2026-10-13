@@ -150,6 +150,9 @@ extern int cfg_open(cfg_t *);
 extern int open_cfg(cfg_t *cfg, FILE *fptr, int);
 extern int is_heard(char **);
 extern int callsign_eq(const char *a, const char *b);
+extern int fpac_single_instance(const char *prog);
+extern void fpac_single_instance_pid(const char *prog);
+extern void fpac_single_instance_close(void);
 
 
 extern void fpac_nr_config_load_ports(void);

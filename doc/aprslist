@@ -1,12 +1,11 @@
+#!/bin/sh
 #APRSLIST from FPAC package
 #APRSLIST du paquetage FPAC
-# See fpac~/etc/aprslist.conf
-# start script example
-#rm -f /var/ax25/aprs.dat
-#/usr/local/sbin/aprslist -d &
-mkdir /temp
+# See aprslist.txt in this directory and the example aprslist.conf
+# Voir aprslist.txt dans ce répertoire et l'exemple aprslist.conf
 #
-rm /temp/aprslist.txt
-/usr/local/sbin/aprslist -dl > /temp/aprslist.txt &
-#
-
+# start script example - exemple de script de lancement
+# aprslist prints the list of stations on its standard output each time
+# a position is heard: send it to a file (or to /dev/null).
+#rm -f /usr/local/var/ax25/aprs.dat
+/usr/local/sbin/aprslist -l > /var/log/aprslist.log 2>&1
