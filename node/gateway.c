@@ -772,9 +772,19 @@ static int connect_to(char *address[], int family, int escape, char *source,
 			node_perror("connect_to: socket", errno);
 			return -1;
 		}
-		/* Why on earth is this different from ax.25 ????? */
-		sprintf(path, "%s", nr_config_get_addr(NrPort));
-		ax25_aton(path, &sockaddr.ax25);
+		/* F6BVP 2026-10-13: the call goes out from the NetRom port of
+		 * this node under the callsign of the user, as every other
+		 * Linux node does: nr_bind() takes the address itself as the
+		 * node and its first "digipeater" as the user. It used to go
+		 * out under the callsign of the node alone: the far end -
+		 * another node, a BBS, a DX cluster - saw every user of this
+		 * node as the node itself. */
+		snprintf(path, sizeof(path), "%s %s", nr_config_get_addr(NrPort), User.call);
+		if (ax25_aton(path, &sockaddr.ax25) == -1)
+		{
+			sprintf(path, "%s", nr_config_get_addr(NrPort));
+			ax25_aton(path, &sockaddr.ax25);
+		}
 		sockaddr.ax25.fsa_ax25.sax25_family = AF_NETROM;
 		addrlen = sizeof(struct full_sockaddr_ax25);
 

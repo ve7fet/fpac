@@ -1,5 +1,13 @@
 fpac (4.1.6-rc9)
 
+	* fpacnode: a NetRom connection made for a user ("Connect" to a
+	  NetRom node or alias) now goes out under the callsign of the
+	  user, from the NetRom port of the node (node/gateway.c,
+	  connect_to(): the address bound is "<port callsign> <user
+	  callsign>", which nr_bind() reads as node and user). It used to
+	  go out under the callsign of the node alone, so that the far end
+	  - another node, a BBS, a DX cluster - took every user of the
+	  node for the node itself.
 	* fpacnode: "Connect <word>" no longer calls on the default port a
 	  word that was found nowhere and cannot be a callsign (no letter
 	  or no digit before the SSID): it is most likely a mistyped NetRom

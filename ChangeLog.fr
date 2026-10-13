@@ -3,6 +3,14 @@ Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
 fpac (4.1.6-rc9)
 
+	* fpacnode : une connexion NetRom faite pour un utilisateur
+	  (« Connect » vers un nœud ou un alias NetRom) part maintenant
+	  sous l'indicatif de l'utilisateur, depuis le port NetRom du nœud
+	  (node/gateway.c, connect_to() : l'adresse liée est « <indicatif
+	  du port> <indicatif de l'utilisateur> », que nr_bind() lit comme
+	  nœud et utilisateur). Elle partait sous le seul indicatif du
+	  nœud : l'autre bout - un autre nœud, un BBS, un cluster DX -
+	  prenait tout utilisateur du nœud pour le nœud lui-même.
 	* fpacnode : « Connect <mot> » n'appelle plus sur le port par
 	  défaut un mot trouvé nulle part et qui ne peut pas être un
 	  indicatif (pas de lettre ou pas de chiffre avant le SSID) : c'est

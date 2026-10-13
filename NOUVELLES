@@ -7,6 +7,10 @@ FPAC 4.1.6-rc9 — un alias NetRom mal tapé n'est plus appelé (en préparation
     NetRom inconnu », avec les alias connus qui commencent de la même
     façon.
 
+  * Une connexion NetRom faite depuis le nœud porte maintenant votre
+    propre indicatif. Jusqu'ici l'autre bout - un autre nœud, un BBS,
+    un cluster DX - voyait l'indicatif du nœud d'où vous appeliez.
+
 FPAC 4.1.6-rc8 — une seule copie de chaque démon (version candidate)
 ====================================================================
 
