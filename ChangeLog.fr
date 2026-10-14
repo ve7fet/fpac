@@ -1,7 +1,7 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
-fpac (pas encore publiée)
+fpac (4.1.6-rc10)
 
 	* fpacnode : « Users » affiche un nouveau bloc, « NetRom Level 4
 	  sessions », entre les blocs AX.25 et ROSE : les circuits NetRom qui

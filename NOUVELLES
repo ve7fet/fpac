@@ -1,3 +1,21 @@
+FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
+====================================================================
+
+  * « Users » affiche un nouveau bloc, « NetRom Level 4 sessions » :
+    les circuits NetRom qui aboutissent au nœud - utilisateurs
+    connectés à un port NetRom, appels faits depuis le nœud - avec le
+    nœud distant sous la forme ALIAS:INDICATIF. « Users * » ajoute les
+    ports NetRom en écoute. Les transits NetRom ne peuvent pas être
+    affichés : le noyau ne garde aucun circuit pour eux.
+
+  * « make install » donne à fpacnode le droit de se lier à un
+    indicatif (setcap cap_net_bind_service). Depuis la 4.1.6-rc9, un
+    appel NetRom porte l'indicatif de l'utilisateur ; sans ce droit,
+    une session qui n'était pas root (compte telnet comme fpacuser,
+    sysop sans sudo) recevait « connect_to: bind: Operation not
+    permitted ». Si vous copiez fpacnode à la main, redonnez le droit :
+    setcap cap_net_bind_service=ep /usr/local/sbin/fpacnode
+
 FPAC 4.1.6-rc9 — un alias NetRom mal tapé n'est plus appelé (version candidate)
 ===============================================================================
 

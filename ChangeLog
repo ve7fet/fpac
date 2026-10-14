@@ -1,4 +1,4 @@
-fpac (not released yet)
+fpac (4.1.6-rc10)
 
 	* fpacnode: "Users" shows a new block, "NetRom Level 4 sessions",
 	  between the AX.25 and the ROSE blocks: the NetRom circuits that

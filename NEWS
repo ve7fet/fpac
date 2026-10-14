@@ -1,3 +1,20 @@
+FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
+==================================================================
+
+  * "Users" shows a new block, "NetRom Level 4 sessions": the
+    NetRom circuits that end on the node - users connected to a
+    NetRom port, calls made from the node - with the far node shown
+    as ALIAS:CALL. "Users *" adds the listening NetRom ports. NetRom
+    transits cannot be shown: the kernel keeps no circuit for them.
+
+  * "make install" gives fpacnode the right to bind a callsign
+    (setcap cap_net_bind_service). Since 4.1.6-rc9 a NetRom call
+    carries the callsign of the user; without this right, a session
+    that was not root (a telnet account such as fpacuser, a sysop
+    without sudo) got "connect_to: bind: Operation not permitted".
+    If you copy fpacnode by hand, give the right again:
+    setcap cap_net_bind_service=ep /usr/local/sbin/fpacnode
+
 FPAC 4.1.6-rc9 — a mistyped NetRom alias is no longer called (release candidate)
 ================================================================================
 
