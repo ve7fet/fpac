@@ -1,5 +1,15 @@
 fpac (not released yet)
 
+	* fpacnode: "Users" shows a new block, "NetRom Level 4 sessions",
+	  between the AX.25 and the ROSE blocks: the NetRom circuits that
+	  end on the node, read from /proc/net/nr (node/command.c,
+	  users_netrom()): user, far node (ALIAS:CALL when it is in the
+	  nodes table), NetRom port, device, circuit numbers and state;
+	  Unack, Snd-Q and Rcv-Q for the sysop. "Users *" also lists the
+	  listening NetRom ports, "Users <callsign>" the circuits of that
+	  callsign. NetRom transits cannot be shown: the kernel forwards
+	  them frame by frame and keeps no circuit for them.
+
 	* fpacnode: "make install" gives fpacnode the capability
 	  cap_net_bind_service (setcap, node/Makefile.am, install-exec-hook;
 	  debian/fpac.postinst for the package). Since 4.1.6-rc9 a NetRom

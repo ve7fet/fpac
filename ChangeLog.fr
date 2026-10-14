@@ -3,6 +3,17 @@ Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
 fpac (pas encore publiée)
 
+	* fpacnode : « Users » affiche un nouveau bloc, « NetRom Level 4
+	  sessions », entre les blocs AX.25 et ROSE : les circuits NetRom qui
+	  aboutissent au nœud, lus dans /proc/net/nr (node/command.c,
+	  users_netrom()) : utilisateur, nœud distant (ALIAS:INDICATIF s'il
+	  est dans la table des nœuds), port NetRom, interface, numéros de
+	  circuit et état ; Unack, Snd-Q et Rcv-Q pour le sysop. « Users * »
+	  liste aussi les ports NetRom en écoute, « Users <indicatif> » les
+	  circuits de cet indicatif. Les transits NetRom ne peuvent pas être
+	  affichés : le noyau les fait suivre trame par trame sans garder de
+	  circuit.
+
 	* fpacnode : « make install » donne à fpacnode le droit
 	  cap_net_bind_service (setcap, node/Makefile.am, install-exec-hook ;
 	  debian/fpac.postinst pour le paquet). Depuis la 4.1.6-rc9, un appel

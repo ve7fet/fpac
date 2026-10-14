@@ -1361,6 +1361,120 @@ int do_ports(int argc, char **argv)
 	return 0;
 }
 
+/*
+ * F6BVP 2026-10-14: NetRom Level 4 sessions ending on this node, as listed
+ * by /proc/net/nr (users connected to a NetRom port, or calls made from
+ * the node). Transits are not shown: the kernel forwards them frame by
+ * frame and keeps no circuit for them. The timers of struct proc_nr are not
+ * used: libax25 reads them as hexadecimal numbers.
+ */
+static void users_netrom(int argc, char **argv)
+{
+	struct proc_nr *p, *list;
+	struct proc_nr_nodes *n, *nodes;
+	char node[20];
+	const char *state, *color;
+	int first = 1;
+
+	if ((list = read_proc_nr()) == NULL)
+		return;
+	nodes = read_proc_nr_nodes();
+
+	for (p = list; p != NULL; p = p->next)
+	{
+		if (argc > 1 && strcasecmp(argv[1], "*")
+			&& !callsign_eq(p->user_addr, argv[1])
+			&& !callsign_eq(p->dest_node, argv[1])
+			&& !callsign_eq(p->src_node, argv[1]))
+			continue;
+
+		/* Listening sockets only with "users *" */
+		if ((argc < 2) && !strcmp(p->dest_node, "*"))
+			continue;
+
+		if (first)
+		{
+			first = 0;
+			tprintf("\n");
+			node_msg("NetRom Level 4 sessions :");
+			if (Colored)
+				tprintf("%sUser%s      <-> %sNode%s             %sPort%s      %sDev%s  %sMy/Ur circ.%s %sState%s",
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor,
+					NodeColors.en_tete, ResetColor, NodeColors.en_tete, ResetColor);
+			else
+				tprintf("User      <-> Node             Port      Dev  My/Ur circ. State");
+			if (is_sysop())
+			{
+				if (Colored)
+					tprintf("        %sUnack Snd-Q Rcv-Q%s", NodeColors.en_tete, ResetColor);
+				else
+					tprintf("        Unack Snd-Q Rcv-Q");
+			}
+			tprintf("\n");
+		}
+
+		/* Remote node shown as ALIAS:CALL when it is in the nodes table */
+		strcpy(node, p->dest_node);
+		for (n = nodes; n != NULL; n = n->next)
+			if (callsign_eq(n->call, p->dest_node))
+			{
+				if (*n->alias)
+					sprintf(node, "%s:%s", n->alias, n->call);
+				break;
+			}
+
+		if (!strcmp(p->dest_node, "*"))
+		{
+			state = "Listening";
+			color = ResetColor;
+		}
+		else switch (p->st)
+		{
+		case 0:
+			state = "Disconnected";
+			color = NodeColors.ax25_disconnected;
+			break;
+		case 1:
+			state = "Conn pending";
+			color = NodeColors.ax25_conn_pending;
+			break;
+		case 2:
+			state = "Disc pending";
+			color = NodeColors.ax25_disc_pending;
+			break;
+		case 3:
+			state = "Connected";
+			color = NodeColors.ax25_connected;
+			break;
+		default:
+			state = "Unknown";
+			color = NodeColors.ax25_unknown;
+			break;
+		}
+
+		if (Colored)
+			tprintf("%s%-9s%s <-> %s%-16s%s %s%-9s%s %-4s %-5s %-5s %s%-12s%s",
+				NodeColors.indicatif, p->user_addr, ResetColor,
+				NodeColors.indicatif, node, ResetColor,
+				NodeColors.indicatif, p->src_node, ResetColor,
+				p->dev, p->my_circuit, p->ur_circuit,
+				color, state, ResetColor);
+		else
+			tprintf("%-9s <-> %-16s %-9s %-4s %-5s %-5s %-12s",
+				p->user_addr, node, p->src_node,
+				p->dev, p->my_circuit, p->ur_circuit, state);
+
+		if (is_sysop() && strcmp(p->dest_node, "*"))
+			tprintf("  %5d %5d %5d",
+				(unsigned char)(p->vs - p->va), p->sndq, p->rcvq);
+		tprintf("\n");
+	}
+
+	free_proc_nr_nodes(nodes);
+	free_proc_nr(list);
+}
+
 int do_users(int argc, char **argv)
 {
 	struct proc_ax25 *p, *list;
@@ -1581,6 +1695,8 @@ int do_users(int argc, char **argv)
 		} // cp != NULL
 	}
 	free_proc_ax25(list);
+
+	users_netrom(argc, argv);
 
 	first = 1;
 
