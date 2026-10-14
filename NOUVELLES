@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc9 — un alias NetRom mal tapé n'est plus appelé (en préparation)
-===========================================================================
+FPAC 4.1.6-rc9 — un alias NetRom mal tapé n'est plus appelé (version candidate)
+===============================================================================
 
   * « C PKTRPT » tapé pour l'alias NetRom PKTXRP appelait PKTRPT comme
     une station sur le port utilisateur. Un mot trouvé nulle part et

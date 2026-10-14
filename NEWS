@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc9 — a mistyped NetRom alias is no longer called (in preparation)
-=============================================================================
+FPAC 4.1.6-rc9 — a mistyped NetRom alias is no longer called (release candidate)
+================================================================================
 
   * "C PKTRPT" typed for the NetRom alias PKTXRP used to call PKTRPT
     as a station on the user port. A word that is found nowhere and
