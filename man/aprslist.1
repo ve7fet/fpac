@@ -31,6 +31,14 @@ print version and exit
 .TP 20
 .BI \-?  
 Display usage: aprslist [-l] [-s] [-d] [-v]
+.P
+Only one
+.B aprslist
+may run on a node. A second one refuses to start while the first holds the lock file
+.IR /var/ax25/fpac/aprslist.lock .
+The
+.B \-s
+mode takes no lock.
 .SH FILES
 .IP  "/etc/ax25/aprslist.conf  /var/ax25/aprs.dat"
 (under the prefix FPAC was built with, /usr/local by default)

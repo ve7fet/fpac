@@ -3,6 +3,18 @@ Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
 fpac (4.1.6-rc10)
 
+	* flexd, aprslist : un seul exemplaire de chacun peut tourner, comme
+	  fpad, fpacwpd, fpacstat et fpacroute depuis la 4.1.6-rc8 :
+	  « another flexd is already running (pid N): not started ». Un
+	  second flexd interrogeait deux fois sa passerelle FlexNet et
+	  réécrivait le fichier gateways du premier ; un second aprslist
+	  émettait chaque balise deux fois. flexd prend le verrou avant de
+	  lire sa configuration ; « aprslist -s » ne fait que lire la liste
+	  et ne prend pas de verrou.
+	* lib : le verrou d'instance unique passe de procutils.c à
+	  instance.c et instance.h, pour que flexd, qui a sa propre copie
+	  des lecteurs FlexNet (flex/procinfo.c), puisse le lier seul.
+
 	* fpacnode : « Users » affiche un nouveau bloc, « NetRom Level 4
 	  sessions », entre les blocs AX.25 et ROSE : les circuits NetRom qui
 	  aboutissent au nœud, lus dans /proc/net/nr (node/command.c,

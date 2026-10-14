@@ -1,4 +1,4 @@
-LDADD = $(AX25_LIB)
+LDADD = $(AX25_LIB) ../lib/libfpac.a
 sbin_PROGRAMS = flexd 
 flexd_SOURCES = flexd.c procinfo.c procinfo.h node.h
 

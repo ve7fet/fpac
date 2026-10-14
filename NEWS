@@ -15,6 +15,11 @@ FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
     If you copy fpacnode by hand, give the right again:
     setcap cap_net_bind_service=ep /usr/local/sbin/fpacnode
 
+  * flexd and aprslist now also refuse to start when another copy
+    is running, like fpad, fpacwpd, fpacstat and fpacroute: a second
+    flexd polled the FlexNet gateway twice, a second aprslist sent
+    each beacon twice.
+
 FPAC 4.1.6-rc9 — a mistyped NetRom alias is no longer called (release candidate)
 ================================================================================
 

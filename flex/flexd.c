@@ -27,6 +27,7 @@
 
 #include "../pathnames.h"
 #include "procinfo.h"
+#include "../lib/instance.h"
 
 #define DEFAULT_POLL_TIME 600
 #define MINIMUM_POLL_TIME 300
@@ -812,6 +813,11 @@ int main(int argc, char *argv[])
 
 	process_options(argc, argv);
 
+	/* Only one flexd may run. Before read_conf(), which rewrites the
+	 * gateways file of the running one */
+	if (fpac_single_instance("flexd") != 0)
+		return 1;
+
 	if ((i = read_conf()) == -1)
 		return 1;
 
@@ -819,6 +825,8 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "flexd: cannot become a daemon\n");
 		return 1;
 	}
+
+	fpac_single_instance_pid("flexd");
 
 	if ((i = update_flex()) == -1) {
 		fprintf(stderr, "\nStopping application. Restart flexd after changing the configuration\n");

@@ -26,6 +26,11 @@ Use an alternate flexd.routes file
 .TP 20 
 .BI \-h
 Display Usage : flexd [-h] [-d] [-x] [-v] [-f wpfile]
+.P
+Only one
+.B flexd
+may run on a node. A second one refuses to start while the first holds the lock file
+.I /var/ax25/fpac/flexd.lock
 .SH FILES
 .IP "/etc/ax25/flexd.conf /etc/ax25/flexd.routes"
 .SH AUTHOR

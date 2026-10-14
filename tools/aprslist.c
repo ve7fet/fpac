@@ -39,6 +39,7 @@
 #include "config.h"
 #include "../pathnames.h"
 #include "ax25compat.h"
+#include "fpac.h"
 
 #define	KISS_MASK	0x0F
 #define	KISS_DATA	0x00
@@ -855,6 +856,10 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 	
+	/* Only one aprslist may run: a second one would send each beacon twice */
+	if (fpac_single_instance("aprslist") != 0)
+		return 1;
+
 	act.sa_handler = SignalTERM;
 	sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
@@ -879,6 +884,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "aprslist: cannot become a daemon\n");
 		return 1;
 	}
+
+	fpac_single_instance_pid("aprslist");
 
 	/* Use syslog for error messages rather than perror/fprintf */
 	if (logging) 

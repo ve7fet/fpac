@@ -113,7 +113,8 @@ libfpac_a_AR = $(AR) $(ARFLAGS)
 libfpac_a_RANLIB = $(RANLIB)
 libfpac_a_LIBADD =
 am_libfpac_a_OBJECTS = libwp.$(OBJEXT) libcfg.$(OBJEXT) \
-	libmd.$(OBJEXT) md5.$(OBJEXT) procutils.$(OBJEXT)
+	libmd.$(OBJEXT) md5.$(OBJEXT) procutils.$(OBJEXT) \
+	instance.$(OBJEXT)
 libfpac_a_OBJECTS = $(am_libfpac_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -130,8 +131,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libcfg.Po ./$(DEPDIR)/libmd.Po \
-	./$(DEPDIR)/libwp.Po ./$(DEPDIR)/md5.Po \
+am__depfiles_remade = ./$(DEPDIR)/instance.Po ./$(DEPDIR)/libcfg.Po \
+	./$(DEPDIR)/libmd.Po ./$(DEPDIR)/libwp.Po ./$(DEPDIR)/md5.Po \
 	./$(DEPDIR)/procutils.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -311,7 +312,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libfpac.a
-libfpac_a_SOURCES = libwp.c libcfg.c libmd.c md5.c md5.h procutils.c ax25compat.h fpac.h global.h wp.h
+libfpac_a_SOURCES = libwp.c libcfg.c libmd.c md5.c md5.h procutils.c instance.c instance.h ax25compat.h fpac.h global.h wp.h
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\"
 
@@ -365,6 +366,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/instance.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcfg.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwp.Po@am__quote@ # am--include-marker
@@ -529,6 +531,7 @@ clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
+	-rm -f ./$(DEPDIR)/instance.Po
 	-rm -f ./$(DEPDIR)/libcfg.Po
 	-rm -f ./$(DEPDIR)/libmd.Po
 	-rm -f ./$(DEPDIR)/libwp.Po
@@ -579,6 +582,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -f ./$(DEPDIR)/instance.Po
 	-rm -f ./$(DEPDIR)/libcfg.Po
 	-rm -f ./$(DEPDIR)/libmd.Po
 	-rm -f ./$(DEPDIR)/libwp.Po

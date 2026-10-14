@@ -110,7 +110,7 @@ am_flexd_OBJECTS = flexd.$(OBJEXT) procinfo.$(OBJEXT)
 flexd_OBJECTS = $(am_flexd_OBJECTS)
 flexd_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-flexd_DEPENDENCIES = $(am__DEPENDENCIES_1)
+flexd_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libfpac.a
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -304,7 +304,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-LDADD = $(AX25_LIB)
+LDADD = $(AX25_LIB) ../lib/libfpac.a
 flexd_SOURCES = flexd.c procinfo.c procinfo.h node.h
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \

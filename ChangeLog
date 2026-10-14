@@ -1,5 +1,16 @@
 fpac (4.1.6-rc10)
 
+	* flexd, aprslist: only one copy of each may run, like fpad,
+	  fpacwpd, fpacstat and fpacroute since 4.1.6-rc8: "another flexd
+	  is already running (pid N): not started". A second flexd polled
+	  its FlexNet gateway twice and rewrote the gateways file of the
+	  running one; a second aprslist sent each beacon twice. flexd
+	  takes the lock before reading its configuration; "aprslist -s"
+	  only reads the list and takes no lock.
+	* lib: the single instance lock moves from procutils.c to
+	  instance.c and instance.h, so that flexd, which has its own copy
+	  of the FlexNet readers (flex/procinfo.c), can link it alone.
+
 	* fpacnode: "Users" shows a new block, "NetRom Level 4 sessions",
 	  between the AX.25 and the ROSE blocks: the NetRom circuits that
 	  end on the node, read from /proc/net/nr (node/command.c,

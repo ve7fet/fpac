@@ -16,6 +16,11 @@ FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
     permitted ». Si vous copiez fpacnode à la main, redonnez le droit :
     setcap cap_net_bind_service=ep /usr/local/sbin/fpacnode
 
+  * flexd et aprslist refusent eux aussi de démarrer quand un autre
+    exemplaire tourne, comme fpad, fpacwpd, fpacstat et fpacroute : un
+    second flexd interrogeait deux fois la passerelle FlexNet, un
+    second aprslist émettait chaque balise deux fois.
+
 FPAC 4.1.6-rc9 — un alias NetRom mal tapé n'est plus appelé (version candidate)
 ===============================================================================
 
