@@ -37,6 +37,13 @@ void netrom_dump(unsigned char *data, int length, int hexdump)
 	char tmp[15];
 	int i;
 
+	/* F6BVP 2026-10-14: every field is checked against the length of the
+	 * frame; a short or damaged frame was read past its end */
+	if (length < 1 + ALEN) {
+		lprintf(T_ERROR, "NET/ROM: bad header!\n");
+		return;
+	}
+
 	/* See if it is a routing broadcast */
 	if (data[0] == NR3NODESIG) {
 		memcpy(tmp, data + 1, ALEN);
@@ -47,7 +54,7 @@ void netrom_dump(unsigned char *data, int length, int hexdump)
 		length -= (ALEN + 1);
 
 		for(i = 0;i < NRDESTPERPACK;i++) {
-			if (length < AXLEN) break;
+			if (length < AXLEN + ALEN + AXLEN + 1) break;
 			
 			lprintf(T_DATA,"        %12s", pax25(tmp, data));
 
@@ -73,6 +80,12 @@ void netrom_dump(unsigned char *data, int length, int hexdump)
 		return;
 	}
 
+	/* Network header (15 bytes) and transport header (5 bytes) */
+	if (length < AXLEN + AXLEN + 1 + 5) {
+		lprintf(T_ERROR, "NET/ROM: bad header!\n");
+		return;
+	}
+
 	/* Decode network layer */
 	lprintf(T_AXHDR, "NET/ROM: ");
 	lprintf(T_ADDR, "%s->", pax25(tmp, data));
@@ -94,20 +107,25 @@ void netrom_dump(unsigned char *data, int length, int hexdump)
 		break;
 
 	case NR4OPCONRQ:        /* Connect request */
+		if (length < 6 + AXLEN + AXLEN) {
+			lprintf(T_ERROR, "         conn rqst: too short\n");
+			break;
+		}
 		lprintf(T_AXHDR, "         conn rqst: ckt %d/%d", data[0], data[1]);
 		lprintf(T_AXHDR, " wnd %d", data[5]);
 		lprintf(T_ADDR, " %s", pax25(tmp, data + 6));
 		lprintf(T_ADDR, "@%s", pax25(tmp, data + 6 + AXLEN));
 		data   += AXLEN + AXLEN + 6;
 		length -= AXLEN + AXLEN + 6;
-		if (length > 0)
+		if (length >= 2)
 			lprintf(T_AXHDR, " timeout %d", data[1] * 256 + data[0]);
 		lprintf(T_AXHDR, "\n");
 		break;
 
 	case NR4OPCONAK:        /* Connect acknowledgement */
 		lprintf(T_AXHDR,"         conn ack: ur ckt %d/%d my ckt %d/%d", data[0], data[1], data[2], data[3]);
-		lprintf(T_AXHDR, " wnd %d", data[5]);
+		if (length > 5)
+			lprintf(T_AXHDR, " wnd %d", data[5]);
 		netrom_flags(data[4]);
 		break;
 

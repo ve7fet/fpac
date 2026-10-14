@@ -72,6 +72,7 @@ void ax25_dump(unsigned char *data, int length, int hexdump)
 	char tmp[15];
 	char ext[40];
 	int ctlen, nr=0, ns=0, pf, pid, seg, type, end, cmdrsp, extseq, paclen;
+	int ndigis = 0;
 	char *dama;
 
 	/* check for FlexNet compressed header first; FlexNet header compressed packets are at least 8 bytes long */
@@ -138,6 +139,14 @@ void ax25_dump(unsigned char *data, int length, int hexdump)
 			lprintf(T_AXHDR, " v");
 			
 			while (!end) {
+				/* A complete digipeater field and a control byte
+				 * must follow, and there are at most 8 digipeaters:
+				 * without the end of address bit the loop used to
+				 * read past the end of the frame */
+				if (length < AXLEN + 1 || ++ndigis > 8) {
+					lprintf(T_ERROR, " bad digipeater field!\n");
+					return;
+				}
 				/* Print digi string */
 				lprintf(T_ADDR," %s%s", pax25(tmp, data), (data[ALEN] & REPEATED) ? "*" : "");
 				
@@ -149,7 +158,11 @@ void ax25_dump(unsigned char *data, int length, int hexdump)
 		}
 	}
 
-	if (length == 0) return;
+	if (length <= 0) return;
+	if (extseq && length < 2) {
+		lprintf(T_ERROR, " bad control field!\n");
+		return;
+	}
 	
 	paclen = length-2;
 
@@ -188,11 +201,15 @@ void ax25_dump(unsigned char *data, int length, int hexdump)
 			length--;
 		
 			if (pid == PID_SEGMENT) {
+				if (length < 1) {
+					lprintf(T_AXHDR, " bad segment\n");
+					return;
+				}
 				seg = *data++;
 				length--;
 				lprintf(T_AXHDR, "%s remain %u", seg & SEG_FIRST ? " First seg;" : "", seg & SEG_REM);
 
-				if (seg & SEG_FIRST) {
+				if ((seg & SEG_FIRST) && length > 0) {
 					pid = *data++;
 					length--;
 				}

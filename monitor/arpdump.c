@@ -86,6 +86,15 @@ void arp_dump(unsigned char *data, int length)
 		break;
 	}
 	
+	/* Both addresses must be in the frame, and an AX.25 address takes
+	 * 7 bytes */
+	if (hwlen < AXALEN || (is_ip && pralen < 4)
+	    || 8 + 2 * hwlen + 2 * pralen > length)
+	{
+		lprintf(T_ERROR, " bad address lengths\n");
+		return;
+	}
+
 	shwaddr   = data + 8;
 	sprotaddr = shwaddr + hwlen;
 	

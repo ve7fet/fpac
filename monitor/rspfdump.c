@@ -6,16 +6,29 @@
 
 #include "listen.h"
 
+/* Dotted address of 4 bytes, read one by one (they are not aligned) */
+static char *ipaddr(unsigned char *p)
+{
+	static char buf[16];
+
+	snprintf(buf, sizeof(buf), "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+	return buf;
+}
+
 void rspf_dump(unsigned char *data, int length)
 {
 	int bptr, nodes, links, adjs;
 	
+	if (length < 11) {
+		lprintf(T_ERROR, "RSPF: bad packet\n");
+		return;
+	}
 	lprintf(T_IPHDR, "RSPF: version %u ", data[0]);
 	
 	switch(data[1])
 	{
 		case 3:	/* RRH */
-			lprintf(T_IPHDR, "type RRH seq %#04x flags %d\n",ntohs(*((u_short*)(&data[8]))), data[10]);
+			lprintf(T_IPHDR, "type RRH seq %#04x flags %d\n",get16(&data[8]), data[10]);
 			bptr = 11;
 			while (bptr < length)			
 				lprintf(T_IPHDR, "%c", data[bptr++]);
@@ -23,13 +36,13 @@ void rspf_dump(unsigned char *data, int length)
 			break;
 		case 1: /*Routing update*/
 			lprintf(T_IPHDR, "type ROUTING UPDATE ");
-			lprintf(T_IPHDR, "fragment %u frag total %u sync %u #nodes %u env_id %u\n", data[2], data[3], data[6], data[7], ntohs(*((u_short*)(&data[8]))));
+			lprintf(T_IPHDR, "fragment %u frag total %u sync %u #nodes %u env_id %u\n", data[2], data[3], data[6], data[7], get16(&data[8]));
 			
 			bptr = data[6] + 6;
 			nodes = data[7];
 			while(nodes-- && (length - bptr) > 7)
 			{
-				lprintf(T_DATA, "     Reporting Router: %s Seq %u Subseq %u #links %u\n", inet_ntoa(*((struct in_addr*)(&data[bptr]))), ntohs(*((u_short*)(&data[bptr+4]))), data[bptr+6], data[bptr+7]);
+				lprintf(T_DATA, "     Reporting Router: %s Seq %u Subseq %u #links %u\n", ipaddr(&data[bptr]), get16(&data[bptr+4]), data[bptr+6], data[bptr+7]);
 				links = data[bptr+7];
 				bptr += 8;
 				while(links-- && (length - bptr) > 4)
@@ -39,7 +52,7 @@ void rspf_dump(unsigned char *data, int length)
 					bptr += 4;
 					while(adjs-- && (length - bptr) > 4)
 					{
-						lprintf(T_DATA, "               %s/%d \n", inet_ntoa(*((struct in_addr*)(&data[bptr+1]))), data[bptr] & 0x3f);
+						lprintf(T_DATA, "               %s/%d \n", ipaddr(&data[bptr+1]), data[bptr] & 0x3f);
 						bptr += 5;
 					}
 				}

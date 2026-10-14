@@ -115,7 +115,8 @@ char *servname(int port, char *proto)
 	static char str[16];
 
 	if ((serv = getservbyport(htons(port), proto)))
-		strncpy(str, serv->s_name, 16);
+		/* strncpy left a name of 16 characters or more unterminated */
+		snprintf(str, sizeof(str), "%s", serv->s_name);
 	else
 		snprintf(str, 16, "%i", port);
 

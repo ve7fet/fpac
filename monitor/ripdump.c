@@ -93,6 +93,11 @@ void rip_dump(unsigned char *data, int length)
     
 	lprintf(T_PROTOCOL, "RIP: ");
 
+	if (length < RIP_HEADER) {
+		lprintf(T_ERROR, "bad packet\n");
+		return;
+	}
+
 	cmd     = data[0];
 	version = data[1];
 	domain  = get16(data + 2);

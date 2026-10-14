@@ -238,7 +238,10 @@ static void readable_dump(unsigned char *data, int length)
 	unsigned char c;
 	int i;
 	int cr = 1;
-	char buf[BUFSIZE];
+	char buf[BUFSIZE + 2];	/* room for the final newline and nul */
+
+	if (length > BUFSIZE)
+		length = BUFSIZE;
 
 	for (i = 0; length > 0; i++) {
 
@@ -333,7 +336,7 @@ int get16(unsigned char *cp)
 
 int get32(unsigned char *cp)
 {
-	int x;
+	unsigned int x;	/* a signed shift overflows on the high byte */
 
 	x = *cp++;
 	x <<= 8;

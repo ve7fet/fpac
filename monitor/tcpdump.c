@@ -37,6 +37,11 @@ void tcp_dump(unsigned char *data, int length, int hexdump)
 	int hdrlen;
 	int mss = 0;
 
+	if (length < TCPLEN) {
+		lprintf(T_PROTOCOL, "TCP: bad header\n");
+		return;
+	}
+
 	source = get16(data + 0);
 	dest   = get16(data + 2);
 	seq    = get32(data + 4);
@@ -76,40 +81,40 @@ void tcp_dump(unsigned char *data, int length, int hexdump)
 		int i = hdrlen - TCPLEN;
 		int kind, optlen;
 
+		/* F6BVP 2026-10-14: the old loop read past the options on
+		 * an end of list option or a bad option length */
 		while (i > 0) {
-			kind = *cp++;
+			kind = cp[0];
 
 			/* Process single-byte options */
-			switch (kind) {
-			case EOL_KIND:
-				i--;
-				cp++;
+			if (kind == EOL_KIND)
 				break;
-			case NOOP_KIND:
-				i--;
+			if (kind == NOOP_KIND) {
 				cp++;
+				i--;
 				continue;
 			}
 
 			/* All other options have a length field */
-			optlen = *cp++;
+			if (i < 2)
+				break;
+			optlen = cp[1];
+			if (optlen < 2 || optlen > i)
+				break;
 
 			/* Process valid multi-byte options */
-  			switch (kind) {
-			case MSS_KIND:
-			 	if (optlen == MSS_LENGTH)
-					mss = get16(cp);
-				break;
-			}
+			if (kind == MSS_KIND && optlen == MSS_LENGTH)
+				mss = get16(cp + 2);
 
-			optlen = max(2, optlen); /* Enforce legal minimum */
 			i -= optlen;
-			cp += optlen - 2;
+			cp += optlen;
 		}
 	}
 
 	if (mss != 0) lprintf(T_TCPHDR," MSS %d", mss);
 
+	if (hdrlen < TCPLEN || hdrlen > length)
+		hdrlen = TCPLEN;
 	length -= hdrlen;
 	data   += hdrlen;
 

@@ -20,6 +20,9 @@ void ki_dump(unsigned char *data, int length, int hexdump)
 	int type;
 	int val;
 
+	if (length < 1)
+		return;
+
 	type = data[0] & 0xf;
 
 	if (type == PARAM_DATA)
@@ -28,7 +31,8 @@ void ki_dump(unsigned char *data, int length, int hexdump)
 		return;
 	}
 	
-	val = data[1];
+	/* A command frame of one byte has no argument */
+	val = length > 1 ? data[1] : 0;
 	
 	switch (type)
 	{

@@ -51,7 +51,19 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 	unsigned char *dest = NULL;
 	unsigned int len, hlen, totlen;
 	int pid;
-	unsigned int lci = ((unsigned)(data[0] & 0x0F) << 8) + data[1];
+	unsigned int lci;
+	unsigned char hdr[5];
+
+	/* Cause and diagnostic bytes of a short packet read as 0, not past
+	 * the end of the frame */
+	if (length < 3)
+	{
+		lprintf(T_ERROR, "ROSE: bad packet!\n");
+		return;
+	}
+	memset(hdr, 0, sizeof(hdr));
+	memcpy(hdr, data, length < 5 ? length : 5);
+	lci = ((unsigned)(data[0] & 0x0F) << 8) + data[1];
 
 	totdata = data;
 	totlen  = length;
@@ -61,8 +73,13 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 	switch (data[2]) {
 	case CALL_REQUEST:
 		len = 4;
-		hlen = (((data[3] >> 4) & 0x0F) + 1) / 2;
-		hlen += (((data[3] >> 0) & 0x0F) + 1) / 2;
+		hlen = (((hdr[3] >> 4) & 0x0F) + 1) / 2;
+		hlen += (((hdr[3] >> 0) & 0x0F) + 1) / 2;
+		if (length < (int)(len + hlen))
+		{
+			lprintf(T_ROSEHDR, "CALL REQUEST - bad length\n");
+			return;
+		}
 		if (hlen == 10)
 		{
 			dest   = data+4;
@@ -72,13 +89,13 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 		data   += len;
 		length -= len;
 		lprintf(T_ROSEHDR, "CALL REQUEST - ");
-		if (length)
+		if (length > 0)
 		{
-			unsigned int flen = data[0]+1;
+			int flen = data[0]+1;
 			facility(data, length);
 			length -= flen;
 			data += flen;
-			if (length) {
+			if (length > 0) {
 				unsigned char cudf0 = data[0];
 				data += length;
 				switch (cudf0)
@@ -109,7 +126,7 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 
 	case CLEAR_REQUEST:
 		lprintf(T_ROSEHDR, "CLEAR REQUEST - Cause %s - Diag %d\n",
-				clear_code(data[3]), data[4]);
+				clear_code(hdr[3]), hdr[4]);
 /*		if (length > 6)
 		{
 			facility(data+6, length-6);
@@ -126,7 +143,7 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 		return;
 
 	case DIAGNOSTIC:
-		lprintf(T_ROSEHDR, "DIAGNOSTIC - Diag %d (%2X)\n", data[3], data[3]);
+		lprintf(T_ROSEHDR, "DIAGNOSTIC - Diag %d (%2X)\n", hdr[3], hdr[3]);
 		return;
 
 	case INTERRUPT:
@@ -140,7 +157,7 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 
 	case RESET_REQUEST:
 		lprintf(T_ROSEHDR, "RESET REQUEST - Cause %s - Diag %d\n",
-			reset_code(data[3]), data[4]);
+			reset_code(hdr[3]), hdr[4]);
 		return;
 
 	case RESET_CONFIRMATION:
@@ -149,7 +166,7 @@ void rose_dump(unsigned char *data, int length, int hexdump)
 		
 	case RESTART_REQUEST:
 		lprintf(T_ROSEHDR, "RESTART REQUEST - Cause %s - Diag %d\n",
-			restart_code(data[3]), data[4]);
+			restart_code(hdr[3]), hdr[4]);
 		return;
 		
 	case RESTART_CONFIRMATION:
@@ -340,147 +357,143 @@ static char *dump_x25_addr(unsigned char *data)
 	return buffer;
 }
 
-static char *dump_ax25_call(unsigned char *data, int l_data)
+/* Callsign of a digipeater facility: 6 shifted characters and the SSID
+ * byte, written into buf (size bytes) */
+static char *dump_ax25_call(char *buf, int size, unsigned char *data, int l_data)
 {
-	static char buffer[25];
-	char *ptr = buffer;
-	int ssid;
+	char call[16];
+	char *ptr = call;
+	int i, ssid;
 
-	while (l_data-- > 1)
+	if (l_data < 7)
 	{
-		*ptr = *data++ >> 1;
+		snprintf(buf, size, "?");
+		return buf;
+	}
+	for (i = 0; i < 6; i++)
+	{
+		*ptr = (data[i] >> 1) & 0x7F;
 		if (*ptr != ' ')
 			++ptr;
 	}
-
-	*ptr++ = '-';
-	ssid = (*data & 0x1F) >> 1;
-	if (ssid >= 10)
-	{
-		*ptr++ = '1';
-		ssid -= 10;
-	}
-	*ptr++ = ssid + '0';
-	*ptr = 0;
-
-	return buffer;
+	*ptr = '\0';
+	ssid = (data[6] >> 1) & 0x0F;
+	snprintf(buf, size, "%s-%d", call, ssid);
+	return buf;
 }
 
+/*
+ * Facilities of a CALL REQUEST, as the Linux kernel writes them
+ * (net/rose/rose_subr.c): a national block, then a CCITT block. The two
+ * high bits of each code give the size of its parameter - 1, 2 or 3
+ * bytes, or for 0xC0 a length byte then the bytes. F6BVP 2026-10-14:
+ * nothing is read beyond the facilities nor beyond the frame any more;
+ * the old code copied the callsigns with a length used before it was
+ * set and overflowed its buffers on a damaged frame.
+ */
 static void facility(unsigned char *data, int lgtot)
 {
-	int lgfac, lg, fct, lgdigi, lgaddcall;
-	int lgad, lgaddr, lgadind;
-	char digis[10], digid[10];
-	char indorig[10], inddest[10];
-	char addstorig[20], addstdest[20];
-	unsigned char *factot;
-
-	factot = data;
-	
-	lgfac = *data++;
-	lg = lgfac;
+	unsigned char *end;
+	int fct, l, lcall;
+	char digis[16], digid[16], call[16];
+	char indorig[12], inddest[12];
+	char addstorig[16], addstdest[16];
 
 	digid[0] = digis[0] = '\0';
 	indorig[0] = inddest[0] = '\0';
+	addstorig[0] = addstdest[0] = '\0';
 
-	while (lg > 0)
+	if (lgtot < 1)
+		return;
+	l = *data++;
+	if (l > lgtot - 1)
+	{
+		lprintf(T_ERROR, "Facilities longer than the frame\n");
+		l = lgtot - 1;
+	}
+	end = data + l;
+
+	while (data < end)
 	{
 		fct = *data++;
-		lg--;
+		switch (fct & 0xC0)
+		{
+		case 0x00:
+			l = 1;
+			break;
+		case 0x40:
+			l = 2;
+			break;
+		case 0x80:
+			l = 3;
+			break;
+		default:
+			if (data >= end)
+				goto bad;
+			l = *data++;
+			break;
+		}
+		if (l > end - data)
+			goto bad;
+
 		switch (fct)
 		{
-		case 0:
-			/* Marker=0 National Fac ou Marker=15 CCITT */
-			data++;
-			lg--;
+		case 0x00:
+			/* Marker: 00 national, 0F CCITT */
 			break;
 		case 0x3F:
-			/* Utilise si appel par call digi au lieu du call N3 */
-			lprintf (T_ROSEHDR, "Facility 3F%2.2X\n", *data++);
-			lg--;
+			/* Used when called by the digi callsign instead of the L3 callsign */
+			lprintf(T_ROSEHDR, "Facility 3F%2.2X\n", data[0]);
 			break;
 		case 0x7F:
-			/* Nombre aleatoire pour eviter les rebouclages */
-			lprintf (T_ROSEHDR, "NbAlea: %2.2X%2.2X\n", *data, *(data + 1));
-			data += 2;
-			lg -= 2;
+			/* Random number against routing loops */
+			lprintf(T_ROSEHDR, "NbAlea: %2.2X%2.2X\n", data[0], data[1]);
 			break;
 		case 0xE9:
 			/* Destination digi */
-			lgdigi = *data++;
-			strncpy(digid, dump_ax25_call(data, lgdigi), 10);
-			data += lgdigi;
-			lg -= 1 + lgdigi;
+			dump_ax25_call(digid, sizeof(digid), data, l);
 			break;
 		case 0xEB:
 			/* Origin digi */
-			lgdigi = *data++;
-			strncpy(digis, dump_ax25_call(data, lgdigi), 10);
-			data += lgdigi;
-			lg -= 1 + lgdigi;
+			dump_ax25_call(digis, sizeof(digis), data, l);
 			break;
 		case 0xED:
-			/* Out of order : callsign */
-			lgaddcall = *data++;
-			/* data_dump(data, lgaddcall, 1); */
-			lprintf(T_ROSEHDR, "at %s", dump_ax25_call(data, lgaddcall));
-			data += lgaddcall;
-			lg -= 1 + lgaddcall;
-			data_dump(factot, lgtot, 1);
+			/* Out of order: callsign */
+			lprintf(T_ROSEHDR, "at %s\n", dump_ax25_call(call, sizeof(call), data, l));
 			break;
 		case 0xEE:
-			/* Out of order : address */
-			lgaddcall = *data++;
-			++data;	/* Don't know... */
-			lprintf(T_ROSEHDR, " @%s\n", dump_x25_addr(data));
-			/* data_dump(data, lgaddcall, 1); */
-			data += lgaddcall;
-			lg -= 1 + lgaddcall;
-			data_dump(factot, lgtot, 1);
+			/* Out of order: address */
+			if (l >= 1 + ROSE_ADDR_LEN)
+				lprintf(T_ROSEHDR, " @%s\n", dump_x25_addr(data + 1));
 			break;
 		case 0xC9:
-			/* Adresse et indicatif du nodal destination */
+			/* Address and callsign of the destination node */
 		case 0xCB:
-			/* Adresse et indicatif du nodal origine */
-			lgaddcall = *data++;
-			data++;
-			data += 3;
-			lgad = *data++;
-			lg -= 6;
-			lgaddr = lgad;
-			
+			/* Address and callsign of the origin node: 4 bytes, the
+			 * number of digits, the address, then the callsign */
+			if (l < 5 + ROSE_ADDR_LEN)
+				goto bad;
+			lcall = l - 5 - ROSE_ADDR_LEN;
+			if (lcall > 10)
+				lcall = 10;
 			if (fct == 0xCB)
 			{
-				if (lgadind > 10) lgadind = 10;
-				strncpy (indorig, (char *)data, lgadind);
-				indorig[lgadind] = '\0';
-				lgadind = lgaddcall - (lgad + 1) / 2 - 5;
-				if (lgadind > 10) { 
-					data_dump(factot, lgtot, 1);
-				}
-			}			
+				strcpy(addstorig, dump_x25_addr(data + 5));
+				memcpy(indorig, data + 5 + ROSE_ADDR_LEN, lcall);
+				indorig[lcall] = '\0';
+			}
 			else
 			{
-				if (lgadind > 10) lgadind = 10;
-				strncpy (inddest, (char *)data, lgadind);
-				inddest[lgadind] = '\0';
-				lgadind = lgaddcall - (lgad + 1) / 2 - 5;
-				if (lgadind > 10) { 
-					data_dump(factot, lgtot, 1);
-				}
+				strcpy(addstdest, dump_x25_addr(data + 5));
+				memcpy(inddest, data + 5 + ROSE_ADDR_LEN, lcall);
+				inddest[lcall] = '\0';
 			}
-				
-			data += lgadind;
-			lg -= lgadind;
 			break;
 		default:
-			lprintf (T_ROSEHDR, "Unknown Facility Type %2.2X at lg:%d\n", fct, lgtot-lg);
-			data_dump(factot, lgtot, 1);
-			lg = 0;
+			lprintf(T_ROSEHDR, "Unknown Facility Type %2.2X\n", fct);
 			break;
 		}
-
-/*		result += strlen (result);*/
+		data += l;
 	}
 
 	if (*indorig && *inddest)
@@ -491,7 +504,11 @@ static void facility(unsigned char *data, int lgtot)
 		lprintf (T_ROSEHDR, " -> ");
 		lprintf (T_ROSEHDR, "%s @%s", inddest, addstdest);
 		if (*digid)
-			lprintf (T_ROSEHDR, " via %s\n", digid);
+			lprintf (T_ROSEHDR, " via %s", digid);
 		lprintf (T_ROSEHDR, "\n");
 	}
+	return;
+
+bad:
+	lprintf(T_ERROR, "Bad facility %2.2X\n", fct);
 }
