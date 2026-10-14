@@ -1,6 +1,20 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (pas encore publiée)
+
+	* fpacnode : « make install » donne à fpacnode le droit
+	  cap_net_bind_service (setcap, node/Makefile.am, install-exec-hook ;
+	  debian/fpac.postinst pour le paquet). Depuis la 4.1.6-rc9, un appel
+	  NetRom fait pour un utilisateur se lie à l'indicatif de
+	  l'utilisateur, ce que nr_bind() n'accepte qu'avec
+	  CAP_NET_BIND_SERVICE : d'une session qui n'était pas root (compte
+	  fpacuser, sysop sans sudo) l'appel échouait sur « connect_to: bind:
+	  Operation not permitted ». Si setcap manque ou si « make install »
+	  n'est pas lancé en root, un avertissement donne la commande à
+	  taper. Copier un nouveau fpacnode par-dessus l'ancien efface ce
+	  droit.
+
 fpac (4.1.6-rc9)
 
 	* fpacnode : une connexion NetRom faite pour un utilisateur

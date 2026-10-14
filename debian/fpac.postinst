@@ -26,6 +26,14 @@ case "$1" in
 	fi
 	
 	ln -fs /var/ax25/rsports /etc/ax25/rsports
+
+	# NetRom calls go out under the callsign of the user: nr_bind()
+	# wants CAP_NET_BIND_SERVICE for that (see node/Makefile.am).
+	if command -v setcap >/dev/null 2>&1
+	then
+		setcap cap_net_bind_service=ep /usr/sbin/fpacnode || \
+			echo "fpac: cannot set cap_net_bind_service on /usr/sbin/fpacnode" >&2
+	fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

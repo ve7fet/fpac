@@ -640,7 +640,8 @@ install-dvi: install-dvi-am
 install-dvi-am:
 
 install-exec-am: install-sbinPROGRAMS
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -694,7 +695,7 @@ ps-am:
 
 uninstall-am: uninstall-sbinPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-generic clean-libtool clean-sbinPROGRAMS cscopelist-am \
@@ -702,16 +703,33 @@ uninstall-am: uninstall-sbinPROGRAMS
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-sbinPROGRAMS install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-sbinPROGRAMS
+	install-exec-am install-exec-hook install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-sbinPROGRAMS \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-sbinPROGRAMS
 
 .PRECIOUS: Makefile
 
+
+# fpacnode binds its NetRom socket under the callsign of the user, which the
+# kernel only allows with CAP_NET_BIND_SERVICE. Give fpacnode that capability
+# so that a session of an ordinary account (fpacuser, a sysop without sudo)
+# can call NetRom nodes. Copying the file over fpacnode drops it again.
+# Skipped for a staged install (DESTDIR): see debian/fpac.postinst.
+install-exec-hook:
+	@if test -n "$(DESTDIR)"; then :; \
+	elif command -v setcap >/dev/null 2>&1 && \
+	     setcap cap_net_bind_service=ep $(sbindir)/fpacnode 2>/dev/null; then \
+		echo "fpacnode: cap_net_bind_service set"; \
+	else \
+		echo "WARNING: cannot give cap_net_bind_service to $(sbindir)/fpacnode."; \
+		echo "         NetRom calls from a session that is not root will fail."; \
+		echo "         As root: setcap cap_net_bind_service=ep $(sbindir)/fpacnode"; \
+	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
