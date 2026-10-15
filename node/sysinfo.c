@@ -22,7 +22,8 @@
 #define LOADAVG_FILE "/proc/loadavg"
 #define MEMINFO_FILE "/proc/meminfo"
 
-static char buf[800];
+/* /proc/meminfo is about 1.5 kB nowadays (55 lines or so) */
+static char buf[4096];
 
 /* This macro opens FILE only if necessary and seeks to 0 so that successive
    calls to the functions are more efficient.  It also reads the current
@@ -92,8 +93,8 @@ int loadavg(double *av1, double *av5, double *av15) {
 char *meminfo(void)
 {
 	*buf = 0;
-	
+
 	FILE_TO_BUF(MEMINFO_FILE)
-	
-return buf;		/* NULL return ==> error */
+
+	return buf;		/* NULL return ==> error */
 }

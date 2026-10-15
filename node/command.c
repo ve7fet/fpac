@@ -3198,17 +3198,14 @@ int do_status(int argc, char **argv)
 	double av[3];
 /*	unsigned *mem;*/
 	char *mem;
-	unsigned int memtotal, memfree, buffers, cached, swaptotal, swapcached, swapfree;
+	unsigned long memtotal, memfree, memavail, buffers, cached, swaptotal, swapfree, v;
+	int have_avail;
+	char label[32];
 	struct utsname name;
 	time_t t;
 	int n;
 	int loopback = -1;
-#define MAX_ROW 30
-	char memo[MAX_ROW][17];			/* memory field label */ 
-  	unsigned int value[MAX_ROW];		/* amount of memory   */
-	char *p;	
-	char kb[3];
-	int i, k, l;
+	char *p;
 	struct proc_ax25 *axp, *axlist;
 	struct proc_rs_route *tp, *tlist;
 	struct proc_rs *rp, *rlist;
@@ -3218,7 +3215,8 @@ int do_status(int argc, char **argv)
 	char userports[256];
 	/* cfg_t cfg; -- supprimé : on utilise le cfg global déjà chargé au démarrage */
 
-	memtotal = memfree = buffers = cached = swaptotal = swapcached = swapfree = 0;
+	memtotal = memfree = memavail = buffers = cached = swaptotal = swapfree = 0;
+	have_avail = 0;
 
 	if ((argc > 1) && (*argv[1] == '?'))
 	{
@@ -3307,51 +3305,55 @@ int do_status(int argc, char **argv)
 	loadavg(&av[0], &av[1], &av[2]);
 	tprintf("Load average     : %.2f, %.2f, %.2f\n", av[0], av[1], av[2]);
 	
-	if (strlen((mem = meminfo())) == 0 )
+	mem = meminfo();
+	if (mem == NULL || *mem == '\0')
 		tprintf("Cannot get memory information !\n");
-	else 
+	else
 	{
-		p = mem;
-		for (i=0; i < MAX_ROW && *p; i++)	
+		/* One "Label:   value kB" per line; look the fields up by name,
+		 * their order and number change from one kernel to another. */
+		for (p = mem ; *p ; p++)
 		{
-			value[i] = 0;
-			l = sscanf(p, "%s%n", memo[i], &k);	
-			p += k;
-			memo[i][16] = '\0';			
-			while(*p && !isdigit(*p)) p++;	
+			if (sscanf(p, "%31[^:\n]: %lu", label, &v) == 2)
 			{
-				l = sscanf(p, "%u%n", &value[i], &k);
-				p += k;					
-			    if (*p == '\n' || l < 1)
-					break;
-			    l = sscanf(p, "%s%n", kb, &k);
-			    p += k;
+				if (!strcmp(label, "MemTotal"))
+					memtotal = v;
+				else if (!strcmp(label, "MemFree"))
+					memfree = v;
+				else if (!strcmp(label, "MemAvailable"))
+				{
+					memavail = v;
+					have_avail = 1;
+				}
+				else if (!strcmp(label, "Buffers"))
+					buffers = v;
+				else if (!strcmp(label, "Cached"))
+					cached = v;
+				else if (!strcmp(label, "SwapTotal"))
+					swaptotal = v;
+				else if (!strcmp(label, "SwapFree"))
+					swapfree = v;
 			}
-	    	}	
-		for (i = 0; i < MAX_ROW; i++)
-		{
-			if(!strcmp(memo[i], "MemTotal:"))
-				memtotal = value[i];
-			if(!strcmp(memo[i], "MemFree:"))
-				memfree = value[i];	
-			if(!strcmp(memo[i], "Buffers:"))
-				buffers = value[i];
-			if(!strcmp(memo[i], "Cached:"))
-				cached = value[i];
-			if(!strcmp(memo[i], "SwapTotal:"))
-				swaptotal = value[i];
-			if(!strcmp(memo[i], "SwapCached:"))
-				swapcached = value[i];
-			if(!strcmp(memo[i], "SwapFree:"))
-				swapfree = value[i];
+			if ((p = strchr(p, '\n')) == NULL)
+				break;
 		}
-			tprintf("Memory           : %7d Kb available ", memtotal);
-			tprintf("%7d Kb used   ", (memtotal-memfree));
-			tprintf("%7d Kb free\n", memfree);
-			tprintf("Swap             : %7d Kb available ", swaptotal);
-			tprintf("%7d Kb cached ", swapcached);
-			tprintf("%7d Kb free\n\n", swapfree); 
-		
+		/* MemAvailable (Linux 3.14 and later) is the kernel's own estimate
+		 * of what can be allocated without swapping, page cache included;
+		 * before it, approximate it as free(1) used to. */
+		if (!have_avail)
+			memavail = memfree + buffers + cached;
+		if (memavail > memtotal)
+			memavail = memtotal;
+		if (swapfree > swaptotal)
+			swapfree = swaptotal;
+
+/* /proc/meminfo counts in kB; show MB, rounded */
+#define MB(kb) (((kb) + 512) / 1024)
+		tprintf("Memory           : %6lu MB total  %6lu MB used  %6lu MB available\n",
+			MB(memtotal), MB(memtotal - memavail), MB(memavail));
+		tprintf("Swap             : %6lu MB total  %6lu MB used  %6lu MB free\n\n",
+			MB(swaptotal), MB(swaptotal - swapfree), MB(swapfree));
+#undef MB
 	}	// else meminfo
 	}	// got system name
 

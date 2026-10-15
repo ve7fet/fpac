@@ -31,6 +31,18 @@ fpac (4.1.6-rc11)
 	  decoders, servname() and readable_dump() buffers (utils.c,
 	  listen.c).
 
+	* fpacnode: Status shows memory and swap in MB instead of kB.
+	  /proc/meminfo is now read line by line and its fields looked up
+	  by name; the old parser ran past the end of its buffer on every
+	  node (an 800-byte buffer for a 1.2 to 1.6 kB file, sscanf()
+	  leaving the offset unchanged at the truncated end, labels
+	  compared in rows never filled), and meminfo() returning NULL on
+	  a read error was given to strlen(). "used" was MemTotal -
+	  MemFree, the page cache counted as used (7 GB "used" out of 8 on
+	  f6bvp-8, 1 GB really); it is now MemTotal - MemAvailable, as in
+	  free(1), with MemFree + Buffers + Cached before Linux 3.14. Swap
+	  shows total, used and free.
+
 fpac (4.1.6-rc10)
 
 	* flexd, aprslist: only one copy of each may run, like fpad,
