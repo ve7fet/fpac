@@ -15,8 +15,9 @@ mailbbs connects to a BBS as a station would, leaves one personal
 message there and disconnects. It is meant for scripts: a report,
 an alert or a "node restarted" notice sent to the sysop.
 
-It is not a daemon, and no FPAC program needs it. myfpac.sh runs it
-at each start of the node when CONNECT is set (see 6).
+It is not a daemon, and no FPAC program needs it. It is meant to be
+run by hand. Until 4.1.6-rc7 myfpac.sh ran it at each start of the
+node; that line is now commented out (see 6).
 
 2. Usage
 
@@ -95,15 +96,10 @@ In a script, with the result checked:
 
 6. Start notice of the node
 
-At each start, myfpac.sh sends "FPAC node ... started" to SYSOP
-when CONNECT is set. Write both in /usr/local/etc/ax25/myfpac.conf,
-which an update never overwrites (make install writes myfpac.sh
-again), for example
+myfpac.sh no longer sends "FPAC node ... started" to the sysop at
+each start: mailbbs is run by hand, for example
 
-    SYSOP="F6BVP"
-    CONNECT="rose0 F6BVP-1 2080175520"
-
-The answer of mailbbs goes to /var/log/fpac.log.
+    date | mailbbs -v -d F6BVP -t "Node restarted" rose0 F6BVP-1 2080175520
 
 7. Things to know
 
@@ -133,8 +129,9 @@ scripts : un compte rendu, une alerte ou un avis « nœud démarré »
 envoyé au sysop.
 
 Ce n'est pas un démon, et aucun programme de FPAC n'en a besoin.
-myfpac.sh le lance à chaque démarrage du nœud quand CONNECT est
-renseigné (voir 6).
+Il est fait pour être lancé à la main. Jusqu'à la 4.1.6-rc7,
+myfpac.sh le lançait à chaque démarrage du nœud ; cette ligne est
+maintenant commentée (voir 6).
 
 2. Mode d'emploi
 
@@ -214,15 +211,10 @@ Dans un script, en contrôlant le résultat :
 
 6. Avis de démarrage du nœud
 
-À chaque démarrage, myfpac.sh envoie « FPAC node ... started » à
-SYSOP quand CONNECT est renseigné. Les écrire tous deux dans
-/usr/local/etc/ax25/myfpac.conf, qu'une mise à jour n'écrase jamais
-(make install réécrit myfpac.sh), par exemple
+myfpac.sh n'envoie plus « FPAC node ... started » au sysop à chaque
+démarrage : mailbbs se lance à la main, par exemple
 
-    SYSOP="F6BVP"
-    CONNECT="rose0 F6BVP-1 2080175520"
-
-La réponse de mailbbs va dans /var/log/fpac.log.
+    date | mailbbs -v -d F6BVP -t "Noeud relance" rose0 F6BVP-1 2080175520
 
 7. À savoir
 

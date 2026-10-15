@@ -12,10 +12,10 @@ leaves one personal message (SP) and disconnects. The text is taken from a
 file or from the standard input. It can be used from a script to send
 statistics, an alert or a change of status of the node to its sysop.
 .P
-It is not a daemon and no FPAC program needs it.
+It is not a daemon and no FPAC program needs it. It is meant to be run by
+hand; since 4.1.6-rc8
 .B myfpac.sh
-runs it at each start of the node when CONNECT is set in myfpac.conf
-(see myfpac.sh(1)).
+no longer runs it at each start of the node.
 .P
 For a ROSE port the arguments are: port, callsign of the BBS, ROSE address,
 then optionally "via" and one digipeater.

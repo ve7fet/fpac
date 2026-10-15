@@ -26,17 +26,9 @@ SYSOP="SYSOP"
 # Node Callsign
 NODECALL="$HOSTNAME"
 
-# route/callsign of the notified BBS, as given to mailbbs:
-# port bbs-callsign [rose-address]
+# route/callsign of the notified BBS (edit for your node)
 #CONNECT="rose0 mybbs-1 2080175520"
 #CONNECT="MYBBS-1"
-CONNECT=""
-
-# Local settings of the node (SYSOP, CONNECT, ...). make install writes this
-# script again at each update; myfpac.conf is never overwritten.
-prefix="@prefix@"
-MYFPAC_CONF="@sysconfdir@/ax25/myfpac.conf"
-[ -r "$MYFPAC_CONF" ] && . "$MYFPAC_CONF"
 
 export PATH SYSOP CONNECT
 
@@ -156,12 +148,9 @@ fpacwpd)
 	echo -n " [flexd] "
 	$DIR/flexd >> $LOG 2>&1
 	sleep 2
-	# Message to the sysop's BBS at each start, only when CONNECT is set
-	# (in myfpac.conf): without it mailbbs only printed its usage line.
-	# mailbbs gives up by itself after 5 minutes; its answer goes to the log.
-	if [ -n "$CONNECT" ] ; then
-		(sleep 10 ; /bin/date | $DIR/mailbbs -d $SYSOP -t "FPAC node $NODECALL started" $CONNECT >> $LOG 2>&1) &
-	fi
+	# No message to the sysop's BBS at each start: mailbbs is a tool to
+	# run by hand (see mailbbs(1)), not from a script started at boot or
+	# by cron, where a BBS that does not answer held the start up.
 	sleep 2
 	echo " ok "
 	;;

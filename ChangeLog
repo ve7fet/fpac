@@ -70,11 +70,8 @@ fpac (4.1.6-rc11)
 	  other lines are skipped; readbbs() hands over a line left
 	  without CR after 3 seconds of silence. Tried from f6bvp-12 to
 	  F6BVP-1 in ROSE: message 23335 stored.
-	* myfpac.sh: the start notice to the sysop's BBS is sent again,
-	  only when CONNECT is set; without it mailbbs printed its usage
-	  every night into the log (53 times on f6bvp-12). SYSOP and
-	  CONNECT are read from @sysconfdir@/ax25/myfpac.conf, which make
-	  install never overwrites; mailbbs answers into /var/log/fpac.log.
+	  mailbbs stays a tool run by hand: myfpac.sh does not run it
+	  (decided for 4.1.6-rc8).
 
 fpac (4.1.6-rc10)
 

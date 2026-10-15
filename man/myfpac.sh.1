@@ -1,4 +1,4 @@
-.TH MYFPAC.SH 1 "15 October 2026" Linux "FPAC Operator's Manual"
+.TH MYFPAC.SH 1 "2 June 2026" Linux "FPAC Operator's Manual"
 .SH NAME
 myfpac.sh \- Bash shell script to control FPAC application daemons.
 .SH SYNOPSIS
@@ -22,21 +22,6 @@ Restart - Stop then Start FPAC.
 .TP 10
 .BI "\ Status -"
 Display the Status of FPAC elements.
-.SH FILES
-.TP
-.I /usr/local/etc/ax25/myfpac.conf
-Settings of the node, read at each run and never overwritten by an update
-(make install writes myfpac.sh again). Shell variables, for instance:
-.EX
-SYSOP="F6BVP"
-CONNECT="rose0 F6BVP-1 2080175520"
-.EE
-When CONNECT is set, each start leaves the message "FPAC node <host>
-started" to SYSOP on that BBS with mailbbs(1); CONNECT holds the port, the
-callsign of the BBS and, for ROSE, its address.
-.TP
-.I /var/log/fpac.log
-What myfpac.sh did, and the answer of mailbbs.
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
 .SH See Also
