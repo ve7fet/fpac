@@ -88,6 +88,134 @@ static int get_tcp_callsign(user_t *pl, char *str, int len);
 
 #define BUFLEN 5120
 
+/*
+ * When the interface of a listening socket goes down, the kernel leaves
+ * the socket closed with a pending error that nothing clears: select()
+ * reports it readable on every turn and accept() fails with EINVAL, so
+ * fpad used to spin and flood syslog. Such a socket is now closed and
+ * marked LISTENER_DROPPED, kept out of select(), and reopened every
+ * REOPEN_DELAY seconds until its interface is back.
+ */
+#define LISTENER_DEAD		-2	/* returned by the new_*_connection() */
+#define LISTENER_DROPPED	-2	/* fd of a closed listening socket */
+#define REOPEN_DELAY		60L
+
+static time_t reopen_at = 0L;	/* 0: no listening socket to reopen */
+
+static int accept_failed(const char *where)
+{
+	int err = errno;
+
+	if (err == EWOULDBLOCK || err == EAGAIN)
+		return(-1);	/* It's gone ??? */
+
+	syslog(LOG_ERR, "%saccept error %s\n", where, strerror(err));
+
+	if (err == EINVAL || err == EBADF || err == ENOTSOCK)
+		return(LISTENER_DEAD);
+	return(-1);
+}
+
+static void drop_listener(int *fd, const char *what, const char *port)
+{
+	close(*fd);
+	*fd = LISTENER_DROPPED;
+	syslog(LOG_ERR, "listening socket %s on %s closed, reopened every %lds\n",
+		what, port, REOPEN_DELAY);
+	if (reopen_at == 0L)
+		reopen_at = time(NULL) + REOPEN_DELAY;
+}
+
+/* Reopens a dropped listening socket; returns FALSE if it is still down */
+static int reopen_listener(int *fd, int domain, char *call, char *addr,
+	char *port, int digi, int pidincl)
+{
+	if (*fd != LISTENER_DROPPED)
+		return(TRUE);
+
+	*fd = new_socket(domain, call, addr, port, digi, pidincl);
+	if (*fd < 0)
+	{
+		*fd = LISTENER_DROPPED;
+		return(FALSE);
+	}
+	syslog(LOG_INFO, "listening socket %s on %s reopened\n",
+		call ? call : (addr ? addr : "TCP"), port ? port : "inet");
+	return(TRUE);
+}
+
+/* Full ROSE address of a coverage or AddPort listening socket */
+static char *rose_listen_addr(char *address, char *addr6)
+{
+	strcpy(address, cfg.fulladdr);
+	if (addr6)
+		memcpy(address+4, addr6, 6);
+	return(address);
+}
+
+/* The coverage address of fd_node[i], i >= 1 */
+static char *cover_addr(int i)
+{
+	cover_t *o;
+
+	for (o = cfg.cover ; o != NULL && i > 1 ; o = o->next)
+		i--;
+	return(o ? o->addr : NULL);
+}
+
+/* Tries again the dropped listening sockets, every REOPEN_DELAY seconds */
+static void reopen_listeners(int *fd_node, int nb_node, int *fd_tcp)
+{
+	int i;
+	int ok = TRUE;
+	char address[11];
+	port_t *p;
+	alias_t *a;
+	appli_t *ap;
+	addrp_t *d;
+
+	if ((reopen_at == 0L) || (time(NULL) < reopen_at))
+		return;
+
+	if (fd_tcp)
+		ok &= reopen_listener(fd_tcp, AF_INET, NULL, NULL, NULL, FALSE, FALSE);
+
+	for (p = cfg.port ; p != NULL ; p = p->next)
+	{
+		ok &= reopen_listener(&p->fd_call, AF_AX25, cfg.callsign, NULL, p->name, TRUE, TRUE);
+		ok &= reopen_listener(&p->fd_digi, AF_AX25, cfg.alt_callsign, NULL, p->name, TRUE, TRUE);
+		ok &= reopen_listener(&p->fd_appli, AF_AX25, cfg.alt_callsign, NULL, p->name, FALSE, FALSE);
+		for (a = p->alias ; a != NULL ; a = a->next)
+			ok &= reopen_listener(&a->fd, AF_AX25, a->alias, NULL, p->name, FALSE, TRUE);
+		for (ap = p->applis ; ap != NULL ; ap = ap->next)
+			ok &= reopen_listener(&ap->fd, AF_AX25, ap->call, NULL, p->name, FALSE, FALSE);
+	}
+
+	for (d = cfg.addrp ; d != NULL ; d = d->next)
+		ok &= reopen_listener(&d->fd, AF_ROSE, NULL,
+			rose_listen_addr(address, d->addr), "rose", TRUE, TRUE);
+
+	for (i = 0 ; i < nb_node ; i++)
+		ok &= reopen_listener(&fd_node[i], AF_ROSE, NULL,
+			rose_listen_addr(address, i ? cover_addr(i) : NULL), "rose", TRUE, TRUE);
+
+	reopen_at = ok ? 0L : time(NULL) + REOPEN_DELAY;
+}
+
+static void listen_on(int fd, fd_set *set, int *maxfd)
+{
+	if (fd < 0)
+		return;
+	FD_SET(fd, set);
+	if (fd > *maxfd)
+		*maxfd = fd;
+}
+
+static int is_ready(int fd, fd_set *set)
+{
+	return((fd >= 0) && FD_ISSET(fd, set));
+}
+
 void clear_nodes()
 {
 	ax25_address rose_call;
@@ -323,6 +451,7 @@ int main(int argc, char **argv)
 	int verbose = 1;
 	int maxfd;
 	int fd_node[MAXCOVER];
+	int nb_node;
 /*	int fd_appli; */
 #ifdef __TCP__
 	int fd_tcp = -1;
@@ -527,6 +656,7 @@ int main(int argc, char **argv)
 		}
 		fd_node[i] = new_socket(AF_ROSE, NULL, address, device, TRUE, TRUE);
 	}
+	nb_node = i;
 
 	/* Get the size of one outq buffer */
 	ioctl(fd_node[0], TIOCOUTQ, &size);
@@ -597,60 +727,30 @@ int main(int argc, char **argv)
 		FD_ZERO(&fdread);
 		FD_ZERO(&fdwrite);
 
+		/* Listening sockets: one that failed to open (-1) or was
+		 * dropped (LISTENER_DROPPED) is left out */
 #ifdef __TCP__
-		if (fd_tcp != -1)
-		{
-			FD_SET(fd_tcp, &fdread);
-			if (fd_tcp > maxfd)
-				maxfd = fd_tcp;
-		}
+		listen_on(fd_tcp, &fdread, &maxfd);
 #endif
 
 		for (p = cfg.port ; p != NULL ; p = p->next)
 		{
-			FD_SET(p->fd_call, &fdread);
-			if (p->fd_call > maxfd)
-				maxfd = p->fd_call;
-
-			FD_SET(p->fd_digi, &fdread);
-			if (p->fd_digi > maxfd)
-				maxfd = p->fd_digi;
-
-			FD_SET(p->fd_appli, &fdread);
-			if (p->fd_appli > maxfd)
-				maxfd = p->fd_appli;
+			listen_on(p->fd_call, &fdread, &maxfd);
+			listen_on(p->fd_digi, &fdread, &maxfd);
+			listen_on(p->fd_appli, &fdread, &maxfd);
 
 			for (a = p->alias ; a != NULL ; a = a->next)
-			{
-				FD_SET(a->fd, &fdread);
-				if (a->fd > maxfd)
-					maxfd = a->fd;
-			}
+				listen_on(a->fd, &fdread, &maxfd);
 
 			for (ap = p->applis ; ap != NULL ; ap = ap->next)
-			{
-				FD_SET(ap->fd, &fdread);
-				if (ap->fd > maxfd)
-					maxfd = ap->fd;
-			}
-
+				listen_on(ap->fd, &fdread, &maxfd);
 		}
 
 		for (d = cfg.addrp ; d != NULL ; d = d->next)
-		{
-			FD_SET(d->fd, &fdread);
-			if (d->fd > maxfd)
-				maxfd = d->fd;
-		}
+			listen_on(d->fd, &fdread, &maxfd);
 
-		for (i = 0 ; i < MAXCOVER ; i++)
-		{
-			if (fd_node[i] == -1)
-				break;
-			FD_SET(fd_node[i], &fdread);
-			if (fd_node[i] > maxfd)
-				maxfd = fd_node[i];
-		}
+		for (i = 0 ; i < nb_node ; i++)
+			listen_on(fd_node[i], &fdread, &maxfd);
 
 		/* if (fd_appli != -1)
 		{
@@ -740,6 +840,12 @@ int main(int argc, char **argv)
 			}
 		}
 			
+#ifdef __TCP__
+		reopen_listeners(fd_node, nb_node, &fd_tcp);
+#else
+		reopen_listeners(fd_node, nb_node, NULL);
+#endif
+
 		if (n == 0)		/* Timeout */
 		{
 			/* check_transits_wp(); */
@@ -747,62 +853,70 @@ int main(int argc, char **argv)
 		}
 #ifdef __TCP__
 		/* Check for new connections on tcpip port */
-		if (FD_ISSET(fd_tcp, &fdread))
+		if (is_ready(fd_tcp, &fdread))
 		{
 syslog(LOG_INFO,"new connection on AF_INET (%d)\n", fd_tcp);
-			new_tcp_connection(fd_tcp, TRUE);
+			if (new_tcp_connection(fd_tcp, TRUE) == LISTENER_DEAD)
+				drop_listener(&fd_tcp, "TCP", "inet");
 		}
 #endif
 
 		/* Check for new connections on all L2 ports */
 		for (p = cfg.port ; (p != NULL) ; p = p->next)
 		{
-			if (FD_ISSET(p->fd_call, &fdread)) 
+			if (is_ready(p->fd_call, &fdread))
 			{
-				new_l2_connection(p->fd_call, FALSE);
+				if (new_l2_connection(p->fd_call, FALSE) == LISTENER_DEAD)
+					drop_listener(&p->fd_call, cfg.callsign, p->name);
 			}
 
-			if (FD_ISSET(p->fd_digi, &fdread)) 
+			if (is_ready(p->fd_digi, &fdread))
 			{
-				new_l2_connection(p->fd_digi, TRUE);
+				if (new_l2_connection(p->fd_digi, TRUE) == LISTENER_DEAD)
+					drop_listener(&p->fd_digi, cfg.alt_callsign, p->name);
 			}
 
-			if (FD_ISSET(p->fd_appli, &fdread)) 
+			if (is_ready(p->fd_appli, &fdread))
 			{
-				new_appli_connection(p->fd_appli, FALSE, "fpacnode");
+				if (new_appli_connection(p->fd_appli, FALSE, "fpacnode") == LISTENER_DEAD)
+					drop_listener(&p->fd_appli, cfg.alt_callsign, p->name);
 			}
 
 			/* Aliases */
 			for (a = p->alias ; a != NULL ; a = a->next)
 			{
-				if (FD_ISSET(a->fd, &fdread)) 
-					new_alias_connection(a, TRUE);
+				if (is_ready(a->fd, &fdread))
+					if (new_alias_connection(a, TRUE) == LISTENER_DEAD)
+						drop_listener(&a->fd, a->alias, p->name);
 			}
 
 			/* Applications */
 			for (ap = p->applis ; ap != NULL ; ap = ap->next)
 			{
-				if (FD_ISSET(ap->fd, &fdread)) 
-					new_appli_connection(ap->fd, FALSE, ap->appli);
+				if (is_ready(ap->fd, &fdread))
+					if (new_appli_connection(ap->fd, FALSE, ap->appli) == LISTENER_DEAD)
+						drop_listener(&ap->fd, ap->call, p->name);
 			}
 		}
 
 		/* Check for new connections on all L3 ports Coverage*/
-		for (i = 0 ; i < MAXCOVER ; i++)
+		for (i = 0 ; i < nb_node ; i++)
 		{
-			if (fd_node[i] == -1)
-				break;
-			if (FD_ISSET(fd_node[i], &fdread)) 
+			if (is_ready(fd_node[i], &fdread))
 			{
-				new_l3_connection(fd_node[i], NULL, TRUE);
+				if (new_l3_connection(fd_node[i], NULL, TRUE) == LISTENER_DEAD)
+					drop_listener(&fd_node[i],
+						rose_listen_addr(address, i ? cover_addr(i) : NULL), "rose");
 			}
 		}
 
 		for (d = cfg.addrp ; (d != NULL) ; d = d->next)
 		{
-			if (FD_ISSET(d->fd, &fdread)) 
+			if (is_ready(d->fd, &fdread))
 			{
-				new_l3_connection(d->fd, d->port, TRUE);
+				if (new_l3_connection(d->fd, d->port, TRUE) == LISTENER_DEAD)
+					drop_listener(&d->fd,
+						rose_listen_addr(address, d->addr), "rose");
 			}
 		}
 
@@ -1140,6 +1254,7 @@ static int new_socket(int domain, char *call, char *addr, char *port, int digi, 
 			else
 			{
 				fprintf(stderr, "Unknown port %s\n", port);
+				close(fd);
 				return(-1);
 			}
 		}
@@ -1311,11 +1426,7 @@ static int new_l2_connection(int fd, int verbose)
 
 	if (new < 0) 
 	{
-		if (errno == EWOULDBLOCK)
-			return(-1);	/* It's gone ??? */
-
-		syslog(LOG_ERR, "accept error %m\n");
-		return(-1); 
+		return(accept_failed(""));
 	}
 
 	yes = 1;
@@ -1651,11 +1762,7 @@ static int new_l3_connection(int fd, char *port, int verbose)
 	new = accept(fd, (struct sockaddr *)&rsexp, &addrlen);
 	if (new < 0) 
 	{
-		if (errno == EWOULDBLOCK)
-			return(-1);	/* It's gone ??? */
-
-		syslog(LOG_ERR, "new_l3_connection() accept error %m\n");
-			return(-1); 
+		return(accept_failed("new_l3_connection() "));
 	}
 	yes = 0;
 	ioctl(fd, FIONBIO, &yes);
@@ -1949,11 +2056,7 @@ static int new_alias_connection(alias_t *a, int verbose)
 
 	if (new < 0) 
 	{
-		if (errno == EWOULDBLOCK)
-			return(-1);	/* It's gone ??? */
-
-		syslog(LOG_ERR, "accept error %m\n");
-		return(-1); 
+		return(accept_failed(""));
 	}
 
 	yes = 1;
@@ -2420,11 +2523,7 @@ static int new_appli_connection(int fd, int accepted, char *appli)
 
 		if (new < 0) 
 		{
-			if (errno == EWOULDBLOCK)
-				return(-1);	/* It's gone ??? */
-
-			syslog(LOG_ERR, "accept error %m\n");
-			return(-1); 
+			return(accept_failed(""));
 		}
 
 		addrlen = sizeof(rec);
@@ -2553,11 +2652,7 @@ static int new_tcp_connection(int fd, int verbose)
 
 	if (new < 0) 
 	{
-		if (errno == EWOULDBLOCK)
-			return(-1);	/* It's gone ??? */
-
-		syslog(LOG_ERR, "accept error %m\n");
-		return(-1); 
+		return(accept_failed(""));
 	}
 
 	ptr = "Callsign:";
