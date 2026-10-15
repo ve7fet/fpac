@@ -829,6 +829,8 @@ int main(int argc, char **argv)
 		if (n < 0)
 			continue;
 
+		temps = time(NULL);
+
 		/* Check the WP connection */
 		if (!wp_is_open() && (wp_timeout < temps))
 		{
