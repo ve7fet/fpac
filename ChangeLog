@@ -42,6 +42,13 @@ fpac (4.1.6-rc11)
 	  f6bvp-8, 1 GB really); it is now MemTotal - MemAvailable, as in
 	  free(1), with MemFree + Buffers + Cached before Linux 3.14. Swap
 	  shows total, used and free.
+	* fpacnode: Status checks what uptime() and loadavg() return.
+	  When /proc/uptime or /proc/loadavg could not be read, the
+	  uninitialized variables were printed ("26 days", "2261634.51"
+	  with a poisoned stack); it now says "unknown". uptime() returns
+	  1 on success instead of the uptime truncated to int. The load
+	  average is followed by the number of CPUs online, without which
+	  it cannot be read. Values checked against /proc on the 8 nodes.
 
 fpac (4.1.6-rc10)
 

@@ -3196,6 +3196,7 @@ int do_status(int argc, char **argv)
 	int upminutes, uphours, updays;
 	double uptime_secs, idle_secs;
 	double av[3];
+	long ncpu;
 /*	unsigned *mem;*/
 	char *mem;
 	unsigned long memtotal, memfree, memavail, buffers, cached, swaptotal, swapfree, v;
@@ -3290,20 +3291,35 @@ int do_status(int argc, char **argv)
 		}
 
 /* read and calculate the amount of uptime and format it nicely */
-	uptime(&uptime_secs, &idle_secs);
-	updays = (int) uptime_secs / (60 * 60 * 24);
-	upminutes = (int) uptime_secs / 60;
-	uphours = upminutes / 60;
-	uphours = uphours % 24;
-	upminutes = upminutes % 60;
-	tprintf("Uptime           : ");
-	if (updays)
-		tprintf("%d day%s, ", updays, (updays != 1) ? "s" : "");
-	if (uphours)
-		tprintf("%d hour%s ", uphours, (uphours != 1) ? "s" : "");
-	tprintf("%d minute%s\n", upminutes, (upminutes != 1) ? "s" : "");
-	loadavg(&av[0], &av[1], &av[2]);
-	tprintf("Load average     : %.2f, %.2f, %.2f\n", av[0], av[1], av[2]);
+	/* Both leave their arguments untouched when /proc cannot be read */
+	if (!uptime(&uptime_secs, &idle_secs))
+		tprintf("Uptime           : unknown\n");
+	else
+	{
+		updays = (int) uptime_secs / (60 * 60 * 24);
+		upminutes = (int) uptime_secs / 60;
+		uphours = upminutes / 60;
+		uphours = uphours % 24;
+		upminutes = upminutes % 60;
+		tprintf("Uptime           : ");
+		if (updays)
+			tprintf("%d day%s, ", updays, (updays != 1) ? "s" : "");
+		if (uphours)
+			tprintf("%d hour%s, ", uphours, (uphours != 1) ? "s" : "");
+		tprintf("%d minute%s\n", upminutes, (upminutes != 1) ? "s" : "");
+	}
+	/* The load counts the processes running or waiting for a CPU: it is
+	 * only meaningful against the number of CPUs */
+	if (!loadavg(&av[0], &av[1], &av[2]))
+		tprintf("Load average     : unknown\n");
+	else
+	{
+		ncpu = sysconf(_SC_NPROCESSORS_ONLN);
+		tprintf("Load average     : %.2f, %.2f, %.2f", av[0], av[1], av[2]);
+		if (ncpu > 0)
+			tprintf(" (%ld CPU%s)", ncpu, (ncpu != 1) ? "s" : "");
+		tprintf("\n");
+	}
 	
 	mem = meminfo();
 	if (mem == NULL || *mem == '\0')

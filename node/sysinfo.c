@@ -58,7 +58,7 @@ int uptime(double *uptime_secs, double *idle_secs) {
     }
     SET_IF_DESIRED(uptime_secs, up);
     SET_IF_DESIRED(idle_secs, idle);
-    return up;	/* assume never be zero seconds in practice */
+    return 1;
 }
 
 int loadavg(double *av1, double *av5, double *av15) {

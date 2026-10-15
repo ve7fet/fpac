@@ -16,7 +16,9 @@ FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in prepar
     and shows the origin and destination of a ROSE call request.
 
   * "Status" gives memory and swap sizes in MB, and the memory "used"
-    no longer counts the disk cache: it is what free(1) shows.
+    no longer counts the disk cache: it is what free(1) shows. The
+    load average is followed by the number of CPUs, and "unknown" is
+    shown instead of random figures if the system cannot be read.
 
 FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
 ==================================================================
