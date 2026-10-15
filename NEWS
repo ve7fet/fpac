@@ -25,6 +25,12 @@ FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in prepar
     cleared connection": the call never left the node, the far end
     did not refuse it.
 
+  * mailbbs leaves its message on a BBS that takes it for a user, as
+    FBB does with a node it does not forward with: it gave up before.
+    myfpac.sh sends the "FPAC node ... started" notice again when
+    CONNECT is set, in the new file /usr/local/etc/ax25/myfpac.conf
+    that updates never overwrite (see myfpac.sh(1)).
+
 FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
 ==================================================================
 

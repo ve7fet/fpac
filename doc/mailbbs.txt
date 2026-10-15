@@ -15,9 +15,8 @@ mailbbs connects to a BBS as a station would, leaves one personal
 message there and disconnects. It is meant for scripts: a report,
 an alert or a "node restarted" notice sent to the sysop.
 
-It is not a daemon, and no FPAC program needs it. Until 4.1.6-rc7
-myfpac.sh ran it at each start of the node; that line is now
-commented out (see 6).
+It is not a daemon, and no FPAC program needs it. myfpac.sh runs it
+at each start of the node when CONNECT is set (see 6).
 
 2. Usage
 
@@ -50,8 +49,13 @@ For a ROSE port, the ROSE address follows the callsign:
 It connects, waits for the banner of the BBS (a line between square
 brackets) and for its prompt (a line ending with ">"), sends its
 own banner [MAIL-version-$], then "SP recipient". When the BBS
-answers OK it sends the title, the text and Ctrl-Z, waits for the
-last prompt and disconnects.
+answers OK (it forwards with this callsign), or asks for the title
+as it does to a user (FBB: "Enter the title ... :"), it sends the
+title, the text and Ctrl-Z, waits for the last prompt and
+disconnects. Information lines in between ("Routing (from WP) to
+...") are skipped; a line beginning with NO or *** is a refusal.
+A prompt that comes without a carriage return is taken after 3
+seconds of silence.
 
 4. Exit code and time limits
 
@@ -91,19 +95,22 @@ In a script, with the result checked:
 
 6. Start notice of the node
 
-In myfpac.sh the line that sent "FPAC node ... started" to the
-sysop is commented out. To use it, set CONNECT near the top of the
-script to the port and callsign of your BBS, for example
+At each start, myfpac.sh sends "FPAC node ... started" to SYSOP
+when CONNECT is set. Write both in /usr/local/etc/ax25/myfpac.conf,
+which an update never overwrites (make install writes myfpac.sh
+again), for example
 
+    SYSOP="F6BVP"
     CONNECT="rose0 F6BVP-1 2080175520"
 
-and remove the "#" in front of the mailbbs line.
+The answer of mailbbs goes to /var/log/fpac.log.
 
 7. Things to know
 
 - mailbbs presents itself with a banner, as a forwarding program
   does, under the callsign of the port (or the one given by -i).
-  The BBS must accept such a connection from that callsign. Check
+  A BBS that does not forward with that callsign refuses the banner
+  ("is not a valid command") and goes on as with a user. Check
   with one message by hand, with -v, before using it in a script.
 - A line of the text holding only "/EX" or a Ctrl-Z ends the
   message early.
@@ -126,8 +133,8 @@ scripts : un compte rendu, une alerte ou un avis « nœud démarré »
 envoyé au sysop.
 
 Ce n'est pas un démon, et aucun programme de FPAC n'en a besoin.
-Jusqu'à la 4.1.6-rc7, myfpac.sh le lançait à chaque démarrage du
-nœud ; cette ligne est maintenant commentée (voir 6).
+myfpac.sh le lance à chaque démarrage du nœud quand CONNECT est
+renseigné (voir 6).
 
 2. Mode d'emploi
 
@@ -161,8 +168,13 @@ Pour un port ROSE, l'adresse ROSE suit l'indicatif :
 Il se connecte, attend la bannière du BBS (une ligne entre
 crochets) et son prompt (une ligne finissant par « > »), envoie sa
 propre bannière [MAIL-version-$], puis « SP destinataire ». Quand
-le BBS répond OK, il envoie le titre, le texte et Ctrl-Z, attend le
-dernier prompt et se déconnecte.
+le BBS répond OK (il fait du forward avec cet indicatif), ou demande
+le titre comme à un utilisateur (FBB : « Enter the title ... : »),
+il envoie le titre, le texte et Ctrl-Z, attend le dernier prompt et
+se déconnecte. Les lignes d'information intermédiaires (« Routing
+(from WP) to ... ») sont ignorées ; une ligne commençant par NO ou
+*** est un refus. Un prompt arrivé sans retour chariot est pris
+après 3 secondes de silence.
 
 4. Code de sortie et délais
 
@@ -202,19 +214,23 @@ Dans un script, en contrôlant le résultat :
 
 6. Avis de démarrage du nœud
 
-Dans myfpac.sh, la ligne qui envoyait « FPAC node ... started » au
-sysop est commentée. Pour s'en servir, donner à CONNECT, en tête du
-script, le port et l'indicatif de votre BBS, par exemple
+À chaque démarrage, myfpac.sh envoie « FPAC node ... started » à
+SYSOP quand CONNECT est renseigné. Les écrire tous deux dans
+/usr/local/etc/ax25/myfpac.conf, qu'une mise à jour n'écrase jamais
+(make install réécrit myfpac.sh), par exemple
 
+    SYSOP="F6BVP"
     CONNECT="rose0 F6BVP-1 2080175520"
 
-et retirer le « # » devant la ligne mailbbs.
+La réponse de mailbbs va dans /var/log/fpac.log.
 
 7. À savoir
 
 - mailbbs se présente avec une bannière, comme un programme de
-  forward, sous l'indicatif du port (ou celui donné par -i). Le
-  BBS doit accepter une telle connexion de cet indicatif. Vérifier
+  forward, sous l'indicatif du port (ou celui donné par -i). Un BBS
+  qui ne fait pas de forward avec cet indicatif refuse la bannière
+  (« is not a valid command ») et continue comme avec un
+  utilisateur. Vérifier
   avec un message à la main, avec -v, avant de l'utiliser dans un
   script.
 - Une ligne du texte ne contenant que « /EX » ou un Ctrl-Z termine

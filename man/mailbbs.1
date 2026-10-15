@@ -1,4 +1,4 @@
-.TH MAILBBS 1 "12 October 2026" Linux "FPAC Operator's Manual"
+.TH MAILBBS 1 "15 October 2026" Linux "FPAC Operator's Manual"
 .SH NAME 
 mailbbs \- leaves a personal message on a BBS
 .SH SYNOPSIS
@@ -12,9 +12,10 @@ leaves one personal message (SP) and disconnects. The text is taken from a
 file or from the standard input. It can be used from a script to send
 statistics, an alert or a change of status of the node to its sysop.
 .P
-It is not a daemon and no FPAC program needs it. Since 4.1.6-rc8
+It is not a daemon and no FPAC program needs it.
 .B myfpac.sh
-no longer runs it at each start of the node.
+runs it at each start of the node when CONNECT is set in myfpac.conf
+(see myfpac.sh(1)).
 .P
 For a ROSE port the arguments are: port, callsign of the BBS, ROSE address,
 then optionally "via" and one digipeater.
@@ -63,8 +64,10 @@ mailbbs \-d F6BVP@F6BVP \-t "Statistics" \-f /usr/local/var/ax25/fpac/fpacstat.d
 .EE
 .SH NOTES
 mailbbs presents itself to the BBS with a banner, [MAIL-version-$], as a
-forwarding program does. The BBS must accept such a connection from the
-callsign used.
+forwarding program does. A BBS that forwards with the callsign used answers
+OK to SP. Any other BBS, FBB for instance, refuses the banner as a command and
+answers as to a user: mailbbs then gives the title at the prompt and the text
+after it. A line beginning with NO or *** after SP is a refusal.
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>
 .SH SEE ALSO

@@ -40,6 +40,7 @@
 #define CONNECT_TIMEOUT	120	/* seconds to get the connection */
 #define LINE_TIMEOUT	60	/* seconds without a line from the BBS */
 #define TOTAL_TIMEOUT	300	/* seconds for the whole dialogue */
+#define PROMPT_DELAY	3	/* seconds before a line without CR is taken */
 #endif
 
 #define RC_USAGE	1	/* bad arguments or configuration */
@@ -136,8 +137,11 @@ static int readbbs (int fd, char *buffer, int maxlen, int timeout, int verbose)
 			return nb;
 		}
 
+		/* A prompt may come without a CR ("Title :"): when part of a
+		 * line has been waiting for PROMPT_DELAY seconds with nothing
+		 * after it, hand it over as it is. */
 		to.tv_usec = 0;
-		to.tv_sec = timeout;
+		to.tv_sec = (len > 0 && timeout > PROMPT_DELAY) ? PROMPT_DELAY : timeout;
 
 		FD_ZERO (&sock_read);
 		FD_SET (fd, &sock_read);
@@ -151,7 +155,17 @@ static int readbbs (int fd, char *buffer, int maxlen, int timeout, int verbose)
 			return READ_CLOSED;
 		}
 		if (nb == 0)
-			return READ_TIMEOUT;
+		{
+			if (len == 0)
+				return READ_TIMEOUT;
+			nb = len;
+			memcpy (buffer, localbuf, nb);
+			buffer[nb] = '\0';
+			len = 0;
+			if (verbose)
+				printf ("%s\n", buffer);
+			return nb;
+		}
 
 		nb = read (fd, localbuf + len, sizeof (localbuf) - len);
 		if (nb <= 0)
@@ -237,6 +251,14 @@ static void usage (FILE *f)
 		"-V : show the version and exit      -h : this help\n"
 		"port is an AX.25, NET/ROM or ROSE port; for ROSE: port bbs-callsign rose-address [[via] digi]\n"
 		"exit code: 0 message left, 1 bad arguments, 2 no connection, 3 no or bad answer from the BBS\n");
+}
+
+/* Last visible character of a line, or 0 */
+static int last_char (const char *buf, int len)
+{
+	while (len > 0 && isspace ((unsigned char) buf[len - 1]))
+		len--;
+	return (len > 0) ? (unsigned char) buf[len - 1] : 0;
 }
 
 static void on_alarm (int sig)
@@ -602,7 +624,7 @@ int main (int argc, char **argv)
 			}
 			break;
 		case WAIT1STPROMPT:
-			if (len >= 2 && buf[len - 2] == '>')
+			if (last_char (buf, len) == '>')
 			{
 				/* 1st prompt received */
 				/* Send SID */
@@ -613,7 +635,7 @@ int main (int argc, char **argv)
 			}
 			break;
 		case WAIT2NDPROMPT:
-			if (len >= 2 && buf[len - 2] == '>')
+			if (last_char (buf, len) == '>')
 			{
 				/* 2nd prompt received */
 				/* Send proposal */
@@ -624,7 +646,26 @@ int main (int argc, char **argv)
 			}
 			break;
 		case WAITOK:
-			if (buf[0] == 'O' || buf[0] == 'o')
+			/*
+			 * F6BVP 2026-10-15: a BBS answers OK to SP only when it
+			 * takes us for a forwarding partner. Otherwise, as FBB
+			 * does for a node it does not forward with, it answers as
+			 * to a user: information lines ("Routing (from WP) to
+			 * ..."), then asks for the title. Any line that was not
+			 * OK used to be taken as a refusal. Now: OK or a prompt
+			 * (line ending with ':', '>' or '?') -> title and text;
+			 * NO or an error ("***") -> refused; anything else is
+			 * only information.
+			 */
+			if (buf[0] == 'N' || buf[0] == 'n' || strncmp (buf, "***", 3) == 0)
+			{
+				/* Refused */
+				buf[strcspn (buf, "\r\n")] = '\0';
+				fprintf (stderr, "mailbbs: the BBS refused the message for %s: %s\n", mailto, buf);
+				close (fd);
+				return RC_DIALOGUE;
+			}
+			if (buf[0] == 'O' || buf[0] == 'o' || (last_char (buf, len) && strchr (":>?", last_char (buf, len))))
 			{
 				/* Send title */
 				snprintf(buf, sizeof(buf), "%s\n", title);
@@ -641,18 +682,10 @@ int main (int argc, char **argv)
 					goto lost;
 
 				phase = WAITLASTPROMPT;
-				break;
 			}
-			else
-			{
-				/* Refused */
-				buf[strcspn (buf, "\r\n")] = '\0';
-				fprintf (stderr, "mailbbs: the BBS refused the message for %s: %s\n", mailto, buf);
-				close (fd);
-				return RC_DIALOGUE;
-			}
+			break;
 		case WAITLASTPROMPT:
-			if (len >= 2 && buf[len - 2] == '>')
+			if (last_char (buf, len) == '>')
 			{
 				/* Last prompt received. Clean disconnection */
 				if (verbose)

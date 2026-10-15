@@ -59,6 +59,22 @@ fpac (4.1.6-rc11)
 	  lib/procutils.c): "No Route Opened for address specified" when
 	  no route of rose_nodes matches the address, "Out of Order, link
 	  unavailable" when one does but its neighbours are all failed.
+	* mailbbs: works with a BBS that takes it for a user. FBB answers
+	  OK to SP only to a forwarding partner; to any other caller it
+	  refuses the [MAIL-...] banner as a command, then answers SP with
+	  "Routing (from WP) to ..." and asks "Enter the title ... :"
+	  without a carriage return. mailbbs took the "Routing" line for a
+	  refusal and gave up (exit code 3) without leaving the message.
+	  After SP, OK or a prompt (a line ending with ':', '>' or '?')
+	  now leads to the title and the text, NO or "***" is a refusal,
+	  other lines are skipped; readbbs() hands over a line left
+	  without CR after 3 seconds of silence. Tried from f6bvp-12 to
+	  F6BVP-1 in ROSE: message 23335 stored.
+	* myfpac.sh: the start notice to the sysop's BBS is sent again,
+	  only when CONNECT is set; without it mailbbs printed its usage
+	  every night into the log (53 times on f6bvp-12). SYSOP and
+	  CONNECT are read from @sysconfdir@/ax25/myfpac.conf, which make
+	  install never overwrites; mailbbs answers into /var/log/fpac.log.
 
 fpac (4.1.6-rc10)
 
