@@ -1,3 +1,23 @@
+FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate, en préparation)
+============================================================================================
+
+  * Quand une interface AX.25 ou ROSE tombait sous fpad (ax25ipd ou
+    kissattach arrêté ou tué), fpad tournait à plein régime et
+    écrivait « accept error Invalid argument » des millions de fois
+    par minute dans le journal du système, jusqu'à sa relance. Il
+    ferme maintenant le port mort, le signale une fois dans le
+    journal, et le rouvre seul dans la minute qui suit le retour de
+    l'interface.
+
+  * Après un premier essai raté pour joindre le serveur des Pages
+    Blanches (fpacwpd arrêté ou en cours de relance), fpad ne
+    réessayait plus jamais avant sa propre relance. Il réessaie
+    maintenant chaque minute.
+
+  * monitor ne plante plus et n'affiche plus de caractères
+    incohérents sur une trame abîmée, et montre l'origine et la
+    destination d'une demande d'appel ROSE.
+
 FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
 ====================================================================
 

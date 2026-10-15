@@ -1,6 +1,40 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (4.1.6-rc11)
+
+	* fpad : plus de boucle à vide quand l'interface d'une socket
+	  d'écoute tombe (ax25ipd ou kissattach tué, port détaché). Le
+	  noyau laisse une telle socket fermée avec une erreur en attente
+	  qu'accept() n'efface pas : select() la disait lisible à chaque
+	  tour, accept() échouait avec EINVAL et fpad écrivait « accept
+	  error Invalid argument » des millions de fois par minute jusqu'à
+	  son arrêt (f6bvp-12, 15/10/2026). Les cinq chemins d'erreur
+	  d'accept() passent par accept_failed() ; une socket d'écoute morte
+	  est fermée (drop_listener(), « listening socket CALL on PORT
+	  closed, reopened every 60s »), retirée du select() et rouverte
+	  avec les mêmes paramètres toutes les 60 secondes
+	  (reopen_listeners()) : le port revient seul avec son interface.
+	  De même pour les sockets d'écoute ROSE et TCP.
+	* fpad : une socket d'écoute qui n'a pas pu s'ouvrir au démarrage
+	  n'est plus donnée à select() (FD_SET(-1) est indéfini) ; les
+	  sockets de couverture sont parcourues jusqu'au nombre ouvert au
+	  lieu de s'arrêter à la première absente ; new_socket() ferme sa
+	  socket quand le port est inconnu.
+	* fpad : le service WP est de nouveau tenté chaque minute après un
+	  échec, comme prévu. temps n'était lu qu'une fois, au démarrage :
+	  après un essai raté (fpacwpd arrêté ou en cours de relance), fpad
+	  ne se reconnectait plus jamais au service WP avant sa propre
+	  relance.
+
+	* monitor : plus de lecture au-delà de la fin d'une trame, trouvé
+	  en donnant des trames aléatoires et abîmées aux décodeurs compilés
+	  avec AddressSanitizer : boucle des digipeaters bornée
+	  (ax25dump.c), facilités ROSE décodées comme le noyau les écrit,
+	  avec origine et destination affichées (rosedump.c), longueurs
+	  vérifiées dans les autres décodeurs, tampons de servname() et de
+	  readable_dump() (utils.c, listen.c).
+
 fpac (4.1.6-rc10)
 
 	* flexd, aprslist : un seul exemplaire de chacun peut tourner, comme

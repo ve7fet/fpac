@@ -1,3 +1,36 @@
+fpac (4.1.6-rc11)
+
+	* fpad: no more spinning when the interface of a listening socket
+	  goes down (ax25ipd or kissattach killed, port detached). The
+	  kernel leaves such a socket closed with a pending error that
+	  accept() does not clear: select() reported it readable on every
+	  turn, accept() failed with EINVAL and fpad logged "accept error
+	  Invalid argument" millions of times a minute until it was
+	  stopped (f6bvp-12, 15 Oct 2026). The five accept() error paths
+	  go through accept_failed(); a dead listening socket is closed
+	  (drop_listener(), "listening socket CALL on PORT closed,
+	  reopened every 60s"), left out of select() and reopened with the
+	  same parameters every 60 seconds (reopen_listeners()), so the
+	  port comes back by itself with its interface. Same for the ROSE
+	  and TCP listening sockets.
+	* fpad: a listening socket that failed to open at start is no
+	  longer given to select() (FD_SET(-1) is undefined); the coverage
+	  sockets are walked up to the number opened instead of stopping
+	  at the first one missing; new_socket() closes its socket when the
+	  port is unknown.
+	* fpad: the WP service is tried again every minute after a
+	  failure, as intended. temps was read once, at start, so after one
+	  failed attempt (fpacwpd stopped or restarting) fpad never
+	  reconnected to the WP service until it was restarted.
+
+	* monitor: no more reading past the end of a frame, found by
+	  feeding random and damaged frames to the decoders built with
+	  AddressSanitizer: digipeater loop bounded (ax25dump.c), ROSE
+	  facilities decoded as the kernel writes them, with origin and
+	  destination shown (rosedump.c), lengths checked in the other
+	  decoders, servname() and readable_dump() buffers (utils.c,
+	  listen.c).
+
 fpac (4.1.6-rc10)
 
 	* flexd, aprslist: only one copy of each may run, like fpad,

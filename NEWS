@@ -1,3 +1,20 @@
+FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in preparation)
+====================================================================================
+
+  * When an AX.25 or ROSE interface went down under fpad (ax25ipd or
+    kissattach stopped or killed), fpad spun at full speed and wrote
+    "accept error Invalid argument" millions of times a minute into
+    the system log, until it was restarted. It now closes the dead
+    port, says so once in the log, and opens it again by itself
+    within a minute of the interface coming back.
+
+  * After one failed attempt to reach the White Pages server
+    (fpacwpd stopped or restarting), fpad never tried again until it
+    was restarted. It now tries again every minute.
+
+  * monitor no longer crashes or prints garbage on a damaged frame,
+    and shows the origin and destination of a ROSE call request.
+
 FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
 ==================================================================
 
