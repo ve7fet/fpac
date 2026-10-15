@@ -366,3 +366,33 @@ struct flex_gt *find_gateway(int addr, struct flex_gt *list)
 		free_flex_gt(flgt);
 	return p;
 }
+
+/*
+ * F6BVP 2026-10-15: cause of a ROSE connect() refused with ENETUNREACH.
+ * rose_connect() (net/rose/af_rose.c) gets ROSE_NOT_OBTAINABLE or
+ * ROSE_OUT_OF_ORDER from rose_get_neigh() but never stores it in the
+ * socket, so SIOCRSGCAUSE returns 0, ROSE_DTE_ORIGINATED, which read
+ * "Remote Station cleared connection" although the call never left the
+ * node. Tell the two cases apart as the kernel does: a route matching
+ * the address in rose_nodes means its neighbours are all out of order,
+ * no route means no route.
+ */
+void fpac_rose_unreachable_cause(rose_address *addr, struct rose_cause_struct *rc)
+{
+	struct proc_rs_nodes *list, *p;
+	char *dest = rose_ntoa(addr);
+	int found = 0;
+
+	if ((list = read_proc_rs_nodes()) != NULL)
+	{
+		for (p = list ; p != NULL && !found ; p = p->next)
+		{
+			if (p->mask <= 10 && strlen(p->address) == 10 &&
+			    strncmp(p->address, dest, p->mask) == 0)
+				found = 1;
+		}
+		free_proc_rs_nodes(list);
+	}
+	rc->cause = found ? ROSE_OUT_OF_ORDER : ROSE_NOT_OBTAINABLE;
+	rc->diagnostic = 0;
+}

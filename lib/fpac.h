@@ -145,6 +145,7 @@ extern char *des2dnic(char *des);
 extern char *dnic2des(char *dnic);
 extern char *rs_get_addr(char *);
 extern char *fpac2asc(rose_address *);
+extern void fpac_rose_unreachable_cause(rose_address *, struct rose_cause_struct *);
 
 extern int cfg_open(cfg_t *);
 extern int open_cfg(cfg_t *cfg, FILE *fptr, int);

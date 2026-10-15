@@ -981,6 +981,8 @@ FSA*/
 			{
 			case ENETUNREACH:
 				ioctl(fd, SIOCRSGCAUSE, &rose_cause);
+				if (rose_cause.cause == ROSE_DTE_ORIGINATED)
+					fpac_rose_unreachable_cause(&sockaddr.rose.srose_addr, &rose_cause);
 				break;
 			case EISCONN:
 				rose_cause.cause = ROSE_NUMBER_BUSY;

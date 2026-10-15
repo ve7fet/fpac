@@ -20,6 +20,11 @@ FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in prepar
     load average is followed by the number of CPUs, and "unknown" is
     shown instead of random figures if the system cannot be read.
 
+  * A call to a ROSE address the node has no route for now says "No
+    Route Opened for address specified" instead of "Remote Station
+    cleared connection": the call never left the node, the far end
+    did not refuse it.
+
 FPAC 4.1.6-rc10 — the NetRom sessions in Users (release candidate)
 ==================================================================
 

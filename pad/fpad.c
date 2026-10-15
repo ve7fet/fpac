@@ -1637,6 +1637,8 @@ static int new_l2_connection(int fd, int verbose)
 				{
 				case ENETUNREACH:
 					ioctl(rsfd, SIOCRSGCAUSE, &rose_cause); 
+					if (rose_cause.cause == ROSE_DTE_ORIGINATED)
+						fpac_rose_unreachable_cause(&roseconnect.srose_addr, &rose_cause);
 					break;
 				case EISCONN:
 					rose_cause.cause      = ROSE_NUMBER_BUSY;
@@ -2231,6 +2233,8 @@ static int new_alias_connection(alias_t *a, int verbose)
 				{
 				case ENETUNREACH:
 					ioctl(rsfd, SIOCRSGCAUSE, &rose_cause); 
+					if (rose_cause.cause == ROSE_DTE_ORIGINATED)
+						fpac_rose_unreachable_cause(&roseconnect.srose_addr, &rose_cause);
 					break;
 				case EISCONN:
 				case EINVAL:
@@ -2949,6 +2953,8 @@ static int get_tcp_callsign(user_t *pl2, char *buffer, int len)
 				{
 				case ENETUNREACH:
 					ioctl(rsfd, SIOCRSGCAUSE, &rose_cause); 
+					if (rose_cause.cause == ROSE_DTE_ORIGINATED)
+						fpac_rose_unreachable_cause(&roseconnect.srose_addr, &rose_cause);
 					break;
 				case EISCONN:
 					rose_cause.cause      = ROSE_NUMBER_BUSY;

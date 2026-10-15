@@ -49,6 +49,16 @@ fpac (4.1.6-rc11)
 	  1 on success instead of the uptime truncated to int. The load
 	  average is followed by the number of CPUs online, without which
 	  it cannot be read. Values checked against /proc on the 8 nodes.
+	* fpacnode, fpad: a ROSE call to an address the node has no route
+	  for said "Remote Station cleared connection", as if the far end
+	  had refused it, although the call never left the node (c
+	  F5ZHO-8 from f6bvp-8, 15 Oct 2026). rose_connect() fails with
+	  ENETUNREACH and gets the cause from rose_get_neigh(), but never
+	  stores it in the socket: SIOCRSGCAUSE returns 0. The cause is
+	  now worked out as the kernel does (fpac_rose_unreachable_cause(),
+	  lib/procutils.c): "No Route Opened for address specified" when
+	  no route of rose_nodes matches the address, "Out of Order, link
+	  unavailable" when one does but its neighbours are all failed.
 
 fpac (4.1.6-rc10)
 
