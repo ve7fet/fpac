@@ -18,6 +18,12 @@ FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate, 
     incohérents sur une trame abîmée, et montre l'origine et la
     destination d'une demande d'appel ROSE.
 
+  * « Lis » et « MONitor » de fpacnode ne s'emballent plus sur une
+    session packet : monitor écarte les trames de la session sur
+    laquelle il affiche, qu'il montrait jusqu'ici et multipliait
+    ainsi. Il envoie aussi environ neuf fois moins de trames pour ce
+    qu'il affiche.
+
 FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
 ====================================================================
 

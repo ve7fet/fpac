@@ -34,6 +34,30 @@ fpac (4.1.6-rc11)
 	  avec origine et destination affichées (rosedump.c), longueurs
 	  vérifiées dans les autres décodeurs, tampons de servname() et de
 	  readable_dump() (utils.c, listen.c).
+	* monitor : lancé depuis fpacnode (Lis, MONitor) sur une session
+	  packet, monitor n'affiche plus les trames de cette session.
+	  fpacnode lui passe sa socket comme sortie standard : chaque ligne
+	  affichée partait dans des trames que monitor captait et affichait
+	  à leur tour, et l'affichage s'emballait (f6bvp-8, 14 oct. 2026).
+	  La session est identifiée au démarrage à partir du descripteur 1
+	  (session.c) : indicatifs local et distant pour l'AX.25, nœuds et
+	  circuit lus dans /proc/net/nr pour NET/ROM, voisin et voie logique
+	  lus dans /proc/net/rose et /proc/net/rose_neigh pour ROSE ; ses
+	  trames sont écartées et une ligne le signale. Pour NET/ROM et
+	  ROSE, les trames RR, RNR et REJ du lien AX.25 qui porte la session
+	  sont écartées aussi, dès qu'une trame de la session a montré de
+	  quel lien il s'agit : elles acquittent ses trames, ne portent
+	  aucune donnée, et entretenaient à elles seules l'emballement
+	  (f6bvp-12, 16 oct. 2026). Sur un terminal, en telnet, ou si la
+	  session n'est pas identifiée, toutes les trames restent affichées
+	  comme avant.
+	* monitor : la sortie est vidée une fois par trame affichée, et non
+	  après chaque morceau de ligne. Sur une session packet, chaque
+	  morceau partait dans sa propre trame, environ neuf trames par
+	  ligne affichée. Essai depuis une session NET/ROM de f6bvp-10 vers
+	  f6bvp-12, « MON axudp » pendant 15 s : 502 trames envoyées pour
+	  38 lignes avant (affichage emballé), 22 trames pour 44 lignes
+	  maintenant.
 
 fpac (4.1.6-rc10)
 

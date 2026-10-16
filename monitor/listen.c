@@ -141,6 +141,11 @@ int main(int argc, char **argv)
 
 	setservent(1);
 
+	/* Run from fpacnode on a packet session: leave its own frames out */
+	if (session_init())
+		lprintf(T_ERROR, "monitor: the frames of this session are not shown\n");
+	fflush(stdout);
+
 	for (;;) {
 		FD_ZERO(&read_fdset);
 		FD_SET(STDIN_FILENO, &read_fdset);
@@ -177,6 +182,8 @@ int main(int argc, char **argv)
 				perror("GIFADDR");
 
 			if (ifr.ifr_hwaddr.sa_family == AF_AX25) {
+				if (session_frame(buffer, size))
+					continue;
 				if (timestamp)
 					display_timestamp();
 				display_port(sa.sa_data);
@@ -188,6 +195,8 @@ int main(int argc, char **argv)
 /*                                lprintf(T_DATA, "\n");*/
 			}
 		} else {
+			if (session_frame(buffer, size))
+				continue;
 			if (timestamp)
 				display_timestamp();
 			display_port(sa.sa_data);
@@ -200,6 +209,8 @@ int main(int argc, char **argv)
 		}
 		if (color)
 			refresh();
+		else
+			fflush(stdout);
 	}
 	{ ssize_t r = read(STDIN_FILENO, buffer, BUFSIZE); (void)r; }
 /* DEBUG F6BVP : wash out buffer */

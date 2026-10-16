@@ -106,11 +106,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_monitor_OBJECTS = listen.$(OBJEXT) kissdump.$(OBJEXT) \
-	ax25dump.$(OBJEXT) nrdump.$(OBJEXT) arpdump.$(OBJEXT) \
-	ipdump.$(OBJEXT) icmpdump.$(OBJEXT) udpdump.$(OBJEXT) \
-	tcpdump.$(OBJEXT) rspfdump.$(OBJEXT) ripdump.$(OBJEXT) \
-	rosedump.$(OBJEXT) flexnetdump.$(OBJEXT) utils.$(OBJEXT)
+am_monitor_OBJECTS = listen.$(OBJEXT) session.$(OBJEXT) \
+	kissdump.$(OBJEXT) ax25dump.$(OBJEXT) nrdump.$(OBJEXT) \
+	arpdump.$(OBJEXT) ipdump.$(OBJEXT) icmpdump.$(OBJEXT) \
+	udpdump.$(OBJEXT) tcpdump.$(OBJEXT) rspfdump.$(OBJEXT) \
+	ripdump.$(OBJEXT) rosedump.$(OBJEXT) flexnetdump.$(OBJEXT) \
+	utils.$(OBJEXT)
 monitor_OBJECTS = $(am_monitor_OBJECTS)
 monitor_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -139,8 +140,9 @@ am__depfiles_remade = ./$(DEPDIR)/arpdump.Po ./$(DEPDIR)/ax25dump.Po \
 	./$(DEPDIR)/ipdump.Po ./$(DEPDIR)/kissdump.Po \
 	./$(DEPDIR)/listen.Po ./$(DEPDIR)/nrdump.Po \
 	./$(DEPDIR)/ripdump.Po ./$(DEPDIR)/rosedump.Po \
-	./$(DEPDIR)/rspfdump.Po ./$(DEPDIR)/tcpdump.Po \
-	./$(DEPDIR)/udpdump.Po ./$(DEPDIR)/utils.Po
+	./$(DEPDIR)/rspfdump.Po ./$(DEPDIR)/session.Po \
+	./$(DEPDIR)/tcpdump.Po ./$(DEPDIR)/udpdump.Po \
+	./$(DEPDIR)/utils.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -315,7 +317,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 LDADD = $(AX25_LIB) $(NCURSES_LIB)
-monitor_SOURCES = listen.c listen.h kissdump.c ax25dump.c nrdump.c arpdump.c ipdump.c icmpdump.c udpdump.c tcpdump.c rspfdump.c ripdump.c rosedump.c flexnetdump.c utils.c
+monitor_SOURCES = listen.c listen.h session.c kissdump.c ax25dump.c nrdump.c arpdump.c ipdump.c icmpdump.c udpdump.c tcpdump.c rspfdump.c ripdump.c rosedump.c flexnetdump.c utils.c
 AM_CPPFLAGS = -DAX25_SYSCONFDIR=\""$(sysconfdir)/ax25/"\" \
               -DAX25_LOCALSTATEDIR=\""$(localstatedir)/ax25/"\" \
               -I$(srcdir)/../lib
@@ -421,6 +423,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ripdump.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rosedump.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rspfdump.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/session.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcpdump.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/udpdump.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@ # am--include-marker
@@ -597,6 +600,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ripdump.Po
 	-rm -f ./$(DEPDIR)/rosedump.Po
 	-rm -f ./$(DEPDIR)/rspfdump.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/tcpdump.Po
 	-rm -f ./$(DEPDIR)/udpdump.Po
 	-rm -f ./$(DEPDIR)/utils.Po
@@ -656,6 +660,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ripdump.Po
 	-rm -f ./$(DEPDIR)/rosedump.Po
 	-rm -f ./$(DEPDIR)/rspfdump.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/tcpdump.Po
 	-rm -f ./$(DEPDIR)/udpdump.Po
 	-rm -f ./$(DEPDIR)/utils.Po

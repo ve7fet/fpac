@@ -63,3 +63,7 @@ void rose_dump(unsigned char *, int, int);
 
 /* In flexnetdump.c */
 void flexnet_dump(unsigned char *, int, int);
+
+/* In session.c */
+int session_init(void);
+int session_frame(const unsigned char *, int);

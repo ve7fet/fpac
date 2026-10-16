@@ -30,6 +30,28 @@ fpac (4.1.6-rc11)
 	  destination shown (rosedump.c), lengths checked in the other
 	  decoders, servname() and readable_dump() buffers (utils.c,
 	  listen.c).
+	* monitor: run from fpacnode (Lis, MONitor) on a packet session,
+	  monitor no longer shows the frames of that session. fpacnode
+	  hands its socket over as standard output: every line displayed
+	  was sent in frames that monitor captured and displayed in turn,
+	  and the display ran away (f6bvp-8, 14 Oct 2026). The session is
+	  identified at start from file descriptor 1 (session.c): local
+	  and remote callsigns for AX.25, nodes and circuit from
+	  /proc/net/nr for NET/ROM, neighbour and logical channel from
+	  /proc/net/rose and /proc/net/rose_neigh for ROSE; its frames are
+	  left out and a line says so. For NET/ROM and ROSE, the RR, RNR
+	  and REJ frames of the AX.25 link that carries the session are
+	  left out too, once a frame of the session has shown which link it
+	  is: they acknowledge its frames, carry no data, and kept the
+	  display running on their own (f6bvp-12, 16 Oct 2026). On a
+	  terminal, over telnet, or when the session cannot be identified,
+	  every frame is shown as before.
+	* monitor: output is flushed once per frame displayed instead of
+	  after every piece of a line. On a packet session each piece went
+	  out in its own frame, about nine frames per line displayed.
+	  Tested from a NET/ROM session of f6bvp-10 to f6bvp-12 with
+	  "MON axudp" for 15 s: 502 frames sent for 38 lines before (the
+	  display running away), 22 frames for 44 lines now.
 
 	* fpacnode: Status shows memory and swap in MB instead of kB.
 	  /proc/meminfo is now read line by line and its fields looked up

@@ -47,9 +47,25 @@ Timestamp each frame
 .TP 10
 .BI \-v
 Display Version
+.SH OWN SESSION
+When monitor writes on an AX.25, NET/ROM or ROSE socket, as it does
+when fpacnode runs it for the
+.B Lis
+and
+.B MONitor
+commands on a packet session, it does not show the frames of that
+session: displaying them would send new frames, which it would display
+in turn. The session is identified at start from standard output: the
+local and remote callsigns for AX.25, the nodes and circuit read from
+/proc/net/nr for NET/ROM, the neighbour and logical channel read from
+/proc/net/rose and /proc/net/rose_neigh for ROSE. For NET/ROM and ROSE
+the RR, RNR and REJ frames of the AX.25 link that carries the session
+are not shown either, once a frame of the session has shown which link
+it is; those of other circuits on the same link are therefore not shown.
+A line says so when it starts. On a terminal or over telnet, every frame is shown.
 .SH COMMANDS
 .TP 10
-.BI CR  
-End the session.		
+.BI CR
+End the session.
 .SH AUTHOR
 Bernard Pidoux F6BVP <bernard.f6bvp@gmail.com>

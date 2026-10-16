@@ -71,8 +71,10 @@ void lprintf(int dtype, char *fmt, ...)
 			if ((*p < 32 && *p != '\n')
 			    || (*p > 126 && *p < 160 && sevenbit))
 				*p = '.';
+		/* F6BVP 2026-10-16: no flush here; listen.c flushes once per
+		 * frame displayed. On a packet session each fragment of a
+		 * line went out in its own frame, about nine per line. */
 		fputs(str, stdout);
-		fflush(stdout);
 	}
 }
 
