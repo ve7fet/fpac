@@ -19,6 +19,8 @@ FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in prepar
     session: monitor leaves out the frames of the session it is
     displaying on, which it used to show and thereby multiply. It
     also sends about nine times fewer frames for what it displays.
+    "MON" without a port name, or with an unknown one, now lists the
+    ports to choose from: type "MON axudp", not "MON -p axudp".
 
   * "Status" gives memory and swap sizes in MB, and the memory "used"
     no longer counts the disk cache: it is what free(1) shows. The

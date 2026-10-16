@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <time.h>
 #include <curses.h>
 
@@ -59,6 +60,23 @@ void display_timestamp(void)
 
 #define BUFSIZE		1500
 
+/*
+ * F6BVP 2026-10-16: the messages below go to standard output. Run from
+ * fpacnode (MONitor = monitor -art -p %1), standard output is the
+ * user's session, while standard error is wherever the node program
+ * was started from: a user typing "MON" without a port, or "MON -p
+ * PORT", got monitor's own usage line or nothing at all.
+ */
+static void show_ports(void)
+{
+	char *p = NULL;
+
+	printf("monitor: AX.25 ports:");
+	while ((p = ax25_config_get_next(p)) != NULL)
+		printf(" %s", p);
+	printf("\n");
+}
+
 int main(int argc, char **argv)
 {
 	unsigned char buffer[BUFSIZE];
@@ -75,7 +93,7 @@ int main(int argc, char **argv)
 
 	timestamp = 0;
 
-	while ((s = getopt(argc, argv, "8achip:rtv")) != -1) {
+	while ((s = getopt(argc, argv, ":8achip:rtv")) != -1) {
 		switch (s) {
 		case '8':
 			sevenbit = 0;
@@ -105,31 +123,35 @@ int main(int argc, char **argv)
 			printf("monitor: %s (built %s)\n", VERSION, __DATE__);
 			return 0;
 		case ':':
-			fprintf(stderr,
-				"monitor: option -p needs a port name\n");
-			return 1;
+			port = "";	/* -p given without a port name */
+			break;
 		case '?':
-			fprintf(stderr,
-				"Usage: monitor [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
+			printf("Usage: monitor [-8] [-a] [-c] [-h] [-i] [-p port] [-r] [-t] [-v]\n");
 			return 1;
 		}
 	}
 
 	if (ax25_config_load_ports() == 0) {
-		fprintf(stderr, "monitor: no AX.25 port data configured\n");
-			return 1;
+		printf("monitor: no AX.25 port data configured\n");
+		return 1;
 	}
 
 	if (port != NULL) {
+		if (*port == '\0' || *port == '-') {
+			printf("monitor: give the name of the port to listen to\n");
+			show_ports();
+			return 1;
+		}
 		if ((dev = ax25_config_get_dev(port)) == NULL) {
-			fprintf(stderr, "monitor: invalid port name - %s\n",
-				port);
+			printf("monitor: unknown port %s\n", port);
+			show_ports();
 			return 1;
 		}
 	}
 
 	if ((s = socket(AF_PACKET, SOCK_PACKET, htons(proto))) == -1) {
-		perror("socket");
+		printf("monitor: cannot listen to the AX.25 ports: %s (needs root or CAP_NET_RAW)\n",
+		       strerror(errno));
 		return 1;
 	}
 

@@ -58,6 +58,14 @@ fpac (4.1.6-rc11)
 	  f6bvp-12, « MON axudp » pendant 15 s : 502 trames envoyées pour
 	  38 lignes avant (affichage emballé), 22 trames pour 44 lignes
 	  maintenant.
+	* monitor : « MON » sans port, ou « MON -p PORT », donnait la ligne
+	  d'usage de monitor lui-même (« [-p port] ») ou « invalid port
+	  name - -p », écrites sur la sortie d'erreur, qu'un utilisateur
+	  packet ne voit jamais. Un port absent ou inconnu est maintenant
+	  signalé sur la sortie standard avec la liste des ports AX.25 ;
+	  une socket de capture impossible à ouvrir indique qu'il faut
+	  root ou CAP_NET_RAW (fpacnode lancé sous un compte utilisateur,
+	  f6bvp-12, 16 oct. 2026).
 
 fpac (4.1.6-rc10)
 

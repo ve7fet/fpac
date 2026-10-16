@@ -52,6 +52,13 @@ fpac (4.1.6-rc11)
 	  Tested from a NET/ROM session of f6bvp-10 to f6bvp-12 with
 	  "MON axudp" for 15 s: 502 frames sent for 38 lines before (the
 	  display running away), 22 frames for 44 lines now.
+	* monitor: "MON" without a port, or "MON -p PORT", gave monitor's
+	  own usage line ("[-p port]") or an "invalid port name - -p",
+	  written on standard error, which a packet user never sees.
+	  A missing or unknown port now says so on standard output and
+	  lists the AX.25 ports; a capture socket that cannot be opened
+	  says that root or CAP_NET_RAW is needed (fpacnode run under a
+	  user account, f6bvp-12, 16 Oct 2026).
 
 	* fpacnode: Status shows memory and swap in MB instead of kB.
 	  /proc/meminfo is now read line by line and its fields looked up

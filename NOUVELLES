@@ -22,7 +22,9 @@ FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate, 
     session packet : monitor écarte les trames de la session sur
     laquelle il affiche, qu'il montrait jusqu'ici et multipliait
     ainsi. Il envoie aussi environ neuf fois moins de trames pour ce
-    qu'il affiche.
+    qu'il affiche. « MON » sans nom de port, ou avec un port inconnu,
+    affiche maintenant la liste des ports : taper « MON axudp » et
+    non « MON -p axudp ».
 
 FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
 ====================================================================
