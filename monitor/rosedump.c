@@ -361,7 +361,7 @@ static char *dump_x25_addr(unsigned char *data)
  * byte, written into buf (size bytes) */
 static char *dump_ax25_call(char *buf, int size, unsigned char *data, int l_data)
 {
-	char call[16];
+	char call[8];	/* 6 characters at most and the NUL */
 	char *ptr = call;
 	int i, ssid;
 
