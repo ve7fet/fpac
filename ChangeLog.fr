@@ -66,6 +66,57 @@ fpac (4.1.6-rc11)
 	  une socket de capture impossible à ouvrir indique qu'il faut
 	  root ou CAP_NET_RAW (fpacnode lancé sous un compte utilisateur,
 	  f6bvp-12, 16 oct. 2026).
+	* monitor : le tampon d'indicatif de dump_ax25_call() (rosedump.c)
+	  est dimensionné à ce qu'il contient, 6 caractères et le NUL : gcc
+	  n'avertit plus que « %s-%d » risque d'être tronqué chez ses
+	  appelants.
+
+	* fpacnode : Status donne la mémoire et le swap en Mo au lieu de
+	  ko. /proc/meminfo est maintenant lu ligne par ligne et ses champs
+	  recherchés par leur nom ; l'ancien analyseur débordait de son
+	  tampon sur tous les nœuds (tampon de 800 octets pour un fichier
+	  de 1,2 à 1,6 ko, sscanf() laissant le décalage inchangé à la fin
+	  tronquée, libellés comparés dans des lignes jamais remplies), et
+	  meminfo(), qui renvoie NULL sur erreur de lecture, était passé à
+	  strlen(). « used » valait MemTotal - MemFree, le cache disque
+	  compté comme utilisé (7 Go « utilisés » sur 8 sur f6bvp-8, 1 Go
+	  en réalité) ; c'est maintenant MemTotal - MemAvailable, comme
+	  free(1), et MemFree + Buffers + Cached avant Linux 3.14. Le swap
+	  affiche total, utilisé et libre.
+	* fpacnode : Status contrôle ce que renvoient uptime() et
+	  loadavg(). Quand /proc/uptime ou /proc/loadavg ne pouvait pas être
+	  lu, les variables non initialisées étaient affichées (« 26 days »,
+	  « 2261634.51 » avec une pile polluée) ; c'est maintenant
+	  « unknown ». uptime() renvoie 1 en cas de succès au lieu de la
+	  durée tronquée en int. La charge moyenne est suivie du nombre de
+	  processeurs en ligne, sans lequel elle ne se lit pas. Valeurs
+	  comparées à /proc sur les 8 nœuds.
+	* fpacnode, fpad : un appel ROSE vers une adresse pour laquelle le
+	  nœud n'a aucune route affichait « Remote Station cleared
+	  connection », comme si l'autre bout l'avait refusé, alors que
+	  l'appel n'avait jamais quitté le nœud (c F5ZHO-8 depuis f6bvp-8,
+	  15 oct. 2026). rose_connect() échoue avec ENETUNREACH et obtient
+	  la cause de rose_get_neigh(), mais ne l'enregistre jamais dans la
+	  socket : SIOCRSGCAUSE renvoie 0. La cause est maintenant établie
+	  comme le fait le noyau (fpac_rose_unreachable_cause(),
+	  lib/procutils.c) : « No Route Opened for address specified »
+	  quand aucune route de rose_nodes ne correspond à l'adresse,
+	  « Out of Order, link unavailable » quand une route correspond mais
+	  que tous ses voisins sont en échec.
+	* mailbbs : fonctionne avec une BBS qui le prend pour un
+	  utilisateur. FBB ne répond OK à SP qu'à un partenaire de forward ;
+	  à tout autre appelant il refuse la bannière [MAIL-...] comme
+	  commande, puis répond à SP par « Routing (from WP) to ... » et
+	  demande « Enter the title ... : » sans retour chariot. mailbbs
+	  prenait la ligne « Routing » pour un refus et abandonnait (code
+	  de sortie 3) sans déposer le message. Après SP, OK ou une invite
+	  (ligne finissant par « : », « > » ou « ? ») mène maintenant au
+	  titre et au texte, NO ou « *** » est un refus, les autres lignes
+	  sont ignorées ; readbbs() rend une ligne restée sans CR après
+	  3 secondes de silence. Essayé de f6bvp-12 vers F6BVP-1 en ROSE :
+	  message 23335 enregistré.
+	  mailbbs reste un outil lancé à la main : myfpac.sh ne le lance
+	  pas (décidé pour la 4.1.6-rc8).
 
 fpac (4.1.6-rc10)
 

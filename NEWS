@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate, in preparation)
-====================================================================================
+FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate)
+====================================================================
 
   * When an AX.25 or ROSE interface went down under fpad (ax25ipd or
     kissattach stopped or killed), fpad spun at full speed and wrote

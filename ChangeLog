@@ -59,6 +59,9 @@ fpac (4.1.6-rc11)
 	  lists the AX.25 ports; a capture socket that cannot be opened
 	  says that root or CAP_NET_RAW is needed (fpacnode run under a
 	  user account, f6bvp-12, 16 Oct 2026).
+	* monitor: the callsign buffer of dump_ax25_call() (rosedump.c)
+	  is sized to what it holds, 6 characters and the NUL, so gcc no
+	  longer warns that "%s-%d" may be truncated by its callers.
 
 	* fpacnode: Status shows memory and swap in MB instead of kB.
 	  /proc/meminfo is now read line by line and its fields looked up

@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate, en préparation)
-============================================================================================
+FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate)
+============================================================================
 
   * Quand une interface AX.25 ou ROSE tombait sous fpad (ax25ipd ou
     kissattach arrêté ou tué), fpad tournait à plein régime et
@@ -25,6 +25,22 @@ FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate, 
     qu'il affiche. « MON » sans nom de port, ou avec un port inconnu,
     affiche maintenant la liste des ports : taper « MON axudp » et
     non « MON -p axudp ».
+
+  * « Status » donne la mémoire et le swap en Mo, et la mémoire
+    « utilisée » ne compte plus le cache disque : c'est ce qu'affiche
+    free(1). La charge moyenne est suivie du nombre de processeurs, et
+    « unknown » s'affiche au lieu de chiffres aléatoires si le système
+    ne peut pas être lu.
+
+  * Un appel vers une adresse ROSE pour laquelle le nœud n'a aucune
+    route affiche maintenant « No Route Opened for address specified »
+    au lieu de « Remote Station cleared connection » : l'appel n'a
+    jamais quitté le nœud, l'autre bout ne l'a pas refusé.
+
+  * mailbbs dépose son message sur une BBS qui le prend pour un
+    utilisateur, comme FBB le fait avec un nœud avec lequel il ne
+    forwarde pas : il abandonnait jusqu'ici. Il se lance à la main ;
+    myfpac.sh ne le lance toujours pas.
 
 FPAC 4.1.6-rc10 — les sessions NetRom dans Users (version candidate)
 ====================================================================
