@@ -1,3 +1,21 @@
+FPAC 4.1.6-rc12 — Pages Blanches conservées lors d'une mise à niveau du système (version candidate, en préparation)
+===================================================================================================================
+
+  * Sur un système 32 bits passé à Debian 13 « trixie » (Raspberry Pi
+    OS 32 bits, par exemple), fpacwpd ne pouvait plus lire son fichier
+    des Pages Blanches : il écrivait « size error » et repartait d'un
+    fichier vide. fpacwpd et la purge nocturne wpmaint convertissent
+    maintenant l'ancien fichier d'eux-mêmes, et en gardent une copie
+    (fpacwp3.dat.time32-<date>).
+
+  * fpacwpd ne remplace plus un fichier des Pages Blanches abîmé par un
+    fichier vide. Il le met de côté (fpacwp3.dat.bad-<date>) et essaie
+    d'abord la copie fpacwp3.dat.old faite par wpmaint.
+
+  * fpacnode n'accueille plus chaque utilisateur par « .../loggedin:
+    Incorrect size » quand sa liste des utilisateurs connectés a été
+    écrite par un autre système : la liste repart simplement vide.
+
 FPAC 4.1.6-rc11 — fpad survit à la perte d'une interface (version candidate)
 ============================================================================
 

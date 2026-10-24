@@ -1,3 +1,20 @@
+FPAC 4.1.6-rc12 — White Pages kept across a system upgrade (release candidate, in preparation)
+==============================================================================================
+
+  * On a 32-bit system moved to Debian 13 "trixie" (32-bit Raspberry
+    Pi OS, for instance), fpacwpd could no longer read its White Pages
+    file: it said "size error" and started again with an empty one.
+    fpacwpd and the nightly wpmaint now convert the old file by
+    themselves, and keep a copy of it (fpacwp3.dat.time32-<date>).
+
+  * fpacwpd no longer replaces a damaged White Pages file with an
+    empty one. It keeps it aside (fpacwp3.dat.bad-<date>) and first
+    tries the copy fpacwp3.dat.old made by wpmaint.
+
+  * fpacnode no longer greets every user with ".../loggedin: Incorrect
+    size" when its list of logged-in users was written by another
+    system: the list simply starts again empty.
+
 FPAC 4.1.6-rc11 — fpad survives a lost interface (release candidate)
 ====================================================================
 
