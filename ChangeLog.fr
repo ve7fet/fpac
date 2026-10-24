@@ -22,6 +22,15 @@ fpac (pas encore publiée)
 	  aurait encore pu être réparé à la main. Il est maintenant gardé
 	  sous <fichier>.bad-<date>, et la copie .old laissée par wpmaint
 	  est essayée avant de repartir d'une base vide.
+	* fpacnode : une liste des utilisateurs connectés (loggedin) dont la
+	  taille n'est pas un nombre entier de fiches repart vide.
+	  login_user() la refusait à chaque connexion : chaque utilisateur
+	  était accueilli par « .../loggedin: Incorrect size », la même
+	  ligne partait dans le journal et la session n'était pas
+	  enregistrée. Chez VK7HDM, le fichier venait de l'ancien système à
+	  time_t de 32 bits. Le fichier ne liste que les sessions en cours,
+	  rien n'est donc perdu. Le contrôle se fait maintenant sous le
+	  verrou.
 
 fpac (4.1.6-rc11)
 

@@ -31,15 +31,6 @@ void login_user(void)
 	long free = -1L;
 	struct stat statbuf;
 
-	if (stat(DATA_NODE_LOGIN_FILE, &statbuf) == -1) {
-		node_perror(DATA_NODE_LOGIN_FILE, errno);
-		return;
-	}
-	if (statbuf.st_size % sizeof(struct fpac_user) != 0) {
-		node_msg("%s: Incorrect size", DATA_NODE_LOGIN_FILE);
-		fpaclog(LOGLVL_ERROR, "%s: Incorrect size", DATA_NODE_LOGIN_FILE);
-		return;
-	}
 	time(&User.logintime);
 	User.cmdtime = User.logintime;
 	User.pid     = getpid();
@@ -52,6 +43,26 @@ void login_user(void)
 		node_perror("login_user: flock", errno);
 		fclose(f);
 		return;
+	}
+	/* The file only lists the sessions in progress. A size that is not a
+	 * whole number of records means it was written by another build (a
+	 * 32-bit time_t on a system that now has a 64-bit one, for instance):
+	 * start it again empty instead of refusing every login. */
+	if (fstat(fileno(f), &statbuf) == -1) {
+		node_perror("login_user: fstat", errno);
+		flock(fileno(f), LOCK_UN);
+		fclose(f);
+		return;
+	}
+	if (statbuf.st_size % sizeof(struct fpac_user) != 0) {
+		if (ftruncate(fileno(f), 0) == -1) {
+			node_perror("login_user: ftruncate", errno);
+			flock(fileno(f), LOCK_UN);
+			fclose(f);
+			return;
+		}
+		fpaclog(LOGLVL_ERROR, "%s: incorrect size (%lld bytes), reset",
+			DATA_NODE_LOGIN_FILE, (long long)statbuf.st_size);
 	}
 	while (fread(&u, sizeof(u), 1, f) == 1) {
 		if (u.pid == -1 || (kill(u.pid, 0) == -1 && errno == ESRCH)) {

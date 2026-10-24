@@ -18,6 +18,14 @@ fpac (not released yet)
 	  have been repaired by hand. It is now kept as <file>.bad-<date>
 	  and the .old copy left by wpmaint is tried before starting with
 	  an empty database.
+	* fpacnode: a list of logged-in users (loggedin) whose size is not a
+	  whole number of records is started again empty. login_user()
+	  refused it at every login: each user was greeted with
+	  ".../loggedin: Incorrect size", the same line went to the log and
+	  the session was not recorded. On VK7HDM the file came from the
+	  old 32-bit time_t system. The file only lists the sessions in
+	  progress, so nothing is lost. The check is now done under the
+	  lock.
 
 fpac (4.1.6-rc11)
 
