@@ -1,3 +1,17 @@
+fpac (not released yet)
+
+	* fpacwpd, wpmaint: a White Pages file written with a 32-bit time_t
+	  is converted instead of being lost. wp_t starts with a time_t, so
+	  a 32-bit system that moves to a 64-bit time_t (Debian 13 "trixie"
+	  on armhf) has records of 152 bytes instead of 144: fpacwpd
+	  logged "size error" and replaced the file with an empty database
+	  (VK7HDM, 24 Oct 2026: 161 records lost, put back from a backup),
+	  and wpmaint would have misread it. wp_convert_time32()
+	  (wp/wptime32.c) recognises the old layout, converts the file and
+	  its .old copy in place before they are read, and keeps the old
+	  file as <file>.time32-<date>. If the conversion fails the file
+	  is left untouched and the program stops instead of overwriting it.
+
 fpac (4.1.6-rc11)
 
 	* fpad: no more spinning when the interface of a listening socket

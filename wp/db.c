@@ -13,6 +13,7 @@
 #include "db.h"
 #include "crc.h"
 #include "hash.h"
+#include "wptime32.h"
 
 /* Database memory mapping vars */
 
@@ -380,6 +381,14 @@ int db_open(char *file, wp_t * wpnode)
 	char fpacwp_old[256];
 
 	strcpy(wp_file, file);
+
+	/* A file written with a 32-bit time_t is converted, never replaced by
+	 * an empty database; same for its backup copy */
+	if (wp_convert_time32(wp_file) < 0)
+		return -1;
+	snprintf(fpacwp_old, sizeof(fpacwp_old), "%s.old", wp_file);
+	if (wp_convert_time32(fpacwp_old) < 0)
+		return -1;
 
 	/* Checks FPAC WP file */	
 	fptr_i = fopen(wp_file, "r");

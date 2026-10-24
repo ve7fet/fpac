@@ -35,6 +35,7 @@
 #include "../pathnames.h"
 #include "ax25compat.h"
 #include "wp.h"
+#include "wptime32.h"
 
 int cr = 0;
 
@@ -184,6 +185,14 @@ int main(int argc, char **argv)
 	
 	strcpy(fpacwp_old, FPACWP);
 	strcat(fpacwp_old, ".old");
+
+	/* A file written with a 32-bit time_t must be converted before it is
+	 * read record by record below */
+	if (wp_convert_time32(FPACWP) < 0 || wp_convert_time32(fpacwp_old) < 0)
+	{
+		fprintf(stderr, "Cannot convert %s, database left untouched. Exiting !\n", FPACWP);
+		exit(1);
+	}
 
 	/* Checks FPAC WP file */	
 	fptr_i = fopen(FPACWP, "r");

@@ -6,11 +6,11 @@ make_tab_SOURCES = make_tab.c
 # against ../lib/libfpac.a, otherwise "make dist" fails building BUILT_SOURCES
 # before the library exists. Override the global LDADD for this target only.
 make_tab_LDADD =
-fpacwpd_SOURCES = fpacwpd.c daemon.c daemon.h db.c db.h db_list.c update.c update.h hash.c hash.h crc.c crc.h sockevent.c sockevent.h wpdefs.h
+fpacwpd_SOURCES = fpacwpd.c daemon.c daemon.h db.c db.h db_list.c update.c update.h hash.c hash.h crc.c crc.h sockevent.c sockevent.h wpdefs.h wptime32.c wptime32.h
 wplist_SOURCES = wplist.c
 wpedit_SOURCES = wpedit.c
 wpstress_SOURCES = wpstress.c
-wpmaint_SOURCES = wpmaint.c
+wpmaint_SOURCES = wpmaint.c wptime32.c wptime32.h
 wpserv_SOURCES = wpserv.c
 wpcmp_SOURCES = wpcmp.c crc.c
 wpconvert_SOURCES = wpconvert.c

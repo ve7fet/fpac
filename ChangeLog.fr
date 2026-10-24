@@ -1,6 +1,21 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
+fpac (pas encore publiée)
+
+	* fpacwpd, wpmaint : un fichier des Pages Blanches écrit avec un
+	  time_t de 32 bits est converti au lieu d'être perdu. wp_t
+	  commence par un time_t, donc un système 32 bits qui passe à un
+	  time_t de 64 bits (Debian 13 « trixie » en armhf) a des fiches de
+	  152 octets au lieu de 144 : fpacwpd écrivait « size error » et
+	  remplaçait le fichier par une base vide (VK7HDM, 24/10/2026 : 161
+	  fiches perdues, remises depuis une sauvegarde), et wpmaint
+	  l'aurait mal lu. wp_convert_time32() (wp/wptime32.c) reconnaît
+	  l'ancien format, convertit sur place le fichier et sa copie .old
+	  avant leur lecture, et garde l'ancien fichier sous
+	  <fichier>.time32-<date>. Si la conversion échoue, le fichier
+	  n'est pas touché et le programme s'arrête au lieu de l'écraser.
+
 fpac (4.1.6-rc11)
 
 	* fpad : plus de boucle à vide quand l'interface d'une socket
