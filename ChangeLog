@@ -11,6 +11,13 @@ fpac (not released yet)
 	  its .old copy in place before they are read, and keeps the old
 	  file as <file>.time32-<date>. If the conversion fails the file
 	  is left untouched and the program stops instead of overwriting it.
+	* fpacwpd: an unusable White Pages file (header too short, wrong
+	  signature, size that matches no known layout) is no longer
+	  overwritten. db_open() replaced it with an empty database at
+	  once, so the records were lost even when the file could still
+	  have been repaired by hand. It is now kept as <file>.bad-<date>
+	  and the .old copy left by wpmaint is tried before starting with
+	  an empty database.
 
 fpac (4.1.6-rc11)
 

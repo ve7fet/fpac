@@ -14,6 +14,7 @@
 #include "crc.h"
 #include "hash.h"
 #include "wptime32.h"
+#include <errno.h>
 
 /* Database memory mapping vars */
 
@@ -369,6 +370,22 @@ static void db_check(void)
 
 #define MAX_TRIES 10
 
+/* Moves an unusable database file out of the way, so that it is never
+ * overwritten: it may still be read or converted by hand. */
+static void db_keep_bad(const char *path)
+{
+	char keep[300], stamp[32];
+	time_t now = time(NULL);
+
+	strftime(stamp, sizeof(stamp), "%Y%m%d-%H%M%S", localtime(&now));
+	snprintf(keep, sizeof(keep), "%s.bad-%s", path, stamp);
+	if (rename(path, keep) == 0)
+		syslog(LOG_ERR, "WP file %s unusable, kept as %s", path, keep);
+	else
+		syslog(LOG_ERR, "WP file %s unusable, cannot keep it as %s: %s",
+		       path, keep, strerror(errno));
+}
+
 int db_open(char *file, wp_t * wpnode)
 {
 	int rc;
@@ -421,8 +438,21 @@ int db_open(char *file, wp_t * wpnode)
 	rc = db_map();
 	if (rc == -2)
 	{
-		db_create(wpnode);
-		rc = db_map();
+		/* Unusable database (header, signature or size): keep it, then
+		 * try the backup copy before starting with an empty one */
+		db_keep_bad(wp_file);
+		if (rename(fpacwp_old, wp_file) == 0)
+		{
+			syslog(LOG_INFO, "WP file %s: using the backup copy %s", wp_file, fpacwp_old);
+			rc = db_map();
+			if (rc == -2)
+				db_keep_bad(wp_file);
+		}
+		if (rc == -2)
+		{
+			db_create(wpnode);
+			rc = db_map();
+		}
 	}
 	if (rc)
 		return rc;

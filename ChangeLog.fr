@@ -15,6 +15,13 @@ fpac (pas encore publiée)
 	  avant leur lecture, et garde l'ancien fichier sous
 	  <fichier>.time32-<date>. Si la conversion échoue, le fichier
 	  n'est pas touché et le programme s'arrête au lieu de l'écraser.
+	* fpacwpd : un fichier des Pages Blanches inutilisable (en-tête trop
+	  court, mauvaise signature, taille qui ne correspond à aucun format
+	  connu) n'est plus écrasé. db_open() le remplaçait aussitôt par une
+	  base vide, et les fiches étaient perdues même quand le fichier
+	  aurait encore pu être réparé à la main. Il est maintenant gardé
+	  sous <fichier>.bad-<date>, et la copie .old laissée par wpmaint
+	  est essayée avant de repartir d'une base vide.
 
 fpac (4.1.6-rc11)
 
