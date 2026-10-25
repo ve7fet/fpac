@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc12 — White Pages kept across a system upgrade (release candidate, in preparation)
-==============================================================================================
+FPAC 4.1.6-rc12 — White Pages kept across a system upgrade (release candidate)
+==============================================================================
 
   * On a 32-bit system moved to Debian 13 "trixie" (32-bit Raspberry
     Pi OS, for instance), fpacwpd could no longer read its White Pages

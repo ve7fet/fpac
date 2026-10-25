@@ -1,5 +1,5 @@
-FPAC 4.1.6-rc12 — Pages Blanches conservées lors d'une mise à niveau du système (version candidate, en préparation)
-===================================================================================================================
+FPAC 4.1.6-rc12 — Pages Blanches conservées lors d'une mise à niveau du système (version candidate)
+===================================================================================================
 
   * Sur un système 32 bits passé à Debian 13 « trixie » (Raspberry Pi
     OS 32 bits, par exemple), fpacwpd ne pouvait plus lire son fichier

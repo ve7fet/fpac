@@ -1,7 +1,7 @@
 Traduction française du ChangeLog de FPAC. Original en anglais dans le fichier ChangeLog.
 Les noms de fichiers, de fonctions et de variables sont conservés tels quels.
 
-fpac (pas encore publiée)
+fpac (4.1.6-rc12)
 
 	* fpacwpd, wpmaint : un fichier des Pages Blanches écrit avec un
 	  time_t de 32 bits est converti au lieu d'être perdu. wp_t

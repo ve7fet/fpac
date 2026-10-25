@@ -1,4 +1,4 @@
-fpac (not released yet)
+fpac (4.1.6-rc12)
 
 	* fpacwpd, wpmaint: a White Pages file written with a 32-bit time_t
 	  is converted instead of being lost. wp_t starts with a time_t, so
